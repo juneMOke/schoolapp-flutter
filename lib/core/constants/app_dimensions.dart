@@ -1360,6 +1360,14 @@ class AppDimensions {
   static const treasurySparklineWidth = 120.0;
   static const treasurySparklineHeight = 34.0;
 
+  /// Le montant d'une carte KPI (A2) et le reste d'une carte de totaux (B7).
+  static const treasuryKpiAmountSize = 32.0;
+  static const treasuryPeriodTotalSize = 18.0;
+
+  /// Le trait et le dernier point de la courbe des 8 jours.
+  static const treasurySparklineStroke = 2.0;
+  static const treasurySparklineDot = 3.5;
+
   /// La même courbe, plus petite, sur une carte de configuration (C1).
   static const treasuryConfigSparklineWidth = 90.0;
   static const treasuryConfigSparklineHeight = 30.0;

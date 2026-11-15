@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
+import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/theme/dashboard_tones.dart';
 import 'package:school_app_flutter/features/treasury/domain/entities/cash_register.dart';
 
@@ -30,7 +31,7 @@ class _SparklinePainter extends CustomPainter {
     final min = values.reduce((a, b) => a < b ? a : b);
     final max = values.reduce((a, b) => a > b ? a : b);
     final span = max - min == 0 ? 1.0 : max - min;
-    const inset = 4.0;
+    const inset = AppDimensions.treasurySparklineDot;
     Offset at(int i) => Offset(
       inset + (size.width - 2 * inset) * i / (values.length - 1),
       inset + (size.height - 2 * inset) * (1 - (values[i] - min) / span),
@@ -44,13 +45,13 @@ class _SparklinePainter extends CustomPainter {
       Paint()
         ..color = DashboardTones.inkValeur.withValues(alpha: 0.85)
         ..style = PaintingStyle.stroke
-        ..strokeWidth = 2
+        ..strokeWidth = AppDimensions.treasurySparklineStroke
         ..strokeJoin = StrokeJoin.round
         ..strokeCap = StrokeCap.round,
     );
     canvas.drawCircle(
       at(values.length - 1),
-      3.5,
+      AppDimensions.treasurySparklineDot,
       Paint()..color = AppColors.orDoux,
     );
   }

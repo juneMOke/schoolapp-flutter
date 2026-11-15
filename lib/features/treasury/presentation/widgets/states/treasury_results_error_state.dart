@@ -1,3 +1,4 @@
+import 'package:school_app_flutter/features/treasury/domain/entities/treasury_refusal.dart';
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_error_result.dart';
@@ -22,6 +23,18 @@ class TreasuryResultsErrorState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    // Un refus métier (plage invalide…) ou l'absence d'année scolaire en
+    // cours : rien ne changera en réessayant, et ce n'est pas une panne.
+    final refused = failure is TreasuryRefusalFailure;
+    if (refused || failure is NotFoundFailure) {
+      return EteeloErrorResult(
+        type: EteeloErrorType.unknown,
+        title: l10n.treasuryErrorRefusedTitle,
+        message: refused
+            ? l10n.treasuryFailureReason(failure)
+            : l10n.treasuryErrorNoYear,
+      );
+    }
     final type = EteeloErrorType.fromFailure(failure);
     final incident = treasuryIncidentOf(failure);
     return EteeloErrorResult(

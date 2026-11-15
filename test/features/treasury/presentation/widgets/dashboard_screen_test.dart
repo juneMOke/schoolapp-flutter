@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:school_app_flutter/features/treasury/domain/entities/treasury_dashboard.dart';
+import 'package:school_app_flutter/features/treasury/domain/entities/treasury_refusal.dart';
 import 'package:school_app_flutter/features/treasury/domain/repositories/treasury_dashboard_repository.dart';
 import 'package:school_app_flutter/features/treasury/presentation/bloc/treasury_evolution_cubit.dart';
 import 'package:school_app_flutter/features/treasury/presentation/bloc/treasury_overview_cubit.dart';
@@ -34,14 +35,12 @@ Future<_MockRepository> _pump(
   ).thenAnswer((_) async => Right(treasuryEvolution()));
   await tester.pumpWidget(
     treasuryHost(
-      MultiBlocProvider(
-        providers: [
-          BlocProvider(create: (_) => TreasuryOverviewCubit(repo)..load()),
-          BlocProvider(
-            create: (_) => TreasuryEvolutionCubit(repo, today: demoDay)..load(),
-          ),
-        ],
-        child: TreasuryDashboardScreen(onOpenClosing: onOpenClosing),
+      BlocProvider(
+        create: (_) => TreasuryOverviewCubit(repo)..load(),
+        child: TreasuryDashboardScreen(
+          onOpenClosing: onOpenClosing,
+          evolutionCubit: (today) => TreasuryEvolutionCubit(repo, today: today),
+        ),
       ),
     ),
   );
@@ -140,4 +139,44 @@ void main() {
       expect(cubit.state.customTo, demoDay);
     });
   });
+
+  testWidgets('les tranches à venir gardent leur place sur l axe', (
+    tester,
+  ) async {
+    setTestWindow(tester, const Size(1280, 1600));
+    await _pump(tester);
+    // Cinq semaines au mois, la dernière à venir : son libellé reste.
+    expect(find.text('S5'), findsOneWidget);
+  });
+
+  test(
+    'INVALID_RANGE sur une période libre : recalage sur le jour du serveur',
+    () async {
+      final repo = _MockRepository();
+      final ahead = DateTime(2026, 10, 25);
+      when(
+        () => repo.evolution(
+          any(),
+          from: any(named: 'from'),
+          to: any(named: 'to'),
+        ),
+      ).thenAnswer((invocation) async {
+        final to = invocation.namedArguments[#to] as DateTime?;
+        if (to == ahead) {
+          return const Left(
+            TreasuryRefusalFailure(
+              TreasuryRefusal.invalidRange,
+              details: {'businessDate': '2026-10-22'},
+            ),
+          );
+        }
+        return Right(treasuryEvolution());
+      });
+      final cubit = TreasuryEvolutionCubit(repo, today: ahead);
+      addTearDown(cubit.close);
+      await cubit.periodChanged(EvolutionPeriod.custom);
+      expect(cubit.state.customTo, demoDay);
+      expect(cubit.state.status, TreasuryEvolutionStatus.ready);
+    },
+  );
 }

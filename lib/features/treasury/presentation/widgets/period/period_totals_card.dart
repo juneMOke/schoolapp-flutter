@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
+import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
 import 'package:school_app_flutter/core/theme/currency_tones.dart';
 import 'package:school_app_flutter/core/theme/dashboard_tones.dart';
@@ -81,7 +82,7 @@ class PeriodTotalsCard extends StatelessWidget {
                         style: AppTextStyles.moneyTabular.copyWith(
                           color: DashboardTones.inkValeur,
                           fontWeight: FontWeight.w800,
-                          fontSize: 18,
+                          fontSize: AppDimensions.treasuryPeriodTotalSize,
                         ),
                       ),
                     ),

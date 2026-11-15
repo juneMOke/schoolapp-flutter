@@ -74,4 +74,26 @@ void main() {
       DateTime(2026, 10),
     );
   });
+
+  test('décembre › janvier : le mois passe l année', () {
+    expect(
+      CashClosingRules.stepPeriod(
+        ClosingScope.month,
+        DateTime(2026, 12, 10),
+        direction: 1,
+        min: DateTime(2026, 9, 1),
+        today: DateTime(2027, 1, 12),
+      ),
+      DateTime(2027),
+    );
+  });
+
+  test('le lundi que le serveur donne pour un dimanche ouvre la semaine', () {
+    final range = CashClosingRules.rangeOf(
+      ClosingScope.week,
+      DateTime(2026, 10, 26),
+    );
+    expect(range.from, DateTime(2026, 10, 26));
+    expect(range.to, DateTime(2026, 10, 31));
+  });
 }

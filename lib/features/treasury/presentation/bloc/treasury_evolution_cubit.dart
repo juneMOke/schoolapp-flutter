@@ -1,3 +1,5 @@
+import 'package:school_app_flutter/features/treasury/data/wire/treasury_wire.dart';
+import 'package:school_app_flutter/features/treasury/domain/entities/treasury_refusal.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
@@ -116,6 +118,19 @@ class TreasuryEvolutionCubit extends Cubit<TreasuryEvolutionState> {
       to: custom ? state.customTo : null,
     );
     if (isClosed || generation != _generation) return;
+    // Une borne après aujourd'hui (le serveur dit lequel) : la plage libre se
+    // recale sur les 30 jours qui finissent ce jour-là, une seule fois.
+    final today = _businessDateOf(result.fold((f) => f, (_) => null));
+    if (custom && today != null && today != state.customTo) {
+      emit(
+        state.copyWith(
+          customFrom: DateTime(today.year, today.month, today.day - 29),
+          customTo: today,
+        ),
+      );
+      await load();
+      return;
+    }
     emit(
       result.fold(
         (failure) => state.copyWith(
@@ -128,5 +143,13 @@ class TreasuryEvolutionCubit extends Cubit<TreasuryEvolutionState> {
         ),
       ),
     );
+  }
+
+  static DateTime? _businessDateOf(Failure? failure) {
+    if (failure is! TreasuryRefusalFailure ||
+        failure.refusal != TreasuryRefusal.invalidRange) {
+      return null;
+    }
+    return TreasuryWire.dayOrNull(failure.details['businessDate']);
   }
 }

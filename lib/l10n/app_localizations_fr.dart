@@ -22921,6 +22921,9 @@ class AppLocalizationsFr extends AppLocalizations {
       'Cette période n\'est pas encore ouverte.';
 
   @override
+  String get treasuryReasonInvalidReportId => 'Ce rapport n\'existe pas.';
+
+  @override
   String get treasuryScopeLabel => 'Afficher';
 
   @override
@@ -23015,6 +23018,114 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get treasurySeeDay => 'Voir la journée de cette caisse';
+
+  @override
+  String get treasuryReportsTitle => 'Rapports de caisse';
+
+  @override
+  String get treasuryReportsSubtitle =>
+      'Consultez un rapport avant de le télécharger, de l\'imprimer ou de le partager.';
+
+  @override
+  String get treasuryReportKindDaily => 'Journaliers';
+
+  @override
+  String get treasuryReportKindWeekly => 'Hebdomadaires';
+
+  @override
+  String get treasuryReportKindMonthly => 'Mensuels';
+
+  @override
+  String get treasuryReportKindYearly => 'Annuels';
+
+  @override
+  String get treasuryReportKindPeriod => 'Période';
+
+  @override
+  String get treasuryReportFinal => 'Définitif';
+
+  @override
+  String get treasuryReportProvisionalDay => 'Provisoire · non clôturé';
+
+  @override
+  String get treasuryReportProvisionalPeriod => 'Provisoire · en cours';
+
+  @override
+  String get treasuryReportProvisionalHint =>
+      'La caisse n\'est pas encore clôturée : les chiffres peuvent encore bouger.';
+
+  @override
+  String get treasuryReportGenerate => 'Générer le rapport';
+
+  @override
+  String get treasuryReportEmptyTitle => 'Aucun rapport sur période';
+
+  @override
+  String get treasuryReportEmptyBody =>
+      'Choisissez les dates puis « Générer le rapport ».';
+
+  @override
+  String get treasuryReportsEmpty => 'Aucun rapport pour l\'instant.';
+
+  @override
+  String get treasuryReportsLoading => 'Chargement des rapports';
+
+  @override
+  String get treasuryReportPdf => 'PDF';
+
+  @override
+  String get treasuryReportExcel => 'Excel';
+
+  @override
+  String get treasuryReportOpenPdf => 'Consulter le PDF';
+
+  @override
+  String get treasuryReportOpenExcel => 'Enregistrer la feuille Excel';
+
+  @override
+  String treasuryReportSaved(String name) {
+    return 'Feuille enregistrée : $name';
+  }
+
+  @override
+  String get treasuryReportBusy =>
+      'Un autre rapport se prépare : réessayez dans un instant.';
+
+  @override
+  String treasuryReportProvisionalRef(String id) {
+    return '$id · provisoire';
+  }
+
+  @override
+  String get treasuryReportOneDaily => 'Rapport journalier';
+
+  @override
+  String get treasuryReportOneWeekly => 'Rapport hebdomadaire';
+
+  @override
+  String get treasuryReportOneMonthly => 'Rapport mensuel';
+
+  @override
+  String get treasuryReportLockedLast =>
+      'Disponible après la clôture de la dernière caisse.';
+
+  @override
+  String get treasuryReportLockedAll =>
+      'Disponible après la clôture de toutes les caisses.';
+
+  @override
+  String get treasuryReportAfterClose => 'PDF · Excel après clôture';
+
+  @override
+  String get treasuryPagePrev => 'Page précédente';
+
+  @override
+  String get treasuryPageNext => 'Page suivante';
+
+  @override
+  String treasuryPageOf(int page, int total) {
+    return 'Page $page sur $total';
+  }
 
   @override
   String get subMenuTreasuryDashboard => 'Tableau de bord';
@@ -23144,6 +23255,16 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get treasuryChartGaps => 'Écarts';
+
+  @override
+  String get treasuryChartUpcoming => 'À venir';
+
+  @override
+  String get treasuryErrorRefusedTitle => 'Rien à afficher';
+
+  @override
+  String get treasuryErrorNoYear =>
+      'L\'école n\'a pas d\'année scolaire en cours : la trésorerie n\'a encore rien à montrer.';
 
   @override
   String get treasuryChartNoPoint => 'Aucun point sur cette période.';

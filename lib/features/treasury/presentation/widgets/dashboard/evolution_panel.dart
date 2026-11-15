@@ -160,8 +160,16 @@ class _Band extends StatelessWidget {
       l10n,
       evolution.granularity,
     );
+    // La semaine se montre du lundi au samedi (R4), même si le serveur la
+    // borne au dimanche ; « Aujourd'hui » n'est pas une plage.
+    final to = evolution.to.weekday == DateTime.sunday
+        ? DateTime(evolution.to.year, evolution.to.month, evolution.to.day - 1)
+        : evolution.to;
+    final range = evolution.period == EvolutionPeriod.today
+        ? '${l10n.treasuryPeriodToday}, ${l10n.treasuryDayShort(evolution.from)}'
+        : l10n.treasuryRangeLabel(evolution.from, to);
     final parts = [
-      l10n.treasuryRangeLabel(evolution.from, evolution.to),
+      range,
       l10n.treasuryCashDays(evolution.cashDays),
       l10n.treasuryDisplayAs(granularity),
       if (evolution.period == EvolutionPeriod.custom) l10n.treasuryAutoChosen,

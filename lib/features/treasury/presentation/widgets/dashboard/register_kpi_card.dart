@@ -38,8 +38,8 @@ class RegisterKpiCard extends StatelessWidget {
         onTap: open,
         child: Padding(
           padding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.lg + 4,
-            vertical: AppSpacing.lg + 2,
+            horizontal: AppSpacing.xl,
+            vertical: AppSpacing.lg,
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -104,7 +104,7 @@ class RegisterKpiCard extends StatelessWidget {
                   style: AppTextStyles.moneyTabular.copyWith(
                     color: DashboardTones.inkValeur,
                     fontWeight: FontWeight.w700,
-                    fontSize: 32,
+                    fontSize: AppDimensions.treasuryKpiAmountSize,
                   ),
                 ),
               ),

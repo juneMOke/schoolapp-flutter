@@ -1736,6 +1736,23 @@ class AppConstants {
   /// `400 INVALID_RANGE`.
   static const String treasuryEvolutionEndpoint = '/api/v1/treasury/evolution';
 
+  /// **GET** `?kind=DAILY|WEEKLY|MONTHLY|YEARLY&page=&size=` = les rapports
+  /// d'un type, le plus récent en tête ; **POST** `{from, to}` = le rapport
+  /// d'une plage (rien n'est créé, idempotent ; `400 INVALID_RANGE`).
+  static const String treasuryReportsEndpoint = '/api/v1/treasury/reports';
+
+  /// **GET** = un rapport décodé de son id, avec son statut du moment.
+  static const String treasuryReportEndpoint =
+      '/api/v1/treasury/reports/{reportId}';
+
+  /// **GET** `?format=pdf|xlsx` = le fichier, généré à chaque appel ;
+  /// `X-Report-Status: FINAL|PROVISIONAL`, `429` si un autre rendu PDF tourne.
+  static const String treasuryReportFileEndpoint =
+      '/api/v1/treasury/reports/{reportId}/file';
+
+  /// Le nombre de rapports par page de la liste (A5).
+  static const int treasuryReportsPageSize = 8;
+
   /// **GET** (keyset) = les clôtures de caisse de l'école, réouvertures
   /// comprises (flux `treasury.closures`, `treasury.read`) : la tablette
   /// arrête l'encaissement en espèces d'une devise close aujourd'hui (R11).

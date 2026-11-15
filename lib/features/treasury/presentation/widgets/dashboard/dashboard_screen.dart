@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:get_it/get_it.dart';
+import 'package:school_app_flutter/features/treasury/domain/repositories/treasury_dashboard_repository.dart';
+import 'package:school_app_flutter/features/treasury/presentation/bloc/treasury_evolution_cubit.dart';
 import 'package:school_app_flutter/core/components/grid/eteelo_grid_view.dart';
 import 'package:school_app_flutter/core/components/skeletons/eteelo_list_skeleton.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
@@ -26,10 +29,15 @@ class TreasuryDashboardScreen extends StatelessWidget {
   /// La configuration des caisses (état vide). `null` sans le droit.
   final VoidCallback? onConfigure;
 
+  /// Couture de test : fabrique le cubit d'évolution à partir du jour du
+  /// serveur.
+  final TreasuryEvolutionCubit Function(DateTime today)? evolutionCubit;
+
   const TreasuryDashboardScreen({
     super.key,
     this.onOpenClosing,
     this.onConfigure,
+    this.evolutionCubit,
   });
 
   @override
@@ -113,9 +121,20 @@ class TreasuryDashboardScreen extends StatelessWidget {
         ),
         child: Padding(
           padding: const EdgeInsets.all(AppSpacing.lg),
-          child: EvolutionPanel(
-            firstDay: overview.academicYear.startDate,
-            today: overview.businessDate,
+          // L'évolution naît une fois le jour du serveur connu : la plage
+          // libre en part, jamais de l'horloge de la tablette (R15).
+          child: BlocProvider(
+            create: (_) =>
+                evolutionCubit?.call(overview.businessDate) ??
+                      TreasuryEvolutionCubit(
+                        GetIt.instance<TreasuryDashboardRepository>(),
+                        today: overview.businessDate,
+                      )
+                  ..load(),
+            child: EvolutionPanel(
+              firstDay: overview.academicYear.startDate,
+              today: overview.businessDate,
+            ),
           ),
         ),
       ),

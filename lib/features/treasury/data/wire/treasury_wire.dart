@@ -1,5 +1,6 @@
 import 'package:school_app_flutter/features/treasury/domain/entities/cash_adjustment.dart';
 import 'package:school_app_flutter/features/treasury/domain/entities/cash_closure.dart';
+import 'package:school_app_flutter/features/treasury/domain/entities/cash_report.dart';
 import 'package:school_app_flutter/features/treasury/domain/entities/cash_movement.dart';
 import 'package:school_app_flutter/features/treasury/domain/entities/cash_register.dart';
 import 'package:school_app_flutter/features/treasury/domain/entities/treasury_currency.dart';
@@ -317,6 +318,39 @@ abstract final class TreasuryWire {
             ],
           ),
       ],
+    );
+  }
+
+  // ── Rapports (A5, A6) ─────────────────────────────────────────────────
+
+  static CashReport reportFromJson(Object? body) {
+    final json = _map(body);
+    final kind = CashReportKind.fromWire(json['kind'] as String?);
+    final status = CashReportStatus.fromWire(json['status'] as String?);
+    if (kind == null || status == null) {
+      throw const FormatException('Rapport illisible');
+    }
+    return CashReport(
+      id: _string(json, 'id'),
+      kind: kind,
+      from: _date(json, 'from'),
+      to: _date(json, 'to'),
+      title: _string(json, 'title'),
+      status: status,
+      inProgress: json['inProgress'] == true,
+      currencies: [
+        for (final code in (json['currencies'] as List?) ?? const [])
+          ?TreasuryCurrency.fromCode(code as String?),
+      ],
+    );
+  }
+
+  static CashReportPage reportPageFromJson(Object? body) {
+    final json = _map(body);
+    return CashReportPage(
+      items: [for (final r in _list(json['content'])) reportFromJson(r)],
+      number: _int(json, 'number'),
+      totalPages: _int(json, 'totalPages'),
     );
   }
 

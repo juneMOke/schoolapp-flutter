@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:school_app_flutter/core/components/charts/evolution_line_chart.dart';
-import 'package:school_app_flutter/core/components/charts/line_chart_point.dart';
 import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
@@ -13,6 +11,7 @@ import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/features/treasury/domain/entities/treasury_dashboard.dart';
 import 'package:school_app_flutter/features/treasury/presentation/helpers/treasury_format.dart';
+import 'package:school_app_flutter/features/treasury/presentation/widgets/dashboard/treasury_balance_line.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// La courbe du solde d'une caisse sur la période (A4) : l'en-tête chiffré
@@ -146,10 +145,13 @@ class RegisterBalanceChart extends StatelessWidget {
                   height: compact
                       ? AppDimensions.treasuryChartHeightCompact
                       : AppDimensions.treasuryChartHeight,
-                  child: EvolutionLineChart(
-                    points: [
-                      for (final (i, (index, p)) in known.indexed)
-                        LineChartPoint(
+                  child: TreasuryBalanceLine(
+                    currency: currency,
+                    openingInCents: s.openingInCents,
+                    lineColor: accent,
+                    slots: [
+                      for (final (index, p) in series.points.indexed)
+                        BalanceSlot(
                           label: bucketLabel(
                             l10n,
                             granularity,
@@ -157,16 +159,12 @@ class RegisterBalanceChart extends StatelessWidget {
                             p,
                             index,
                           ),
-                          value: p.balanceInCents! / 100,
-                          isHighlighted: i == known.length - 1,
+                          balanceInCents: p.balanceInCents,
+                          inflowsInCents: p.inflowsInCents,
+                          outflowsInCents: p.outflowsInCents,
+                          partial: p.partial,
                         ),
                     ],
-                    lineColor: accent,
-                    highlightColor: AppColors.terreCuite,
-                    minY: 0,
-                    targetLine: s.openingInCents / 100,
-                    targetLineColor: AppColors.terreCuite,
-                    targetLineLabel: l10n.treasuryOpening,
                   ),
                 ),
             ],
@@ -202,7 +200,12 @@ class RegisterBalanceChart extends StatelessWidget {
         period == EvolutionPeriod.week
             ? l10n.treasuryDayBucket(start)
             : l10n.treasuryShortDateBucket(start),
-      EvolutionGranularity.week => l10n.treasuryWeekBucket(index + 1),
+      // Une période libre en semaines se date (« 5 oct. ») ; un mois les
+      // numérote (S1 … Sn).
+      EvolutionGranularity.week =>
+        period == EvolutionPeriod.custom
+            ? l10n.treasuryShortDateBucket(start)
+            : l10n.treasuryWeekBucket(index + 1),
       EvolutionGranularity.month => l10n.treasuryMonthBucket(start),
     };
   }
@@ -219,7 +222,7 @@ class _Figure extends StatelessWidget {
   Widget build(BuildContext context) => Container(
     padding: const EdgeInsets.symmetric(
       horizontal: AppSpacing.md,
-      vertical: AppSpacing.xs + 2,
+      vertical: AppSpacing.xs,
     ),
     decoration: BoxDecoration(
       color: ink.withValues(alpha: 0.08),

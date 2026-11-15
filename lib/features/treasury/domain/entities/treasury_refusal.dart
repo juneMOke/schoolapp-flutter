@@ -22,7 +22,8 @@ enum TreasuryRefusal {
   closureAlreadyReopened('CLOSURE_ALREADY_REOPENED'),
   reopenNotToday('REOPEN_NOT_TODAY'),
   invalidDate('INVALID_DATE'),
-  invalidRange('INVALID_RANGE');
+  invalidRange('INVALID_RANGE'),
+  invalidReportId('INVALID_REPORT_ID');
 
   const TreasuryRefusal(this.detailCode);
 

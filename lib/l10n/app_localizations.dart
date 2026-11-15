@@ -34986,6 +34986,12 @@ abstract class AppLocalizations {
   /// **'This period has not started yet.'**
   String get treasuryReasonInvalidRange;
 
+  /// No description provided for @treasuryReasonInvalidReportId.
+  ///
+  /// In en, this message translates to:
+  /// **'This report does not exist.'**
+  String get treasuryReasonInvalidReportId;
+
   /// No description provided for @treasuryScopeLabel.
   ///
   /// In en, this message translates to:
@@ -35135,6 +35141,198 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'See this register\'s day'**
   String get treasurySeeDay;
+
+  /// No description provided for @treasuryReportsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cash reports'**
+  String get treasuryReportsTitle;
+
+  /// No description provided for @treasuryReportsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Look at a report before downloading, printing or sharing it.'**
+  String get treasuryReportsSubtitle;
+
+  /// No description provided for @treasuryReportKindDaily.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily'**
+  String get treasuryReportKindDaily;
+
+  /// No description provided for @treasuryReportKindWeekly.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekly'**
+  String get treasuryReportKindWeekly;
+
+  /// No description provided for @treasuryReportKindMonthly.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly'**
+  String get treasuryReportKindMonthly;
+
+  /// No description provided for @treasuryReportKindYearly.
+  ///
+  /// In en, this message translates to:
+  /// **'Yearly'**
+  String get treasuryReportKindYearly;
+
+  /// No description provided for @treasuryReportKindPeriod.
+  ///
+  /// In en, this message translates to:
+  /// **'Range'**
+  String get treasuryReportKindPeriod;
+
+  /// No description provided for @treasuryReportFinal.
+  ///
+  /// In en, this message translates to:
+  /// **'Final'**
+  String get treasuryReportFinal;
+
+  /// No description provided for @treasuryReportProvisionalDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Provisional · not closed'**
+  String get treasuryReportProvisionalDay;
+
+  /// No description provided for @treasuryReportProvisionalPeriod.
+  ///
+  /// In en, this message translates to:
+  /// **'Provisional · in progress'**
+  String get treasuryReportProvisionalPeriod;
+
+  /// No description provided for @treasuryReportProvisionalHint.
+  ///
+  /// In en, this message translates to:
+  /// **'The register is not closed yet: the figures may still change.'**
+  String get treasuryReportProvisionalHint;
+
+  /// No description provided for @treasuryReportGenerate.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate the report'**
+  String get treasuryReportGenerate;
+
+  /// No description provided for @treasuryReportEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No range report'**
+  String get treasuryReportEmptyTitle;
+
+  /// No description provided for @treasuryReportEmptyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose the dates, then « Generate the report ».'**
+  String get treasuryReportEmptyBody;
+
+  /// No description provided for @treasuryReportsEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No report yet.'**
+  String get treasuryReportsEmpty;
+
+  /// No description provided for @treasuryReportsLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading the reports'**
+  String get treasuryReportsLoading;
+
+  /// No description provided for @treasuryReportPdf.
+  ///
+  /// In en, this message translates to:
+  /// **'PDF'**
+  String get treasuryReportPdf;
+
+  /// No description provided for @treasuryReportExcel.
+  ///
+  /// In en, this message translates to:
+  /// **'Excel'**
+  String get treasuryReportExcel;
+
+  /// No description provided for @treasuryReportOpenPdf.
+  ///
+  /// In en, this message translates to:
+  /// **'View the PDF'**
+  String get treasuryReportOpenPdf;
+
+  /// No description provided for @treasuryReportOpenExcel.
+  ///
+  /// In en, this message translates to:
+  /// **'Save the Excel sheet'**
+  String get treasuryReportOpenExcel;
+
+  /// No description provided for @treasuryReportSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Sheet saved: {name}'**
+  String treasuryReportSaved(String name);
+
+  /// No description provided for @treasuryReportBusy.
+  ///
+  /// In en, this message translates to:
+  /// **'Another report is being prepared: try again in a moment.'**
+  String get treasuryReportBusy;
+
+  /// No description provided for @treasuryReportProvisionalRef.
+  ///
+  /// In en, this message translates to:
+  /// **'{id} · provisional'**
+  String treasuryReportProvisionalRef(String id);
+
+  /// No description provided for @treasuryReportOneDaily.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily report'**
+  String get treasuryReportOneDaily;
+
+  /// No description provided for @treasuryReportOneWeekly.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekly report'**
+  String get treasuryReportOneWeekly;
+
+  /// No description provided for @treasuryReportOneMonthly.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly report'**
+  String get treasuryReportOneMonthly;
+
+  /// No description provided for @treasuryReportLockedLast.
+  ///
+  /// In en, this message translates to:
+  /// **'Available once the last register is closed.'**
+  String get treasuryReportLockedLast;
+
+  /// No description provided for @treasuryReportLockedAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Available once every register is closed.'**
+  String get treasuryReportLockedAll;
+
+  /// No description provided for @treasuryReportAfterClose.
+  ///
+  /// In en, this message translates to:
+  /// **'PDF · Excel after closing'**
+  String get treasuryReportAfterClose;
+
+  /// No description provided for @treasuryPagePrev.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous page'**
+  String get treasuryPagePrev;
+
+  /// No description provided for @treasuryPageNext.
+  ///
+  /// In en, this message translates to:
+  /// **'Next page'**
+  String get treasuryPageNext;
+
+  /// No description provided for @treasuryPageOf.
+  ///
+  /// In en, this message translates to:
+  /// **'Page {page} of {total}'**
+  String treasuryPageOf(int page, int total);
 
   /// No description provided for @subMenuTreasuryDashboard.
   ///
@@ -35333,6 +35531,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Gaps'**
   String get treasuryChartGaps;
+
+  /// No description provided for @treasuryChartUpcoming.
+  ///
+  /// In en, this message translates to:
+  /// **'Upcoming'**
+  String get treasuryChartUpcoming;
+
+  /// No description provided for @treasuryErrorRefusedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing to show'**
+  String get treasuryErrorRefusedTitle;
+
+  /// No description provided for @treasuryErrorNoYear.
+  ///
+  /// In en, this message translates to:
+  /// **'The school has no current school year: the treasury has nothing to show yet.'**
+  String get treasuryErrorNoYear;
 
   /// No description provided for @treasuryChartNoPoint.
   ///
