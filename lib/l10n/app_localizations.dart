@@ -35298,6 +35298,48 @@ abstract class AppLocalizations {
   /// **'Closing'**
   String get treasuryClosureColumn;
 
+  /// No description provided for @treasuryReportFormat.
+  ///
+  /// In en, this message translates to:
+  /// **'Report format'**
+  String get treasuryReportFormat;
+
+  /// No description provided for @treasuryViewerProvisional.
+  ///
+  /// In en, this message translates to:
+  /// **'Provisional report: the register is not closed yet, figures may still change. The document is marked “PROVISIONAL”.'**
+  String get treasuryViewerProvisional;
+
+  /// No description provided for @treasuryViewerLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading the report'**
+  String get treasuryViewerLoading;
+
+  /// No description provided for @treasuryViewerSaveSheet.
+  ///
+  /// In en, this message translates to:
+  /// **'Save the sheet'**
+  String get treasuryViewerSaveSheet;
+
+  /// No description provided for @treasuryXlsxSheets.
+  ///
+  /// In en, this message translates to:
+  /// **'Workbook sheets'**
+  String get treasuryXlsxSheets;
+
+  /// No description provided for @treasuryXlsxEmptySheet.
+  ///
+  /// In en, this message translates to:
+  /// **'This sheet is empty.'**
+  String get treasuryXlsxEmptySheet;
+
+  /// No description provided for @treasuryXlsxUnreadable.
+  ///
+  /// In en, this message translates to:
+  /// **'This sheet cannot be previewed. You can save it and open it in Excel.'**
+  String get treasuryXlsxUnreadable;
+
   /// No description provided for @treasuryReasonNotToday.
   ///
   /// In en, this message translates to:
@@ -35601,7 +35643,7 @@ abstract class AppLocalizations {
   /// No description provided for @treasuryReportOpenExcel.
   ///
   /// In en, this message translates to:
-  /// **'Save the Excel sheet'**
+  /// **'Open the Excel sheet'**
   String get treasuryReportOpenExcel;
 
   /// No description provided for @treasuryReportSaved.
