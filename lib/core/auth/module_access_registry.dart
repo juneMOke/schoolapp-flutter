@@ -269,6 +269,10 @@ const ModuleAccess kTreasuryRegisterWriteAccess = ModuleAccess([
   Perm.treasuryRegisterWrite,
 ]);
 
+/// Clôturer une caisse, répondre à une ligne arrivée après une clôture : la
+/// caissière ou le promoteur (`POST /treasury/days/{date}/closures…`).
+const ModuleAccess kTreasuryCloseAccess = ModuleAccess([Perm.treasuryClose]);
+
 /// Toutes les actions d'écriture gardées, avec le libellé qui sert aux
 /// messages d'échec. Énumérées pour qu'un test puisse vérifier qu'aucune n'est
 /// hors de portée de tous les rôles.
@@ -370,6 +374,7 @@ const Map<String, Map<String, ModuleAccess>> kModuleAccessRegistry = {
   // Les trois écrans de la trésorerie se LISENT sous `treasury.read` ; créer,
   // ajuster et clôturer sont gardés geste par geste.
   MenuConstants.treasuryMenuId: {
+    MenuConstants.treasuryClosingId: ModuleAccess([Perm.treasuryRead]),
     MenuConstants.treasuryConfigId: ModuleAccess([Perm.treasuryRead]),
   },
   // Le fichier se LIT sous `hr.staff.read` ; créer ou modifier une fiche,

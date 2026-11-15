@@ -1333,4 +1333,21 @@ class AppDimensions {
 
   /// Modale de création ou d'ajustement d'une caisse.
   static const treasuryRegisterModalMaxWidth = 540.0;
+
+  // ── Trésorerie · Clôture de caisse ──────────────────────────────────────
+  /// Largeur minimale d'une carte « caisse du jour » (grille auto-remplie).
+  static const treasuryDayCardMinWidth = 340.0;
+
+  /// Largeur maximale de la navigation ‹ date › : au-delà, la date ne
+  /// s'étire pas.
+  static const treasuryDayNavMaxWidth = 420.0;
+
+  /// Case chiffrée d'une carte du jour (Ouverture, Entrées, Sorties).
+  static const treasuryFigureMinWidth = 120.0;
+
+  /// Colonne « Heure » de la liste des mouvements.
+  static const treasuryMovesTimeColumn = 54.0;
+
+  /// Modale de clôture.
+  static const treasuryClosingModalMaxWidth = 560.0;
 }

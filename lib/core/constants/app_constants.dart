@@ -1698,6 +1698,26 @@ class AppConstants {
   static const String treasuryCashRegisterAdjustmentsEndpoint =
       '/api/v1/treasury/cash-registers/{registerId}/adjustments';
 
+  /// **GET** = une journée de caisse, caisse par caisse.
+  static const String treasuryDayEndpoint = '/api/v1/treasury/days/{date}';
+
+  /// **GET** = les mouvements d'une caisse sur une journée (`registerId`,
+  /// `direction` facultatif).
+  static const String treasuryDayMovementsEndpoint =
+      '/api/v1/treasury/days/{date}/movements';
+
+  /// **POST** = clôturer une caisse aujourd'hui (« Oui » / « Non »).
+  static const String treasuryDayClosuresEndpoint =
+      '/api/v1/treasury/days/{date}/closures';
+
+  /// **POST** = répondre à une ligne arrivée après une clôture (R19).
+  static const String treasuryAfterClosureConfirmationEndpoint =
+      '/api/v1/treasury/movements/{movementId}/after-closure-confirmation';
+
+  /// **POST** = rouvrir la clôture du jour (promoteur, R20).
+  static const String treasuryClosureReopeningEndpoint =
+      '/api/v1/treasury/closures/{closureId}/reopening';
+
   /// **GET** (web, même hôte que l'application) = la version déployée,
   /// écrite par `flutter build web` : `{version, build_number, …}`.
   static const String webVersionManifestPath = 'version.json';

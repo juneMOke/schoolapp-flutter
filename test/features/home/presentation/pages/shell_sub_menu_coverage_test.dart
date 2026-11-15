@@ -94,6 +94,7 @@ const Map<String, String> _constants = {
   'expenseRegisterId': 'depenses-frais-fonctionnement',
   'expenseQueueId': 'depenses-validations',
   'treasuryConfigId': 'tr-config',
+  'treasuryClosingId': 'tr-cloture',
   'communicationAnnouncementsId': 'communication-communiques',
   'communicationTemplatesId': 'communication-modeles',
   'hrStaffFileId': 'fichier-du-personnel',

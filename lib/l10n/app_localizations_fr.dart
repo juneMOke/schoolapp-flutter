@@ -22448,4 +22448,473 @@ class AppLocalizationsFr extends AppLocalizations {
 
     return '$dateString';
   }
+
+  @override
+  String get subMenuTreasuryClosing => 'Clôture de caisse';
+
+  @override
+  String get treasuryClosingTitle => 'Clôture de caisse';
+
+  @override
+  String get treasuryClosingSubtitle =>
+      'Ce qui est entré et sorti de chaque caisse, ce qu\'il reste, et la clôture du soir.';
+
+  @override
+  String get treasuryDayLoading => 'Chargement de la journée';
+
+  @override
+  String get treasuryPrevDay => 'Journée précédente';
+
+  @override
+  String get treasuryNextDay => 'Journée suivante';
+
+  @override
+  String get treasuryToday => 'Aujourd\'hui';
+
+  @override
+  String get treasuryTodayLower => 'aujourd\'hui';
+
+  @override
+  String treasuryDayLong(DateTime date) {
+    final intl.DateFormat dateDateFormat = intl.DateFormat.yMMMMEEEEd(
+      localeName,
+    );
+    final String dateString = dateDateFormat.format(date);
+
+    return '$dateString';
+  }
+
+  @override
+  String get treasuryDayOpenTitle => 'Journée en cours';
+
+  @override
+  String get treasuryDayClosedTitle => 'Journée clôturée';
+
+  @override
+  String treasuryClosedCount(int closed, int total) {
+    String _temp0 = intl.Intl.pluralLogic(
+      closed,
+      locale: localeName,
+      other: '$closed caisses sur $total clôturées',
+      one: '1 caisse sur $total clôturée',
+      zero: 'Aucune caisse clôturée sur $total',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get treasuryDayReportPending =>
+      'le rapport du jour sera disponible après la dernière clôture.';
+
+  @override
+  String get treasuryDayReportAvailable =>
+      'les rapports de la journée sont disponibles.';
+
+  @override
+  String treasuryCloseShortcut(String register) {
+    return 'Clôturer $register';
+  }
+
+  @override
+  String get treasuryOpenToClose => 'Ouverte · à clôturer';
+
+  @override
+  String treasuryClosedAtShort(String time) {
+    return 'Clôturée $time';
+  }
+
+  @override
+  String treasuryClosedAtGapShort(String time) {
+    return 'Clôturée $time · écart';
+  }
+
+  @override
+  String get treasuryNotClosed => 'Non clôturée';
+
+  @override
+  String get treasuryOpening => 'Ouverture';
+
+  @override
+  String get treasuryInflows => 'Entrées';
+
+  @override
+  String get treasuryOutflows => 'Sorties';
+
+  @override
+  String get treasurySeeDetail => 'Voir le détail';
+
+  @override
+  String get treasuryHideDetail => 'Masquer le détail';
+
+  @override
+  String get treasuryRemainingExpected => 'Reste en caisse (attendu)';
+
+  @override
+  String get treasuryRemaining => 'Reste en caisse';
+
+  @override
+  String get treasuryRemainingDeclared => 'Reste déclaré à la clôture';
+
+  @override
+  String get treasuryRemainingHint => 'Ouverture + entrées − sorties';
+
+  @override
+  String treasuryExpectedShort(String amount) {
+    return 'Attendu $amount';
+  }
+
+  @override
+  String get treasuryCloseHint =>
+      'En fin de journée, vérifiez que le reste correspond à l\'argent présent dans la caisse.';
+
+  @override
+  String get treasuryCloseButton => 'Clôturer la caisse';
+
+  @override
+  String get treasuryCloseOffline =>
+      'Clôture impossible hors ligne. Reconnectez la tablette.';
+
+  @override
+  String treasuryClosePending(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          '$count mouvements pas encore envoyés au serveur. La clôture sera possible une fois tout envoyé.',
+      one:
+          '1 mouvement pas encore envoyé au serveur. La clôture sera possible une fois tout envoyé.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String treasuryCloseAfterClosurePending(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count paiements arrivés après la clôture d\'hier à confirmer.',
+      one: '1 paiement arrivé après la clôture d\'hier à confirmer.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get treasuryReadOnlyCashier =>
+      'Consultation seule : la clôture est faite par la caissière ou le promoteur.';
+
+  @override
+  String treasuryClosedBy(String time, String name) {
+    return 'Clôturée à $time par $name';
+  }
+
+  @override
+  String treasuryClosedByPromoter(String time, String name) {
+    return 'Clôturée à $time par $name (promoteur)';
+  }
+
+  @override
+  String get treasuryClosedMatched => 'le reste correspondait à la caisse';
+
+  @override
+  String get treasuryClosedWithGap => 'avec un écart justifié';
+
+  @override
+  String treasuryGapTitle(String gap) {
+    return 'Écart de clôture $gap';
+  }
+
+  @override
+  String get treasuryGapMissing => 'manquant';
+
+  @override
+  String get treasuryGapSurplus => 'excédent';
+
+  @override
+  String treasuryExpectedDeclared(String expected, String declared) {
+    return 'attendu $expected · déclaré $declared';
+  }
+
+  @override
+  String treasuryGapAuthor(String name, String time) {
+    return 'Justification de $name · $time · reprise dans le rapport du jour';
+  }
+
+  @override
+  String get treasuryReopenButton => 'Rouvrir la journée';
+
+  @override
+  String treasuryReopenTitle(String register) {
+    return 'Rouvrir la clôture de $register';
+  }
+
+  @override
+  String get treasuryReopenReason => 'Motif de la réouverture (obligatoire)';
+
+  @override
+  String get treasuryReopenHint =>
+      'La clôture reste lisible : elle est marquée rouverte, jamais effacée. Son écart est contre-passé, le rapport du jour redevient provisoire, et la caisse pourra être clôturée à nouveau.';
+
+  @override
+  String get treasuryReopenSave => 'Rouvrir';
+
+  @override
+  String treasuryReopened(String register, String time) {
+    return '$register rouverte · la clôture de $time est annulée. Le rapport du jour redevient provisoire.';
+  }
+
+  @override
+  String get treasuryMovesTime => 'Heure';
+
+  @override
+  String get treasuryMovesIn => 'Entrée';
+
+  @override
+  String get treasuryMovesOut => 'Sortie';
+
+  @override
+  String get treasuryMovesAmount => 'Montant';
+
+  @override
+  String treasuryMovesCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count mouvements',
+      one: '1 mouvement',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get treasuryMovesEmptyIn => 'Aucune entrée ce jour-là.';
+
+  @override
+  String get treasuryMovesEmptyOut => 'Aucune sortie ce jour-là.';
+
+  @override
+  String get treasuryMovesLoading => 'Chargement des mouvements';
+
+  @override
+  String treasuryMovesLoadFailed(String reason) {
+    return 'Mouvements indisponibles : $reason';
+  }
+
+  @override
+  String get treasuryMovesSearchIn => 'Chercher un élève, un reçu…';
+
+  @override
+  String get treasuryMovesSearchOut => 'Chercher une sortie, un bon…';
+
+  @override
+  String treasuryMovesNoResult(String query) {
+    return 'Aucun résultat pour « $query ».';
+  }
+
+  @override
+  String treasuryMovesShowMore(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Afficher les $count autres',
+      one: 'Afficher l\'autre',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get treasuryMovesShowLess => 'Afficher moins';
+
+  @override
+  String get treasurySourceBankDeposit => 'Dépôt banque';
+
+  @override
+  String get treasurySourceGap => 'Écart de clôture';
+
+  @override
+  String get treasuryNatureCancellation => 'Annulation';
+
+  @override
+  String get treasuryNatureOffset => 'Compensation';
+
+  @override
+  String treasuryAfterClosureLabel(DateTime date) {
+    final intl.DateFormat dateDateFormat = intl.DateFormat.yMMMd(localeName);
+    final String dateString = dateDateFormat.format(date);
+
+    return 'arrivé après la clôture du $dateString';
+  }
+
+  @override
+  String get treasuryAfterClosureAlready => 'Déjà en caisse hier';
+
+  @override
+  String get treasuryAfterClosureToday => 'Arrivé aujourd\'hui';
+
+  @override
+  String get treasuryAfterClosureAnsweredAlready => 'déjà compté la veille';
+
+  @override
+  String get treasuryAfterClosureAnsweredToday => 'compté aujourd\'hui';
+
+  @override
+  String get treasuryAfterClosureToastAlready =>
+      'Paiement confirmé · déjà en caisse hier : il n\'est pas compté une seconde fois.';
+
+  @override
+  String get treasuryAfterClosureToastToday =>
+      'Paiement confirmé · arrivé aujourd\'hui : il compte dans la journée.';
+
+  @override
+  String get treasuryCloseAfterClosureWhere =>
+      'Répondez-y dans le détail des entrées ou des sorties de la journée où ils sont inscrits.';
+
+  @override
+  String treasuryCloseEyebrow(DateTime date) {
+    final intl.DateFormat dateDateFormat = intl.DateFormat.MMMEd(localeName);
+    final String dateString = dateDateFormat.format(date);
+
+    return 'Clôture · $dateString';
+  }
+
+  @override
+  String treasuryCloseTitle(String register) {
+    return 'Clôturer $register';
+  }
+
+  @override
+  String get treasuryDayPoint => 'Le point de la journée';
+
+  @override
+  String get treasuryLedgerOpening => 'Ouverture de la caisse';
+
+  @override
+  String get treasuryLedgerFormula => 'ouverture + entrées − sorties';
+
+  @override
+  String treasuryCloseQuestion(String amount) {
+    return 'Avez-vous bien $amount dans la caisse ?';
+  }
+
+  @override
+  String get treasuryCloseQuestionHint =>
+      'Comptez l\'argent présent dans la caisse et comparez-le au reste ci-dessus.';
+
+  @override
+  String get treasuryAnswerYes => 'Oui, c\'est juste';
+
+  @override
+  String get treasuryAnswerYesHint => 'Le montant correspond à la caisse';
+
+  @override
+  String get treasuryAnswerNo => 'Non, il y a une différence';
+
+  @override
+  String get treasuryAnswerNoHint => 'Je saisis ce qu\'il y a vraiment';
+
+  @override
+  String get treasuryDeclaredQuestion =>
+      'Combien y a-t-il réellement dans la caisse ?';
+
+  @override
+  String treasuryGapMissingBanner(String gap, String amount) {
+    return 'Écart $gap · il manque $amount';
+  }
+
+  @override
+  String treasuryGapSurplusBanner(String gap, String amount) {
+    return 'Écart $gap · il y a $amount de plus que prévu';
+  }
+
+  @override
+  String get treasuryNoGap =>
+      'C\'est exactement le reste attendu : il n\'y a pas d\'écart.';
+
+  @override
+  String get treasuryPickYes => 'Choisir « Oui »';
+
+  @override
+  String get treasuryGapReason => 'Justification de l\'écart (obligatoire)';
+
+  @override
+  String get treasuryGapReasonHint => 'Expliquez d\'où vient la différence…';
+
+  @override
+  String get treasuryGapReasonVisible =>
+      'La justification apparaîtra dans le rapport du jour et lors de la consultation de cette journée.';
+
+  @override
+  String get treasuryGapReasonShort =>
+      'La justification doit faire au moins 5 caractères.';
+
+  @override
+  String get treasuryGapSuggest1 => 'Erreur de rendu de monnaie';
+
+  @override
+  String get treasuryGapSuggest2 => 'Billet refusé ou abîmé';
+
+  @override
+  String get treasuryCloseWithGap => 'Clôturer avec cet écart';
+
+  @override
+  String get treasuryLockWarning =>
+      'Après la clôture, la journée de cette caisse est verrouillée : plus aucun encaissement ni paiement ce jour. Une correction passera par un ajustement daté du lendemain.';
+
+  @override
+  String treasuryClosedToastMatched(String register, String amount) {
+    return '$register clôturée · reste confirmé : $amount';
+  }
+
+  @override
+  String treasuryClosedToastGap(String register, String gap) {
+    return '$register clôturée · écart de $gap justifié, repris dans le rapport du jour';
+  }
+
+  @override
+  String treasuryAlreadyClosedToast(String time, String name) {
+    return 'Caisse déjà clôturée à $time par $name : les chiffres ont été mis à jour.';
+  }
+
+  @override
+  String treasuryExpectedChangedMessage(String before, String after) {
+    return 'Un mouvement est arrivé entre-temps : le reste attendu est passé de $before à $after. Vérifiez la caisse et répondez à nouveau.';
+  }
+
+  @override
+  String get treasuryReasonExpectedChanged =>
+      'Le reste attendu a changé : vérifiez et répondez à nouveau.';
+
+  @override
+  String get treasuryReasonAfterClosurePending =>
+      'Des paiements arrivés après la clôture d\'hier attendent votre réponse.';
+
+  @override
+  String get treasuryReasonAlreadyAnswered =>
+      'Cette ligne a déjà reçu une réponse.';
+
+  @override
+  String get treasuryReasonNotAfterClosure =>
+      'Cette ligne n\'est pas arrivée après une clôture.';
+
+  @override
+  String get treasuryReasonNotToday =>
+      'Ce geste ne se fait que pour aujourd\'hui.';
+
+  @override
+  String get treasuryReasonInvalidDeclaration =>
+      'Saisissez un montant différent du reste attendu.';
+
+  @override
+  String get treasuryReasonAlreadyReopened =>
+      'Cette clôture a déjà été rouverte.';
+
+  @override
+  String get treasuryReasonInvalidDate =>
+      'Cette journée n\'est pas une journée de caisse.';
+
+  @override
+  String get treasuryEmptyClosing =>
+      'Créez une caisse dans Trésorerie ▸ Configuration pour commencer.';
+
+  @override
+  String get treasuryConfigureRegisters => 'Configurer les caisses';
 }

@@ -128,6 +128,10 @@ class MenuConstants {
   /// détient, et ses ajustements.
   static const String treasuryConfigId = 'tr-config';
 
+  /// Clôture de caisse : ce qui est entré et sorti de chaque caisse, ce qu'il
+  /// reste, et la clôture du soir.
+  static const String treasuryClosingId = 'tr-cloture';
+
   /// Le fichier du personnel : tous les agents de l'école, leur contrat et
   /// leur dossier administratif.
   static const String hrStaffFileId = 'fichier-du-personnel';
