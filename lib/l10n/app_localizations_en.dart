@@ -22988,6 +22988,27 @@ class AppLocalizationsEn extends AppLocalizations {
       'This sheet cannot be previewed. You can save it and open it in Excel.';
 
   @override
+  String get treasuryMovesReceipt => 'Receipt no.';
+
+  @override
+  String get treasuryMovesPiece => 'Voucher no.';
+
+  @override
+  String get treasuryMovesStudent => 'Student';
+
+  @override
+  String get treasuryMovesLabel => 'Label';
+
+  @override
+  String get treasuryMovesFee => 'Fee';
+
+  @override
+  String get treasuryMovesDetail => 'Detail';
+
+  @override
+  String get treasurySignatureAndDate => 'Signature and date';
+
+  @override
   String get treasuryReasonNotToday => 'This can only be done for today.';
 
   @override

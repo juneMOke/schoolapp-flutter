@@ -1436,6 +1436,13 @@ class AppDimensions {
 
   /// L'aperçu d'une feuille Excel (A6) : colonnes bornées, lignes de 32.
   static const treasuryXlsxColumnMin = 64.0;
-  static const treasuryXlsxColumnMax = 280.0;
+  static const treasuryXlsxColumnMax = 420.0;
+
+  /// Une colonne de marge de la feuille (A, L) : étroite, jamais nulle.
+  static const treasuryXlsxMargin = 12.0;
+
+  /// La colonne des numéros de lignes et la ligne des lettres de colonnes.
+  static const treasuryXlsxGutter = 36.0;
+  static const treasuryXlsxHeaderHeight = 24.0;
   static const treasuryXlsxRowHeight = 32.0;
 }

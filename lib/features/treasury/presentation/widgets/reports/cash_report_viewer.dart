@@ -103,12 +103,16 @@ class _CashReportViewerState extends State<CashReportViewer> {
     return EteeloAdaptiveDialog(
       clipBehavior: Clip.antiAlias,
       insetPadding: const EdgeInsets.all(AppDimensions.spacingL),
-      maxWidth: (screen.width * AppDimensions.documentViewerWidthRatio)
-          .clamp(
-            AppDimensions.documentViewerMaxWidth,
-            AppDimensions.documentViewerWideMaxWidth,
-          )
-          .toDouble(),
+      // La feuille prend presque tout l'écran : un rapport a onze colonnes,
+      // l'onglet « Données » dix-sept. La page PDF garde sa largeur.
+      maxWidth: _format == CashReportFormat.xlsx
+          ? screen.width
+          : (screen.width * AppDimensions.documentViewerWidthRatio)
+                .clamp(
+                  AppDimensions.documentViewerMaxWidth,
+                  AppDimensions.documentViewerWideMaxWidth,
+                )
+                .toDouble(),
       maxHeight: screen.height * AppDimensions.dialogMaxHeightRatio,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,

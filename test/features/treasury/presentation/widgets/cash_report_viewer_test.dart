@@ -140,6 +140,8 @@ void main() {
     );
     await tester.tap(find.text('ouvrir'));
     await tester.pumpAndSettle();
-    expect(find.text('Total encaissé'), findsOneWidget);
+    // Les onglets restent visibles ; la grille ne bâtit que ses lignes à
+    // l'écran (téléphone paysage : quelques-unes).
+    expect(find.text('Données'), findsOneWidget);
   });
 }

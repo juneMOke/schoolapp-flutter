@@ -6,7 +6,6 @@ import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/core/helpers/school_time.dart';
-import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
@@ -15,6 +14,7 @@ import 'package:school_app_flutter/features/treasury/presentation/bloc/report_si
 import 'package:school_app_flutter/features/treasury/presentation/helpers/treasury_format.dart';
 import 'package:school_app_flutter/features/treasury/presentation/widgets/signatories/signatory_tile.dart';
 import 'package:school_app_flutter/features/treasury/presentation/widgets/states/treasury_results_error_state.dart';
+import 'package:school_app_flutter/features/treasury/presentation/widgets/common/treasury_panel.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Trésorerie ▸ Configuration ▸ Signataires des rapports : les blocs imprimés
@@ -33,53 +33,27 @@ class ReportSignatoriesSection extends StatelessWidget {
         final edit = state.status == ReportSignatoriesStatus.ready
             ? onEdit
             : null;
-        return Container(
-          padding: const EdgeInsets.all(AppSpacing.lg),
-          decoration: BoxDecoration(
-            color: AppColors.surfaceRaised,
-            borderRadius: AppRadius.brLg,
-            border: Border.all(color: AppColors.border),
-          ),
+        return TreasuryPanel(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Wrap(
-                alignment: WrapAlignment.spaceBetween,
-                crossAxisAlignment: WrapCrossAlignment.center,
-                spacing: AppSpacing.md,
-                runSpacing: AppSpacing.sm,
-                children: [
-                  ConstrainedBox(
-                    constraints: const BoxConstraints(
-                      maxWidth: AppDimensions.treasurySectionIntroMaxWidth,
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          l10n.treasurySignatoriesTitle,
-                          style: AppTypography.titleMedium,
-                        ),
-                        Text(
-                          l10n.treasurySignatoriesSubtitle,
-                          style: AppTypography.bodySmall.copyWith(
-                            color: AppColors.textSecondary,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  if (edit != null)
-                    EteeloButton.secondary(
-                      label: l10n.treasurySignatoriesEdit,
-                      icon: Icons.edit_outlined,
-                      onPressed: edit,
-                      fullWidth: false,
-                    ),
-                ],
+              TreasurySectionHeader(
+                icon: Icons.draw_outlined,
+                title: l10n.treasurySignatoriesTitle,
+                subtitle: l10n.treasurySignatoriesSubtitle,
               ),
-              const SizedBox(height: AppSpacing.md),
+              if (edit != null) ...[
+                Align(
+                  alignment: AlignmentDirectional.centerEnd,
+                  child: EteeloButton.secondary(
+                    label: l10n.treasurySignatoriesEdit,
+                    icon: Icons.edit_outlined,
+                    onPressed: edit,
+                    fullWidth: false,
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.md),
+              ],
               switch (state.status) {
                 ReportSignatoriesStatus.loading => EteeloListSkeleton(
                   rowCount: 1,

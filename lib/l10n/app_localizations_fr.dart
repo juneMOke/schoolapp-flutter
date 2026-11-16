@@ -23143,6 +23143,27 @@ class AppLocalizationsFr extends AppLocalizations {
       'L\'aperçu de cette feuille n\'est pas disponible. Vous pouvez l\'enregistrer et l\'ouvrir dans Excel.';
 
   @override
+  String get treasuryMovesReceipt => 'N° reçu';
+
+  @override
+  String get treasuryMovesPiece => 'N° pièce';
+
+  @override
+  String get treasuryMovesStudent => 'Élève';
+
+  @override
+  String get treasuryMovesLabel => 'Libellé';
+
+  @override
+  String get treasuryMovesFee => 'Frais';
+
+  @override
+  String get treasuryMovesDetail => 'Détail';
+
+  @override
+  String get treasurySignatureAndDate => 'Signature et date';
+
+  @override
   String get treasuryReasonNotToday =>
       'Ce geste ne se fait que pour aujourd\'hui.';
 

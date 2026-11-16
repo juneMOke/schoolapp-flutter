@@ -18,6 +18,9 @@ class AppMotion {
   static const Duration stagger = Duration(milliseconds: 60);
   static const Duration stepIn = Duration(milliseconds: 340);
   static const Duration pop = Duration(milliseconds: 420);
+
+  /// Une pulsation lente : l'anneau du dernier point d'une courbe.
+  static const Duration pulse = Duration(milliseconds: 1800);
   static const Duration skeletonPulse = Duration(milliseconds: 1500);
   // Tour complet d'un indicateur en rotation (spinner « processing »).
   static const Duration spinnerCycle = Duration(milliseconds: 900);

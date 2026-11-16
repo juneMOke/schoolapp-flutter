@@ -18,12 +18,14 @@ class SignatoryTile extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final name = signatory.name?.trim();
     final blank = name == null || name.isEmpty;
+    // Le bloc tel qu'il s'imprime au pied du rapport : légende, nom,
+    // fonction, puis la ligne où l'on signe.
     return Container(
       padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
-        color: AppColors.surfaceAlt,
+        color: AppColors.treasuryNoteBg,
         borderRadius: AppRadius.brMd,
-        border: Border.all(color: AppColors.border),
+        border: Border.all(color: AppColors.treasuryNoteBorder),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -35,7 +37,7 @@ class SignatoryTile extends StatelessWidget {
               color: AppColors.textSecondary,
             ),
           ),
-          const SizedBox(height: AppSpacing.xs),
+          const SizedBox(height: AppSpacing.sm),
           Text(
             blank ? l10n.treasurySignatoryBlank : name,
             style: blank
@@ -43,7 +45,9 @@ class SignatoryTile extends StatelessWidget {
                     color: AppColors.textMuted,
                     fontStyle: FontStyle.italic,
                   )
-                : AppTypography.titleSmall,
+                : AppTypography.titleSmall.copyWith(
+                    color: AppColors.textPrimary,
+                  ),
           ),
           Text(
             signatory.function,
@@ -53,13 +57,34 @@ class SignatoryTile extends StatelessWidget {
           ),
           if (signatory.filledByCloser) ...[
             const SizedBox(height: AppSpacing.xs),
-            Text(
-              l10n.treasurySignatoryCloserHint,
-              style: AppTypography.labelSmall.copyWith(
-                color: AppColors.terreCuite,
-              ),
+            Row(
+              children: [
+                const Icon(
+                  Icons.lock_outline,
+                  size: AppSpacing.md,
+                  color: AppColors.terreCuite,
+                ),
+                const SizedBox(width: AppSpacing.xs),
+                Flexible(
+                  child: Text(
+                    l10n.treasurySignatoryCloserHint,
+                    style: AppTypography.labelSmall.copyWith(
+                      color: AppColors.terreCuite,
+                    ),
+                  ),
+                ),
+              ],
             ),
           ],
+          const SizedBox(height: AppSpacing.xl),
+          const Divider(height: 1, thickness: 1.5, color: AppColors.textMuted),
+          const SizedBox(height: AppSpacing.xs),
+          Text(
+            l10n.treasurySignatureAndDate,
+            style: AppTypography.labelSmall.copyWith(
+              color: AppColors.textMuted,
+            ),
+          ),
         ],
       ),
     );

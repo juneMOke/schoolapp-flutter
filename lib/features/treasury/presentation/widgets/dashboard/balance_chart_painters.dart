@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
+import 'package:school_app_flutter/core/theme/app_motion.dart';
 
 /// Le repère du tracé d'une courbe fl_chart à [count] tranches : l'axe des
 /// montants à gauche ([left]), celui des tranches en bas ([bottom]).
@@ -55,52 +56,117 @@ class TreasuryChartBackdrop extends CustomPainter {
       old.bottom != bottom;
 }
 
-/// L'anneau autour du dernier point connu : il dit « on en est là ».
-class TreasuryChartRing extends CustomPainter {
+/// L'anneau du dernier point connu (spec A4) : il pulse en 1,8 s, de 6 à
+/// 18 de rayon en s'effaçant ; fixe quand les animations sont réduites.
+class TreasuryPulsingRing extends StatefulWidget {
   final int x;
   final double y;
   final int count;
-  final double minY;
   final double maxY;
   final double left;
   final double bottom;
 
-  const TreasuryChartRing({
+  const TreasuryPulsingRing({
+    super.key,
     required this.x,
     required this.y,
     required this.count,
-    required this.minY,
     required this.maxY,
     required this.left,
     required this.bottom,
   });
 
-  static const double _radius = 13;
+  @override
+  State<TreasuryPulsingRing> createState() => _TreasuryPulsingRingState();
+}
+
+class _TreasuryPulsingRingState extends State<TreasuryPulsingRing>
+    with SingleTickerProviderStateMixin {
+  late final _controller = AnimationController(
+    vsync: this,
+    duration: AppMotion.pulse,
+  );
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (MediaQuery.disableAnimationsOf(context)) {
+      _controller.stop();
+    } else if (!_controller.isAnimating) {
+      _controller.repeat();
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final still = MediaQuery.disableAnimationsOf(context);
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, _) => CustomPaint(
+        painter: _RingPainter(
+          x: widget.x,
+          y: widget.y,
+          count: widget.count,
+          maxY: widget.maxY,
+          left: widget.left,
+          bottom: widget.bottom,
+          progress: still ? null : _controller.value,
+        ),
+      ),
+    );
+  }
+}
+
+class _RingPainter extends CustomPainter {
+  final int x;
+  final double y;
+  final int count;
+  final double maxY;
+  final double left;
+  final double bottom;
+
+  /// 0 → 1 au fil d'une pulsation ; `null` : anneau fixe.
+  final double? progress;
+
+  const _RingPainter({
+    required this.x,
+    required this.y,
+    required this.count,
+    required this.maxY,
+    required this.left,
+    required this.bottom,
+    required this.progress,
+  });
+
+  static const double _from = 6;
+  static const double _to = 18;
+  static const double _still = 13;
 
   @override
   void paint(Canvas canvas, Size size) {
     final plotHeight = size.height - bottom;
-    final span = maxY - minY == 0 ? 1 : maxY - minY;
+    final span = maxY == 0 ? 1 : maxY;
     final center = Offset(
       _xOf(size, left, count, x.toDouble()),
-      plotHeight * (1 - (y - minY) / span),
+      plotHeight * (1 - y / span),
     );
-    canvas
-      ..drawCircle(
-        center,
-        _radius,
-        Paint()..color = AppColors.terreCuite.withValues(alpha: 0.12),
-      )
-      ..drawCircle(
-        center,
-        _radius,
-        Paint()
-          ..style = PaintingStyle.stroke
-          ..color = AppColors.terreCuite.withValues(alpha: 0.2),
-      );
+    final t = progress;
+    final radius = t == null ? _still : _from + (_to - _from) * t;
+    final alpha = t == null ? 0.16 : 0.35 * (1 - t);
+    canvas.drawCircle(
+      center,
+      radius,
+      Paint()..color = AppColors.terreCuite.withValues(alpha: alpha),
+    );
   }
 
   @override
-  bool shouldRepaint(TreasuryChartRing old) =>
-      old.x != x || old.y != y || old.minY != minY || old.maxY != maxY;
+  bool shouldRepaint(_RingPainter old) =>
+      old.progress != progress || old.x != x || old.y != y || old.maxY != maxY;
 }
