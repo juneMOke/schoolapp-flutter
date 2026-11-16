@@ -267,7 +267,9 @@ void main() {
       );
       await tester.tap(find.text('Voir le détail').first);
       await tester.pumpAndSettle();
-      expect(find.text('Frais de scolarité — Kabongo Mwamba · 6e A'), findsOne);
+      // Le libellé du serveur se range en colonnes : l'élève, puis les frais.
+      expect(find.text('Kabongo Mwamba · 6e A'), findsOne);
+      expect(find.text('Frais de scolarité'), findsOne);
       expect(find.text('Déjà en caisse hier'), findsOneWidget);
       // La liste des entrées ne montre pas la sortie qui l'a défaite.
       expect(find.text('Annulation — CF-RC-2627-000123'), findsNothing);

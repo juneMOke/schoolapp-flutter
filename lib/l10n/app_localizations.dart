@@ -35340,6 +35340,48 @@ abstract class AppLocalizations {
   /// **'This sheet cannot be previewed. You can save it and open it in Excel.'**
   String get treasuryXlsxUnreadable;
 
+  /// No description provided for @treasuryMovesReceipt.
+  ///
+  /// In en, this message translates to:
+  /// **'Receipt no.'**
+  String get treasuryMovesReceipt;
+
+  /// No description provided for @treasuryMovesPiece.
+  ///
+  /// In en, this message translates to:
+  /// **'Voucher no.'**
+  String get treasuryMovesPiece;
+
+  /// No description provided for @treasuryMovesStudent.
+  ///
+  /// In en, this message translates to:
+  /// **'Student'**
+  String get treasuryMovesStudent;
+
+  /// No description provided for @treasuryMovesLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Label'**
+  String get treasuryMovesLabel;
+
+  /// No description provided for @treasuryMovesFee.
+  ///
+  /// In en, this message translates to:
+  /// **'Fee'**
+  String get treasuryMovesFee;
+
+  /// No description provided for @treasuryMovesDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Detail'**
+  String get treasuryMovesDetail;
+
+  /// No description provided for @treasurySignatureAndDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Signature and date'**
+  String get treasurySignatureAndDate;
+
   /// No description provided for @treasuryReasonNotToday.
   ///
   /// In en, this message translates to:

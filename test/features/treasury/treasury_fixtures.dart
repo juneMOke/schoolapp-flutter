@@ -146,6 +146,12 @@ Widget treasuryHost(Widget child) => MaterialApp(
   localizationsDelegates: AppLocalizations.localizationsDelegates,
   supportedLocales: AppLocalizations.supportedLocales,
   locale: const Locale('fr'),
+  // Animations réduites : l'anneau pulsé de la courbe tourne sans fin, et
+  // `pumpAndSettle` ne rendrait jamais la main.
+  builder: (context, child) => MediaQuery(
+    data: MediaQuery.of(context).copyWith(disableAnimations: true),
+    child: child!,
+  ),
   home: Scaffold(body: SingleChildScrollView(child: child)),
 );
 

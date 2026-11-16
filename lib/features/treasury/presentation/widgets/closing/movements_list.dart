@@ -134,112 +134,156 @@ class _MovementsListState extends State<MovementsList> {
     final hidden = filtered.length - shown.length;
     final total = items.fold<int>(0, (sum, m) => sum + m.signedInCents);
     final head = AppTypography.labelCaps.copyWith(color: ink);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        // En-tête : HEURE · ENTRÉE (ou SORTIE) · MONTANT, au ton du sens.
-        Container(
-          color: tone.soft,
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.md,
-            vertical: AppSpacing.sm,
-          ),
-          child: Row(
-            children: [
-              SizedBox(
-                width: AppDimensions.treasuryMovesTimeColumn,
-                child: Text(l10n.treasuryMovesTime.toUpperCase(), style: head),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final wide = constraints.maxWidth >= MovementColumns.wideMin;
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // En-tête : HEURE · ENTRÉE (ou SORTIE) · MONTANT, au ton du sens.
+            Container(
+              color: tone.soft,
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.md,
+                vertical: AppSpacing.sm,
               ),
-              Expanded(
-                child: Text(
-                  (_inflows ? l10n.treasuryMovesIn : l10n.treasuryMovesOut)
-                      .toUpperCase(),
-                  style: head,
-                ),
-              ),
-              Text(l10n.treasuryMovesAmount.toUpperCase(), style: head),
-            ],
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              if (searchable) ...[
-                const SizedBox(height: AppSpacing.sm),
-                EteeloTextInput(
-                  controller: _query,
-                  label: _inflows
-                      ? l10n.treasuryMovesSearchIn
-                      : l10n.treasuryMovesSearchOut,
-                  hideLabel: true,
-                  placeholder: _inflows
-                      ? l10n.treasuryMovesSearchIn
-                      : l10n.treasuryMovesSearchOut,
-                  capitalization: EteeloTextCapitalization.none,
-                  onChanged: (_) => setState(() {}),
-                ),
-                const SizedBox(height: AppSpacing.sm),
-              ],
-              if (filtered.isEmpty)
-                Text(
-                  l10n.treasuryMovesNoResult(_query.text.trim()),
-                  style: AppTypography.bodySmall.copyWith(
-                    color: AppColors.textSecondary,
+              child: Row(
+                children: [
+                  SizedBox(
+                    width: AppDimensions.treasuryMovesTimeColumn,
+                    child: Text(
+                      l10n.treasuryMovesTime.toUpperCase(),
+                      style: head,
+                    ),
                   ),
-                ),
-              for (final movement in shown)
-                MovementRow(
-                  movement: movement,
-                  currency: widget.currency,
-                  // Une ligne défaite par une autre (annulée) n'attend plus rien :
-                  // le serveur refuserait la réponse (NOT_AFTER_CLOSURE).
-                  onAnswer: state.awaitsAnswer(movement)
-                      ? widget.onAnswer
-                      : null,
-                ),
-              if (hidden > 0 || (_all && searchable && query.isEmpty))
-                EteeloButton.ghost(
-                  label: _all
-                      ? l10n.treasuryMovesShowLess
-                      : l10n.treasuryMovesShowMore(hidden),
-                  icon: _all ? Icons.expand_less : Icons.expand_more,
-                  onPressed: () => setState(() => _all = !_all),
-                ),
-            ],
-          ),
-        ),
-        // Pied : filet 2 du ton, fond clair, le compte et le total signé.
-        Container(
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.md,
-            vertical: AppSpacing.sm,
-          ),
-          decoration: BoxDecoration(
-            color: tone.soft,
-            border: Border(top: BorderSide(color: ink, width: 2)),
-          ),
-          child: Row(
-            children: [
-              Expanded(
-                child: Text(
-                  l10n.treasuryMovesCount(items.length),
-                  style: AppTypography.labelMedium.copyWith(color: ink),
-                ),
+                  if (wide) ...[
+                    SizedBox(
+                      width: MovementColumns.reference,
+                      child: Text(
+                        (_inflows
+                                ? l10n.treasuryMovesReceipt
+                                : l10n.treasuryMovesPiece)
+                            .toUpperCase(),
+                        style: head,
+                      ),
+                    ),
+                    Expanded(
+                      flex: 3,
+                      child: Text(
+                        (_inflows
+                                ? l10n.treasuryMovesStudent
+                                : l10n.treasuryMovesLabel)
+                            .toUpperCase(),
+                        style: head,
+                      ),
+                    ),
+                    Expanded(
+                      flex: 2,
+                      child: Text(
+                        (_inflows
+                                ? l10n.treasuryMovesFee
+                                : l10n.treasuryMovesDetail)
+                            .toUpperCase(),
+                        style: head,
+                      ),
+                    ),
+                  ] else
+                    Expanded(
+                      child: Text(
+                        (_inflows
+                                ? l10n.treasuryMovesIn
+                                : l10n.treasuryMovesOut)
+                            .toUpperCase(),
+                        style: head,
+                      ),
+                    ),
+                  const SizedBox(width: AppSpacing.sm),
+                  Text(l10n.treasuryMovesAmount.toUpperCase(), style: head),
+                ],
               ),
-              Text(
-                TreasuryFormat.signedMoney(total, widget.currency),
-                softWrap: false,
-                style: AppTextStyles.moneyTabular.copyWith(
-                  color: ink,
-                  fontWeight: FontWeight.w700,
-                ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  if (searchable) ...[
+                    const SizedBox(height: AppSpacing.sm),
+                    EteeloTextInput(
+                      controller: _query,
+                      label: _inflows
+                          ? l10n.treasuryMovesSearchIn
+                          : l10n.treasuryMovesSearchOut,
+                      hideLabel: true,
+                      placeholder: _inflows
+                          ? l10n.treasuryMovesSearchIn
+                          : l10n.treasuryMovesSearchOut,
+                      capitalization: EteeloTextCapitalization.none,
+                      onChanged: (_) => setState(() {}),
+                    ),
+                    const SizedBox(height: AppSpacing.sm),
+                  ],
+                  if (filtered.isEmpty)
+                    Text(
+                      l10n.treasuryMovesNoResult(_query.text.trim()),
+                      style: AppTypography.bodySmall.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                  for (final movement in shown)
+                    MovementRow(
+                      wide: wide,
+                      movement: movement,
+                      currency: widget.currency,
+                      // Une ligne défaite par une autre (annulée) n'attend plus rien :
+                      // le serveur refuserait la réponse (NOT_AFTER_CLOSURE).
+                      onAnswer: state.awaitsAnswer(movement)
+                          ? widget.onAnswer
+                          : null,
+                    ),
+                  if (hidden > 0 || (_all && searchable && query.isEmpty))
+                    EteeloButton.ghost(
+                      label: _all
+                          ? l10n.treasuryMovesShowLess
+                          : l10n.treasuryMovesShowMore(hidden),
+                      icon: _all ? Icons.expand_less : Icons.expand_more,
+                      onPressed: () => setState(() => _all = !_all),
+                    ),
+                ],
               ),
-            ],
-          ),
-        ),
-      ],
+            ),
+            // Pied : filet 2 du ton, fond clair, le compte et le total signé.
+            Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.md,
+                vertical: AppSpacing.sm,
+              ),
+              decoration: BoxDecoration(
+                color: tone.soft,
+                border: Border(top: BorderSide(color: ink, width: 2)),
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      l10n.treasuryMovesCount(items.length),
+                      style: AppTypography.labelMedium.copyWith(color: ink),
+                    ),
+                  ),
+                  Text(
+                    TreasuryFormat.signedMoney(total, widget.currency),
+                    softWrap: false,
+                    style: AppTextStyles.moneyTabular.copyWith(
+                      color: ink,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 }

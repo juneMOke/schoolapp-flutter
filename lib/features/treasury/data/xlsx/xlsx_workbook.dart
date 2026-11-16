@@ -2,19 +2,52 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:archive/archive.dart';
+import 'package:school_app_flutter/features/treasury/data/xlsx/xlsx_styles.dart';
 import 'package:xml/xml.dart';
 
-/// Une cellule lue : son texte prêt à afficher, et sa graisse.
+export 'package:school_app_flutter/features/treasury/data/xlsx/xlsx_styles.dart'
+    show XlsxAlign;
+
+/// Une cellule lue : son texte prêt à afficher et son allure.
 class XlsxCell {
   final String text;
   final bool bold;
 
-  /// Un nombre : on l'aligne à droite.
+  /// Un nombre : à droite, sauf alignement posé par la feuille.
   final bool numeric;
 
-  const XlsxCell(this.text, {this.bold = false, this.numeric = false});
+  /// Fond et encre en ARGB, `null` si la feuille n'en pose pas.
+  final int? fill;
+  final int? ink;
+  final XlsxAlign? align;
+
+  /// Colonnes couvertes, elle comprise (cellule fusionnée) ; 0 pour une
+  /// cellule recouverte par sa voisine de gauche.
+  final int span;
+
+  const XlsxCell(
+    this.text, {
+    this.bold = false,
+    this.numeric = false,
+    this.fill,
+    this.ink,
+    this.align,
+    this.span = 1,
+  });
 
   static const empty = XlsxCell('');
+
+  XlsxCell withSpan(int span) => XlsxCell(
+    text,
+    bold: bold,
+    numeric: numeric,
+    fill: fill,
+    ink: ink,
+    align: align,
+    span: span,
+  );
+
+  bool get isBlank => text.isEmpty && fill == null;
 }
 
 class XlsxSheet {
@@ -25,20 +58,30 @@ class XlsxSheet {
   final List<List<XlsxCell>> rows;
   final int columnCount;
 
+  /// La largeur de chaque colonne posée par la feuille, en unités de
+  /// caractère d'Excel ; `null` quand elle n'en pose pas.
+  final List<double?> widths;
+
+  /// Le numéro Excel de la première ligne de [rows] (1 pour la ligne 1).
+  final int firstRow;
+
   const XlsxSheet({
     required this.name,
     required this.rows,
     required this.columnCount,
+    this.widths = const [],
+    this.firstRow = 1,
   });
 }
 
-/// Un classeur `.xlsx` lu pour l'**aperçu** (Trésorerie A6) : les valeurs, les
-/// montants mis en forme, la graisse. Ni couleurs ni cellules fusionnées : le
-/// fichier enregistré reste complet, l'aperçu sert à vérifier les chiffres.
+/// Un classeur `.xlsx` lu pour l'**aperçu** (Trésorerie A6) : valeurs,
+/// montants et heures mis en forme, gras, couleurs, alignement, largeurs de
+/// colonnes et cellules fusionnées sur une ligne. Le fichier enregistré reste
+/// complet : l'aperçu sert à lire, pas à éditer.
 ///
 /// Un `.xlsx` est un zip de XML : le classeur nomme ses feuilles, les
 /// relations disent où elles sont, les chaînes partagées portent les textes,
-/// les styles disent ce qui est en gras et comment un nombre s'écrit.
+/// les styles l'allure des cellules.
 class XlsxWorkbook {
   final List<XlsxSheet> sheets;
 
@@ -68,8 +111,13 @@ class XlsxWorkbook {
               const <XmlElement>[])
         rel.getAttribute('Id') ?? '': rel.getAttribute('Target') ?? '',
     };
-    final shared = _sharedStrings(doc('xl/sharedStrings.xml'));
-    final styles = _Styles.of(doc('xl/styles.xml'));
+    final shared = [
+      for (final si
+          in doc('xl/sharedStrings.xml')?.findAllElements('si') ??
+              const <XmlElement>[])
+        si.findAllElements('t').map((t) => t.innerText).join(),
+    ];
+    final styles = XlsxStyles.of(doc('xl/styles.xml'));
     final sheets = <XlsxSheet>[];
     for (final sheet in workbook.findAllElements('sheet')) {
       final relId = sheet.attributes
@@ -89,16 +137,11 @@ class XlsxWorkbook {
     return XlsxWorkbook(sheets);
   }
 
-  static List<String> _sharedStrings(XmlDocument? doc) => [
-    for (final si in doc?.findAllElements('si') ?? const <XmlElement>[])
-      si.findAllElements('t').map((t) => t.innerText).join(),
-  ];
-
   static XlsxSheet _sheet(
     String name,
     XmlDocument xml,
     List<String> shared,
-    _Styles styles,
+    XlsxStyles styles,
   ) {
     final cells = <int, Map<int, XlsxCell>>{};
     var maxCol = -1;
@@ -109,7 +152,7 @@ class XlsxWorkbook {
         final (rowIndex, colIndex) = _position(ref);
         final style = styles.at(int.tryParse(c.getAttribute('s') ?? '') ?? 0);
         final cell = _cell(c, shared, style);
-        if (cell.text.isEmpty) continue;
+        if (cell.isBlank) continue;
         (cells[rowIndex] ??= {})[colIndex] = cell;
         if (colIndex > maxCol) maxCol = colIndex;
       }
@@ -117,11 +160,38 @@ class XlsxWorkbook {
     if (cells.isEmpty) {
       return XlsxSheet(name: name, rows: const [], columnCount: 0);
     }
+    // Fusions sur une ligne : la première cellule s'étend, les autres
+    // s'effacent. Une fusion sur plusieurs lignes garde sa première ligne.
+    for (final merge in xml.findAllElements('mergeCell')) {
+      final range = merge.getAttribute('ref')?.split(':');
+      if (range == null || range.length != 2) continue;
+      final (r0, c0) = _position(range[0]);
+      final (_, c1) = _position(range[1]);
+      if (c1 <= c0) continue;
+      final row = cells[r0] ??= {};
+      row[c0] = (row[c0] ?? XlsxCell.empty).withSpan(c1 - c0 + 1);
+      for (var col = c0 + 1; col <= c1; col++) {
+        row[col] = const XlsxCell('', span: 0);
+      }
+      if (c1 > maxCol) maxCol = c1;
+    }
+    final widths = List<double?>.filled(maxCol + 1, null);
+    for (final col in xml.findAllElements('col')) {
+      final min = int.tryParse(col.getAttribute('min') ?? '');
+      final max = int.tryParse(col.getAttribute('max') ?? '');
+      final width = double.tryParse(col.getAttribute('width') ?? '');
+      if (min == null || max == null || width == null) continue;
+      for (var i = min - 1; i < max && i <= maxCol; i++) {
+        if (i >= 0) widths[i] = width;
+      }
+    }
     final first = cells.keys.reduce((a, b) => a < b ? a : b);
     final last = cells.keys.reduce((a, b) => a > b ? a : b);
     return XlsxSheet(
       name: name,
       columnCount: maxCol + 1,
+      widths: widths,
+      firstRow: first + 1,
       rows: [
         for (var r = first; r <= last; r++)
           [
@@ -132,31 +202,39 @@ class XlsxWorkbook {
     );
   }
 
-  static XlsxCell _cell(XmlElement c, List<String> shared, _Style style) {
+  static XlsxCell _cell(XmlElement c, List<String> shared, XlsxStyle style) {
     final type = c.getAttribute('t');
     final raw = c.getElement('v')?.innerText;
+    XlsxCell text(String value) => XlsxCell(
+      value,
+      bold: style.bold,
+      fill: style.fill,
+      ink: style.ink,
+      align: style.align,
+    );
     switch (type) {
       case 's':
         final index = int.tryParse(raw ?? '');
-        final text = index != null && index < shared.length
-            ? shared[index]
-            : '';
-        return XlsxCell(text, bold: style.bold);
+        return text(
+          index != null && index < shared.length ? shared[index] : '',
+        );
       case 'inlineStr':
-        final text = c.findAllElements('t').map((t) => t.innerText).join();
-        return XlsxCell(text, bold: style.bold);
+        return text(c.findAllElements('t').map((t) => t.innerText).join());
       case 'str':
       case 'e':
-        return XlsxCell(raw ?? '', bold: style.bold);
+        return text(raw ?? '');
       case 'b':
-        return XlsxCell(raw == '1' ? 'VRAI' : 'FAUX', bold: style.bold);
+        return text(raw == '1' ? 'VRAI' : 'FAUX');
       default:
         final value = num.tryParse(raw ?? '');
-        if (value == null) return XlsxCell(raw ?? '', bold: style.bold);
+        if (value == null) return text(raw ?? '');
         return XlsxCell(
           style.format(value),
           bold: style.bold,
-          numeric: !style.isDate,
+          fill: style.fill,
+          ink: style.ink,
+          align: style.align,
+          numeric: !style.isTemporal,
         );
     }
   }
@@ -170,97 +248,5 @@ class XlsxWorkbook {
       col = col * 26 + (unit - 64);
     }
     return (int.parse(match.group(2)!) - 1, col - 1);
-  }
-}
-
-class _Style {
-  final bool bold;
-  final String? numberFormat;
-
-  const _Style({this.bold = false, this.numberFormat});
-
-  /// Une date Excel : un nombre de jours depuis le 30/12/1899.
-  bool get isDate {
-    final code = numberFormat;
-    if (code == null) return false;
-    final unquoted = code.replaceAll(RegExp(r'"[^"]*"'), '').toLowerCase();
-    return unquoted.contains('d') && unquoted.contains('m') ||
-        unquoted.contains('yy');
-  }
-
-  String format(num value) {
-    if (isDate) {
-      final date = DateTime.utc(
-        1899,
-        12,
-        30,
-      ).add(Duration(days: value.floor()));
-      String two(int v) => v.toString().padLeft(2, '0');
-      return '${two(date.day)}/${two(date.month)}/${date.year}';
-    }
-    final code = numberFormat ?? '';
-    // Le premier segment (valeurs positives) et son suffixe entre guillemets :
-    // `#,##0" FC"` → « 3 450 000 FC ».
-    final positive = code.split(';').first;
-    final suffix = RegExp(r'"([^"]*)"\s*$').firstMatch(positive)?.group(1);
-    final decimals =
-        RegExp(r'\.(0+)').firstMatch(positive)?.group(1)?.length ??
-        (value == value.roundToDouble() ? 0 : 2);
-    final fixed = value.abs().toStringAsFixed(decimals);
-    final parts = fixed.split('.');
-    final grouped = parts.first.replaceAllMapped(
-      RegExp(r'\B(?=(\d{3})+(?!\d))'),
-      (_) => ' ',
-    );
-    final number = parts.length > 1 ? '$grouped,${parts[1]}' : grouped;
-    return '${value < 0 ? '−' : ''}$number${suffix ?? ''}';
-  }
-}
-
-class _Styles {
-  final List<_Style> xfs;
-
-  const _Styles(this.xfs);
-
-  _Style at(int index) => index < xfs.length ? xfs[index] : const _Style();
-
-  static const Map<int, String> _builtIn = {
-    1: '0',
-    2: '0.00',
-    3: '#,##0',
-    4: '#,##0.00',
-    14: 'dd/mm/yyyy',
-    15: 'd-mmm-yy',
-    16: 'd-mmm',
-    17: 'mmm-yy',
-    22: 'm/d/yy h:mm',
-  };
-
-  static _Styles of(XmlDocument? doc) {
-    if (doc == null) return const _Styles([]);
-    final formats = <int, String>{
-      ..._builtIn,
-      for (final f in doc.findAllElements('numFmt'))
-        int.tryParse(f.getAttribute('numFmtId') ?? '') ?? -1:
-            f.getAttribute('formatCode') ?? '',
-    };
-    final fonts = [
-      for (final font
-          in doc.findAllElements('fonts').firstOrNull?.findElements('font') ??
-              const <XmlElement>[])
-        font.getElement('b') != null,
-    ];
-    final cellXfs = doc.findAllElements('cellXfs').firstOrNull;
-    return _Styles([
-      for (final xf in cellXfs?.findElements('xf') ?? const <XmlElement>[])
-        _Style(
-          bold: () {
-            final id = int.tryParse(xf.getAttribute('fontId') ?? '') ?? 0;
-            return id < fonts.length && fonts[id];
-          }(),
-          numberFormat:
-              formats[int.tryParse(xf.getAttribute('numFmtId') ?? '') ?? 0],
-        ),
-    ]);
   }
 }

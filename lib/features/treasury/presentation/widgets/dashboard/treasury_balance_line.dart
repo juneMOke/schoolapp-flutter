@@ -256,18 +256,27 @@ class TreasuryBalanceLine extends StatelessWidget {
             left: axisReserved,
             bottom: _bottomReserved,
           ),
-          foregroundPainter: lastKnown < 0
-              ? null
-              : TreasuryChartRing(
-                  x: lastKnown,
-                  y: known.last.y - minY,
-                  count: slots.length,
-                  minY: 0,
-                  maxY: maxY - minY,
-                  left: axisReserved,
-                  bottom: _bottomReserved,
+          child: lastKnown < 0
+              ? chart
+              : Stack(
+                  children: [
+                    Positioned.fill(child: chart),
+                    // L'anneau pulsé du dernier point connu, au-dessus de la
+                    // courbe ; il laisse passer les appuis.
+                    Positioned.fill(
+                      child: IgnorePointer(
+                        child: TreasuryPulsingRing(
+                          x: lastKnown,
+                          y: known.last.y - minY,
+                          count: slots.length,
+                          maxY: maxY - minY,
+                          left: axisReserved,
+                          bottom: _bottomReserved,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-          child: chart,
         );
       },
     );

@@ -15,7 +15,7 @@ void main() {
     final sheet = XlsxWorkbook.read(cashReportXlsx()).sheets.first;
     // La grille commence à la première ligne non vide (2) et garde les
     // colonnes vides avant le contenu (A).
-    expect(sheet.rows, hasLength(3));
+    expect(sheet.rows, hasLength(4));
     expect(sheet.columnCount, 4);
     expect(sheet.rows[0][1].text, 'Caisse');
     expect(sheet.rows[0][1].bold, isTrue);
@@ -23,6 +23,22 @@ void main() {
     expect(sheet.rows[1][3].numeric, isTrue);
     expect(sheet.rows[2][1].text, 'Total encaissé');
     expect(sheet.rows[2][3].text, '−5 000 FC');
+  });
+
+  test('une heure s écrit HH:mm, pas en fraction de jour', () {
+    final sheet = XlsxWorkbook.read(cashReportXlsx()).sheets.first;
+    expect(sheet.rows[3][2].text, '08:15');
+    expect(sheet.rows[3][2].numeric, isFalse);
+  });
+
+  test('fusion, fond, largeur de colonne et numéro de ligne', () {
+    final sheet = XlsxWorkbook.read(cashReportXlsx()).sheets.first;
+    final title = sheet.rows[0][1];
+    expect(title.span, 3);
+    expect(title.fill, 0xFF0E2D42);
+    expect(sheet.rows[0][2].span, 0);
+    expect(sheet.widths[1], 20);
+    expect(sheet.firstRow, 2);
   });
 
   test('chaîne en ligne et date au format jour/mois/année', () {
