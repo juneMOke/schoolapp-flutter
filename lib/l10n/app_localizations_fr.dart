@@ -8936,6 +8936,98 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
+  String get subMenuTicketPrinter => 'Imprimante de tickets';
+
+  @override
+  String get ticketPrinterSubtitle =>
+      'Où sortent les tickets de cette tablette, et en combien d\'exemplaires.';
+
+  @override
+  String get ticketPrinterPermissionTitle => 'Autorisation Bluetooth';
+
+  @override
+  String get ticketPrinterPermissionGranted =>
+      '« Appareils à proximité » est accordée : l\'application peut joindre l\'imprimante.';
+
+  @override
+  String ticketPrinterPermissionMissing(String permissions) {
+    return 'Il manque l\'autorisation « Appareils à proximité » ($permissions) : sans elle, aucun ticket ne part sur l\'imprimante.';
+  }
+
+  @override
+  String get ticketPrinterPermissionAllow => 'Autoriser';
+
+  @override
+  String get ticketPrinterPermissionOpenSettings =>
+      'Ouvrir les réglages Android';
+
+  @override
+  String get ticketPrinterPermissionManagedHint =>
+      'Tablette gérée par une console de gestion de parc : accordez ces permissions dans la politique de l\'application (« Automatically granted »), Android ne les demandera pas.';
+
+  @override
+  String get ticketPrinterTitle => 'Imprimante';
+
+  @override
+  String get ticketPrinterChoose =>
+      'Choisissez l\'imprimante de ce guichet : les tickets y partiront sans question.';
+
+  @override
+  String ticketPrinterGone(String printer) {
+    return 'L\'imprimante retenue ($printer) n\'est plus appairée. Choisissez-en une autre.';
+  }
+
+  @override
+  String get ticketPrinterPairHint =>
+      'Aucune imprimante n\'est appairée : appairez-la dans les réglages Bluetooth d\'Android, puis revenez ici.';
+
+  @override
+  String get ticketPrinterBluetoothOffHint =>
+      'Le Bluetooth est éteint : allumez-le pour voir les imprimantes.';
+
+  @override
+  String get ticketPrinterUnreachableHint =>
+      'La liste des imprimantes n\'a pas pu se lire.';
+
+  @override
+  String get ticketPrinterWaitPermission =>
+      'Les imprimantes s\'afficheront une fois l\'autorisation accordée.';
+
+  @override
+  String get ticketPrinterTestPrint => 'Imprimer un ticket d\'essai';
+
+  @override
+  String ticketPrinterTestSent(String printer) {
+    return 'Ticket d\'essai envoyé sur $printer.';
+  }
+
+  @override
+  String ticketPrinterTestFailed(String cause) {
+    return 'Le ticket d\'essai n\'est pas parti : $cause';
+  }
+
+  @override
+  String get ticketPrinterTestHeading => 'TICKET D\'ESSAI';
+
+  @override
+  String get ticketPrinterTestBody =>
+      'Cette imprimante est prête pour les tickets.';
+
+  @override
+  String get ticketCopiesDefaultTitle => 'Exemplaires par défaut';
+
+  @override
+  String get ticketCopiesDefaultHint =>
+      'Chaque ticket sort en ce nombre d\'exemplaires. Pour un ticket précis, le nombre se change au moment d\'imprimer.';
+
+  @override
+  String get ticketPrinterSpoolerNote =>
+      'Sur ce poste, les tickets passent par l\'imprimante du système : seul le nombre d\'exemplaires se règle ici.';
+
+  @override
+  String get ticketPrinterLoading => 'Lecture des réglages d\'impression';
+
+  @override
   String get paymentAnomalyBannerTitle => 'Trop-perçu à arbitrer';
 
   @override

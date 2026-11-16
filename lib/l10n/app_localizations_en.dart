@@ -8858,6 +8858,96 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get subMenuTicketPrinter => 'Ticket printer';
+
+  @override
+  String get ticketPrinterSubtitle =>
+      'Where this tablet\'s tickets print, and how many copies.';
+
+  @override
+  String get ticketPrinterPermissionTitle => 'Bluetooth permission';
+
+  @override
+  String get ticketPrinterPermissionGranted =>
+      'Nearby devices is granted: the app can reach the printer.';
+
+  @override
+  String ticketPrinterPermissionMissing(String permissions) {
+    return 'The Nearby devices permission is missing ($permissions): without it, no ticket reaches the printer.';
+  }
+
+  @override
+  String get ticketPrinterPermissionAllow => 'Allow';
+
+  @override
+  String get ticketPrinterPermissionOpenSettings => 'Open Android settings';
+
+  @override
+  String get ticketPrinterPermissionManagedHint =>
+      'Tablet managed by a device management console: grant these permissions in the app\'s policy (\"Automatically granted\"); Android will not ask for them.';
+
+  @override
+  String get ticketPrinterTitle => 'Printer';
+
+  @override
+  String get ticketPrinterChoose =>
+      'Choose this desk\'s printer: tickets will go to it without a question.';
+
+  @override
+  String ticketPrinterGone(String printer) {
+    return 'The saved printer ($printer) is no longer paired. Choose another one.';
+  }
+
+  @override
+  String get ticketPrinterPairHint =>
+      'No printer is paired: pair it in Android\'s Bluetooth settings, then come back here.';
+
+  @override
+  String get ticketPrinterBluetoothOffHint =>
+      'Bluetooth is off: turn it on to see the printers.';
+
+  @override
+  String get ticketPrinterUnreachableHint =>
+      'The printer list could not be read.';
+
+  @override
+  String get ticketPrinterWaitPermission =>
+      'Printers will show once the permission is granted.';
+
+  @override
+  String get ticketPrinterTestPrint => 'Print a test ticket';
+
+  @override
+  String ticketPrinterTestSent(String printer) {
+    return 'Test ticket sent to $printer.';
+  }
+
+  @override
+  String ticketPrinterTestFailed(String cause) {
+    return 'The test ticket did not print: $cause';
+  }
+
+  @override
+  String get ticketPrinterTestHeading => 'TEST TICKET';
+
+  @override
+  String get ticketPrinterTestBody => 'This printer is ready for tickets.';
+
+  @override
+  String get ticketCopiesDefaultTitle => 'Default copies';
+
+  @override
+  String get ticketCopiesDefaultHint =>
+      'Each ticket prints this many copies. For a given ticket, the number can be changed when printing.';
+
+  @override
+  String get ticketPrinterSpoolerNote =>
+      'On this computer, tickets go through the system printer: only the number of copies is set here.';
+
+  @override
+  String get ticketPrinterLoading => 'Reading print settings';
+
+  @override
   String get paymentAnomalyBannerTitle => 'Overpayment to arbitrate';
 
   @override

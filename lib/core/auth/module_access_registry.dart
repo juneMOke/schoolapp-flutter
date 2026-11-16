@@ -326,6 +326,9 @@ const Map<String, Map<String, ModuleAccess>> kModuleAccessRegistry = {
     // caisse : une seule définition, pour que les deux portes s'ouvrent et se
     // ferment ensemble.
     MenuConstants.facturationsId: kBillingReadAccess,
+    // Qui sort des tickets règle son imprimante : la même exigence que
+    // « Tickets à imprimer ».
+    MenuConstants.ticketPrinterId: kTicketPrintAccess,
   },
   // Le contrôle ne lit que des créances et leur solde : `finance.charge.read`
   // suffit, et c'est exactement ce que détient le secrétariat. Qui le détient

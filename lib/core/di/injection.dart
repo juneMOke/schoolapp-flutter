@@ -253,6 +253,8 @@ import 'package:school_app_flutter/features/student/presentation/bloc/parent_blo
 import 'package:school_app_flutter/features/student/presentation/bloc/student_bloc.dart';
 import 'package:school_app_flutter/core/database/tenant/tenant_scope.dart';
 import 'package:school_app_flutter/core/database/tenant/tenant_session.dart';
+import 'package:school_app_flutter/features/finance/presentation/bloc/ticket_printer/ticket_printer_settings_cubit.dart';
+import 'package:school_app_flutter/core/device/desktop_platform.dart';
 
 final GetIt getIt = GetIt.instance;
 
@@ -1115,6 +1117,9 @@ Future<void> configureDependencies({
   getIt.registerLazySingleton<ThermalPrinterPermission>(
     () => const PermissionHandlerThermalPermission(),
   );
+  getIt.registerLazySingleton<ThermalPrinterPermissionDetails>(
+    () => const PermissionHandlerThermalPermission(),
+  );
   // L'adaptateur consulte la permission pour CONSTATER `BLUETOOTH_SCAN`, que le
   // canal natif ne sait pas voir. Sans elle, il déclarerait tout prêt et
   // l'impression échouerait en désignant la mauvaise cause.
@@ -1537,6 +1542,17 @@ Future<void> configureDependencies({
 
   // Le défaut d'exemplaires d'un ticket : le réglage de la tablette, sinon
   // celui de l'école (`ref_school`), sinon un exemplaire.
+  // Finances ▸ Imprimante de tickets.
+  getIt.registerFactory<TicketPrinterSettingsCubit>(
+    () => TicketPrinterSettingsCubit(
+      getIt<ThermalPrinterPort>(),
+      getIt<ThermalPrinterPermission>(),
+      getIt<ThermalPrinterPermissionDetails>(),
+      getIt<TicketPrinterSettingsStore>(),
+      getIt<ResolveTicketCopiesUseCase>(),
+      thermal: !printsTicketsThroughSpooler,
+    ),
+  );
   getIt.registerFactory<ResolveTicketCopiesUseCase>(
     () => ResolveTicketCopiesUseCase(
       getIt<SchoolRepository>(),

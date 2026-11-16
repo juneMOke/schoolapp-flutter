@@ -5,6 +5,7 @@ import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/features/documents/domain/printing/thermal_printer.dart';
 import 'package:school_app_flutter/features/documents/domain/printing/ticket_copies.dart';
+import 'package:school_app_flutter/features/documents/presentation/ticket/ticket_copies_stepper.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Ce que le caissier a décidé : sur quelle imprimante, combien d'exemplaires.
@@ -86,9 +87,15 @@ class _ThermalPrinterPickerDialogState
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            _CopiesStepper(
-              copies: _copies,
-              onChanged: (value) => setState(() => _copies = value),
+            Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.lg,
+                vertical: AppSpacing.xs,
+              ),
+              child: TicketCopiesStepper(
+                copies: _copies,
+                onChanged: (value) => setState(() => _copies = value),
+              ),
             ),
             const Divider(height: 1, color: AppColors.border),
             Flexible(
@@ -124,70 +131,6 @@ class _ThermalPrinterPickerDialogState
           child: Text(l10n.cancel),
         ),
       ],
-    );
-  }
-}
-
-/// « Exemplaires  (−) 2 (+) ».
-///
-/// Les deux bornes **désactivent** leur bouton plutôt que de le cacher : le
-/// compteur ne change pas de forme sous le doigt.
-class _CopiesStepper extends StatelessWidget {
-  final int copies;
-  final ValueChanged<int> onChanged;
-
-  const _CopiesStepper({required this.copies, required this.onChanged});
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    final theme = Theme.of(context);
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.lg,
-        vertical: AppSpacing.xs,
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: Text(
-              l10n.ticketCopiesLabel,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: AppColors.textPrimary,
-              ),
-            ),
-          ),
-          IconButton(
-            tooltip: l10n.ticketCopiesDecrease,
-            icon: const Icon(Icons.remove_circle_outline),
-            color: AppColors.textPrimary,
-            onPressed: copies > TicketCopies.min
-                ? () => onChanged(copies - 1)
-                : null,
-          ),
-          SizedBox(
-            width: AppDimensions.ticketCopiesValueWidth,
-            child: Text(
-              '$copies',
-              key: const ValueKey('ticketCopiesValue'),
-              textAlign: TextAlign.center,
-              style: theme.textTheme.titleMedium?.copyWith(
-                color: AppColors.textPrimary,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-          ),
-          IconButton(
-            tooltip: l10n.ticketCopiesIncrease,
-            icon: const Icon(Icons.add_circle_outline),
-            color: AppColors.textPrimary,
-            onPressed: copies < TicketCopies.max
-                ? () => onChanged(copies + 1)
-                : null,
-          ),
-        ],
-      ),
     );
   }
 }

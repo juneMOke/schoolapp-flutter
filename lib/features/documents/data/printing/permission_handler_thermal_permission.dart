@@ -7,7 +7,8 @@ import 'package:school_app_flutter/features/documents/data/printing/thermal_prin
 /// les permissions y sont accordées à l'installation, et `permission_handler`
 /// rend `granted` sans rien afficher. Aucune ramification de version n'est donc
 /// nécessaire ici — c'est le paquet qui la porte.
-class PermissionHandlerThermalPermission implements ThermalPrinterPermission {
+class PermissionHandlerThermalPermission
+    implements ThermalPrinterPermission, ThermalPrinterPermissionDetails {
   const PermissionHandlerThermalPermission();
 
   @override
@@ -21,6 +22,20 @@ class PermissionHandlerThermalPermission implements ThermalPrinterPermission {
           await Permission.bluetoothScan.isGranted;
     } catch (_) {
       return false;
+    }
+  }
+
+  @override
+  Future<Set<NearbyPermission>> missing() async {
+    try {
+      return {
+        if (!await Permission.bluetoothConnect.isGranted)
+          NearbyPermission.connect,
+        if (!await Permission.bluetoothScan.isGranted) NearbyPermission.scan,
+      };
+    } catch (_) {
+      // Canal absent (test, bureau) : rien à demander ici.
+      return const {};
     }
   }
 
