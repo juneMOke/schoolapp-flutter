@@ -12898,6 +12898,7 @@
   "treasuryReportColConsult": "Consulter",
   "treasuryReportUntilToday": "jusqu'à aujourd'hui",
   "treasuryChartOpenHint": "Touchez un point pour voir son solde et ouvrir son rapport",
+  "treasuryChartOpenHintMouse": "Cliquez sur un point pour ouvrir son rapport",
   "treasuryChartOpenReport": "Ouvrir le rapport",
   "treasuryReportDay": "{day}",
   "treasuryNumericDate": "{date}",

@@ -12721,6 +12721,7 @@
   "treasuryReportColConsult": "Open",
   "treasuryReportUntilToday": "until today",
   "treasuryChartOpenHint": "Tap a point to see its balance and open its report",
+  "treasuryChartOpenHintMouse": "Click a point to open its report",
   "treasuryChartOpenReport": "Open the report",
   "treasuryReportDay": "{day}",
   "@treasuryReportDay": {"placeholders": {"day": {"type": "DateTime", "format": "yMMMd"}}},

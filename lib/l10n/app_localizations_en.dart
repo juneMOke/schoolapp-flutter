@@ -22942,6 +22942,9 @@ class AppLocalizationsEn extends AppLocalizations {
       'Tap a point to see its balance and open its report';
 
   @override
+  String get treasuryChartOpenHintMouse => 'Click a point to open its report';
+
+  @override
   String get treasuryChartOpenReport => 'Open the report';
 
   @override

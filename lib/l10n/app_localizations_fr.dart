@@ -23096,6 +23096,10 @@ class AppLocalizationsFr extends AppLocalizations {
       'Touchez un point pour voir son solde et ouvrir son rapport';
 
   @override
+  String get treasuryChartOpenHintMouse =>
+      'Cliquez sur un point pour ouvrir son rapport';
+
+  @override
   String get treasuryChartOpenReport => 'Ouvrir le rapport';
 
   @override

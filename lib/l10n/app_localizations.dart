@@ -35274,6 +35274,12 @@ abstract class AppLocalizations {
   /// **'Tap a point to see its balance and open its report'**
   String get treasuryChartOpenHint;
 
+  /// No description provided for @treasuryChartOpenHintMouse.
+  ///
+  /// In en, this message translates to:
+  /// **'Click a point to open its report'**
+  String get treasuryChartOpenHintMouse;
+
   /// No description provided for @treasuryChartOpenReport.
   ///
   /// In en, this message translates to:

@@ -119,7 +119,14 @@ class EvolutionPanel extends StatelessWidget {
       TreasuryEvolutionStatus.ready when evolution != null => Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          _Band(evolution: evolution, onPointHint: l10n.treasuryChartOpenHint),
+          _Band(
+            evolution: evolution,
+            // Au doigt, un appui choisit le point ; à la souris, le clic
+            // l'ouvre (SelectableBalanceLine).
+            onPointHint: treasuryTypesDates
+                ? l10n.treasuryChartOpenHintMouse
+                : l10n.treasuryChartOpenHint,
+          ),
           const SizedBox(height: AppSpacing.md + 2),
           EteeloGridView(
             itemCount: evolution.series.length,
