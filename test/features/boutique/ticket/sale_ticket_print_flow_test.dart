@@ -110,14 +110,15 @@ void main() {
       return;
     }
 
+    // Le nombre d'exemplaires se règle dans l'aperçu, avant d'imprimer.
+    for (var i = 0; i < more; i++) {
+      await tester.tap(find.byTooltip('Un exemplaire de plus'));
+      await tester.pump();
+    }
     await tester.tap(find.text('Imprimer'));
     await tester.pumpAndSettle();
 
     if (find.byType(AlertDialog).evaluate().isNotEmpty) {
-      for (var i = 0; i < more; i++) {
-        await tester.tap(find.byTooltip('Un exemplaire de plus'));
-        await tester.pump();
-      }
       await tester.tap(find.text(choose ?? 'Annuler'));
       await tester.pumpAndSettle();
     }

@@ -5,7 +5,6 @@ import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/features/documents/domain/printing/thermal_printer.dart';
 import 'package:school_app_flutter/features/documents/domain/printing/ticket_copies.dart';
-import 'package:school_app_flutter/features/documents/presentation/ticket/ticket_copies_stepper.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Ce que le caissier a décidé : sur quelle imprimante, combien d'exemplaires.
@@ -33,12 +32,12 @@ class ThermalPrintChoice {
 /// C'est aussi ce qui le garde hors du champ de la règle des états partagés :
 /// il n'y a pas de zone de résultats ici, seulement un choix.
 ///
-/// ## Le compteur vit ici, et pas dans l'aperçu
+/// ## Le compteur vit dans l'aperçu
 ///
 /// Ce dialogue ne s'ouvre plus que sans imprimante retenue (première
 /// impression, imprimante désappairée) : son choix est alors retenu. Le
-/// compteur se règle **avant** de toucher l'imprimante — toucher une ligne
-/// lance l'impression. [initialCopies] est le défaut de l'appelant.
+/// nombre d'exemplaires se règle dans l'aperçu (`TicketCopiesOption`) ;
+/// [initialCopies] est ce nombre, rendu tel quel avec l'imprimante.
 Future<ThermalPrintChoice?> showThermalPrinterPicker(
   BuildContext context, {
   required List<ThermalPrinter> printers,
@@ -69,7 +68,7 @@ class _ThermalPrinterPickerDialog extends StatefulWidget {
 
 class _ThermalPrinterPickerDialogState
     extends State<_ThermalPrinterPickerDialog> {
-  late int _copies = widget.initialCopies;
+  late final int _copies = widget.initialCopies;
 
   @override
   Widget build(BuildContext context) {
@@ -87,17 +86,6 @@ class _ThermalPrinterPickerDialogState
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.lg,
-                vertical: AppSpacing.xs,
-              ),
-              child: TicketCopiesStepper(
-                copies: _copies,
-                onChanged: (value) => setState(() => _copies = value),
-              ),
-            ),
-            const Divider(height: 1, color: AppColors.border),
             Flexible(
               child: ListView(
                 shrinkWrap: true,

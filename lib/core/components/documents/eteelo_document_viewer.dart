@@ -46,6 +46,7 @@ Future<void> showEteeloDocumentViewer(
   bool closeAfterPrint = false,
   VoidCallback? onPrinted,
   VoidCallback? onShared,
+  Widget? printOptions,
   Widget Function(BuildContext context, PrintableDocument document)?
   previewBuilder,
 }) {
@@ -61,6 +62,7 @@ Future<void> showEteeloDocumentViewer(
       closeAfterPrint: closeAfterPrint,
       onPrinted: onPrinted,
       onShared: onShared,
+      printOptions: printOptions,
       previewBuilder: previewBuilder,
     ),
   );
@@ -102,6 +104,10 @@ class EteeloDocumentViewerView extends StatelessWidget {
   final VoidCallback? onPrinted;
   final VoidCallback? onShared;
 
+  /// Un réglage de cette impression-ci, posé au-dessus du pied : le nombre
+  /// d'exemplaires d'un ticket. `null` pour les autres pièces.
+  final Widget? printOptions;
+
   /// Point d'injection de l'aperçu.
   ///
   /// [EteeloPdfPreview] rasterise par canal de plateforme et ne se monte pas en
@@ -120,6 +126,7 @@ class EteeloDocumentViewerView extends StatelessWidget {
     this.closeAfterPrint = false,
     this.onPrinted,
     this.onShared,
+    this.printOptions,
     this.previewBuilder,
   });
 
@@ -241,6 +248,15 @@ class EteeloDocumentViewerView extends StatelessWidget {
                   : preview(context, document),
             ),
             const Divider(height: 1, color: AppColors.border),
+            if (printOptions case final options? when canPrint) ...[
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppDimensions.spacingM,
+                ),
+                child: options,
+              ),
+              const Divider(height: 1, color: AppColors.border),
+            ],
             DocumentViewerFooter(
               canShare: canShare,
               canPrint: canPrint,

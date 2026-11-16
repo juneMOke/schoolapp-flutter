@@ -65,3 +65,21 @@ class TicketCopiesStepper extends StatelessWidget {
     );
   }
 }
+
+/// Le raccourci ponctuel de la visionneuse d'un ticket : parti des
+/// exemplaires par défaut (Finances ▸ Imprimante de tickets), il ne vaut que
+/// pour cette impression.
+class TicketCopiesOption extends StatelessWidget {
+  final ValueNotifier<int> copies;
+
+  const TicketCopiesOption({super.key, required this.copies});
+
+  @override
+  Widget build(BuildContext context) => ValueListenableBuilder<int>(
+    valueListenable: copies,
+    builder: (context, value, _) => TicketCopiesStepper(
+      copies: value,
+      onChanged: (next) => copies.value = TicketCopies.clamp(next),
+    ),
+  );
+}

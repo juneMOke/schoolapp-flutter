@@ -29,6 +29,7 @@ import 'package:school_app_flutter/features/documents/presentation/ticket/therma
 import 'package:school_app_flutter/features/documents/presentation/ticket/thermal_ticket_printer.dart';
 import 'package:school_app_flutter/features/school/data/school_logo_band_loader.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
+import 'package:school_app_flutter/features/documents/presentation/ticket/ticket_copies_stepper.dart';
 
 /// Ce qu'un lot a produit.
 class TicketBatchOutcome {
@@ -76,6 +77,14 @@ class _ComposedBatch {
     required this.logoBand,
     required this.copies,
   });
+
+  /// Le même lot, au nombre d'exemplaires choisi dans l'aperçu.
+  _ComposedBatch withCopies(int copies) => _ComposedBatch(
+    tickets: tickets,
+    skipped: skipped,
+    logoBand: logoBand,
+    copies: copies,
+  );
 }
 
 /// Le bouton de « Tickets à imprimer » : le même cheminement que tout autre
@@ -114,6 +123,7 @@ Future<TicketBatchOutcome> reviewAndPrintTicketBatch(
   if (!context.mounted) return const TicketBatchOutcome(cancelled: true);
 
   var outcome = TicketBatchOutcome(skipped: batch.skipped, cancelled: true);
+  final chosenCopies = ValueNotifier(batch.copies);
   await showEteeloDocumentViewer(
     context,
     title: l10n.ticketsToPrintTitle,
@@ -123,24 +133,26 @@ Future<TicketBatchOutcome> reviewAndPrintTicketBatch(
       reference: l10n.ticketsToPrintTitle,
     ),
     previewBuilder: previewBuilder,
+    printOptions: TicketCopiesOption(copies: chosenCopies),
     closeAfterPrint: true,
     onPrint: () async {
       outcome = printsTicketsThroughSpooler
           ? await _sendToSpooler(
               context,
-              batch,
+              batch.withCopies(chosenCopies.value),
               tickets: tickets,
               cutNotice: cutNotice,
               l10n: l10n,
             )
           : await _sendToThermalPrinter(
               context,
-              batch,
+              batch.withCopies(chosenCopies.value),
               choose: choose,
               send: send,
             );
     },
   );
+  chosenCopies.dispose();
   return outcome;
 }
 
