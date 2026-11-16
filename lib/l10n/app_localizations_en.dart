@@ -18320,6 +18320,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get shortcutsHelpRows => 'Move from one row to the next';
 
   @override
+  String get shortcutsHelpStep => 'Previous or next day or period';
+
+  @override
   String get shortcutsHelpOpen => 'Open the row';
 
   @override
@@ -22935,7 +22938,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get treasuryReportUntilToday => 'until today';
 
   @override
-  String get treasuryChartOpenHint => 'Tap a point to open its report';
+  String get treasuryChartOpenHint =>
+      'Tap a point to see its balance and open its report';
+
+  @override
+  String get treasuryChartOpenHintMouse => 'Click a point to open its report';
+
+  @override
+  String get treasuryChartOpenReport => 'Open the report';
 
   @override
   String treasuryReportDay(DateTime day) {
@@ -23115,6 +23125,11 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String treasuryCellGap(String gap) {
     return 'gap $gap';
+  }
+
+  @override
+  String treasuryCellJustification(String justification) {
+    return '“$justification”';
   }
 
   @override

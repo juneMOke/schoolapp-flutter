@@ -14,17 +14,19 @@ import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_empty_result.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_page_header.dart';
+import 'package:school_app_flutter/features/treasury/domain/entities/cash_report.dart';
 import 'package:school_app_flutter/features/treasury/domain/entities/treasury_dashboard.dart';
 import 'package:school_app_flutter/features/treasury/presentation/bloc/treasury_overview_cubit.dart';
 import 'package:school_app_flutter/features/treasury/presentation/widgets/dashboard/evolution_panel.dart';
 import 'package:school_app_flutter/features/treasury/presentation/widgets/dashboard/register_kpi_card.dart';
 import 'package:school_app_flutter/features/treasury/presentation/widgets/states/treasury_results_error_state.dart';
+import 'package:school_app_flutter/features/treasury/presentation/widgets/common/treasury_location_sync.dart';
 import 'package:school_app_flutter/features/treasury/presentation/widgets/common/treasury_panel.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Trésorerie ▸ Tableau de bord (A1-A4) : combien chaque caisse détient,
 /// puis leur évolution. Chaque caisse dans sa devise, jamais additionnées.
-class TreasuryDashboardScreen extends StatelessWidget {
+class TreasuryDashboardScreen extends StatefulWidget {
   /// La clôture de la caisse, journée du jour (A2). `null` sans le droit.
   final VoidCallback? onOpenClosing;
 
@@ -42,6 +44,17 @@ class TreasuryDashboardScreen extends StatelessWidget {
     this.evolutionCubit,
     this.reportsCubit,
   });
+
+  @override
+  State<TreasuryDashboardScreen> createState() =>
+      _TreasuryDashboardScreenState();
+}
+
+class _TreasuryDashboardScreenState extends State<TreasuryDashboardScreen> {
+  /// Les rapports « Période » générés pendant la session. Relire le tableau
+  /// de bord (F5, la page tirée) remonte les rapports : le serveur ne les
+  /// garde pas (D31), l'écran les leur rend.
+  var _periodReports = const <CashReport>[];
 
   @override
   Widget build(BuildContext context) {
@@ -87,7 +100,7 @@ class TreasuryDashboardScreen extends StatelessWidget {
   }
 
   Widget _empty(AppLocalizations l10n) {
-    final configure = onConfigure;
+    final configure = widget.onConfigure;
     return EteeloEmptyResult(
       label: l10n.treasuryEmptyTitle,
       description: l10n.treasuryEmptyDashboard,
@@ -114,7 +127,7 @@ class TreasuryDashboardScreen extends StatelessWidget {
         spacing: AppSpacing.lg,
         itemBuilder: (context, index) => RegisterKpiCard(
           overview: overview.registers[index],
-          onOpen: onOpenClosing,
+          onOpen: widget.onOpenClosing,
         ),
       ),
       const SizedBox(height: AppSpacing.xl),
@@ -125,15 +138,17 @@ class TreasuryDashboardScreen extends StatelessWidget {
           // libre en part, jamais de l'horloge de la tablette (R15).
           child: BlocProvider(
             create: (_) =>
-                evolutionCubit?.call(overview.businessDate) ??
-                      TreasuryEvolutionCubit(
-                        GetIt.instance<TreasuryDashboardRepository>(),
-                        today: overview.businessDate,
-                      )
-                  ..load(),
-            child: EvolutionPanel(
-              firstDay: overview.academicYear.startDate,
-              today: overview.businessDate,
+                widget.evolutionCubit?.call(overview.businessDate) ??
+                TreasuryEvolutionCubit(
+                  GetIt.instance<TreasuryDashboardRepository>(),
+                  today: overview.businessDate,
+                ),
+            // Il lance la première lecture, sur l'adresse.
+            child: EvolutionLocationSync(
+              child: EvolutionPanel(
+                firstDay: overview.academicYear.startDate,
+                today: overview.businessDate,
+              ),
             ),
           ),
         ),
@@ -144,15 +159,22 @@ class TreasuryDashboardScreen extends StatelessWidget {
           padding: EdgeInsets.zero,
           child: BlocProvider(
             create: (_) =>
-                reportsCubit?.call(overview.businessDate) ??
+                (widget.reportsCubit?.call(overview.businessDate) ??
                       CashReportsCubit(
                         GetIt.instance<TreasuryReportsRepository>(),
                         today: overview.businessDate,
-                      )
-                  ..load(),
-            child: ReportsPanel(
-              firstDay: overview.academicYear.startDate,
-              today: overview.businessDate,
+                      ))
+                  ..restorePeriodReports(_periodReports),
+            child: BlocListener<CashReportsCubit, CashReportsState>(
+              listenWhen: (previous, current) =>
+                  previous.periodReports != current.periodReports,
+              listener: (_, state) => _periodReports = state.periodReports,
+              child: ReportsLocationSync(
+                child: ReportsPanel(
+                  firstDay: overview.academicYear.startDate,
+                  today: overview.businessDate,
+                ),
+              ),
             ),
           ),
         ),

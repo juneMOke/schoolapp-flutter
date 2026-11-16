@@ -8,6 +8,7 @@ import 'package:school_app_flutter/core/widgets/app_page_background.dart';
 import 'package:school_app_flutter/features/auth/presentation/widgets/permission_gate.dart';
 import 'package:school_app_flutter/features/home/presentation/bloc/navigation_bloc.dart';
 import 'package:school_app_flutter/features/treasury/presentation/bloc/treasury_overview_cubit.dart';
+import 'package:school_app_flutter/features/treasury/presentation/widgets/common/treasury_refresh_scope.dart';
 import 'package:school_app_flutter/features/treasury/presentation/widgets/dashboard/dashboard_screen.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
@@ -18,10 +19,17 @@ class TreasuryDashboardPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) => BlocProvider<TreasuryOverviewCubit>(
     create: (_) => GetIt.instance<TreasuryOverviewCubit>()..load(),
-    child: const AppPageBackground(
-      width: PageContentWidth.wide,
-      scrollable: true,
-      child: _DashboardBody(),
+    // Relire le tableau de bord le remonte : l'évolution et les rapports
+    // repartent avec lui.
+    child: Builder(
+      builder: (context) => TreasuryRefreshScope(
+        onRefresh: context.read<TreasuryOverviewCubit>().load,
+        child: const AppPageBackground(
+          width: PageContentWidth.wide,
+          scrollable: true,
+          child: _DashboardBody(),
+        ),
+      ),
     ),
   );
 }

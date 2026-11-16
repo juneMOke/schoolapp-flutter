@@ -25,8 +25,8 @@ void main() {
   Either<Failure, CashClosure>? result;
   Completer<Either<Failure, CashClosure>>? hold;
 
-  Future<void> open(WidgetTester tester) async {
-    setTestWindow(tester, const Size(1280, 1600));
+  Future<void> open(WidgetTester tester, {bool fixWindow = true}) async {
+    if (fixWindow) setTestWindow(tester, const Size(1280, 1600));
     await tester.pumpWidget(
       treasuryHost(
         Builder(
@@ -173,5 +173,15 @@ void main() {
     await tapText(tester, 'Clôturer la caisse');
     expect(result!.isLeft(), isTrue);
     expect(sent, hasLength(1));
+  });
+
+  testAtReferenceFormats('« Non » : le reste et l écart tiennent sur tous '
+      'les formats', (tester, _) async {
+    await open(tester, fixWindow: false);
+    await tapText(tester, 'Non, il y a une différence');
+    await tester.enterText(find.byType(TextField).at(0), '3 445 000');
+    await tester.pumpAndSettle();
+    await tester.ensureVisible(find.text('Clôturer avec cet écart').last);
+    await tester.pumpAndSettle();
   });
 }

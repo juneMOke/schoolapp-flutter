@@ -1,3 +1,4 @@
+import 'package:flutter/gestures.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/components/charts/chart_label_density.dart';
@@ -44,8 +45,12 @@ class TreasuryBalanceLine extends StatelessWidget {
   final int openingInCents;
   final Color lineColor;
 
-  /// Toucher un point ouvre le rapport de sa tranche (R7). `null` : rien.
+  /// Cliquer un point ouvre le rapport de sa tranche (R7). `null` : rien.
   final ValueChanged<int>? onOpenSlot;
+
+  /// Au doigt, un appui choisit le point au lieu de l'ouvrir (voir
+  /// `SelectableBalanceLine`). `null` : l'appui ouvre, comme le clic.
+  final ValueChanged<int>? onSelectSlot;
 
   const TreasuryBalanceLine({
     super.key,
@@ -54,6 +59,7 @@ class TreasuryBalanceLine extends StatelessWidget {
     required this.openingInCents,
     required this.lineColor,
     this.onOpenSlot,
+    this.onSelectSlot,
   });
 
   /// Marge de l'axe des montants : 74, 52 sur téléphone (spec A4).
@@ -202,7 +208,14 @@ class TreasuryBalanceLine extends StatelessWidget {
                 if (open == null || spot == null || event is! FlTapUpEvent) {
                   return;
                 }
-                open(spot.x.toInt());
+                final index = spot.x.toInt();
+                final select = onSelectSlot;
+                if (select != null &&
+                    event.details.kind != PointerDeviceKind.mouse) {
+                  select(index);
+                } else {
+                  open(index);
+                }
               },
               touchTooltipData: LineTouchTooltipData(
                 getTooltipColor: (_) => AppColors.bleuProfond,

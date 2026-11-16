@@ -16,6 +16,7 @@ import 'package:school_app_flutter/features/treasury/presentation/helpers/signat
 import 'package:school_app_flutter/features/treasury/presentation/widgets/signatories/report_signatories_section.dart';
 import 'package:school_app_flutter/features/treasury/presentation/helpers/register_actions.dart';
 import 'package:school_app_flutter/features/treasury/presentation/widgets/registers/registers_screen.dart';
+import 'package:school_app_flutter/features/treasury/presentation/widgets/common/treasury_refresh_scope.dart';
 
 /// Trésorerie ▸ Configuration.
 class CashRegistersPage extends StatelessWidget {
@@ -31,10 +32,18 @@ class CashRegistersPage extends StatelessWidget {
         create: (_) => GetIt.instance<ReportSignatoriesCubit>()..load(),
       ),
     ],
-    child: const AppPageBackground(
-      width: PageContentWidth.wide,
-      scrollable: true,
-      child: _RegistersBody(),
+    child: Builder(
+      builder: (context) => TreasuryRefreshScope(
+        onRefresh: () => Future.wait([
+          context.read<CashRegistersCubit>().load(),
+          context.read<ReportSignatoriesCubit>().load(),
+        ]),
+        child: const AppPageBackground(
+          width: PageContentWidth.wide,
+          scrollable: true,
+          child: _RegistersBody(),
+        ),
+      ),
     ),
   );
 }

@@ -91,6 +91,24 @@ class TreasuryEvolutionCubit extends Cubit<TreasuryEvolutionState> {
     await load();
   }
 
+  /// La période lue dans l'adresse (F5, Précédent, lien) ; les bornes ne
+  /// valent que pour la période libre.
+  Future<void> applyLocation(
+    EvolutionPeriod period, {
+    DateTime? from,
+    DateTime? to,
+  }) async {
+    emit(
+      state.copyWith(
+        period: period,
+        customFrom: from ?? state.customFrom,
+        customTo: to ?? state.customTo,
+        rangeError: false,
+      ),
+    );
+    await load();
+  }
+
   Future<void> load() async {
     final custom = state.period == EvolutionPeriod.custom;
     if (custom && state.customTo.isBefore(state.customFrom)) {

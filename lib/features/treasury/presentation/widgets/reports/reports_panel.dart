@@ -12,6 +12,7 @@ import 'package:school_app_flutter/core/widgets/app_snack_bar.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
 import 'package:school_app_flutter/features/treasury/domain/entities/cash_report.dart';
 import 'package:school_app_flutter/features/treasury/presentation/bloc/cash_reports_cubit.dart';
+import 'package:school_app_flutter/features/treasury/presentation/helpers/treasury_date_picker.dart';
 import 'package:school_app_flutter/features/treasury/presentation/helpers/treasury_failure_text.dart';
 import 'package:school_app_flutter/core/components/tables/data_table_pagination_bar.dart';
 import 'package:school_app_flutter/features/treasury/presentation/helpers/treasury_tones.dart';
@@ -156,8 +157,8 @@ class _PeriodReports extends StatelessWidget {
     final localizations = MaterialLocalizations.of(context);
     Future<void> pick(bool isFrom) async {
       final initial = isFrom ? state.customFrom : state.customTo;
-      final picked = await showDatePicker(
-        context: context,
+      final picked = await showTreasuryDatePicker(
+        context,
         initialDate: initial.isBefore(firstDay)
             ? firstDay
             : initial.isAfter(today)

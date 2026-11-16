@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/features/treasury/presentation/widgets/common/treasury_step_gestures.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/components/tables/eteelo_column_table.dart';
 import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
@@ -34,11 +35,15 @@ class PeriodView extends StatelessWidget {
   /// Les filtres Journalier · Hebdomadaire · Mensuel, dans la même carte.
   final Widget? filters;
 
+  /// La journée ouverte à côté (écran large), marquée dans la liste.
+  final DateTime? selectedDay;
+
   const PeriodView({
     super.key,
     required this.onOpenDay,
     required this.today,
     this.filters,
+    this.selectedDay,
   });
 
   @override
@@ -81,7 +86,13 @@ class PeriodView extends StatelessWidget {
                 failure: state.failure ?? const ServerFailure(),
                 onRetry: cubit.load,
               ),
-              CashPeriodStatus.ready => _content(context, state, state.period!),
+              CashPeriodStatus.ready => TreasuryStepGestures(
+                onPrevious: cubit.nextFrom(-1) == null
+                    ? null
+                    : () => cubit.step(-1),
+                onNext: cubit.nextFrom(1) == null ? null : () => cubit.step(1),
+                child: _content(context, state, state.period!),
+              ),
             },
           ],
         );
@@ -157,6 +168,7 @@ class PeriodView extends StatelessWidget {
                 row: row,
                 registers: registers,
                 isToday: row.day == today,
+                selected: row.day == selectedDay,
                 onOpen: () => onOpenDay(row.day),
               );
             },

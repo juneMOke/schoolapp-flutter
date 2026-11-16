@@ -53,12 +53,13 @@ class CashPeriodCubit extends Cubit<CashPeriodState> {
     required ClosingScope scope,
     required DateTime today,
     required DateTime historyStart,
+    DateTime? from,
   }) : _today = today,
        _historyStart = historyStart,
        super(
          CashPeriodState(
            scope: scope,
-           from: CashClosingRules.rangeOf(scope, today).from,
+           from: CashClosingRules.rangeOf(scope, from ?? today).from,
          ),
        );
 
@@ -117,6 +118,10 @@ class CashPeriodCubit extends Cubit<CashPeriodState> {
     final next = nextFrom(direction);
     if (next != null) await load(next);
   }
+
+  /// La période qui contient [day] ; la période en cours sans [day].
+  Future<void> goTo(DateTime? day) =>
+      load(CashClosingRules.rangeOf(state.scope, day ?? _today).from);
 
   Future<void> goCurrent() =>
       load(CashClosingRules.rangeOf(state.scope, _today).from);

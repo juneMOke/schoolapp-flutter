@@ -76,24 +76,30 @@ class ClosingLedger extends StatelessWidget {
                 top: BorderSide(color: AppColors.bleuProfond, width: 2),
               ),
             ),
-            child: Row(
+            // Le reste ne se coupe jamais : sur un téléphone en gros texte, il
+            // passe sous son libellé plutôt que de déborder — c'est le
+            // chiffre que la caissière compare à ses billets.
+            child: Wrap(
+              alignment: WrapAlignment.spaceBetween,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              spacing: AppSpacing.md,
+              runSpacing: AppSpacing.xs,
               children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        l10n.treasuryRemaining,
-                        style: AppTypography.titleSmall,
+                Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      l10n.treasuryRemaining,
+                      style: AppTypography.titleSmall,
+                    ),
+                    Text(
+                      l10n.treasuryLedgerFormula,
+                      style: AppTypography.bodySmall.copyWith(
+                        color: AppColors.textSecondary,
                       ),
-                      Text(
-                        l10n.treasuryLedgerFormula,
-                        style: AppTypography.bodySmall.copyWith(
-                          color: AppColors.textSecondary,
-                        ),
-                      ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
                 Text(
                   TreasuryFormat.money(shownExpectedInCents, currency),

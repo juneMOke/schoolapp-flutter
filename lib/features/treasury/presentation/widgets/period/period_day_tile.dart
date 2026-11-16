@@ -39,6 +39,7 @@ EteeloColumnTableRow periodDayRow(
   required List<CashRegister> registers,
   required bool isToday,
   required VoidCallback onOpen,
+  bool selected = false,
 }) {
   final l10n = AppLocalizations.of(context)!;
   final cells = [
@@ -50,6 +51,8 @@ EteeloColumnTableRow periodDayRow(
   return EteeloColumnTableRow(
     widths: PeriodDayColumns.widths(registers.length),
     onTap: onOpen,
+    // La journée ouverte à côté, sur un écran large.
+    background: selected ? AppColors.treasuryOpeningSoft : null,
     cells: [
       ConstrainedBox(
         constraints: const BoxConstraints(
@@ -178,7 +181,24 @@ class _Cell extends StatelessWidget {
       ),
     );
     if (gap == 0 || justification == null) return line;
-    return Tooltip(message: justification, child: line);
+    // La justification se lit sur la ligne : une infobulle ne s'ouvre pas au
+    // doigt (la ligne entière ouvre la journée), et l'appui long ne se
+    // devine pas.
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        line,
+        Text(
+          // Entière : c'est la seule place où elle se lit dans la période.
+          l10n.treasuryCellJustification(justification),
+          style: AppTypography.labelSmall.copyWith(
+            color: AppColors.textSecondary,
+            fontStyle: FontStyle.italic,
+          ),
+        ),
+      ],
+    );
   }
 }
 

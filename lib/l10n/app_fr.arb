@@ -11514,6 +11514,10 @@
   "@shortcutsHelpRows": {
     "description": "Aide des raccourcis clavier (touche ? ou F1)."
   },
+  "shortcutsHelpStep": "Journée ou période précédente, suivante",
+  "@shortcutsHelpStep": {
+    "description": "Aide des raccourcis clavier (touche ? ou F1)."
+  },
   "shortcutsHelpOpen": "Ouvrir la ligne",
   "@shortcutsHelpOpen": {
     "description": "Aide des raccourcis clavier (touche ? ou F1)."
@@ -12893,7 +12897,9 @@
   "treasuryReportColStatus": "Statut",
   "treasuryReportColConsult": "Consulter",
   "treasuryReportUntilToday": "jusqu'à aujourd'hui",
-  "treasuryChartOpenHint": "Touchez un point pour ouvrir son rapport",
+  "treasuryChartOpenHint": "Touchez un point pour voir son solde et ouvrir son rapport",
+  "treasuryChartOpenHintMouse": "Cliquez sur un point pour ouvrir son rapport",
+  "treasuryChartOpenReport": "Ouvrir le rapport",
   "treasuryReportDay": "{day}",
   "treasuryNumericDate": "{date}",
   "treasuryDayColumn": "Journée",
@@ -12946,6 +12952,8 @@
   "treasuryGapTag": "Écart",
   "treasuryCellGap": "écart {gap}",
   "@treasuryCellGap": {"placeholders": {"gap": {"type": "String"}}},
+  "treasuryCellJustification": "« {justification} »",
+  "@treasuryCellJustification": {"placeholders": {"justification": {"type": "String"}}},
   "treasuryPeriodClosing": "Reste en fin de période",
   "treasurySeeDay": "Voir la journée de cette caisse",
   "treasuryReportsTitle": "Rapports de caisse",

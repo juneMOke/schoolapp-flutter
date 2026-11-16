@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/components/keyboard/page_action_shortcut.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/components/grid/eteelo_grid_view.dart';
 import 'package:school_app_flutter/core/components/skeletons/eteelo_list_skeleton.dart';
@@ -49,27 +50,35 @@ class RegistersScreen extends StatelessWidget {
     return BlocBuilder<CashRegistersCubit, CashRegistersState>(
       builder: (context, state) {
         final create = _createIfAvailable(state);
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            EteeloPageHeader(
-              titleStyle: TreasuryTitle.style(context),
-              eyebrow: l10n.menuTreasury,
-              title: l10n.treasuryConfigTitle,
-              subtitle: l10n.treasuryConfigSubtitle,
-              actions: [
-                if (create != null)
-                  EteeloButton.primary(
-                    label: l10n.treasuryNewRegister,
-                    icon: Icons.add,
-                    onPressed: create,
-                    fullWidth: false,
-                  ),
-              ],
-            ),
-            const SizedBox(height: AppSpacing.xl),
-            _body(context, state, create),
-          ],
+        // Ctrl+N : « Nouvelle caisse », tant qu'une devise reste sans caisse.
+        // Le raccourci reste posé (l'arbre ne change pas de forme) et ne
+        // prend la touche que si le bouton est offert.
+        return PageActionShortcut(
+          action: PageAction.create,
+          onInvoke: onCreate,
+          isAllowed: () => create != null,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              EteeloPageHeader(
+                titleStyle: TreasuryTitle.style(context),
+                eyebrow: l10n.menuTreasury,
+                title: l10n.treasuryConfigTitle,
+                subtitle: l10n.treasuryConfigSubtitle,
+                actions: [
+                  if (create != null)
+                    EteeloButton.primary(
+                      label: l10n.treasuryNewRegister,
+                      icon: Icons.add,
+                      onPressed: create,
+                      fullWidth: false,
+                    ),
+                ],
+              ),
+              const SizedBox(height: AppSpacing.xl),
+              _body(context, state, create),
+            ],
+          ),
         );
       },
     );

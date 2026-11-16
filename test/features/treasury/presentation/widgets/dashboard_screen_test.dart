@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:dartz/dartz.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -15,6 +17,8 @@ import 'package:school_app_flutter/features/treasury/presentation/bloc/treasury_
 import 'package:school_app_flutter/features/treasury/presentation/helpers/treasury_format.dart';
 import 'package:school_app_flutter/features/treasury/domain/entities/treasury_currency.dart';
 import 'package:school_app_flutter/features/treasury/presentation/widgets/dashboard/dashboard_screen.dart';
+import 'package:school_app_flutter/features/treasury/presentation/widgets/dashboard/register_balance_chart.dart';
+import 'package:school_app_flutter/features/treasury/presentation/widgets/dashboard/treasury_balance_line.dart';
 
 import '../../../../test_helpers/reference_formats.dart';
 import '../../treasury_fixtures.dart';
@@ -27,9 +31,11 @@ Future<_MockRepository> _pump(
   WidgetTester tester, {
   TreasuryOverview? overview,
   VoidCallback? onOpenClosing,
+  bool withCdf = false,
+  _MockReports? reportsRepository,
 }) async {
   final repo = _MockRepository();
-  final reports = _MockReports();
+  final reports = reportsRepository ?? _MockReports();
   when(() => reports.list(any(), any())).thenAnswer(
     (_) async => Right(
       CashReportPage(
@@ -55,7 +61,7 @@ Future<_MockRepository> _pump(
       from: any(named: 'from'),
       to: any(named: 'to'),
     ),
-  ).thenAnswer((_) async => Right(treasuryEvolution()));
+  ).thenAnswer((_) async => Right(treasuryEvolution(withCdf: withCdf)));
   await tester.pumpWidget(
     treasuryHost(
       BlocProvider(
@@ -79,7 +85,7 @@ void main() {
   });
 
   testAtReferenceFormats('deux caisses et leur évolution', (tester, _) async {
-    await _pump(tester, onOpenClosing: () {});
+    await _pump(tester, onOpenClosing: () {}, withCdf: true);
     expect(find.text('Combien avons-nous en caisse ?'), findsOneWidget);
     expect(find.textContaining('2026-2027'), findsOneWidget);
   });
@@ -110,6 +116,42 @@ void main() {
       findsOneWidget,
     );
     expect(find.textContaining('▼ -8 %'), findsOneWidget);
+  });
+
+  testWidgets('poste : les deux courbes côte à côte ; tablette : l une sous '
+      'l autre', (tester) async {
+    setTestWindow(tester, const Size(1440, 1600));
+    await _pump(tester, withCdf: true);
+    var charts = find.byType(RegisterBalanceChart);
+    expect(charts, findsNWidgets(2));
+    expect(
+      tester.getTopLeft(charts.first).dy,
+      tester.getTopLeft(charts.last).dy,
+    );
+
+    setTestWindow(tester, const Size(800, 2400));
+    await tester.pumpAndSettle();
+    charts = find.byType(RegisterBalanceChart);
+    expect(
+      tester.getTopLeft(charts.last).dy,
+      greaterThan(tester.getBottomLeft(charts.first).dy),
+    );
+  });
+
+  testWidgets('la hauteur de la courbe suit aussi la hauteur de l écran', (
+    tester,
+  ) async {
+    Future<double> chartHeight(Size window) async {
+      setTestWindow(tester, window);
+      await tester.pumpAndSettle();
+      return tester.getSize(find.byType(TreasuryBalanceLine).first).height;
+    }
+
+    await _pump(tester);
+    expect(await chartHeight(const Size(1280, 800)), 230);
+    expect(await chartHeight(const Size(360, 740)), 200);
+    // Téléphone en paysage : large, mais bas.
+    expect(await chartHeight(const Size(740, 360)), 160);
   });
 
   testWidgets('toucher une caisse ouvre sa clôture', (tester) async {
@@ -214,6 +256,46 @@ void main() {
     expect(find.text('Provisoire · non clôturé'), findsOneWidget);
     expect(find.text('Définitif'), findsOneWidget);
     expect(find.text('RJ-20261022 · USD · CDF'), findsOneWidget);
+  });
+
+  testWidgets('F5 garde les rapports « Période » générés pendant la session', (
+    tester,
+  ) async {
+    setTestWindow(tester, const Size(1280, 2400));
+    final reports = _MockReports();
+    when(() => reports.period(any(), any())).thenAnswer(
+      (_) async => Right(
+        cashReport(id: 'RP-20261009-1022', kind: CashReportKind.period),
+      ),
+    );
+    final repo = await _pump(tester, reportsRepository: reports);
+    Future<void> openPeriod() async {
+      // Le dernier « Période » : celui des rapports, sous l'évolution.
+      await tester.tap(find.text('Période').last);
+      await tester.pumpAndSettle();
+    }
+
+    await openPeriod();
+    await tester.tap(find.text('Générer le rapport'));
+    await tester.pumpAndSettle();
+    expect(find.text('RP-20261009-1022 · USD · CDF'), findsOneWidget);
+
+    // F5 : le tableau de bord se relit — le temps de la lecture, son
+    // squelette remplace les rapports.
+    final reload = Completer<Either<Failure, TreasuryOverview>>();
+    when(() => repo.overview()).thenAnswer((_) => reload.future);
+    final loading = BlocProvider.of<TreasuryOverviewCubit>(
+      tester.element(find.byType(TreasuryDashboardScreen)),
+    ).load();
+    // Une image pour l'état « chargement », une pour le squelette.
+    await tester.pump();
+    await tester.pump();
+    expect(find.text('Rapports de caisse'), findsNothing);
+    reload.complete(Right(treasuryOverview()));
+    await loading;
+    await tester.pumpAndSettle();
+    await openPeriod();
+    expect(find.text('RP-20261009-1022 · USD · CDF'), findsOneWidget);
   });
 
   group('CashReportsCubit', () {

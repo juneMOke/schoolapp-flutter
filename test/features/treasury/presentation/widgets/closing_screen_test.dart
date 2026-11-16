@@ -1,5 +1,8 @@
 import 'package:dartz/dartz.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
@@ -13,6 +16,7 @@ import 'package:school_app_flutter/features/treasury/domain/services/cash_pendin
 import 'package:school_app_flutter/features/treasury/presentation/bloc/cash_closing_cubit.dart';
 import 'package:school_app_flutter/features/treasury/presentation/helpers/treasury_format.dart';
 import 'package:school_app_flutter/features/treasury/presentation/widgets/closing/closing_screen.dart';
+import 'package:school_app_flutter/features/treasury/presentation/widgets/closing/day_card.dart';
 
 import '../../../../test_helpers/reference_formats.dart';
 import '../../treasury_fixtures.dart';
@@ -73,8 +77,7 @@ Future<void> _pump(
   await tester.pumpWidget(
     treasuryHost(
       BlocProvider(
-        create: (_) =>
-            CashClosingCubit(repo, probe, initialDate: day.date)..load(),
+        create: (_) => CashClosingCubit(repo, probe, initialDate: day.date),
         child: ClosingScreen(
           online: online,
           callbacks: ClosingCallbacks(
@@ -111,6 +114,89 @@ void main() {
     );
     expect(find.text('Clôture de caisse'), findsOneWidget);
     expect(find.text('Jeudi 22 octobre 2026'), findsOneWidget);
+  });
+
+  testWidgets('F5 relit la journée affichée', (tester) async {
+    setTestWindow(tester, const Size(1280, 1400));
+    await _pump(tester, treasuryDay([usdDay(), cdfDay()]));
+    final repo = GetIt.instance<TreasuryDayRepository>();
+    clearInteractions(repo);
+    await tester.sendKeyEvent(LogicalKeyboardKey.f5);
+    await tester.pumpAndSettle();
+    verify(() => repo.day(demoDay)).called(1);
+  });
+
+  testWidgets('glisser vers la droite au doigt ouvre la veille', (
+    tester,
+  ) async {
+    setTestWindow(tester, const Size(1280, 1400));
+    await _pump(tester, treasuryDay([usdDay(), cdfDay()]));
+    await tester.fling(find.byType(DayCard).first, const Offset(300, 0), 1000);
+    await tester.pumpAndSettle();
+    expect(find.text('Mercredi 21 octobre 2026'), findsOneWidget);
+  });
+
+  testWidgets('contre-épreuve : glisser à la souris ne change pas de jour', (
+    tester,
+  ) async {
+    setTestWindow(tester, const Size(1280, 1400));
+    await _pump(tester, treasuryDay([usdDay(), cdfDay()]));
+    await tester.fling(
+      find.byType(DayCard).first,
+      const Offset(300, 0),
+      1000,
+      deviceKind: PointerDeviceKind.mouse,
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('Jeudi 22 octobre 2026'), findsOneWidget);
+  });
+
+  testWidgets('← ouvre la veille, → revient', (tester) async {
+    setTestWindow(tester, const Size(1280, 1400));
+    await _pump(tester, treasuryDay([usdDay(), cdfDay()]));
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+    await tester.pumpAndSettle();
+    expect(find.text('Mercredi 21 octobre 2026'), findsOneWidget);
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+    await tester.pumpAndSettle();
+    expect(find.text('Jeudi 22 octobre 2026'), findsOneWidget);
+  });
+
+  testWidgets('poste : la date se tape au clavier', (tester) async {
+    debugDefaultTargetPlatformOverride = TargetPlatform.linux;
+    addTearDown(() => debugDefaultTargetPlatformOverride = null);
+    setTestWindow(tester, const Size(1280, 1400));
+    await _pump(tester, treasuryDay([usdDay(), cdfDay()]));
+    await tester.tap(
+      find.widgetWithIcon(OutlinedButton, Icons.calendar_today_outlined),
+    );
+    await tester.pumpAndSettle();
+    expect(find.byType(InputDatePickerFormField), findsOneWidget);
+    debugDefaultTargetPlatformOverride = null;
+  });
+
+  testWidgets('au doigt : la date se choisit au calendrier', (tester) async {
+    setTestWindow(tester, const Size(1280, 1400));
+    await _pump(tester, treasuryDay([usdDay(), cdfDay()]));
+    await tester.tap(
+      find.widgetWithIcon(OutlinedButton, Icons.calendar_today_outlined),
+    );
+    await tester.pumpAndSettle();
+    expect(find.byType(CalendarDatePicker), findsOneWidget);
+  });
+
+  testWidgets('un bouton au focus du clavier : ← change de journée, le '
+      'focus ne bouge pas en plus', (tester) async {
+    setTestWindow(tester, const Size(1280, 1400));
+    await _pump(tester, treasuryDay([usdDay(), cdfDay()]));
+    await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+    await tester.pump();
+    final focused = FocusManager.instance.primaryFocus;
+    expect(focused, isNot(isA<FocusScopeNode>()));
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+    await tester.pumpAndSettle();
+    expect(find.text('Mercredi 21 octobre 2026'), findsOneWidget);
+    expect(FocusManager.instance.primaryFocus, same(focused));
   });
 
   testWidgets('le bandeau compte en vrai pluriel', (tester) async {
@@ -311,10 +397,34 @@ void main() {
     expect(find.text('Non clôturée'), findsOneWidget);
   });
 
-  testWidgets('toucher une journée de la semaine la rouvre en Journalier', (
+  testWidgets('la semaine montre la justification d un écart sur sa ligne', (
     tester,
   ) async {
     setTestWindow(tester, const Size(1280, 1400));
+    await _pump(tester, treasuryDay([usdDay(), cdfDay()]));
+    await tester.tap(find.text('Hebdomadaire'));
+    await tester.pumpAndSettle();
+    expect(find.text('« Erreur de rendu de monnaie »'), findsOneWidget);
+  });
+
+  testWidgets('écran large : la journée touchée s ouvre à côté de la '
+      'semaine', (tester) async {
+    setTestWindow(tester, const Size(1280, 1400));
+    await _pump(tester, treasuryDay([usdDay(), cdfDay()]));
+    await tester.tap(find.text('Hebdomadaire'));
+    await tester.pumpAndSettle();
+    expect(find.text('Jeudi 22 octobre 2026'), findsOneWidget);
+    await tester.tap(find.text('Mer. 21 oct.'));
+    await tester.pumpAndSettle();
+    expect(find.text('Jour par jour'), findsOneWidget);
+    expect(find.text('Mercredi 21 octobre 2026'), findsOneWidget);
+    expect(find.byType(DayCard), findsNWidgets(2));
+  });
+
+  testWidgets('toucher une journée de la semaine la rouvre en Journalier', (
+    tester,
+  ) async {
+    setTestWindow(tester, const Size(800, 1400));
     await _pump(tester, treasuryDay([usdDay(), cdfDay()]));
     await tester.tap(find.text('Hebdomadaire'));
     await tester.pumpAndSettle();
@@ -322,6 +432,23 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Jour par jour'), findsNothing);
     expect(find.text('Mercredi 21 octobre 2026'), findsOneWidget);
+  });
+
+  testWidgets('retour Android depuis une journée de la semaine : la semaine '
+      'revient, sans quitter l écran', (tester) async {
+    setTestWindow(tester, const Size(800, 1400));
+    await _pump(tester, treasuryDay([usdDay(), cdfDay()]));
+    await tester.tap(find.text('Hebdomadaire'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Mer. 21 oct.'));
+    await tester.pumpAndSettle();
+    expect(find.text('Jour par jour'), findsNothing);
+
+    await tester.binding.handlePopRoute();
+    await tester.pumpAndSettle();
+
+    expect(find.text('Jour par jour'), findsOneWidget);
+    expect(find.text('Clôture de caisse'), findsOneWidget);
   });
 
   testWidgets('le journalier reste verrouillé tant qu une caisse est ouverte', (

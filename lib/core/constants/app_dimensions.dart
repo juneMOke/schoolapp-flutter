@@ -1383,6 +1383,19 @@ class AppDimensions {
   static const treasuryChartHeight = 230.0;
   static const treasuryChartHeightCompact = 200.0;
 
+  /// Hauteur de la courbe sur un écran bas (téléphone en paysage).
+  static const treasuryChartHeightLow = 160.0;
+
+  /// Largeur sous laquelle une courbe de caisse ne partage pas sa ligne :
+  /// au-delà de deux fois cette largeur (poste), USD et CDF se lisent côte à
+  /// côte au lieu de s'étirer, aplaties, sur toute la page.
+  static const treasuryChartMinWidth = 480.0;
+
+  /// Vitesse (dp/s) au-delà de laquelle un glissement horizontal change de
+  /// journée ou de période (Clôture, au doigt) ; en deçà, c'est un geste
+  /// hésitant, pas une demande.
+  static const treasurySwipeMinVelocity = 300.0;
+
   /// Le contrôle segmenté terre cuite (spec A3) : piste r12, segment r9,
   /// pad 15 de côté, une cible de 40.
   static const treasuryFilterRadius = 12.0;

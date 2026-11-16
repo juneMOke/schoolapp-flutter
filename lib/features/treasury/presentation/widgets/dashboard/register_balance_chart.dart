@@ -9,6 +9,7 @@ import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/features/treasury/domain/entities/treasury_dashboard.dart';
 import 'package:school_app_flutter/features/treasury/presentation/helpers/treasury_format.dart';
+import 'package:school_app_flutter/features/treasury/presentation/widgets/dashboard/selectable_balance_line.dart';
 import 'package:school_app_flutter/features/treasury/presentation/widgets/dashboard/treasury_balance_line.dart';
 import 'package:school_app_flutter/features/treasury/domain/entities/treasury_currency.dart';
 import 'package:school_app_flutter/features/treasury/presentation/helpers/treasury_tones.dart';
@@ -48,9 +49,10 @@ class RegisterBalanceChart extends StatelessWidget {
       for (final (index, p) in series.points.indexed)
         if (p.balanceInCents != null) (index, p),
     ];
-    final compact =
-        MediaQuery.sizeOf(context).width <
-        AppBreakpoints.treasuryChartCompactMax;
+    final screen = MediaQuery.sizeOf(context);
+    final compact = screen.width < AppBreakpoints.treasuryChartCompactMax;
+    // La hauteur aussi : en paysage, un téléphone est large mais bas.
+    final low = screen.height < AppBreakpoints.treasuryChartLowHeightMax;
     final variation = s.variationPercent;
     return Semantics(
       label: l10n.treasuryChartSemantics(
@@ -93,34 +95,28 @@ class RegisterBalanceChart extends StatelessWidget {
                   ),
                 )
               else
-                SizedBox(
-                  height: compact
+                SelectableBalanceLine(
+                  height: low
+                      ? AppDimensions.treasuryChartHeightLow
+                      : compact
                       ? AppDimensions.treasuryChartHeightCompact
                       : AppDimensions.treasuryChartHeight,
-                  child: TreasuryBalanceLine(
-                    currency: currency,
-                    openingInCents: s.openingInCents,
-                    lineColor: accent,
-                    onOpenSlot: onOpenPoint == null
-                        ? null
-                        : (index) => onOpenPoint!(series.points[index]),
-                    slots: [
-                      for (final (index, p) in series.points.indexed)
-                        BalanceSlot(
-                          label: bucketLabel(
-                            l10n,
-                            granularity,
-                            period,
-                            p,
-                            index,
-                          ),
-                          balanceInCents: p.balanceInCents,
-                          inflowsInCents: p.inflowsInCents,
-                          outflowsInCents: p.outflowsInCents,
-                          partial: p.partial,
-                        ),
-                    ],
-                  ),
+                  currency: currency,
+                  openingInCents: s.openingInCents,
+                  lineColor: accent,
+                  onOpenSlot: onOpenPoint == null
+                      ? null
+                      : (index) => onOpenPoint!(series.points[index]),
+                  slots: [
+                    for (final (index, p) in series.points.indexed)
+                      BalanceSlot(
+                        label: bucketLabel(l10n, granularity, period, p, index),
+                        balanceInCents: p.balanceInCents,
+                        inflowsInCents: p.inflowsInCents,
+                        outflowsInCents: p.outflowsInCents,
+                        partial: p.partial,
+                      ),
+                  ],
                 ),
             ],
           ),

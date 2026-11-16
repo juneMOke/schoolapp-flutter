@@ -28410,6 +28410,12 @@ abstract class AppLocalizations {
   /// **'Move from one row to the next'**
   String get shortcutsHelpRows;
 
+  /// No description provided for @shortcutsHelpStep.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous or next day or period'**
+  String get shortcutsHelpStep;
+
   /// No description provided for @shortcutsHelpOpen.
   ///
   /// In en, this message translates to:
@@ -35265,8 +35271,20 @@ abstract class AppLocalizations {
   /// No description provided for @treasuryChartOpenHint.
   ///
   /// In en, this message translates to:
-  /// **'Tap a point to open its report'**
+  /// **'Tap a point to see its balance and open its report'**
   String get treasuryChartOpenHint;
+
+  /// No description provided for @treasuryChartOpenHintMouse.
+  ///
+  /// In en, this message translates to:
+  /// **'Click a point to open its report'**
+  String get treasuryChartOpenHintMouse;
+
+  /// No description provided for @treasuryChartOpenReport.
+  ///
+  /// In en, this message translates to:
+  /// **'Open the report'**
+  String get treasuryChartOpenReport;
 
   /// No description provided for @treasuryReportDay.
   ///
@@ -35555,6 +35573,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'gap {gap}'**
   String treasuryCellGap(String gap);
+
+  /// No description provided for @treasuryCellJustification.
+  ///
+  /// In en, this message translates to:
+  /// **'“{justification}”'**
+  String treasuryCellJustification(String justification);
 
   /// No description provided for @treasuryPeriodClosing.
   ///
