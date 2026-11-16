@@ -2,9 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
 import 'package:school_app_flutter/core/auth/module_access_registry.dart';
-import 'package:school_app_flutter/core/components/status/sync_indicator.dart';
-import 'package:school_app_flutter/core/components/status/sync_status_cubit.dart';
-import 'package:school_app_flutter/core/components/status/sync_status_state.dart';
 import 'package:school_app_flutter/core/constants/menu_constants.dart';
 import 'package:school_app_flutter/core/layout/page_content_width.dart';
 import 'package:school_app_flutter/core/offline/id_generator.dart';
@@ -37,6 +34,10 @@ class _CashClosingPageState extends State<CashClosingPage> {
     create: (_) => GetIt.instance<CashClosingCubit>(),
     child: TreasuryRefreshScope(
       keyboard: false,
+      // La file d'envoi vidée, le compteur « pas encore envoyés » tombe : on
+      // relit, sinon le bouton resterait bloqué jusqu'au prochain changement
+      // de jour. La page tirée synchronise d'abord, puis relit une fois.
+      refreshOnSynced: true,
       onRefresh: () async => _screen.currentState?.refresh(),
       child: AppPageBackground(
         width: PageContentWidth.wide,
@@ -65,7 +66,7 @@ class _ClosingBody extends StatelessWidget {
       context,
       kTreasuryRegisterWriteAccess,
     );
-    final screen = OnlineOnly(
+    return OnlineOnly(
       builder: (context, online) => _RefreshOnReconnect(
         online: online,
         child: ClosingScreen(
@@ -80,28 +81,6 @@ class _ClosingBody extends StatelessWidget {
         ),
       ),
     );
-    final sync = _syncStatusOf(context);
-    if (sync == null) return screen;
-    // La file d'envoi vidée, le compteur « pas encore envoyés » tombe : on
-    // relit, sinon le bouton resterait bloqué jusqu'au prochain changement
-    // de jour.
-    return BlocListener<SyncStatusCubit, SyncStatusState>(
-      bloc: sync,
-      listenWhen: (previous, current) =>
-          previous.status != current.status &&
-          current.status == SyncStatus.synced,
-      listener: (context, _) => context.read<CashClosingCubit>().refresh(),
-      child: screen,
-    );
-  }
-
-  /// Le cubit global de synchronisation, absent dans les tests d'écran.
-  static SyncStatusCubit? _syncStatusOf(BuildContext context) {
-    try {
-      return context.read<SyncStatusCubit>();
-    } on ProviderNotFoundException {
-      return null;
-    }
   }
 
   static void _openConfiguration(BuildContext context) =>
