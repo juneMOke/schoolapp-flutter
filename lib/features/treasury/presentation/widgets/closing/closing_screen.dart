@@ -25,6 +25,8 @@ import 'package:school_app_flutter/features/treasury/domain/entities/cash_report
 import 'package:school_app_flutter/features/treasury/presentation/widgets/reports/closing_report_bar.dart';
 import 'package:school_app_flutter/features/treasury/presentation/widgets/common/treasury_panel.dart';
 import 'package:school_app_flutter/features/treasury/presentation/widgets/common/treasury_refresh_scope.dart';
+import 'package:school_app_flutter/core/navigation/location_params_sync.dart';
+import 'package:school_app_flutter/features/treasury/presentation/helpers/treasury_location.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Les gestes de l'écran, câblés par la page ; `null` quand ils ne sont pas
@@ -61,11 +63,15 @@ class ClosingScreen extends StatefulWidget {
 
 class _ClosingScreenState extends State<ClosingScreen> {
   /// Journalier à l'ouverture ; le filtre n'est pas mémorisé d'une visite à
-  /// l'autre (B1).
+  /// l'autre (B1), mais l'adresse le garde (F5, lien).
   var _scope = ClosingScope.day;
 
   /// La semaine ou le mois affiché, pour les relire avec la journée.
   CashPeriodCubit? _period;
+
+  /// Le premier jour de la semaine ou du mois affiché ; `null` pour la
+  /// période en cours.
+  DateTime? _periodFrom;
 
   ClosingCallbacks get callbacks => widget.callbacks;
   bool get online => widget.online;
@@ -84,12 +90,66 @@ class _ClosingScreenState extends State<ClosingScreen> {
     ]);
   }
 
+  void _scopeChanged(ClosingScope scope) => setState(() {
+    _scope = scope;
+    _periodFrom = null;
+  });
+
+  /// L'adresse a changé (F5, Précédent, lien) : l'écran la suit.
+  void _followLocation(Map<String, String?> values) {
+    final scope = TreasuryLocation.scopeOf(values[TreasuryLocation.viewParam]);
+    final cubit = context.read<CashClosingCubit>();
+    if (scope == ClosingScope.day) {
+      if (_scope != scope) setState(() => _scope = scope);
+      final day = TreasuryLocation.dayOf(values[TreasuryLocation.dayParam]);
+      if (day == null) {
+        cubit.goToday();
+      } else if (day != cubit.state.date) {
+        cubit.load(day);
+      }
+      return;
+    }
+    final from = TreasuryLocation.dayOf(values[TreasuryLocation.periodParam]);
+    if (scope != _scope) {
+      setState(() {
+        _scope = scope;
+        _periodFrom = from;
+      });
+      return;
+    }
+    final period = _period;
+    if (period != null && !period.isClosed) period.goTo(from);
+  }
+
+  Map<String, String?> _location(CashClosingState state) {
+    final today = state.businessDate;
+    final day = _scope == ClosingScope.day;
+    return {
+      TreasuryLocation.viewParam: TreasuryLocation.viewOf(_scope),
+      TreasuryLocation.dayParam: day && today != null && state.date != today
+          ? TreasuryLocation.write(state.date)
+          : null,
+      TreasuryLocation.periodParam: day
+          ? null
+          : TreasuryLocation.write(_periodFrom),
+    };
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     return TreasuryRefreshScope(
       onRefresh: _refresh,
-      child: _build(context, l10n),
+      child: BlocBuilder<CashClosingCubit, CashClosingState>(
+        buildWhen: (previous, current) =>
+            previous.date != current.date ||
+            previous.businessDate != current.businessDate,
+        builder: (context, state) => LocationParamsSync(
+          current: _location(state),
+          onLocation: _followLocation,
+          child: _build(context, l10n),
+        ),
+      ),
     );
   }
 
@@ -121,11 +181,22 @@ class _ClosingScreenState extends State<ClosingScreen> {
                   scope: _scope,
                   today: businessDate,
                   historyStart: state.historyStart!,
+                  from: _periodFrom,
                 )..load(),
-                child: PeriodView(
-                  onOpenDay: _openDay,
-                  today: businessDate,
-                  filters: _tabs(),
+                child: BlocListener<CashPeriodCubit, CashPeriodState>(
+                  listenWhen: (previous, current) =>
+                      previous.from != current.from,
+                  listener: (context, period) => setState(
+                    () =>
+                        _periodFrom = context.read<CashPeriodCubit>().isCurrent
+                        ? null
+                        : period.from,
+                  ),
+                  child: PeriodView(
+                    onOpenDay: _openDay,
+                    today: businessDate,
+                    filters: _tabs(),
+                  ),
                 ),
               )
             // La barre reste dès que le serveur a dit quel jour on est, même
@@ -155,10 +226,7 @@ class _ClosingScreenState extends State<ClosingScreen> {
     );
   }
 
-  Widget _tabs() => ClosingScopeTabs(
-    scope: _scope,
-    onChanged: (scope) => setState(() => _scope = scope),
-  );
+  Widget _tabs() => ClosingScopeTabs(scope: _scope, onChanged: _scopeChanged);
 
   /// Le sélecteur de date du Journalier : borné au début de l'historique et
   /// à aujourd'hui, dimanches exclus (R4).

@@ -19,6 +19,7 @@ import 'package:school_app_flutter/features/treasury/presentation/bloc/treasury_
 import 'package:school_app_flutter/features/treasury/presentation/widgets/dashboard/evolution_panel.dart';
 import 'package:school_app_flutter/features/treasury/presentation/widgets/dashboard/register_kpi_card.dart';
 import 'package:school_app_flutter/features/treasury/presentation/widgets/states/treasury_results_error_state.dart';
+import 'package:school_app_flutter/features/treasury/presentation/widgets/common/treasury_location_sync.dart';
 import 'package:school_app_flutter/features/treasury/presentation/widgets/common/treasury_panel.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
@@ -131,9 +132,11 @@ class TreasuryDashboardScreen extends StatelessWidget {
                         today: overview.businessDate,
                       )
                   ..load(),
-            child: EvolutionPanel(
-              firstDay: overview.academicYear.startDate,
-              today: overview.businessDate,
+            child: EvolutionLocationSync(
+              child: EvolutionPanel(
+                firstDay: overview.academicYear.startDate,
+                today: overview.businessDate,
+              ),
             ),
           ),
         ),
@@ -150,9 +153,11 @@ class TreasuryDashboardScreen extends StatelessWidget {
                         today: overview.businessDate,
                       )
                   ..load(),
-            child: ReportsPanel(
-              firstDay: overview.academicYear.startDate,
-              today: overview.businessDate,
+            child: ReportsLocationSync(
+              child: ReportsPanel(
+                firstDay: overview.academicYear.startDate,
+                today: overview.businessDate,
+              ),
             ),
           ),
         ),

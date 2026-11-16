@@ -85,6 +85,9 @@ class CashReportsState extends Equatable {
     status,
     kind,
     page,
+    // Sans elle, la page lue dans l'adresse se perdait pendant le premier
+    // chargement (deux états « égaux ») : Réessayer relisait la page 1.
+    requestedPage,
     periodReports,
     customFrom,
     customTo,
@@ -109,13 +112,27 @@ class CashReportsCubit extends Cubit<CashReportsState> {
 
   /// Changer de type ramène à la première page.
   Future<void> kindChanged(CashReportKind kind) async {
-    emit(state.copyWith(kind: kind, clearPage: true));
+    emit(state.copyWith(kind: kind, clearPage: true, requestedPage: 0));
     if (kind == CashReportKind.period) {
       ++_generation;
       emit(state.copyWith(status: CashReportsStatus.ready));
       return;
     }
     await load(0);
+  }
+
+  /// Le type et la page lus dans l'adresse (F5, Précédent, lien) : une seule
+  /// lecture, directement sur la page demandée.
+  Future<void> applyLocation(CashReportKind kind, int page) async {
+    // Type et page changent ensemble : l'adresse ne voit jamais le type sans
+    // sa page (elle s'écrirait sans, et ramènerait la première).
+    emit(state.copyWith(kind: kind, clearPage: true, requestedPage: page));
+    if (kind == CashReportKind.period) {
+      ++_generation;
+      emit(state.copyWith(status: CashReportsStatus.ready));
+      return;
+    }
+    await load(page);
   }
 
   Future<void> load([int page = 0]) async {
