@@ -23090,7 +23090,10 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get treasuryChartOpenHint =>
-      'Touchez un point pour ouvrir son rapport';
+      'Touchez un point pour voir son solde et ouvrir son rapport';
+
+  @override
+  String get treasuryChartOpenReport => 'Ouvrir le rapport';
 
   @override
   String treasuryReportDay(DateTime day) {

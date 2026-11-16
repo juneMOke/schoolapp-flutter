@@ -22935,7 +22935,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get treasuryReportUntilToday => 'until today';
 
   @override
-  String get treasuryChartOpenHint => 'Tap a point to open its report';
+  String get treasuryChartOpenHint =>
+      'Tap a point to see its balance and open its report';
+
+  @override
+  String get treasuryChartOpenReport => 'Open the report';
 
   @override
   String treasuryReportDay(DateTime day) {

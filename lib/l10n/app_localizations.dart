@@ -35265,8 +35265,14 @@ abstract class AppLocalizations {
   /// No description provided for @treasuryChartOpenHint.
   ///
   /// In en, this message translates to:
-  /// **'Tap a point to open its report'**
+  /// **'Tap a point to see its balance and open its report'**
   String get treasuryChartOpenHint;
+
+  /// No description provided for @treasuryChartOpenReport.
+  ///
+  /// In en, this message translates to:
+  /// **'Open the report'**
+  String get treasuryChartOpenReport;
 
   /// No description provided for @treasuryReportDay.
   ///
