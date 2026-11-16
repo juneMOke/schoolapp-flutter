@@ -25,6 +25,7 @@ import 'package:school_app_flutter/features/treasury/domain/entities/cash_report
 import 'package:school_app_flutter/features/treasury/presentation/widgets/reports/closing_report_bar.dart';
 import 'package:school_app_flutter/features/treasury/presentation/widgets/common/treasury_panel.dart';
 import 'package:school_app_flutter/features/treasury/presentation/widgets/common/treasury_refresh_scope.dart';
+import 'package:school_app_flutter/features/treasury/presentation/widgets/common/treasury_swipe_nav.dart';
 import 'package:school_app_flutter/core/navigation/location_params_sync.dart';
 import 'package:school_app_flutter/core/navigation/screen_back_scope.dart';
 import 'package:school_app_flutter/features/treasury/presentation/helpers/treasury_location.dart';
@@ -241,7 +242,13 @@ class ClosingScreenState extends State<ClosingScreen> {
                 ),
                 const SizedBox(height: AppSpacing.lg),
               ],
-              _body(context, state),
+              TreasurySwipeNav(
+                onPrevious: cubit.nextDay(-1) == null
+                    ? null
+                    : () => cubit.step(-1),
+                onNext: cubit.nextDay(1) == null ? null : () => cubit.step(1),
+                child: _body(context, state),
+              ),
             ],
           ],
         );

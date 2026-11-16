@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/features/treasury/presentation/widgets/common/treasury_swipe_nav.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/components/tables/eteelo_column_table.dart';
 import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
@@ -81,7 +82,13 @@ class PeriodView extends StatelessWidget {
                 failure: state.failure ?? const ServerFailure(),
                 onRetry: cubit.load,
               ),
-              CashPeriodStatus.ready => _content(context, state, state.period!),
+              CashPeriodStatus.ready => TreasurySwipeNav(
+                onPrevious: cubit.nextFrom(-1) == null
+                    ? null
+                    : () => cubit.step(-1),
+                onNext: cubit.nextFrom(1) == null ? null : () => cubit.step(1),
+                child: _content(context, state, state.period!),
+              ),
             },
           ],
         );

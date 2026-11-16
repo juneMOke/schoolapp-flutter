@@ -1,4 +1,5 @@
 import 'package:dartz/dartz.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -14,6 +15,7 @@ import 'package:school_app_flutter/features/treasury/domain/services/cash_pendin
 import 'package:school_app_flutter/features/treasury/presentation/bloc/cash_closing_cubit.dart';
 import 'package:school_app_flutter/features/treasury/presentation/helpers/treasury_format.dart';
 import 'package:school_app_flutter/features/treasury/presentation/widgets/closing/closing_screen.dart';
+import 'package:school_app_flutter/features/treasury/presentation/widgets/closing/day_card.dart';
 
 import '../../../../test_helpers/reference_formats.dart';
 import '../../treasury_fixtures.dart';
@@ -122,6 +124,31 @@ void main() {
     await tester.sendKeyEvent(LogicalKeyboardKey.f5);
     await tester.pumpAndSettle();
     verify(() => repo.day(demoDay)).called(1);
+  });
+
+  testWidgets('glisser vers la droite au doigt ouvre la veille', (
+    tester,
+  ) async {
+    setTestWindow(tester, const Size(1280, 1400));
+    await _pump(tester, treasuryDay([usdDay(), cdfDay()]));
+    await tester.fling(find.byType(DayCard).first, const Offset(300, 0), 1000);
+    await tester.pumpAndSettle();
+    expect(find.text('Mercredi 21 octobre 2026'), findsOneWidget);
+  });
+
+  testWidgets('contre-épreuve : glisser à la souris ne change pas de jour', (
+    tester,
+  ) async {
+    setTestWindow(tester, const Size(1280, 1400));
+    await _pump(tester, treasuryDay([usdDay(), cdfDay()]));
+    await tester.fling(
+      find.byType(DayCard).first,
+      const Offset(300, 0),
+      1000,
+      deviceKind: PointerDeviceKind.mouse,
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('Jeudi 22 octobre 2026'), findsOneWidget);
   });
 
   testWidgets('le bandeau compte en vrai pluriel', (tester) async {
