@@ -9,6 +9,7 @@ import 'package:school_app_flutter/features/documents/data/ticket/esc_pos_ticket
 import 'package:school_app_flutter/features/documents/domain/printing/thermal_printer.dart';
 import 'package:school_app_flutter/features/documents/domain/printing/thermal_printer_port.dart';
 import 'package:school_app_flutter/features/documents/domain/printing/ticket_copies.dart';
+import 'package:school_app_flutter/features/documents/domain/printing/ticket_printer_settings.dart';
 import 'package:school_app_flutter/features/documents/domain/ticket/ticket_logo_band.dart';
 import 'package:school_app_flutter/features/documents/domain/ticket/ticket_receipt_model.dart';
 import 'package:school_app_flutter/features/documents/presentation/ticket/thermal_printer_picker.dart';
@@ -25,11 +26,13 @@ import 'package:school_app_flutter/features/documents/presentation/ticket/therma
 /// 2. **La liste ensuite**, résolue avant d'ouvrir la moindre boîte de
 ///    dialogue : une liste vide n'est pas un écran à montrer, c'est une cause à
 ///    dire — et le repli PDF derrière.
-/// 3. **Le choix enfin.** Il est redemandé à **chaque** ticket : sur un parc où
-///    une tablette peut être déplacée d'un guichet à l'autre, une imprimante
-///    mémorisée est une imprimante qui sort le reçu d'un parent dans la pièce
-///    d'à côté. Le même dialogue porte le **nombre d'exemplaires**, parti de
-///    [initialCopies].
+/// 3. **L'imprimante enfin** : celle de la tablette (Finances ▸ Imprimante de
+///    tickets), sans question. Sans imprimante retenue, ou si elle n'est plus
+///    appairée, le sélecteur s'ouvre une fois et son choix est retenu. Décision
+///    du 2026-11-16 : le choix redemandé à chaque ticket protégeait d'une
+///    tablette déplacée d'un guichet à l'autre, mais pesait sur chaque
+///    impression ; l'écran dit désormais sur quelle imprimante le ticket est
+///    parti, et l'imprimante se change dans les réglages.
 ///
 /// ⚠️ Rien ici n'est un échec d'encaissement. Le versement est **déjà écrit
 /// localement** quand cette fonction s'exécute : tout ce qui suit ne coûte que
@@ -52,9 +55,8 @@ Future<ThermalTicketOutcome> printThermalTicket(
 /// imprime, et deux copies de ce parcours divergeraient sur la seule chose qui
 /// compte, l'ordre des trois questions.
 ///
-/// C'est aussi ce qui garde le **choix redemandé à chaque ticket** : mémoriser
-/// l'imprimante ferait sortir le reçu d'un parent dans la pièce d'à côté, et il
-/// n'y a aucune raison que ce soit vrai pour un ticket et faux pour l'autre.
+/// C'est aussi ce qui garde la **même imprimante** pour tous les tickets :
+/// il n'y a aucune raison qu'un reçu parte ailleurs qu'une vente.
 ///
 /// [bytes] est **un** exemplaire : la répétition appartient au port, qui seul
 /// sait l'assembler en un envoi unique.
@@ -70,7 +72,7 @@ Future<ThermalTicketOutcome> printThermalBytes(
   return chosen.fold((outcome) async => outcome, (choice) async {
     final problem = await sendThermalBytes(bytes, choice);
     return problem == null
-        ? const ThermalTicketPrinted()
+        ? ThermalTicketPrinted(printer: choice.printer)
         : ThermalTicketFailed(problem, copies: choice.copies);
   });
 }
@@ -121,6 +123,25 @@ Future<Either<ThermalTicketOutcome, ThermalPrintChoice>> chooseThermalPrinter(
     );
   }
 
+  // L'imprimante de cette tablette (Finances ▸ Imprimante de tickets) : le
+  // ticket y part sans question, tant qu'elle reste appairée. Son nom est
+  // relu dans la liste, celui du jour.
+  final settings = getIt<TicketPrinterSettingsStore>();
+  final remembered = (await settings.read()).printer;
+  final paired = remembered == null
+      ? null
+      : printers
+            .where((p) => p.macAddress == remembered.macAddress)
+            .firstOrNull;
+  if (paired != null) {
+    return Right(
+      ThermalPrintChoice(
+        printer: paired,
+        copies: TicketCopies.clamp(initialCopies),
+      ),
+    );
+  }
+
   // La modale a disparu pendant la préparation : plus personne à qui demander
   // l'imprimante. Ce n'est PAS une renonciation — l'appelant doit encore
   // produire un papier, par le repli.
@@ -132,6 +153,8 @@ Future<Either<ThermalTicketOutcome, ThermalPrintChoice>> chooseThermalPrinter(
     initialCopies: initialCopies,
   );
   if (chosen == null) return const Left(ThermalTicketCancelled());
+  // Choisie une fois, retenue : les tickets suivants y partent directement.
+  await settings.savePrinter(chosen.printer);
   return Right(chosen);
 }
 

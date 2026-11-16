@@ -16,6 +16,8 @@ import 'package:school_app_flutter/features/documents/presentation/ticket/therma
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 import 'package:school_app_flutter/core/money/money.dart';
 import 'package:school_app_flutter/core/money/money_bag.dart';
+import 'package:school_app_flutter/features/documents/domain/printing/ticket_printer_settings.dart';
+import '../../../../test_helpers/memory_ticket_printer_settings.dart';
 
 const _netum = ThermalPrinter(
   name: 'NT-8003DD',
@@ -139,6 +141,9 @@ void main() {
     port = _FakePort();
     permission = _FakePermission();
     getIt
+      ..registerSingleton<TicketPrinterSettingsStore>(
+        MemoryTicketPrinterSettings(),
+      )
       ..registerSingleton<ThermalPrinterPort>(port)
       ..registerSingleton<ThermalPrinterPermission>(permission);
   });
@@ -204,15 +209,48 @@ void main() {
       expect(port.sent.single.take(2), equals([0x1B, 0x40]));
     });
 
-    testWidgets('demande le choix à CHAQUE ticket', (tester) async {
+    testWidgets('choisie une fois, l imprimante est retenue', (tester) async {
       port.printers = const [_netum, _other];
 
-      await print(tester);
       await print(tester, choose: 'POS-58');
+      // Le second ticket part sans question, sur la même imprimante.
+      final second = await print(tester, choose: 'NT-8003DD');
 
-      // Rien n'est mémorisé : une tablette déplacée d'un guichet à l'autre ne
-      // doit pas sortir le reçu d'un parent dans la pièce d'à côté.
-      expect(port.sentTo, equals([_netum.macAddress, _other.macAddress]));
+      expect(port.sentTo, equals([_other.macAddress, _other.macAddress]));
+      expect(
+        second,
+        isA<ThermalTicketPrinted>().having((o) => o.printer, 'printer', _other),
+      );
+    });
+
+    testWidgets('l imprimante retenue n est plus appairée : on redemande', (
+      tester,
+    ) async {
+      (getIt<TicketPrinterSettingsStore>() as MemoryTicketPrinterSettings)
+          .printer = const ThermalPrinter(
+        name: 'Ancienne',
+        macAddress: '00:00:00:00:00:00',
+      );
+
+      await print(tester);
+
+      expect(port.sentTo, equals([_netum.macAddress]));
+      expect(
+        (await getIt<TicketPrinterSettingsStore>().read()).printer,
+        _netum,
+      );
+    });
+
+    testWidgets('l imprimante retenue garde le nombre d exemplaires demandé', (
+      tester,
+    ) async {
+      (getIt<TicketPrinterSettingsStore>() as MemoryTicketPrinterSettings)
+              .printer =
+          _netum;
+
+      await print(tester, initialCopies: 3);
+
+      expect(port.sentCopies, equals([3]));
     });
 
     testWidgets('une liste fermée n\'imprime rien et n\'est pas un échec', (

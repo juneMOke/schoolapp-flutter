@@ -145,7 +145,12 @@ Future<bool> _sendToThermalPrinter(
     initialCopies: copies,
   );
   switch (outcome) {
-    case ThermalTicketPrinted():
+    case ThermalTicketPrinted(:final printer):
+      if (printer != null) {
+        messenger?.showSnackBar(
+          SnackBar(content: Text(l10n.ticketSentToPrinter(printer.label))),
+        );
+      }
       await getIt<MarkCancellationTicketPrintedUseCase>()(paymentId);
       return true;
     case ThermalTicketFailed(:final problem):

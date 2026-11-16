@@ -1129,8 +1129,8 @@ Future<void> configureDependencies({
       getIt<ThermalPrinterPermission>(),
     ),
   );
-  // Mémoire d'imprimante du banc de calage, jamais de la production : le ticket
-  // demande l'imprimante à chaque impression. Enregistrée sous `kDebugMode`
+  // Mémoire d'imprimante du banc de calage, distincte de celle des guichets
+  // (`TicketPrinterSettingsStore`). Enregistrée sous `kDebugMode`
   // comme les routes qu'elle sert, donc absente du build release.
   if (kDebugMode) {
     getIt.registerLazySingleton<TicketBenchPrinterStore>(

@@ -1,4 +1,5 @@
 import 'package:school_app_flutter/core/error/failures.dart';
+import 'package:school_app_flutter/features/documents/domain/printing/thermal_printer.dart';
 
 /// Ce qu'il est advenu d'une tentative d'impression thermique.
 ///
@@ -11,9 +12,13 @@ sealed class ThermalTicketOutcome {
   const ThermalTicketOutcome();
 }
 
-/// Le ticket est sorti. Rien à dire, rien à replier.
+/// Le ticket est sorti. Rien à replier ; l'appelant peut dire sur quelle
+/// imprimante, puisqu'elle n'est plus demandée à chaque ticket.
 class ThermalTicketPrinted extends ThermalTicketOutcome {
-  const ThermalTicketPrinted();
+  /// L'imprimante qui l'a sorti, `null` quand l'appelant ne la connaît pas.
+  final ThermalPrinter? printer;
+
+  const ThermalTicketPrinted({this.printer});
 }
 
 /// Le caissier a fermé la liste sans choisir.

@@ -260,6 +260,8 @@ class _PrintBar extends StatelessWidget {
   final problem = outcome.problem;
   final lines = [
     if (outcome.printed > 0) l10n.ticketsToPrintDone(outcome.printed),
+    if (outcome.printed > 0 && outcome.printer != null)
+      l10n.ticketsPrinterUsed(outcome.printer!.label),
     if (outcome.spoolerFailed) l10n.ticketPrintFailed,
     if (problem != null)
       l10n.ticketsToPrintStopped(thermalPrinterProblemCause(l10n, problem)),

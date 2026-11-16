@@ -20,6 +20,8 @@ import 'package:school_app_flutter/features/documents/data/printing/thermal_prin
 import 'package:school_app_flutter/features/documents/domain/printing/thermal_printer.dart';
 import 'package:school_app_flutter/features/documents/domain/printing/thermal_printer_port.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
+import 'package:school_app_flutter/features/documents/domain/printing/ticket_printer_settings.dart';
+import '../../../test_helpers/memory_ticket_printer_settings.dart';
 
 const _netum = ThermalPrinter(
   name: 'NT-8003DD',
@@ -47,6 +49,9 @@ void main() {
     permission = _FakePermission();
     composer = _FakeComposer();
     getIt
+      ..registerSingleton<TicketPrinterSettingsStore>(
+        MemoryTicketPrinterSettings(),
+      )
       ..registerSingleton<ThermalPrinterPort>(port)
       ..registerSingleton<ThermalPrinterPermission>(permission)
       ..registerSingleton<SaleTicketComposer>(composer)
@@ -139,7 +144,7 @@ void main() {
 
     expect(port.sentTo, equals([_netum.macAddress]));
     expect(port.sentBytes.single, isNotEmpty);
-    expect(find.text('Ticket imprimé.'), findsOne);
+    expect(find.text('Ticket imprimé. Ticket envoyé sur NT-8003DD.'), findsOne);
     // Vrai : le papier est sorti, l'appelant peut noter la trace.
     expect(returned, isTrue);
   });

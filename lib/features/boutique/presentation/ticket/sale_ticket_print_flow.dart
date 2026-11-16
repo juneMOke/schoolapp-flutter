@@ -96,9 +96,17 @@ Future<bool> printSaleTicket(
       );
 
       switch (outcome) {
-        case ThermalTicketPrinted():
+        case ThermalTicketPrinted(:final printer):
           printed = true;
-          messenger?.showSnackBar(SnackBar(content: Text(printedNotice)));
+          messenger?.showSnackBar(
+            SnackBar(
+              content: Text(
+                printer == null
+                    ? printedNotice
+                    : '$printedNotice ${l10n.ticketSentToPrinter(printer.label)}',
+              ),
+            ),
+          );
         // Le caissier a fermé la liste : le geste demandé a été repris.
         // Insister par un message serait lui reprocher son propre choix.
         case ThermalTicketCancelled():

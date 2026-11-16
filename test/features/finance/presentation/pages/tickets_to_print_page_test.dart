@@ -1,3 +1,4 @@
+import 'package:school_app_flutter/features/documents/domain/printing/thermal_printer.dart';
 import 'package:school_app_flutter/features/documents/presentation/ticket/ticket_batch_print_flow.dart';
 import 'package:bloc_test/bloc_test.dart';
 import 'package:dartz/dartz.dart';
@@ -343,6 +344,17 @@ void main() {
       )!;
       expect(summary.text, isNot(contains('PDF')));
       expect(summary.offersSettings, isFalse);
+    });
+
+    test('des tickets sortis : l imprimante est dite', () {
+      final summary = ticketBatchSummary(
+        l10n,
+        const TicketBatchOutcome(
+          printed: 2,
+          printer: ThermalPrinter(name: 'NT-8003DD', macAddress: 'DC:0D'),
+        ),
+      )!;
+      expect(summary.text, contains('Imprimante : NT-8003DD.'));
     });
 
     test('rien à dire : rien', () {

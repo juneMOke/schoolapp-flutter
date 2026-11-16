@@ -30,6 +30,8 @@ import 'package:school_app_flutter/features/school/domain/entities/school.dart';
 import 'package:school_app_flutter/features/school/domain/entities/school_logo.dart';
 import 'package:school_app_flutter/features/school/domain/repositories/school_repository.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
+import 'package:school_app_flutter/features/documents/domain/printing/ticket_printer_settings.dart';
+import '../../../../test_helpers/memory_ticket_printer_settings.dart';
 
 const _netum = ThermalPrinter(
   name: 'NT-8003DD',
@@ -71,6 +73,9 @@ void main() {
     queue = _FakeQueue();
     tickets = _FakeTickets();
     getIt
+      ..registerSingleton<TicketPrinterSettingsStore>(
+        MemoryTicketPrinterSettings(),
+      )
       ..registerSingleton<ThermalPrinterPort>(port)
       ..registerSingleton<ThermalPrinterPermission>(_FakePermission())
       ..registerFactory<BuildCancellationTicketUseCase>(

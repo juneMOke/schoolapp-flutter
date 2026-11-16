@@ -34,12 +34,10 @@ class ThermalPrintChoice {
 ///
 /// ## Le compteur vit ici, et pas dans l'aperçu
 ///
-/// Ce dialogue est redemandé à **chaque** ticket et ne concerne que la
-/// thermique : c'est l'endroit où le nombre d'exemplaires se décide sans
-/// toucher la visionneuse commune aux dix sorties papier. Le compteur se règle
-/// **avant** de toucher l'imprimante — toucher une ligne lance l'impression.
-/// [initialCopies] est le défaut de l'appelant, jamais mémorisé d'un ticket à
-/// l'autre.
+/// Ce dialogue ne s'ouvre plus que sans imprimante retenue (première
+/// impression, imprimante désappairée) : son choix est alors retenu. Le
+/// compteur se règle **avant** de toucher l'imprimante — toucher une ligne
+/// lance l'impression. [initialCopies] est le défaut de l'appelant.
 Future<ThermalPrintChoice?> showThermalPrinterPicker(
   BuildContext context, {
   required List<ThermalPrinter> printers,

@@ -40,6 +40,9 @@ class ThermalPrinter extends Equatable {
     );
   }
 
+  /// Ce que l'écran en montre : le nom, ou l'adresse d'un appareil sans nom.
+  String get label => name.isEmpty ? macAddress : name;
+
   @override
   List<Object?> get props => [name, macAddress];
 }

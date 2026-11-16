@@ -8926,6 +8926,16 @@ class AppLocalizationsFr extends AppLocalizations {
       'l\'imprimante est injoignable, éteinte ou hors de portée.';
 
   @override
+  String ticketSentToPrinter(String printer) {
+    return 'Ticket envoyé sur $printer.';
+  }
+
+  @override
+  String ticketsPrinterUsed(String printer) {
+    return 'Imprimante : $printer.';
+  }
+
+  @override
   String get paymentAnomalyBannerTitle => 'Trop-perçu à arbitrer';
 
   @override

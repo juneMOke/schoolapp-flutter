@@ -5903,6 +5903,23 @@
   "ticketPrinterCauseBluetoothOff": "le Bluetooth est éteint.",
   "ticketPrinterCauseNoPrinter": "aucune imprimante n'est appairée à cette tablette.",
   "ticketPrinterCauseUnreachable": "l'imprimante est injoignable, éteinte ou hors de portée.",
+  "ticketSentToPrinter": "Ticket envoyé sur {printer}.",
+  "@ticketSentToPrinter": {
+    "description": "Après un ticket thermique : l'imprimante n'est plus demandée à chaque fois, l'écran dit où le ticket est parti.",
+    "placeholders": {
+      "printer": {
+        "type": "String"
+      }
+    }
+  },
+  "ticketsPrinterUsed": "Imprimante : {printer}.",
+  "@ticketsPrinterUsed": {
+    "placeholders": {
+      "printer": {
+        "type": "String"
+      }
+    }
+  },
   "paymentAnomalyBannerTitle": "Trop-perçu à arbitrer",
   "paymentAnomalyBannerFallback": "Un encaissement dépasse le reste dû.",
   "paymentAnomalyAcknowledgeLabel": "Traité",

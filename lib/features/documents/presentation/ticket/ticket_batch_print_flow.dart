@@ -9,6 +9,7 @@ import 'package:school_app_flutter/core/offline/current_user_context.dart';
 import 'package:school_app_flutter/core/widgets/app_confirmation_dialog.dart';
 import 'package:school_app_flutter/features/documents/data/ticket/esc_pos_ticket_renderer.dart';
 import 'package:school_app_flutter/features/documents/data/ticket/pdf_ticket_renderer.dart';
+import 'package:school_app_flutter/features/documents/domain/printing/thermal_printer.dart';
 import 'package:school_app_flutter/features/documents/domain/entities/ticket_print_job.dart';
 import 'package:school_app_flutter/features/documents/domain/ticket/ticket_cancellation_layout.dart';
 import 'package:school_app_flutter/features/documents/domain/ticket/ticket_cancellation_model.dart';
@@ -48,7 +49,11 @@ class TicketBatchOutcome {
   /// Le spouleur a refusé le lot.
   final bool spoolerFailed;
 
+  /// L'imprimante thermique du lot, `null` hors thermique.
+  final ThermalPrinter? printer;
+
   const TicketBatchOutcome({
+    this.printer,
     this.printed = 0,
     this.skipped = 0,
     this.problem,
@@ -238,6 +243,7 @@ Future<TicketBatchOutcome> _sendToThermalPrinter(
         printed: printed,
         skipped: batch.skipped,
         problem: problem,
+        printer: printer.printer,
       );
     }
     // Une note de suivi ratée n'annule pas le papier : il est sorti. Le
@@ -245,7 +251,11 @@ Future<TicketBatchOutcome> _sendToThermalPrinter(
     await markPrinted(job);
     printed++;
   }
-  return TicketBatchOutcome(printed: printed, skipped: batch.skipped);
+  return TicketBatchOutcome(
+    printed: printed,
+    skipped: batch.skipped,
+    printer: printer.printer,
+  );
 }
 
 Future<_ComposedBatch> _compose(

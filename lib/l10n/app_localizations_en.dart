@@ -8848,6 +8848,16 @@ class AppLocalizationsEn extends AppLocalizations {
       'the printer is unreachable, off or out of range.';
 
   @override
+  String ticketSentToPrinter(String printer) {
+    return 'Ticket sent to $printer.';
+  }
+
+  @override
+  String ticketsPrinterUsed(String printer) {
+    return 'Printer: $printer.';
+  }
+
+  @override
   String get paymentAnomalyBannerTitle => 'Overpayment to arbitrate';
 
   @override

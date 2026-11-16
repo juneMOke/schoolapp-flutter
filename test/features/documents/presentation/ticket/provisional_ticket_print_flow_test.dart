@@ -32,6 +32,8 @@ import 'package:school_app_flutter/features/documents/presentation/ticket/provis
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 import 'package:school_app_flutter/core/money/money.dart';
 import 'package:school_app_flutter/core/money/money_bag.dart';
+import 'package:school_app_flutter/features/documents/domain/printing/ticket_printer_settings.dart';
+import '../../../../test_helpers/memory_ticket_printer_settings.dart';
 
 const _netum = ThermalPrinter(
   name: 'NT-8003DD',
@@ -66,6 +68,9 @@ void main() {
     permission = _FakePermission();
     repository = _FakeTicketRepository();
     getIt
+      ..registerSingleton<TicketPrinterSettingsStore>(
+        MemoryTicketPrinterSettings(),
+      )
       ..registerSingleton<ThermalPrinterPort>(port)
       ..registerSingleton<ThermalPrinterPermission>(permission)
       ..registerFactory<BuildProvisionalTicketUseCase>(
@@ -283,14 +288,18 @@ void main() {
     });
   });
 
-  testWidgets('thermique servie : ni message, ni spouleur', (tester) async {
+  testWidgets('thermique servie : pas de spouleur, l imprimante est dite', (
+    tester,
+  ) async {
     await run(tester);
 
     expect(port.sentTo, equals([_netum.macAddress]));
     // Le filet ne se déploie pas quand le trapèze a tenu : ouvrir le spouleur
     // ici sortirait un SECOND papier pour le même versement.
     expect(printing.laidOut, isEmpty);
-    expect(find.byType(SnackBar), findsNothing);
+    // L'imprimante n'est plus demandée à chaque ticket : l'écran dit où il
+    // est parti.
+    expect(find.text('Ticket envoyé sur NT-8003DD.'), findsOneWidget);
   });
 
   /// Le poste de bureau n'a pas de thermique Bluetooth (le paquet n'y parle

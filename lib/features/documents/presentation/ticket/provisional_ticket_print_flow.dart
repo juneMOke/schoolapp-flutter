@@ -226,7 +226,12 @@ Future<void> _sendTicketToPrinter(
     // Le seul signal qui prouve qu'un papier existe. On le retient ici, et
     // nulle part ailleurs : c'est lui qui retirera le rattrapage d'impression
     // du détail de ce versement.
-    case ThermalTicketPrinted():
+    case ThermalTicketPrinted(:final printer):
+      if (printer != null) {
+        messenger?.showSnackBar(
+          SnackBar(content: Text(l10n.ticketSentToPrinter(printer.label))),
+        );
+      }
       await getIt<MarkTicketPrintedUseCase>()(paymentId);
       return;
 

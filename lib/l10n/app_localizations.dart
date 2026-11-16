@@ -14184,6 +14184,18 @@ abstract class AppLocalizations {
   /// **'the printer is unreachable, off or out of range.'**
   String get ticketPrinterCauseUnreachable;
 
+  /// No description provided for @ticketSentToPrinter.
+  ///
+  /// In en, this message translates to:
+  /// **'Ticket sent to {printer}.'**
+  String ticketSentToPrinter(String printer);
+
+  /// No description provided for @ticketsPrinterUsed.
+  ///
+  /// In en, this message translates to:
+  /// **'Printer: {printer}.'**
+  String ticketsPrinterUsed(String printer);
+
   /// No description provided for @paymentAnomalyBannerTitle.
   ///
   /// In en, this message translates to:

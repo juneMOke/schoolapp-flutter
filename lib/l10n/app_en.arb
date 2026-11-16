@@ -5819,6 +5819,22 @@
   "ticketPrinterCauseBluetoothOff": "Bluetooth is off.",
   "ticketPrinterCauseNoPrinter": "no printer is paired with this tablet.",
   "ticketPrinterCauseUnreachable": "the printer is unreachable, off or out of range.",
+  "ticketSentToPrinter": "Ticket sent to {printer}.",
+  "@ticketSentToPrinter": {
+    "placeholders": {
+      "printer": {
+        "type": "String"
+      }
+    }
+  },
+  "ticketsPrinterUsed": "Printer: {printer}.",
+  "@ticketsPrinterUsed": {
+    "placeholders": {
+      "printer": {
+        "type": "String"
+      }
+    }
+  },
   "paymentAnomalyBannerTitle": "Overpayment to arbitrate",
   "paymentAnomalyBannerFallback": "A payment exceeds the amount still due.",
   "paymentAnomalyAcknowledgeLabel": "Handled",
