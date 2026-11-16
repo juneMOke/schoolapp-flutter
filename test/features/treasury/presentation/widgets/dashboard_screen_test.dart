@@ -15,6 +15,7 @@ import 'package:school_app_flutter/features/treasury/presentation/bloc/treasury_
 import 'package:school_app_flutter/features/treasury/presentation/helpers/treasury_format.dart';
 import 'package:school_app_flutter/features/treasury/domain/entities/treasury_currency.dart';
 import 'package:school_app_flutter/features/treasury/presentation/widgets/dashboard/dashboard_screen.dart';
+import 'package:school_app_flutter/features/treasury/presentation/widgets/dashboard/register_balance_chart.dart';
 
 import '../../../../test_helpers/reference_formats.dart';
 import '../../treasury_fixtures.dart';
@@ -27,6 +28,7 @@ Future<_MockRepository> _pump(
   WidgetTester tester, {
   TreasuryOverview? overview,
   VoidCallback? onOpenClosing,
+  bool withCdf = false,
 }) async {
   final repo = _MockRepository();
   final reports = _MockReports();
@@ -55,7 +57,7 @@ Future<_MockRepository> _pump(
       from: any(named: 'from'),
       to: any(named: 'to'),
     ),
-  ).thenAnswer((_) async => Right(treasuryEvolution()));
+  ).thenAnswer((_) async => Right(treasuryEvolution(withCdf: withCdf)));
   await tester.pumpWidget(
     treasuryHost(
       BlocProvider(
@@ -79,7 +81,7 @@ void main() {
   });
 
   testAtReferenceFormats('deux caisses et leur évolution', (tester, _) async {
-    await _pump(tester, onOpenClosing: () {});
+    await _pump(tester, onOpenClosing: () {}, withCdf: true);
     expect(find.text('Combien avons-nous en caisse ?'), findsOneWidget);
     expect(find.textContaining('2026-2027'), findsOneWidget);
   });
@@ -110,6 +112,26 @@ void main() {
       findsOneWidget,
     );
     expect(find.textContaining('▼ -8 %'), findsOneWidget);
+  });
+
+  testWidgets('poste : les deux courbes côte à côte ; tablette : l une sous '
+      'l autre', (tester) async {
+    setTestWindow(tester, const Size(1440, 1600));
+    await _pump(tester, withCdf: true);
+    var charts = find.byType(RegisterBalanceChart);
+    expect(charts, findsNWidgets(2));
+    expect(
+      tester.getTopLeft(charts.first).dy,
+      tester.getTopLeft(charts.last).dy,
+    );
+
+    setTestWindow(tester, const Size(800, 2400));
+    await tester.pumpAndSettle();
+    charts = find.byType(RegisterBalanceChart);
+    expect(
+      tester.getTopLeft(charts.last).dy,
+      greaterThan(tester.getBottomLeft(charts.first).dy),
+    );
   });
 
   testWidgets('toucher une caisse ouvre sa clôture', (tester) async {

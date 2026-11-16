@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/components/controls/segmented_tab_filter.dart';
+import 'package:school_app_flutter/core/components/grid/eteelo_grid_view.dart';
 import 'package:school_app_flutter/core/components/skeletons/eteelo_list_skeleton.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
+import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
@@ -20,7 +22,8 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// L'évolution des caisses (A3) : les filtres de période, le bandeau qui dit
 /// la plage, le nombre de jours de caisse et la granularité **retenue par le
-/// serveur**, puis une courbe par caisse, l'une sous l'autre.
+/// serveur**, puis une courbe par caisse : côte à côte quand la largeur le
+/// permet (poste), l'une sous l'autre sinon.
 class EvolutionPanel extends StatelessWidget {
   /// Bornes du sélecteur de la période libre (R15).
   final DateTime firstDay;
@@ -116,16 +119,20 @@ class EvolutionPanel extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           _Band(evolution: evolution, onPointHint: l10n.treasuryChartOpenHint),
-          for (final series in evolution.series) ...[
-            const SizedBox(height: AppSpacing.md + 2),
-            RegisterBalanceChart(
-              series: series,
+          const SizedBox(height: AppSpacing.md + 2),
+          EteeloGridView(
+            itemCount: evolution.series.length,
+            padding: EdgeInsets.zero,
+            minItemWidth: AppDimensions.treasuryChartMinWidth,
+            spacing: AppSpacing.md + 2,
+            itemBuilder: (context, index) => RegisterBalanceChart(
+              series: evolution.series[index],
               granularity: evolution.granularity,
               period: evolution.period,
               onOpenPoint: (point) =>
                   openPointReport(context, evolution.granularity, point),
             ),
-          ],
+          ),
         ],
       ),
       _ => const SizedBox.shrink(),

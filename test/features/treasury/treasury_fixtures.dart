@@ -272,39 +272,65 @@ TreasuryOverview treasuryOverview({List<RegisterOverview>? registers}) =>
           ],
     );
 
-/// Le mois d'octobre, semaine par semaine, pour la caisse USD.
-TreasuryEvolution treasuryEvolution() => TreasuryEvolution(
-  period: EvolutionPeriod.month,
-  from: DateTime(2026, 10),
-  to: DateTime(2026, 10, 31),
-  granularity: EvolutionGranularity.week,
-  cashDays: 19,
-  series: [
-    RegisterSeries(
-      register: usdRegister,
-      synthesis: const CashSynthesis(
-        openingInCents: 522000,
-        inflowsInCents: 614000,
-        outflowsInCents: 654000,
-        gapsInCents: 0,
-        closingInCents: 482000,
-        variationPercent: -8,
-      ),
-      points: [
-        for (var w = 0; w < 5; w++)
-          EvolutionPoint(
-            start: DateTime.utc(2026, 9, 30 + 7 * w, 23),
-            end: DateTime.utc(2026, 10, 7 + 7 * w, 23),
-            balanceInCents: w < 4 ? 500000 - w * 5000 : null,
-            inflowsInCents: 150000,
-            outflowsInCents: 160000,
+/// Le mois d'octobre, semaine par semaine, pour la caisse USD — et la caisse
+/// CDF avec [withCdf].
+TreasuryEvolution treasuryEvolution({bool withCdf = false}) =>
+    TreasuryEvolution(
+      period: EvolutionPeriod.month,
+      from: DateTime(2026, 10),
+      to: DateTime(2026, 10, 31),
+      granularity: EvolutionGranularity.week,
+      cashDays: 19,
+      series: [
+        RegisterSeries(
+          register: usdRegister,
+          synthesis: const CashSynthesis(
+            openingInCents: 522000,
+            inflowsInCents: 614000,
+            outflowsInCents: 654000,
             gapsInCents: 0,
-            partial: w == 3,
+            closingInCents: 482000,
+            variationPercent: -8,
+          ),
+          points: [
+            for (var w = 0; w < 5; w++)
+              EvolutionPoint(
+                start: DateTime.utc(2026, 9, 30 + 7 * w, 23),
+                end: DateTime.utc(2026, 10, 7 + 7 * w, 23),
+                balanceInCents: w < 4 ? 500000 - w * 5000 : null,
+                inflowsInCents: 150000,
+                outflowsInCents: 160000,
+                gapsInCents: 0,
+                partial: w == 3,
+              ),
+          ],
+        ),
+        if (withCdf)
+          RegisterSeries(
+            register: cdfRegister,
+            synthesis: const CashSynthesis(
+              openingInCents: 332626900,
+              inflowsInCents: 34196100,
+              outflowsInCents: 21823000,
+              gapsInCents: 0,
+              closingInCents: 345000000,
+              variationPercent: 4,
+            ),
+            points: [
+              for (var w = 0; w < 5; w++)
+                EvolutionPoint(
+                  start: DateTime.utc(2026, 9, 30 + 7 * w, 23),
+                  end: DateTime.utc(2026, 10, 7 + 7 * w, 23),
+                  balanceInCents: w < 4 ? 340000000 + w * 1000000 : null,
+                  inflowsInCents: 9000000,
+                  outflowsInCents: 8000000,
+                  gapsInCents: 0,
+                  partial: w == 3,
+                ),
+            ],
           ),
       ],
-    ),
-  ],
-);
+    );
 
 CashReport cashReport({
   String id = 'RJ-20261022',

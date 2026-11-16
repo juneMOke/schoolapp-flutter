@@ -1383,6 +1383,11 @@ class AppDimensions {
   static const treasuryChartHeight = 230.0;
   static const treasuryChartHeightCompact = 200.0;
 
+  /// Largeur sous laquelle une courbe de caisse ne partage pas sa ligne :
+  /// au-delà de deux fois cette largeur (poste), USD et CDF se lisent côte à
+  /// côte au lieu de s'étirer, aplaties, sur toute la page.
+  static const treasuryChartMinWidth = 480.0;
+
   /// Vitesse (dp/s) au-delà de laquelle un glissement horizontal change de
   /// journée ou de période (Clôture, au doigt) ; en deçà, c'est un geste
   /// hésitant, pas une demande.
