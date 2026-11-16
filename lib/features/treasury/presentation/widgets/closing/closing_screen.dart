@@ -7,38 +7,19 @@ import 'package:school_app_flutter/features/treasury/presentation/widgets/closin
 import 'package:school_app_flutter/features/treasury/presentation/widgets/period/period_view.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_page_header.dart';
-import 'package:school_app_flutter/features/treasury/domain/entities/cash_movement.dart';
-import 'package:school_app_flutter/features/treasury/domain/entities/treasury_day.dart';
 import 'package:school_app_flutter/features/treasury/domain/services/cash_closing_rules.dart';
 import 'package:school_app_flutter/features/treasury/presentation/bloc/cash_closing_cubit.dart';
+import 'package:school_app_flutter/features/treasury/presentation/widgets/closing/closing_day_pane.dart';
 import 'package:school_app_flutter/features/treasury/presentation/widgets/closing/closing_day_view.dart';
 import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
-import 'package:school_app_flutter/features/treasury/presentation/widgets/closing/day_nav_bar.dart';
 import 'package:school_app_flutter/features/treasury/presentation/widgets/common/treasury_panel.dart';
 import 'package:school_app_flutter/features/treasury/presentation/widgets/common/treasury_refresh_scope.dart';
-import 'package:school_app_flutter/features/treasury/presentation/widgets/common/treasury_step_gestures.dart';
 import 'package:school_app_flutter/core/navigation/location_params_sync.dart';
 import 'package:school_app_flutter/core/navigation/screen_back_scope.dart';
-import 'package:school_app_flutter/features/treasury/presentation/helpers/treasury_date_picker.dart';
 import 'package:school_app_flutter/features/treasury/presentation/helpers/treasury_location.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
-/// Les gestes de l'écran, câblés par la page ; `null` quand ils ne sont pas
-/// offerts (droits).
-class ClosingCallbacks {
-  final void Function(CashDaySummary summary)? close;
-  final void Function(CashDaySummary summary)? reopen;
-  final Future<void> Function(CashMovement movement, bool alreadyCounted)?
-  answer;
-  final VoidCallback? configure;
-
-  const ClosingCallbacks({
-    this.close,
-    this.reopen,
-    this.answer,
-    this.configure,
-  });
-}
+export 'closing_day_view.dart' show ClosingCallbacks;
 
 /// Trésorerie ▸ Clôture de caisse, vue journalière (B1–B5).
 class ClosingScreen extends StatefulWidget {
@@ -134,20 +115,6 @@ class ClosingScreenState extends State<ClosingScreen> {
     if (period != null && !period.isClosed) period.goTo(from);
   }
 
-  Map<String, String?> _location(CashClosingState state) {
-    final today = state.businessDate;
-    final day = _scope == ClosingScope.day;
-    return {
-      TreasuryLocation.viewParam: TreasuryLocation.viewOf(_scope),
-      TreasuryLocation.dayParam: day && today != null && state.date != today
-          ? TreasuryLocation.write(state.date)
-          : null,
-      TreasuryLocation.periodParam: day
-          ? null
-          : TreasuryLocation.write(_periodFrom),
-    };
-  }
-
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -163,7 +130,12 @@ class ClosingScreenState extends State<ClosingScreen> {
               previous.date != current.date ||
               previous.businessDate != current.businessDate,
           builder: (context, state) => LocationParamsSync(
-            current: _location(state),
+            current: TreasuryLocation.closing(
+              scope: _scope,
+              date: state.date,
+              today: state.businessDate,
+              periodFrom: _periodFrom,
+            ),
             onLocation: _followLocation,
             child: _build(context, l10n),
           ),
@@ -175,7 +147,6 @@ class ClosingScreenState extends State<ClosingScreen> {
   Widget _build(BuildContext context, AppLocalizations l10n) {
     return BlocBuilder<CashClosingCubit, CashClosingState>(
       builder: (context, state) {
-        final cubit = context.read<CashClosingCubit>();
         final businessDate = state.businessDate;
         return Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -194,37 +165,13 @@ class ClosingScreenState extends State<ClosingScreen> {
                 businessDate != null &&
                 state.historyStart != null)
               _periodArea(context, state, businessDate)
-            // La barre reste dès que le serveur a dit quel jour on est, même
-            // si la journée affichée échoue : on peut toujours en sortir.
-            else ...[
-              if (businessDate != null) ...[
-                DayNavBar(
-                  date: state.date,
-                  isToday: state.date == businessDate,
-                  onPrevious: cubit.nextDay(-1) == null
-                      ? null
-                      : () => cubit.step(-1),
-                  onNext: cubit.nextDay(1) == null ? null : () => cubit.step(1),
-                  onToday: cubit.goToday,
-                  filters: state.historyStart == null ? null : _tabs(),
-                  onPickDate: state.historyStart == null
-                      ? null
-                      : () => _pickDate(context, state),
-                ),
-                const SizedBox(height: AppSpacing.lg),
-              ],
-              TreasuryStepGestures(
-                onPrevious: cubit.nextDay(-1) == null
-                    ? null
-                    : () => cubit.step(-1),
-                onNext: cubit.nextDay(1) == null ? null : () => cubit.step(1),
-                child: ClosingDayView(
-                  state: state,
-                  callbacks: callbacks,
-                  online: online,
-                ),
+            else
+              ClosingDayPane(
+                state: state,
+                callbacks: callbacks,
+                online: online,
+                filters: _tabs(),
               ),
-            ],
           ],
         );
       },
@@ -261,27 +208,11 @@ class ClosingScreenState extends State<ClosingScreen> {
             const SizedBox(width: AppSpacing.lg),
             Expanded(
               flex: 4,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  DayNavBar(
-                    date: state.date,
-                    isToday: state.date == businessDate,
-                    onPrevious: cubit.nextDay(-1) == null
-                        ? null
-                        : () => cubit.step(-1),
-                    onNext: cubit.nextDay(1) == null
-                        ? null
-                        : () => cubit.step(1),
-                    onToday: cubit.goToday,
-                  ),
-                  const SizedBox(height: AppSpacing.lg),
-                  ClosingDayView(
-                    state: state,
-                    callbacks: callbacks,
-                    online: online,
-                  ),
-                ],
+              child: ClosingDayPane(
+                state: state,
+                callbacks: callbacks,
+                online: online,
+                standalone: false,
               ),
             ),
           ],
@@ -321,22 +252,4 @@ class ClosingScreenState extends State<ClosingScreen> {
   );
 
   Widget _tabs() => ClosingScopeTabs(scope: _scope, onChanged: _scopeChanged);
-
-  /// Le sélecteur de date du Journalier : borné au début de l'historique et
-  /// à aujourd'hui, dimanches exclus (R4).
-  Future<void> _pickDate(BuildContext context, CashClosingState state) async {
-    final today = state.businessDate;
-    final first = state.historyStart;
-    if (today == null || first == null) return;
-    final cubit = context.read<CashClosingCubit>();
-    final picked = await showTreasuryDatePicker(
-      context,
-      initialDate: state.date,
-      firstDate: first,
-      lastDate: today,
-      selectableDayPredicate: (day) => day.weekday != DateTime.sunday,
-    );
-    if (picked == null || !context.mounted) return;
-    await cubit.load(picked);
-  }
 }

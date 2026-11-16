@@ -7,17 +7,34 @@ import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_empty_result.dart';
+import 'package:school_app_flutter/features/treasury/domain/entities/cash_movement.dart';
 import 'package:school_app_flutter/features/treasury/domain/entities/cash_report.dart';
 import 'package:school_app_flutter/features/treasury/domain/entities/treasury_day.dart';
 import 'package:school_app_flutter/features/treasury/domain/services/cash_closing_rules.dart';
 import 'package:school_app_flutter/features/treasury/presentation/bloc/cash_closing_cubit.dart';
-import 'package:school_app_flutter/features/treasury/presentation/widgets/closing/closing_screen.dart';
 import 'package:school_app_flutter/features/treasury/presentation/widgets/closing/day_card.dart';
 import 'package:school_app_flutter/features/treasury/presentation/widgets/closing/day_nav_bar.dart';
 import 'package:school_app_flutter/features/treasury/presentation/widgets/closing/day_status_banner.dart';
 import 'package:school_app_flutter/features/treasury/presentation/widgets/reports/closing_report_bar.dart';
 import 'package:school_app_flutter/features/treasury/presentation/widgets/states/treasury_results_error_state.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
+
+/// Les gestes de l'écran, câblés par la page ; `null` quand ils ne sont pas
+/// offerts (droits).
+class ClosingCallbacks {
+  final void Function(CashDaySummary summary)? close;
+  final void Function(CashDaySummary summary)? reopen;
+  final Future<void> Function(CashMovement movement, bool alreadyCounted)?
+  answer;
+  final VoidCallback? configure;
+
+  const ClosingCallbacks({
+    this.close,
+    this.reopen,
+    this.answer,
+    this.configure,
+  });
+}
 
 /// La journée de Clôture de caisse (B2–B5) : son état, une carte par caisse
 /// et le rapport du jour. Seule en Journalier ; à côté de la semaine ou du

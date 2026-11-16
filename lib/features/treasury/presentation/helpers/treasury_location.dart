@@ -23,6 +23,22 @@ abstract final class TreasuryLocation {
   static const reportsParam = 'rapports';
   static const reportsPageParam = 'rapports-page';
 
+  /// L'adresse de Clôture : la vue, la journée (sauf aujourd'hui), ou le
+  /// début de la période (sauf la période en cours, [periodFrom] `null`).
+  static Map<String, String?> closing({
+    required ClosingScope scope,
+    required DateTime date,
+    required DateTime? today,
+    required DateTime? periodFrom,
+  }) {
+    final day = scope == ClosingScope.day;
+    return {
+      viewParam: viewOf(scope),
+      dayParam: day && today != null && date != today ? write(date) : null,
+      periodParam: day ? null : write(periodFrom),
+    };
+  }
+
   static String? viewOf(ClosingScope scope) => switch (scope) {
     ClosingScope.day => null,
     ClosingScope.week => weekValue,
