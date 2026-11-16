@@ -15,25 +15,41 @@ import 'package:school_app_flutter/features/home/presentation/bloc/navigation_bl
 import 'package:school_app_flutter/features/treasury/presentation/bloc/cash_closing_cubit.dart';
 import 'package:school_app_flutter/features/treasury/presentation/helpers/closing_actions.dart';
 import 'package:school_app_flutter/features/treasury/presentation/widgets/closing/closing_screen.dart';
+import 'package:school_app_flutter/features/treasury/presentation/widgets/common/treasury_refresh_scope.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Trésorerie ▸ Clôture de caisse.
-class CashClosingPage extends StatelessWidget {
+class CashClosingPage extends StatefulWidget {
   const CashClosingPage({super.key});
+
+  @override
+  State<CashClosingPage> createState() => _CashClosingPageState();
+}
+
+class _CashClosingPageState extends State<CashClosingPage> {
+  /// L'écran relit ce qu'il affiche (journée, semaine ou mois) quand on tire
+  /// la page.
+  final _screen = GlobalKey<ClosingScreenState>();
 
   @override
   Widget build(BuildContext context) => BlocProvider<CashClosingCubit>(
     create: (_) => GetIt.instance<CashClosingCubit>()..load(),
-    child: const AppPageBackground(
-      width: PageContentWidth.wide,
-      scrollable: true,
-      child: _ClosingBody(),
+    child: TreasuryRefreshScope(
+      keyboard: false,
+      onRefresh: () async => _screen.currentState?.refresh(),
+      child: AppPageBackground(
+        width: PageContentWidth.wide,
+        scrollable: true,
+        child: _ClosingBody(screenKey: _screen),
+      ),
     ),
   );
 }
 
 class _ClosingBody extends StatelessWidget {
-  const _ClosingBody();
+  final GlobalKey<ClosingScreenState> screenKey;
+
+  const _ClosingBody({required this.screenKey});
 
   @override
   Widget build(BuildContext context) {
@@ -52,6 +68,7 @@ class _ClosingBody extends StatelessWidget {
       builder: (context, online) => _RefreshOnReconnect(
         online: online,
         child: ClosingScreen(
+          key: screenKey,
           online: online,
           callbacks: ClosingCallbacks(
             close: canClose ? actions.close : null,

@@ -59,10 +59,10 @@ class ClosingScreen extends StatefulWidget {
   });
 
   @override
-  State<ClosingScreen> createState() => _ClosingScreenState();
+  State<ClosingScreen> createState() => ClosingScreenState();
 }
 
-class _ClosingScreenState extends State<ClosingScreen> {
+class ClosingScreenState extends State<ClosingScreen> {
   /// Journalier à l'ouverture ; le filtre n'est pas mémorisé d'une visite à
   /// l'autre (B1), mais l'adresse le garde (F5, lien).
   var _scope = ClosingScope.day;
@@ -89,8 +89,9 @@ class _ClosingScreenState extends State<ClosingScreen> {
     context.read<CashClosingCubit>().load(day);
   }
 
-  /// F5 : la journée, et la semaine ou le mois s'ils sont affichés.
-  Future<void> _refresh() async {
+  /// F5 ou la page tirée : la journée, et la semaine ou le mois s'ils sont
+  /// affichés.
+  Future<void> refresh() async {
     final period = _scope == ClosingScope.day ? null : _period;
     await Future.wait([
       context.read<CashClosingCubit>().refresh(),
@@ -157,8 +158,10 @@ class _ClosingScreenState extends State<ClosingScreen> {
     return ScreenBackScope(
       canPop: _returnTo == null || _scope != ClosingScope.day,
       onBack: _backToPeriod,
+      // La page tirée se pose au-dessus du défilement, dans la page.
       child: TreasuryRefreshScope(
-        onRefresh: _refresh,
+        onRefresh: refresh,
+        pull: false,
         child: BlocBuilder<CashClosingCubit, CashClosingState>(
           buildWhen: (previous, current) =>
               previous.date != current.date ||
