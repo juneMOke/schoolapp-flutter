@@ -152,6 +152,12 @@ class CashReportsCubit extends Cubit<CashReportsState> {
     );
   }
 
+  /// Les rapports « Période » d'avant une relecture du tableau de bord (F5,
+  /// la page tirée) : le serveur ne les garde pas (D31).
+  void restorePeriodReports(List<CashReport> reports) {
+    if (reports.isNotEmpty) emit(state.copyWith(periodReports: reports));
+  }
+
   void rangeChanged(DateTime from, DateTime to) =>
       emit(state.copyWith(customFrom: from, customTo: to));
 

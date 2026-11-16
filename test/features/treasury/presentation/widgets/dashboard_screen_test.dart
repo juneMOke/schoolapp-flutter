@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:dartz/dartz.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -30,9 +32,10 @@ Future<_MockRepository> _pump(
   TreasuryOverview? overview,
   VoidCallback? onOpenClosing,
   bool withCdf = false,
+  _MockReports? reportsRepository,
 }) async {
   final repo = _MockRepository();
-  final reports = _MockReports();
+  final reports = reportsRepository ?? _MockReports();
   when(() => reports.list(any(), any())).thenAnswer(
     (_) async => Right(
       CashReportPage(
@@ -253,6 +256,46 @@ void main() {
     expect(find.text('Provisoire · non clôturé'), findsOneWidget);
     expect(find.text('Définitif'), findsOneWidget);
     expect(find.text('RJ-20261022 · USD · CDF'), findsOneWidget);
+  });
+
+  testWidgets('F5 garde les rapports « Période » générés pendant la session', (
+    tester,
+  ) async {
+    setTestWindow(tester, const Size(1280, 2400));
+    final reports = _MockReports();
+    when(() => reports.period(any(), any())).thenAnswer(
+      (_) async => Right(
+        cashReport(id: 'RP-20261009-1022', kind: CashReportKind.period),
+      ),
+    );
+    final repo = await _pump(tester, reportsRepository: reports);
+    Future<void> openPeriod() async {
+      // Le dernier « Période » : celui des rapports, sous l'évolution.
+      await tester.tap(find.text('Période').last);
+      await tester.pumpAndSettle();
+    }
+
+    await openPeriod();
+    await tester.tap(find.text('Générer le rapport'));
+    await tester.pumpAndSettle();
+    expect(find.text('RP-20261009-1022 · USD · CDF'), findsOneWidget);
+
+    // F5 : le tableau de bord se relit — le temps de la lecture, son
+    // squelette remplace les rapports.
+    final reload = Completer<Either<Failure, TreasuryOverview>>();
+    when(() => repo.overview()).thenAnswer((_) => reload.future);
+    final loading = BlocProvider.of<TreasuryOverviewCubit>(
+      tester.element(find.byType(TreasuryDashboardScreen)),
+    ).load();
+    // Une image pour l'état « chargement », une pour le squelette.
+    await tester.pump();
+    await tester.pump();
+    expect(find.text('Rapports de caisse'), findsNothing);
+    reload.complete(Right(treasuryOverview()));
+    await loading;
+    await tester.pumpAndSettle();
+    await openPeriod();
+    expect(find.text('RP-20261009-1022 · USD · CDF'), findsOneWidget);
   });
 
   group('CashReportsCubit', () {
