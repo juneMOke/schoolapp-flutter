@@ -1,11 +1,27 @@
 import 'package:dartz/dartz.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
+import 'package:school_app_flutter/features/documents/domain/printing/thermal_printer.dart';
 import 'package:school_app_flutter/features/documents/domain/printing/ticket_copies.dart';
+import 'package:school_app_flutter/features/documents/domain/printing/ticket_printer_settings.dart';
 import 'package:school_app_flutter/features/documents/domain/usecases/resolve_ticket_copies_use_case.dart';
 import 'package:school_app_flutter/features/school/domain/entities/school.dart';
 import 'package:school_app_flutter/features/school/domain/entities/school_logo.dart';
 import 'package:school_app_flutter/features/school/domain/repositories/school_repository.dart';
+
+class _Device implements TicketPrinterSettingsStore {
+  int? copies;
+
+  @override
+  Future<TicketPrinterSettings> read() async =>
+      TicketPrinterSettings(copies: copies);
+
+  @override
+  Future<void> savePrinter(ThermalPrinter? printer) async {}
+
+  @override
+  Future<void> saveCopies(int? copies) async => this.copies = copies;
+}
 
 class _FakeSchools implements SchoolRepository {
   Either<Failure, School?> result = const Right(null);
@@ -23,11 +39,26 @@ School _school(int? copies) =>
 
 void main() {
   late _FakeSchools schools;
+  late _Device device;
   late ResolveTicketCopiesUseCase resolve;
 
   setUp(() {
     schools = _FakeSchools();
-    resolve = ResolveTicketCopiesUseCase(schools);
+    device = _Device();
+    resolve = ResolveTicketCopiesUseCase(schools, device: device);
+  });
+
+  test('le réglage de la tablette passe avant celui de l école', () async {
+    schools.result = Right(_school(3));
+    device.copies = 2;
+
+    expect(await resolve(), 2);
+  });
+
+  test('tablette réglée hors bornes : ramenée dans les bornes', () async {
+    device.copies = 40;
+
+    expect(await resolve(), TicketCopies.max);
   });
 
   test('le réglage de l école décide', () async {
