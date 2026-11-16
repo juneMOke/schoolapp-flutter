@@ -26,6 +26,7 @@ import 'package:school_app_flutter/features/treasury/presentation/widgets/report
 import 'package:school_app_flutter/features/treasury/presentation/widgets/common/treasury_panel.dart';
 import 'package:school_app_flutter/features/treasury/presentation/widgets/common/treasury_refresh_scope.dart';
 import 'package:school_app_flutter/core/navigation/location_params_sync.dart';
+import 'package:school_app_flutter/core/navigation/screen_back_scope.dart';
 import 'package:school_app_flutter/features/treasury/presentation/helpers/treasury_location.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
@@ -73,11 +74,18 @@ class _ClosingScreenState extends State<ClosingScreen> {
   /// période en cours.
   DateTime? _periodFrom;
 
+  /// La vue d'où l'on a ouvert la journée affichée : le retour Android y
+  /// remonte au lieu de quitter l'écran.
+  ClosingScope? _returnTo;
+
   ClosingCallbacks get callbacks => widget.callbacks;
   bool get online => widget.online;
 
   void _openDay(DateTime day) {
-    setState(() => _scope = ClosingScope.day);
+    setState(() {
+      _returnTo = _scope == ClosingScope.day ? null : _scope;
+      _scope = ClosingScope.day;
+    });
     context.read<CashClosingCubit>().load(day);
   }
 
@@ -93,6 +101,14 @@ class _ClosingScreenState extends State<ClosingScreen> {
   void _scopeChanged(ClosingScope scope) => setState(() {
     _scope = scope;
     _periodFrom = null;
+    _returnTo = null;
+  });
+
+  /// Retour depuis une journée ouverte dans la semaine ou le mois : la même
+  /// période revient (son début est gardé).
+  void _backToPeriod() => setState(() {
+    _scope = _returnTo ?? _scope;
+    _returnTo = null;
   });
 
   /// L'adresse a changé (F5, Précédent, lien) : l'écran la suit.
@@ -138,16 +154,20 @@ class _ClosingScreenState extends State<ClosingScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    return TreasuryRefreshScope(
-      onRefresh: _refresh,
-      child: BlocBuilder<CashClosingCubit, CashClosingState>(
-        buildWhen: (previous, current) =>
-            previous.date != current.date ||
-            previous.businessDate != current.businessDate,
-        builder: (context, state) => LocationParamsSync(
-          current: _location(state),
-          onLocation: _followLocation,
-          child: _build(context, l10n),
+    return ScreenBackScope(
+      canPop: _returnTo == null || _scope != ClosingScope.day,
+      onBack: _backToPeriod,
+      child: TreasuryRefreshScope(
+        onRefresh: _refresh,
+        child: BlocBuilder<CashClosingCubit, CashClosingState>(
+          buildWhen: (previous, current) =>
+              previous.date != current.date ||
+              previous.businessDate != current.businessDate,
+          builder: (context, state) => LocationParamsSync(
+            current: _location(state),
+            onLocation: _followLocation,
+            child: _build(context, l10n),
+          ),
         ),
       ),
     );

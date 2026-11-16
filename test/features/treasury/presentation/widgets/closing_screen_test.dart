@@ -335,6 +335,23 @@ void main() {
     expect(find.text('Mercredi 21 octobre 2026'), findsOneWidget);
   });
 
+  testWidgets('retour Android depuis une journée de la semaine : la semaine '
+      'revient, sans quitter l écran', (tester) async {
+    setTestWindow(tester, const Size(1280, 1400));
+    await _pump(tester, treasuryDay([usdDay(), cdfDay()]));
+    await tester.tap(find.text('Hebdomadaire'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Mer. 21 oct.'));
+    await tester.pumpAndSettle();
+    expect(find.text('Jour par jour'), findsNothing);
+
+    await tester.binding.handlePopRoute();
+    await tester.pumpAndSettle();
+
+    expect(find.text('Jour par jour'), findsOneWidget);
+    expect(find.text('Clôture de caisse'), findsOneWidget);
+  });
+
   testWidgets('le journalier reste verrouillé tant qu une caisse est ouverte', (
     tester,
   ) async {
