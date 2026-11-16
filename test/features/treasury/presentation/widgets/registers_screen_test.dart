@@ -1,5 +1,6 @@
 import 'package:dartz/dartz.dart';
-import 'package:flutter/material.dart';
+
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
@@ -90,6 +91,34 @@ void main() {
     expect(find.text('Nouvelle caisse'), findsNWidgets(2));
     await tester.tap(find.text('Nouvelle caisse').last);
     expect(opened, 1);
+  });
+
+  testWidgets('Ctrl+N ouvre « Nouvelle caisse » tant qu une devise reste', (
+    tester,
+  ) async {
+    setTestWindow(tester, const Size(1280, 900));
+    var opened = 0;
+    await _pump(tester, list: Right([usdConfig]), onCreate: () => opened++);
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+    await tester.sendKeyEvent(LogicalKeyboardKey.keyN);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+    expect(opened, 1);
+  });
+
+  testWidgets('les deux caisses existent : Ctrl+N ne fait rien', (
+    tester,
+  ) async {
+    setTestWindow(tester, const Size(1280, 900));
+    var opened = 0;
+    await _pump(
+      tester,
+      list: Right([usdConfig, cdfConfig]),
+      onCreate: () => opened++,
+    );
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+    await tester.sendKeyEvent(LogicalKeyboardKey.keyN);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+    expect(opened, 0);
   });
 
   testWidgets('clôturée aujourd hui : l encadré remplace le bouton Ajuster', (

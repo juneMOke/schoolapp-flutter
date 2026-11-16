@@ -1,5 +1,6 @@
 import 'package:dartz/dartz.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
@@ -111,6 +112,16 @@ void main() {
     );
     expect(find.text('Clôture de caisse'), findsOneWidget);
     expect(find.text('Jeudi 22 octobre 2026'), findsOneWidget);
+  });
+
+  testWidgets('F5 relit la journée affichée', (tester) async {
+    setTestWindow(tester, const Size(1280, 1400));
+    await _pump(tester, treasuryDay([usdDay(), cdfDay()]));
+    final repo = GetIt.instance<TreasuryDayRepository>();
+    clearInteractions(repo);
+    await tester.sendKeyEvent(LogicalKeyboardKey.f5);
+    await tester.pumpAndSettle();
+    verify(() => repo.day(demoDay)).called(1);
   });
 
   testWidgets('le bandeau compte en vrai pluriel', (tester) async {

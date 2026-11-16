@@ -24,6 +24,7 @@ import 'package:school_app_flutter/features/treasury/presentation/widgets/states
 import 'package:school_app_flutter/features/treasury/domain/entities/cash_report.dart';
 import 'package:school_app_flutter/features/treasury/presentation/widgets/reports/closing_report_bar.dart';
 import 'package:school_app_flutter/features/treasury/presentation/widgets/common/treasury_panel.dart';
+import 'package:school_app_flutter/features/treasury/presentation/widgets/common/treasury_refresh_scope.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Les gestes de l'écran, câblés par la page ; `null` quand ils ne sont pas
@@ -63,6 +64,9 @@ class _ClosingScreenState extends State<ClosingScreen> {
   /// l'autre (B1).
   var _scope = ClosingScope.day;
 
+  /// La semaine ou le mois affiché, pour les relire avec la journée.
+  CashPeriodCubit? _period;
+
   ClosingCallbacks get callbacks => widget.callbacks;
   bool get online => widget.online;
 
@@ -71,9 +75,25 @@ class _ClosingScreenState extends State<ClosingScreen> {
     context.read<CashClosingCubit>().load(day);
   }
 
+  /// F5 : la journée, et la semaine ou le mois s'ils sont affichés.
+  Future<void> _refresh() async {
+    final period = _scope == ClosingScope.day ? null : _period;
+    await Future.wait([
+      context.read<CashClosingCubit>().refresh(),
+      if (period != null && !period.isClosed) period.load(),
+    ]);
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    return TreasuryRefreshScope(
+      onRefresh: _refresh,
+      child: _build(context, l10n),
+    );
+  }
+
+  Widget _build(BuildContext context, AppLocalizations l10n) {
     return BlocBuilder<CashClosingCubit, CashClosingState>(
       builder: (context, state) {
         final cubit = context.read<CashClosingCubit>();
@@ -96,7 +116,7 @@ class _ClosingScreenState extends State<ClosingScreen> {
                 state.historyStart != null)
               BlocProvider(
                 key: ValueKey(_scope),
-                create: (_) => CashPeriodCubit(
+                create: (_) => _period = CashPeriodCubit(
                   GetIt.instance<TreasuryDayRepository>(),
                   scope: _scope,
                   today: businessDate,
