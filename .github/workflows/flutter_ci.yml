@@ -3,8 +3,16 @@ name: Flutter CI
 on:
   push:
     branches: [ main, master, develop, 'feature/**', 'fix/**' ]
+    paths-ignore: [ '**.md' ]
   pull_request:
     branches: [ main, master, develop ]
+    paths-ignore: [ '**.md' ]
+
+# Un nouveau push sur une PR annule le run en cours de cette PR : seul le
+# dernier commit compte. Sur `main` (push), chaque fusion va au bout.
+concurrency:
+  group: flutter-ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   # ─────────────────────────────────────────────────────────────────
@@ -89,10 +97,10 @@ jobs:
             --api-base-url="${{ secrets.DEV_API_BASE_URL || 'http://localhost:8080' }}"
 
   # ─────────────────────────────────────────────────────────────────
-  # Job 2 — Analyse statique + tests
+  # Job 2 — Analyse statique (en parallèle des tests)
   # ─────────────────────────────────────────────────────────────────
-  analyze-and-test:
-    name: Analyze & Test
+  analyze:
+    name: Analyze
     needs: validate-env
     if: ${{ !cancelled() && needs.validate-env.result == 'success' }}
     runs-on: ubuntu-latest
@@ -106,6 +114,7 @@ jobs:
         with:
           flutter-version: '3.41.6'
           channel: 'stable'
+          cache: true
 
       - name: Install dependencies
         run: flutter pub get
@@ -125,12 +134,65 @@ jobs:
       - name: Analyze
         run: flutter analyze
 
-      - name: Run tests
-        run: flutter test --coverage
+  # ─────────────────────────────────────────────────────────────────
+  # Job 3 — Tests, découpés en 4 morceaux sur 4 machines
+  # Les tests faisaient ~90 % d'un run (32-47 min sur un seul job). Chaque
+  # morceau repaie ~4 min d'installation et de génération, mais les quatre
+  # tournent en même temps. Pas de `--coverage` (+70 % mesuré) tant que
+  # rien ne l'envoie (`CODECOV_TOKEN` absent).
+  # ─────────────────────────────────────────────────────────────────
+  test:
+    name: Test (${{ matrix.shard }}/4)
+    needs: validate-env
+    if: ${{ !cancelled() && needs.validate-env.result == 'success' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [ 1, 2, 3, 4 ]
+    steps:
+      - uses: actions/checkout@v5
 
-      - name: Upload coverage (optional)
-        uses: codecov/codecov-action@v4
-        if: always()
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
         with:
-          files: coverage/lcov.info
-          fail_ci_if_error: false
+          flutter-version: '3.41.6'
+          channel: 'stable'
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Generate code
+        run: flutter pub run build_runner build --delete-conflicting-outputs
+
+      - name: Generate localizations
+        run: flutter gen-l10n
+
+      # Découpage par FICHIERS, pas `--total-shards` : ce dernier répartit
+      # les tests mais charge et compile chaque fichier dans chaque morceau.
+      # Un fichier sur quatre, dans l'ordre trié : les modules s'entremêlent,
+      # la charge s'équilibre.
+      - name: Run tests (shard ${{ matrix.shard }}/4)
+        run: |
+          mapfile -t files < <(find test -name '*_test.dart' | sort \
+            | awk -v i=${{ matrix.shard }} 'NR % 4 == i % 4')
+          echo "${#files[@]} fichiers de test dans ce morceau"
+          flutter test "${files[@]}"
+
+  # ─────────────────────────────────────────────────────────────────
+  # Job 4 — Verdict unique, sous l'ancien nom : un seul check à lire
+  # (et à exiger si `main` est un jour protégée).
+  # ─────────────────────────────────────────────────────────────────
+  analyze-and-test:
+    name: Analyze & Test
+    needs: [ validate-env, analyze, test ]
+    if: ${{ !cancelled() && needs.validate-env.result == 'success' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check analyze and every test shard
+        run: |
+          echo "analyze=${{ needs.analyze.result }} test=${{ needs.test.result }}"
+          [ "${{ needs.analyze.result }}" = success ] && [ "${{ needs.test.result }}" = success ]
