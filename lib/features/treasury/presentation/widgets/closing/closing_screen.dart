@@ -5,24 +5,15 @@ import 'package:school_app_flutter/features/treasury/domain/repositories/treasur
 import 'package:school_app_flutter/features/treasury/presentation/bloc/cash_period_cubit.dart';
 import 'package:school_app_flutter/features/treasury/presentation/widgets/closing/closing_scope_tabs.dart';
 import 'package:school_app_flutter/features/treasury/presentation/widgets/period/period_view.dart';
-import 'package:school_app_flutter/core/components/grid/eteelo_grid_view.dart';
-import 'package:school_app_flutter/core/components/skeletons/eteelo_list_skeleton.dart';
-import 'package:school_app_flutter/core/constants/app_dimensions.dart';
-import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
-import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
-import 'package:school_app_flutter/core/widgets/eteelo_empty_result.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_page_header.dart';
 import 'package:school_app_flutter/features/treasury/domain/entities/cash_movement.dart';
 import 'package:school_app_flutter/features/treasury/domain/entities/treasury_day.dart';
 import 'package:school_app_flutter/features/treasury/domain/services/cash_closing_rules.dart';
 import 'package:school_app_flutter/features/treasury/presentation/bloc/cash_closing_cubit.dart';
-import 'package:school_app_flutter/features/treasury/presentation/widgets/closing/day_card.dart';
+import 'package:school_app_flutter/features/treasury/presentation/widgets/closing/closing_day_view.dart';
+import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
 import 'package:school_app_flutter/features/treasury/presentation/widgets/closing/day_nav_bar.dart';
-import 'package:school_app_flutter/features/treasury/presentation/widgets/closing/day_status_banner.dart';
-import 'package:school_app_flutter/features/treasury/presentation/widgets/states/treasury_results_error_state.dart';
-import 'package:school_app_flutter/features/treasury/domain/entities/cash_report.dart';
-import 'package:school_app_flutter/features/treasury/presentation/widgets/reports/closing_report_bar.dart';
 import 'package:school_app_flutter/features/treasury/presentation/widgets/common/treasury_panel.dart';
 import 'package:school_app_flutter/features/treasury/presentation/widgets/common/treasury_refresh_scope.dart';
 import 'package:school_app_flutter/features/treasury/presentation/widgets/common/treasury_step_gestures.dart';
@@ -74,6 +65,9 @@ class ClosingScreenState extends State<ClosingScreen> {
   /// Le premier jour de la semaine ou du mois affiché ; `null` pour la
   /// période en cours.
   DateTime? _periodFrom;
+
+  /// La semaine ou le mois, d'une forme d'écran à l'autre.
+  final _periodKey = GlobalKey(debugLabel: 'closing-period');
 
   /// La vue d'où l'on a ouvert la journée affichée : le retour Android y
   /// remonte au lieu de quitter l'écran.
@@ -198,31 +192,7 @@ class ClosingScreenState extends State<ClosingScreen> {
             if (_scope != ClosingScope.day &&
                 businessDate != null &&
                 state.historyStart != null)
-              BlocProvider(
-                key: ValueKey(_scope),
-                create: (_) => _period = CashPeriodCubit(
-                  GetIt.instance<TreasuryDayRepository>(),
-                  scope: _scope,
-                  today: businessDate,
-                  historyStart: state.historyStart!,
-                  from: _periodFrom,
-                )..load(),
-                child: BlocListener<CashPeriodCubit, CashPeriodState>(
-                  listenWhen: (previous, current) =>
-                      previous.from != current.from,
-                  listener: (context, period) => setState(
-                    () =>
-                        _periodFrom = context.read<CashPeriodCubit>().isCurrent
-                        ? null
-                        : period.from,
-                  ),
-                  child: PeriodView(
-                    onOpenDay: _openDay,
-                    today: businessDate,
-                    filters: _tabs(),
-                  ),
-                ),
-              )
+              _periodArea(context, state, businessDate)
             // La barre reste dès que le serveur a dit quel jour on est, même
             // si la journée affichée échoue : on peut toujours en sortir.
             else ...[
@@ -247,7 +217,11 @@ class ClosingScreenState extends State<ClosingScreen> {
                     ? null
                     : () => cubit.step(-1),
                 onNext: cubit.nextDay(1) == null ? null : () => cubit.step(1),
-                child: _body(context, state),
+                child: ClosingDayView(
+                  state: state,
+                  callbacks: callbacks,
+                  online: online,
+                ),
               ),
             ],
           ],
@@ -255,6 +229,95 @@ class ClosingScreenState extends State<ClosingScreen> {
       },
     );
   }
+
+  /// La semaine ou le mois. Sur un écran large (10″ paysage, poste), la
+  /// journée touchée s'ouvre à côté : on contrôle les six jours sans perdre
+  /// la période. Plus étroit, elle remplace la période (retour : la période).
+  Widget _periodArea(
+    BuildContext context,
+    CashClosingState state,
+    DateTime businessDate,
+  ) {
+    final cubit = context.read<CashClosingCubit>();
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final sideBySide = constraints.maxWidth >= AppBreakpoints.sideBySideMin;
+        // La période garde son état quand l'écran change de forme.
+        final period = KeyedSubtree(
+          key: _periodKey,
+          child: _periodProvider(
+            businessDate,
+            state,
+            onOpenDay: sideBySide ? cubit.load : _openDay,
+            selectedDay: sideBySide ? state.date : null,
+          ),
+        );
+        if (!sideBySide) return period;
+        return Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(flex: 5, child: period),
+            const SizedBox(width: AppSpacing.lg),
+            Expanded(
+              flex: 4,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  DayNavBar(
+                    date: state.date,
+                    isToday: state.date == businessDate,
+                    onPrevious: cubit.nextDay(-1) == null
+                        ? null
+                        : () => cubit.step(-1),
+                    onNext: cubit.nextDay(1) == null
+                        ? null
+                        : () => cubit.step(1),
+                    onToday: cubit.goToday,
+                  ),
+                  const SizedBox(height: AppSpacing.lg),
+                  ClosingDayView(
+                    state: state,
+                    callbacks: callbacks,
+                    online: online,
+                  ),
+                ],
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _periodProvider(
+    DateTime businessDate,
+    CashClosingState state, {
+    required ValueChanged<DateTime> onOpenDay,
+    DateTime? selectedDay,
+  }) => BlocProvider(
+    key: ValueKey(_scope),
+    create: (_) => _period = CashPeriodCubit(
+      GetIt.instance<TreasuryDayRepository>(),
+      scope: _scope,
+      today: businessDate,
+      historyStart: state.historyStart!,
+      from: _periodFrom,
+    )..load(),
+    child: BlocListener<CashPeriodCubit, CashPeriodState>(
+      listenWhen: (previous, current) => previous.from != current.from,
+      listener: (context, period) => setState(
+        () => _periodFrom = context.read<CashPeriodCubit>().isCurrent
+            ? null
+            : period.from,
+      ),
+      child: PeriodView(
+        onOpenDay: onOpenDay,
+        selectedDay: selectedDay,
+        today: businessDate,
+        filters: _tabs(),
+      ),
+    ),
+  );
 
   Widget _tabs() => ClosingScopeTabs(scope: _scope, onChanged: _scopeChanged);
 
@@ -274,107 +337,5 @@ class ClosingScreenState extends State<ClosingScreen> {
     );
     if (picked == null || !context.mounted) return;
     await cubit.load(picked);
-  }
-
-  Widget _body(BuildContext context, CashClosingState state) {
-    final l10n = AppLocalizations.of(context)!;
-    final day = state.day;
-    final configure = callbacks.configure;
-    return switch (state.status) {
-      CashClosingStatus.loading => EteeloListSkeleton(
-        rowCount: 2,
-        pillCount: 2,
-        showAvatar: false,
-        semanticsLabel: l10n.treasuryDayLoading,
-      ),
-      CashClosingStatus.failure => TreasuryResultsErrorState(
-        failure: state.failure ?? const ServerFailure(),
-        onRetry: context.read<CashClosingCubit>().load,
-      ),
-      _ when day == null || day.registers.isEmpty => EteeloEmptyResult(
-        label: l10n.treasuryEmptyTitle,
-        description: l10n.treasuryEmptyClosing,
-        medallionIcon: Icons.payments_outlined,
-        fullWidthCard: true,
-        primaryAction: configure == null
-            ? null
-            : EteeloButton.primary(
-                label: l10n.treasuryConfigureRegisters,
-                icon: Icons.settings_outlined,
-                onPressed: configure,
-                fullWidth: false,
-              ),
-      ),
-      _ => _day(context, state, day),
-    };
-  }
-
-  Widget _day(BuildContext context, CashClosingState state, TreasuryDay day) {
-    final blocks = {
-      for (final summary in day.registers)
-        summary.register.id: CashClosingRules.blockOf(
-          isToday: day.isToday,
-          sunday: state.sunday,
-          closed: summary.isClosed,
-          canClose: callbacks.close != null,
-          online: online,
-          pendingSyncCount: state.pendingSync[summary.register.currency] ?? 0,
-          pendingAfterClosureCount: summary.pendingAfterClosureCount,
-        ),
-    };
-    final close = callbacks.close;
-    final next = day.registers
-        .where((s) => blocks[s.register.id] == null)
-        .firstOrNull;
-    // Une ligne arrivée après une clôture se règle sur sa propre journée,
-    // même passée : le serveur compte toutes celles qui attendent jusqu'à
-    // aujourd'hui, et refuserait la clôture du jour tant qu'il en reste une.
-    final answer = online ? callbacks.answer : null;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        DayStatusBanner(
-          day: day,
-          nextRegisterName: next?.register.name,
-          onCloseNext: next == null || close == null ? null : () => close(next),
-        ),
-        const SizedBox(height: AppSpacing.lg),
-        EteeloGridView(
-          itemCount: day.registers.length,
-          padding: EdgeInsets.zero,
-          minItemWidth: AppDimensions.treasuryDayCardMinWidth,
-          spacing: AppSpacing.lg,
-          itemBuilder: (context, index) {
-            final summary = day.registers[index];
-            final reopen = callbacks.reopen;
-            return DayCard(
-              key: ValueKey('${summary.register.id}-${day.date}'),
-              summary: summary,
-              date: day.date,
-              isToday: day.isToday,
-              block: blocks[summary.register.id],
-              pendingSyncCount:
-                  state.pendingSync[summary.register.currency] ?? 0,
-              onClose: close == null ? null : () => close(summary),
-              onReopen:
-                  reopen != null && online && day.isToday && summary.isClosed
-                  ? () => reopen(summary)
-                  : null,
-              onAnswer: answer,
-            );
-          },
-        ),
-        const SizedBox(height: AppSpacing.lg),
-        ClosingReportBar(
-          label: AppLocalizations.of(context)!.treasuryReportOneDaily,
-          title: capitalizeFirst(
-            AppLocalizations.of(context)!.treasuryDayLong(day.date),
-          ),
-          reportId: CashReportIds.daily(day.date),
-          remainingRegisters: day.registers.length - day.closedCount,
-          pastNotClosed: !day.isToday && day.closedCount < day.registers.length,
-        ),
-      ],
-    );
   }
 }

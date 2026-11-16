@@ -35,11 +35,15 @@ class PeriodView extends StatelessWidget {
   /// Les filtres Journalier · Hebdomadaire · Mensuel, dans la même carte.
   final Widget? filters;
 
+  /// La journée ouverte à côté (écran large), marquée dans la liste.
+  final DateTime? selectedDay;
+
   const PeriodView({
     super.key,
     required this.onOpenDay,
     required this.today,
     this.filters,
+    this.selectedDay,
   });
 
   @override
@@ -164,6 +168,7 @@ class PeriodView extends StatelessWidget {
                 row: row,
                 registers: registers,
                 isToday: row.day == today,
+                selected: row.day == selectedDay,
                 onOpen: () => onOpenDay(row.day),
               );
             },

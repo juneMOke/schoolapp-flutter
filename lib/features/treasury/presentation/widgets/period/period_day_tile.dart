@@ -39,6 +39,7 @@ EteeloColumnTableRow periodDayRow(
   required List<CashRegister> registers,
   required bool isToday,
   required VoidCallback onOpen,
+  bool selected = false,
 }) {
   final l10n = AppLocalizations.of(context)!;
   final cells = [
@@ -50,6 +51,8 @@ EteeloColumnTableRow periodDayRow(
   return EteeloColumnTableRow(
     widths: PeriodDayColumns.widths(registers.length),
     onTap: onOpen,
+    // La journée ouverte à côté, sur un écran large.
+    background: selected ? AppColors.treasuryOpeningSoft : null,
     cells: [
       ConstrainedBox(
         constraints: const BoxConstraints(

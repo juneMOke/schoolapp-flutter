@@ -384,10 +384,24 @@ void main() {
     expect(find.text('« Erreur de rendu de monnaie »'), findsOneWidget);
   });
 
+  testWidgets('écran large : la journée touchée s ouvre à côté de la '
+      'semaine', (tester) async {
+    setTestWindow(tester, const Size(1280, 1400));
+    await _pump(tester, treasuryDay([usdDay(), cdfDay()]));
+    await tester.tap(find.text('Hebdomadaire'));
+    await tester.pumpAndSettle();
+    expect(find.text('Jeudi 22 octobre 2026'), findsOneWidget);
+    await tester.tap(find.text('Mer. 21 oct.'));
+    await tester.pumpAndSettle();
+    expect(find.text('Jour par jour'), findsOneWidget);
+    expect(find.text('Mercredi 21 octobre 2026'), findsOneWidget);
+    expect(find.byType(DayCard), findsNWidgets(2));
+  });
+
   testWidgets('toucher une journée de la semaine la rouvre en Journalier', (
     tester,
   ) async {
-    setTestWindow(tester, const Size(1280, 1400));
+    setTestWindow(tester, const Size(800, 1400));
     await _pump(tester, treasuryDay([usdDay(), cdfDay()]));
     await tester.tap(find.text('Hebdomadaire'));
     await tester.pumpAndSettle();
@@ -399,7 +413,7 @@ void main() {
 
   testWidgets('retour Android depuis une journée de la semaine : la semaine '
       'revient, sans quitter l écran', (tester) async {
-    setTestWindow(tester, const Size(1280, 1400));
+    setTestWindow(tester, const Size(800, 1400));
     await _pump(tester, treasuryDay([usdDay(), cdfDay()]));
     await tester.tap(find.text('Hebdomadaire'));
     await tester.pumpAndSettle();
