@@ -28410,6 +28410,12 @@ abstract class AppLocalizations {
   /// **'Move from one row to the next'**
   String get shortcutsHelpRows;
 
+  /// No description provided for @shortcutsHelpStep.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous or next day or period'**
+  String get shortcutsHelpStep;
+
   /// No description provided for @shortcutsHelpOpen.
   ///
   /// In en, this message translates to:

@@ -18320,6 +18320,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get shortcutsHelpRows => 'Move from one row to the next';
 
   @override
+  String get shortcutsHelpStep => 'Previous or next day or period';
+
+  @override
   String get shortcutsHelpOpen => 'Open the row';
 
   @override

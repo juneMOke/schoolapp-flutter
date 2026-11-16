@@ -11514,6 +11514,10 @@
   "@shortcutsHelpRows": {
     "description": "Aide des raccourcis clavier (touche ? ou F1)."
   },
+  "shortcutsHelpStep": "Journée ou période précédente, suivante",
+  "@shortcutsHelpStep": {
+    "description": "Aide des raccourcis clavier (touche ? ou F1)."
+  },
   "shortcutsHelpOpen": "Ouvrir la ligne",
   "@shortcutsHelpOpen": {
     "description": "Aide des raccourcis clavier (touche ? ou F1)."

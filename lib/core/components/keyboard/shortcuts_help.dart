@@ -47,6 +47,7 @@ class ShortcutsHelpDialog extends StatelessWidget {
       (['F5', 'Ctrl+R'], l10n.shortcutsHelpRefresh),
       (['Ctrl+P'], l10n.shortcutsHelpPrint),
       (['↑', '↓'], l10n.shortcutsHelpRows),
+      (['←', '→'], l10n.shortcutsHelpStep),
       ([enter], l10n.shortcutsHelpOpen),
       (['Ctrl+$enter'], l10n.shortcutsHelpSubmit),
       ([l10n.shortcutsKeyEscape], l10n.shortcutsHelpClose),

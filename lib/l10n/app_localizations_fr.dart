@@ -18453,6 +18453,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get shortcutsHelpRows => 'Passer d\'une ligne à l\'autre';
 
   @override
+  String get shortcutsHelpStep => 'Journée ou période précédente, suivante';
+
+  @override
   String get shortcutsHelpOpen => 'Ouvrir la ligne';
 
   @override

@@ -151,6 +151,31 @@ void main() {
     expect(find.text('Jeudi 22 octobre 2026'), findsOneWidget);
   });
 
+  testWidgets('← ouvre la veille, → revient', (tester) async {
+    setTestWindow(tester, const Size(1280, 1400));
+    await _pump(tester, treasuryDay([usdDay(), cdfDay()]));
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+    await tester.pumpAndSettle();
+    expect(find.text('Mercredi 21 octobre 2026'), findsOneWidget);
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+    await tester.pumpAndSettle();
+    expect(find.text('Jeudi 22 octobre 2026'), findsOneWidget);
+  });
+
+  testWidgets('un bouton au focus du clavier : ← change de journée, le '
+      'focus ne bouge pas en plus', (tester) async {
+    setTestWindow(tester, const Size(1280, 1400));
+    await _pump(tester, treasuryDay([usdDay(), cdfDay()]));
+    await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+    await tester.pump();
+    final focused = FocusManager.instance.primaryFocus;
+    expect(focused, isNot(isA<FocusScopeNode>()));
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+    await tester.pumpAndSettle();
+    expect(find.text('Mercredi 21 octobre 2026'), findsOneWidget);
+    expect(FocusManager.instance.primaryFocus, same(focused));
+  });
+
   testWidgets('le bandeau compte en vrai pluriel', (tester) async {
     setTestWindow(tester, const Size(1280, 1400));
     await _pump(
