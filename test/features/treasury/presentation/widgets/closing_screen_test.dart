@@ -1,4 +1,5 @@
 import 'package:dartz/dartz.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -160,6 +161,29 @@ void main() {
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
     await tester.pumpAndSettle();
     expect(find.text('Jeudi 22 octobre 2026'), findsOneWidget);
+  });
+
+  testWidgets('poste : la date se tape au clavier', (tester) async {
+    debugDefaultTargetPlatformOverride = TargetPlatform.linux;
+    addTearDown(() => debugDefaultTargetPlatformOverride = null);
+    setTestWindow(tester, const Size(1280, 1400));
+    await _pump(tester, treasuryDay([usdDay(), cdfDay()]));
+    await tester.tap(
+      find.widgetWithIcon(OutlinedButton, Icons.calendar_today_outlined),
+    );
+    await tester.pumpAndSettle();
+    expect(find.byType(InputDatePickerFormField), findsOneWidget);
+    debugDefaultTargetPlatformOverride = null;
+  });
+
+  testWidgets('au doigt : la date se choisit au calendrier', (tester) async {
+    setTestWindow(tester, const Size(1280, 1400));
+    await _pump(tester, treasuryDay([usdDay(), cdfDay()]));
+    await tester.tap(
+      find.widgetWithIcon(OutlinedButton, Icons.calendar_today_outlined),
+    );
+    await tester.pumpAndSettle();
+    expect(find.byType(CalendarDatePicker), findsOneWidget);
   });
 
   testWidgets('un bouton au focus du clavier : ← change de journée, le '

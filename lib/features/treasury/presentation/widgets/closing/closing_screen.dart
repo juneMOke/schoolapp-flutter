@@ -19,6 +19,7 @@ import 'package:school_app_flutter/features/treasury/presentation/widgets/common
 import 'package:school_app_flutter/features/treasury/presentation/widgets/common/treasury_step_gestures.dart';
 import 'package:school_app_flutter/core/navigation/location_params_sync.dart';
 import 'package:school_app_flutter/core/navigation/screen_back_scope.dart';
+import 'package:school_app_flutter/features/treasury/presentation/helpers/treasury_date_picker.dart';
 import 'package:school_app_flutter/features/treasury/presentation/helpers/treasury_location.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
@@ -328,8 +329,8 @@ class ClosingScreenState extends State<ClosingScreen> {
     final first = state.historyStart;
     if (today == null || first == null) return;
     final cubit = context.read<CashClosingCubit>();
-    final picked = await showDatePicker(
-      context: context,
+    final picked = await showTreasuryDatePicker(
+      context,
       initialDate: state.date,
       firstDate: first,
       lastDate: today,

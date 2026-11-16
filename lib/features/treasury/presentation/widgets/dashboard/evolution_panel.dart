@@ -18,6 +18,7 @@ import 'package:school_app_flutter/features/treasury/presentation/widgets/common
 import 'package:school_app_flutter/core/helpers/school_time.dart';
 import 'package:school_app_flutter/features/treasury/domain/entities/cash_report.dart';
 import 'package:school_app_flutter/features/treasury/presentation/helpers/cash_report_opener.dart';
+import 'package:school_app_flutter/features/treasury/presentation/helpers/treasury_date_picker.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// L'évolution des caisses (A3) : les filtres de période, le bandeau qui dit
@@ -213,8 +214,8 @@ class _CustomRange extends StatelessWidget {
     final localizations = MaterialLocalizations.of(context);
     Future<void> pick(bool isFrom) async {
       final initial = isFrom ? state.customFrom : state.customTo;
-      final picked = await showDatePicker(
-        context: context,
+      final picked = await showTreasuryDatePicker(
+        context,
         initialDate: initial.isBefore(firstDay) ? firstDay : initial,
         firstDate: firstDay,
         lastDate: today,
