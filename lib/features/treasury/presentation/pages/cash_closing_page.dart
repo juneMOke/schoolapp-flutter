@@ -33,7 +33,8 @@ class _CashClosingPageState extends State<CashClosingPage> {
 
   @override
   Widget build(BuildContext context) => BlocProvider<CashClosingCubit>(
-    create: (_) => GetIt.instance<CashClosingCubit>()..load(),
+    // L'écran lance la première lecture, sur la journée de l'adresse.
+    create: (_) => GetIt.instance<CashClosingCubit>(),
     child: TreasuryRefreshScope(
       keyboard: false,
       onRefresh: () async => _screen.currentState?.refresh(),

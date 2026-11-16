@@ -87,9 +87,9 @@ void main() {
   Widget closing() {
     final probe = _Probe();
     when(() => probe.pendingFor(any())).thenAnswer((_) async => 0);
+    // Comme la page : l'écran lance la première lecture.
     return BlocProvider(
-      create: (_) =>
-          CashClosingCubit(days, probe, initialDate: demoDay)..load(),
+      create: (_) => CashClosingCubit(days, probe, initialDate: demoDay),
       child: const ClosingScreen(online: true, callbacks: ClosingCallbacks()),
     );
   }
@@ -111,6 +111,8 @@ void main() {
       await pump(tester, '/tresorerie/cloture?jour=2026-10-20', closing());
       expect(find.text('Mardi 20 octobre 2026'), findsOneWidget);
       verify(() => days.day(DateTime(2026, 10, 20))).called(1);
+      // Une seule lecture : pas aujourd'hui d'abord.
+      verifyNever(() => days.day(demoDay));
     });
 
     testWidgets('F5 : l adresse rouvre la semaine', (tester) async {
@@ -141,8 +143,9 @@ void main() {
       );
     });
 
+    // Comme le tableau de bord : la synchro lance la première lecture.
     Widget panel() => BlocProvider(
-      create: (_) => CashReportsCubit(reports, today: demoDay)..load(),
+      create: (_) => CashReportsCubit(reports, today: demoDay),
       child: const ReportsLocationSync(child: SizedBox()),
     );
 
@@ -155,6 +158,8 @@ void main() {
         panel(),
       );
       verify(() => reports.list(CashReportKind.weekly, 1)).called(1);
+      // Une seule lecture : pas les journaliers d'abord.
+      verifyNever(() => reports.list(CashReportKind.daily, any()));
       expect(address(), '/tresorerie/tableau?rapports=weekly&rapports-page=2');
     });
 
@@ -166,12 +171,12 @@ void main() {
         tester,
         '/tresorerie/tableau?rapports-page=3',
         BlocProvider(
-          create: (_) =>
-              cubit = CashReportsCubit(reports, today: demoDay)..load(),
+          create: (_) => cubit = CashReportsCubit(reports, today: demoDay),
           child: const ReportsLocationSync(child: SizedBox()),
         ),
       );
       verify(() => reports.list(CashReportKind.daily, 2)).called(1);
+      verifyNever(() => reports.list(CashReportKind.daily, 0));
       // Réessayer relit `requestedPage` : la page de l'adresse.
       expect(cubit.state.requestedPage, 2);
       expect(address(), '/tresorerie/tableau?rapports-page=3');
@@ -182,6 +187,7 @@ void main() {
     ) async {
       await pump(tester, '/tresorerie/tableau', panel());
       verifyNever(() => reports.list(CashReportKind.weekly, any()));
+      verify(() => reports.list(CashReportKind.daily, 0)).called(1);
       expect(address(), '/tresorerie/tableau');
     });
   });

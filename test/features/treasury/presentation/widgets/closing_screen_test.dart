@@ -77,8 +77,7 @@ Future<void> _pump(
   await tester.pumpWidget(
     treasuryHost(
       BlocProvider(
-        create: (_) =>
-            CashClosingCubit(repo, probe, initialDate: day.date)..load(),
+        create: (_) => CashClosingCubit(repo, probe, initialDate: day.date),
         child: ClosingScreen(
           online: online,
           callbacks: ClosingCallbacks(

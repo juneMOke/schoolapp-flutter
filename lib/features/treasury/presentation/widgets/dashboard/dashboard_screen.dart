@@ -127,11 +127,11 @@ class TreasuryDashboardScreen extends StatelessWidget {
           child: BlocProvider(
             create: (_) =>
                 evolutionCubit?.call(overview.businessDate) ??
-                      TreasuryEvolutionCubit(
-                        GetIt.instance<TreasuryDashboardRepository>(),
-                        today: overview.businessDate,
-                      )
-                  ..load(),
+                TreasuryEvolutionCubit(
+                  GetIt.instance<TreasuryDashboardRepository>(),
+                  today: overview.businessDate,
+                ),
+            // Il lance la première lecture, sur l'adresse.
             child: EvolutionLocationSync(
               child: EvolutionPanel(
                 firstDay: overview.academicYear.startDate,
@@ -148,11 +148,10 @@ class TreasuryDashboardScreen extends StatelessWidget {
           child: BlocProvider(
             create: (_) =>
                 reportsCubit?.call(overview.businessDate) ??
-                      CashReportsCubit(
-                        GetIt.instance<TreasuryReportsRepository>(),
-                        today: overview.businessDate,
-                      )
-                  ..load(),
+                CashReportsCubit(
+                  GetIt.instance<TreasuryReportsRepository>(),
+                  today: overview.businessDate,
+                ),
             child: ReportsLocationSync(
               child: ReportsPanel(
                 firstDay: overview.academicYear.startDate,

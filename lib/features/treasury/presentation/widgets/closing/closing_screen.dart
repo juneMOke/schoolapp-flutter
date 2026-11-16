@@ -13,6 +13,7 @@ import 'package:school_app_flutter/features/treasury/presentation/widgets/closin
 import 'package:school_app_flutter/features/treasury/presentation/widgets/closing/closing_day_view.dart';
 import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
 import 'package:school_app_flutter/features/treasury/presentation/widgets/common/treasury_panel.dart';
+import 'package:school_app_flutter/features/treasury/presentation/widgets/common/treasury_location_sync.dart';
 import 'package:school_app_flutter/features/treasury/presentation/widgets/common/treasury_refresh_scope.dart';
 import 'package:school_app_flutter/core/navigation/location_params_sync.dart';
 import 'package:school_app_flutter/core/navigation/screen_back_scope.dart';
@@ -54,6 +55,18 @@ class ClosingScreenState extends State<ClosingScreen> {
   /// La vue d'où l'on a ouvert la journée affichée : le retour Android y
   /// remonte au lieu de quitter l'écran.
   ClosingScope? _returnTo;
+
+  var _started = false;
+
+  /// La première lecture part sur la journée de l'adresse (F5, lien) : une
+  /// seule requête au montage, pas aujourd'hui puis la journée demandée.
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_started) return;
+    _started = true;
+    context.read<CashClosingCubit>().load(closingDayOf(context));
+  }
 
   ClosingCallbacks get callbacks => widget.callbacks;
   bool get online => widget.online;
