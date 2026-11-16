@@ -1383,6 +1383,9 @@ class AppDimensions {
   static const treasuryChartHeight = 230.0;
   static const treasuryChartHeightCompact = 200.0;
 
+  /// Hauteur de la courbe sur un écran bas (téléphone en paysage).
+  static const treasuryChartHeightLow = 160.0;
+
   /// Largeur sous laquelle une courbe de caisse ne partage pas sa ligne :
   /// au-delà de deux fois cette largeur (poste), USD et CDF se lisent côte à
   /// côte au lieu de s'étirer, aplaties, sur toute la page.

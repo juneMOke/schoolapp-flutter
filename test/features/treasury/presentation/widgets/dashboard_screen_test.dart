@@ -16,6 +16,7 @@ import 'package:school_app_flutter/features/treasury/presentation/helpers/treasu
 import 'package:school_app_flutter/features/treasury/domain/entities/treasury_currency.dart';
 import 'package:school_app_flutter/features/treasury/presentation/widgets/dashboard/dashboard_screen.dart';
 import 'package:school_app_flutter/features/treasury/presentation/widgets/dashboard/register_balance_chart.dart';
+import 'package:school_app_flutter/features/treasury/presentation/widgets/dashboard/treasury_balance_line.dart';
 
 import '../../../../test_helpers/reference_formats.dart';
 import '../../treasury_fixtures.dart';
@@ -132,6 +133,22 @@ void main() {
       tester.getTopLeft(charts.last).dy,
       greaterThan(tester.getBottomLeft(charts.first).dy),
     );
+  });
+
+  testWidgets('la hauteur de la courbe suit aussi la hauteur de l écran', (
+    tester,
+  ) async {
+    Future<double> chartHeight(Size window) async {
+      setTestWindow(tester, window);
+      await tester.pumpAndSettle();
+      return tester.getSize(find.byType(TreasuryBalanceLine).first).height;
+    }
+
+    await _pump(tester);
+    expect(await chartHeight(const Size(1280, 800)), 230);
+    expect(await chartHeight(const Size(360, 740)), 200);
+    // Téléphone en paysage : large, mais bas.
+    expect(await chartHeight(const Size(740, 360)), 160);
   });
 
   testWidgets('toucher une caisse ouvre sa clôture', (tester) async {

@@ -79,6 +79,11 @@ class AppBreakpoints {
   /// Sous ce seuil, la courbe d'une caisse (Trésorerie ▸ Tableau de bord)
   /// passe à sa hauteur compacte (spec A4).
   static const double treasuryChartCompactMax = 520.0;
+
+  /// Hauteur de fenêtre sous laquelle la courbe d'une caisse passe à sa
+  /// hauteur basse : un téléphone en paysage (360 dp) n'a pas 230 dp à lui
+  /// donner sans cacher son en-tête chiffré.
+  static const double treasuryChartLowHeightMax = 480.0;
   static const double formGridThreeColMin = 880.0;
 
   /// En-tête de page à chiffres (Classes) : en deçà, le titre passe au-dessus

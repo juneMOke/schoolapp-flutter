@@ -49,9 +49,10 @@ class RegisterBalanceChart extends StatelessWidget {
       for (final (index, p) in series.points.indexed)
         if (p.balanceInCents != null) (index, p),
     ];
-    final compact =
-        MediaQuery.sizeOf(context).width <
-        AppBreakpoints.treasuryChartCompactMax;
+    final screen = MediaQuery.sizeOf(context);
+    final compact = screen.width < AppBreakpoints.treasuryChartCompactMax;
+    // La hauteur aussi : en paysage, un téléphone est large mais bas.
+    final low = screen.height < AppBreakpoints.treasuryChartLowHeightMax;
     final variation = s.variationPercent;
     return Semantics(
       label: l10n.treasuryChartSemantics(
@@ -95,7 +96,9 @@ class RegisterBalanceChart extends StatelessWidget {
                 )
               else
                 SelectableBalanceLine(
-                  height: compact
+                  height: low
+                      ? AppDimensions.treasuryChartHeightLow
+                      : compact
                       ? AppDimensions.treasuryChartHeightCompact
                       : AppDimensions.treasuryChartHeight,
                   currency: currency,
