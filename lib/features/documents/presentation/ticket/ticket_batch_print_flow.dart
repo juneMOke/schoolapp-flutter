@@ -9,6 +9,7 @@ import 'package:school_app_flutter/core/offline/current_user_context.dart';
 import 'package:school_app_flutter/core/widgets/app_confirmation_dialog.dart';
 import 'package:school_app_flutter/features/documents/data/ticket/esc_pos_ticket_renderer.dart';
 import 'package:school_app_flutter/features/documents/data/ticket/pdf_ticket_renderer.dart';
+import 'package:school_app_flutter/features/documents/domain/printing/thermal_printer.dart';
 import 'package:school_app_flutter/features/documents/domain/entities/ticket_print_job.dart';
 import 'package:school_app_flutter/features/documents/domain/ticket/ticket_cancellation_layout.dart';
 import 'package:school_app_flutter/features/documents/domain/ticket/ticket_cancellation_model.dart';
@@ -28,6 +29,7 @@ import 'package:school_app_flutter/features/documents/presentation/ticket/therma
 import 'package:school_app_flutter/features/documents/presentation/ticket/thermal_ticket_printer.dart';
 import 'package:school_app_flutter/features/school/data/school_logo_band_loader.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
+import 'package:school_app_flutter/features/documents/presentation/ticket/ticket_copies_stepper.dart';
 
 /// Ce qu'un lot a produit.
 class TicketBatchOutcome {
@@ -48,7 +50,11 @@ class TicketBatchOutcome {
   /// Le spouleur a refusé le lot.
   final bool spoolerFailed;
 
+  /// L'imprimante thermique du lot, `null` hors thermique.
+  final ThermalPrinter? printer;
+
   const TicketBatchOutcome({
+    this.printer,
     this.printed = 0,
     this.skipped = 0,
     this.problem,
@@ -71,6 +77,14 @@ class _ComposedBatch {
     required this.logoBand,
     required this.copies,
   });
+
+  /// Le même lot, au nombre d'exemplaires choisi dans l'aperçu.
+  _ComposedBatch withCopies(int copies) => _ComposedBatch(
+    tickets: tickets,
+    skipped: skipped,
+    logoBand: logoBand,
+    copies: copies,
+  );
 }
 
 /// Le bouton de « Tickets à imprimer » : le même cheminement que tout autre
@@ -109,6 +123,7 @@ Future<TicketBatchOutcome> reviewAndPrintTicketBatch(
   if (!context.mounted) return const TicketBatchOutcome(cancelled: true);
 
   var outcome = TicketBatchOutcome(skipped: batch.skipped, cancelled: true);
+  final chosenCopies = ValueNotifier(batch.copies);
   await showEteeloDocumentViewer(
     context,
     title: l10n.ticketsToPrintTitle,
@@ -118,24 +133,26 @@ Future<TicketBatchOutcome> reviewAndPrintTicketBatch(
       reference: l10n.ticketsToPrintTitle,
     ),
     previewBuilder: previewBuilder,
+    printOptions: TicketCopiesOption(copies: chosenCopies),
     closeAfterPrint: true,
     onPrint: () async {
       outcome = printsTicketsThroughSpooler
           ? await _sendToSpooler(
               context,
-              batch,
+              batch.withCopies(chosenCopies.value),
               tickets: tickets,
               cutNotice: cutNotice,
               l10n: l10n,
             )
           : await _sendToThermalPrinter(
               context,
-              batch,
+              batch.withCopies(chosenCopies.value),
               choose: choose,
               send: send,
             );
     },
   );
+  chosenCopies.dispose();
   return outcome;
 }
 
@@ -182,9 +199,8 @@ Future<TicketBatchOutcome> _sendToSpooler(
 /// Imprime [jobs] — les tickets cochés de « Tickets à imprimer », dans
 /// l'ordre des numéros (continuité des tickets RC, lot D).
 ///
-/// L'imprimante se choisit **une fois** pour le lot, avec le nombre
-/// d'exemplaires de l'école : la redemander à chaque ticket rendrait le lot
-/// inutilisable, la mémoriser ferait sortir des reçus dans la pièce d'à côté.
+/// Une imprimante pour tout le lot — celle de la tablette, sinon choisie une
+/// fois —, au nombre d'exemplaires réglé dans l'aperçu.
 /// Puis les tickets partent **un par un** : chacun est marqué imprimé dès que
 /// SON envoi a réussi, et la première panne arrête le lot — les suivants
 /// restent dans la file, cochés, prêts à relancer.
@@ -233,11 +249,13 @@ Future<TicketBatchOutcome> _sendToThermalPrinter(
       printer,
     );
     if (problem != null) {
+      await rememberTicketPrinter(printer.printer, problem);
       await recordProblem(job, problem.name);
       return TicketBatchOutcome(
         printed: printed,
         skipped: batch.skipped,
         problem: problem,
+        printer: printer.printer,
       );
     }
     // Une note de suivi ratée n'annule pas le papier : il est sorti. Le
@@ -245,7 +263,12 @@ Future<TicketBatchOutcome> _sendToThermalPrinter(
     await markPrinted(job);
     printed++;
   }
-  return TicketBatchOutcome(printed: printed, skipped: batch.skipped);
+  await rememberTicketPrinter(printer.printer, null);
+  return TicketBatchOutcome(
+    printed: printed,
+    skipped: batch.skipped,
+    printer: printer.printer,
+  );
 }
 
 Future<_ComposedBatch> _compose(

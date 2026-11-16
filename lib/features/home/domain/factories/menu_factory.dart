@@ -156,6 +156,11 @@ class MenuFactory {
           title: l10n.subMenuBilling,
           route: AppRoutesNames.facturations,
         ),
+        SubMenuItem(
+          id: MenuConstants.ticketPrinterId,
+          title: l10n.subMenuTicketPrinter,
+          route: AppRoutesNames.ticketPrinter,
+        ),
       ],
     );
   }

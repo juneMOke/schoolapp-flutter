@@ -1,3 +1,6 @@
+import 'package:school_app_flutter/features/finance/presentation/widgets/tickets_to_print/ticket_batch_summary.dart';
+import 'package:school_app_flutter/features/documents/domain/printing/thermal_printer.dart';
+import 'package:school_app_flutter/features/documents/presentation/ticket/ticket_batch_print_flow.dart';
 import 'package:bloc_test/bloc_test.dart';
 import 'package:dartz/dartz.dart';
 import 'package:flutter/material.dart';
@@ -314,5 +317,52 @@ void main() {
     await open(tester);
 
     expect(find.byType(EteeloErrorResult), findsOneWidget);
+  });
+
+  group('ticketBatchSummary', () {
+    final l10n = lookupAppLocalizations(const Locale('fr'));
+
+    test('permission refusée : la cause seule, et les réglages offerts', () {
+      final summary = ticketBatchSummary(
+        l10n,
+        const TicketBatchOutcome(
+          problem: ThermalPrinterProblem.permissionDenied,
+        ),
+      )!;
+      expect(summary.text, contains('Appareils à proximité'));
+      // Le lot n'imprime rien en PDF : il ne doit pas l'annoncer.
+      expect(summary.text, isNot(contains('PDF')));
+      expect(summary.offersSettings, isTrue);
+    });
+
+    test('une autre panne : pas de réglages, toujours pas de PDF', () {
+      final summary = ticketBatchSummary(
+        l10n,
+        const TicketBatchOutcome(
+          printed: 1,
+          problem: ThermalPrinterProblem.unreachable,
+        ),
+      )!;
+      expect(summary.text, isNot(contains('PDF')));
+      expect(summary.offersSettings, isFalse);
+    });
+
+    test('des tickets sortis : l imprimante est dite', () {
+      final summary = ticketBatchSummary(
+        l10n,
+        const TicketBatchOutcome(
+          printed: 2,
+          printer: ThermalPrinter(name: 'NT-8003DD', macAddress: 'DC:0D'),
+        ),
+      )!;
+      expect(summary.text, contains('Imprimante : NT-8003DD.'));
+    });
+
+    test('rien à dire : rien', () {
+      expect(
+        ticketBatchSummary(l10n, const TicketBatchOutcome(cancelled: true)),
+        isNull,
+      );
+    });
   });
 }

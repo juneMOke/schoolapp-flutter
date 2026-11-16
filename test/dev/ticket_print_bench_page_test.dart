@@ -11,6 +11,8 @@ import 'package:school_app_flutter/dev/ticket_bench_printer_store.dart';
 import 'package:school_app_flutter/features/documents/data/printing/thermal_printer_permission.dart';
 import 'package:school_app_flutter/features/documents/domain/printing/thermal_printer.dart';
 import 'package:school_app_flutter/features/documents/domain/printing/thermal_printer_port.dart';
+import 'package:school_app_flutter/features/documents/domain/printing/ticket_printer_settings.dart';
+import '../test_helpers/memory_ticket_printer_settings.dart';
 
 const _printer = ThermalPrinter(
   name: 'NT-8003DD',
@@ -108,6 +110,9 @@ void main() {
     permission = _FakePermission();
     store = _FakeStore();
     getIt
+      ..registerSingleton<TicketPrinterSettingsStore>(
+        MemoryTicketPrinterSettings(),
+      )
       ..registerSingleton<ThermalPrinterPort>(port)
       ..registerSingleton<ThermalPrinterPermission>(permission)
       ..registerSingleton<TicketBenchPrinterStore>(store);

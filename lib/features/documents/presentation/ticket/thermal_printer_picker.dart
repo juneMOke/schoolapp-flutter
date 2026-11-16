@@ -32,14 +32,12 @@ class ThermalPrintChoice {
 /// C'est aussi ce qui le garde hors du champ de la règle des états partagés :
 /// il n'y a pas de zone de résultats ici, seulement un choix.
 ///
-/// ## Le compteur vit ici, et pas dans l'aperçu
+/// ## Le compteur vit dans l'aperçu
 ///
-/// Ce dialogue est redemandé à **chaque** ticket et ne concerne que la
-/// thermique : c'est l'endroit où le nombre d'exemplaires se décide sans
-/// toucher la visionneuse commune aux dix sorties papier. Le compteur se règle
-/// **avant** de toucher l'imprimante — toucher une ligne lance l'impression.
-/// [initialCopies] est le défaut de l'appelant, jamais mémorisé d'un ticket à
-/// l'autre.
+/// Ce dialogue ne s'ouvre plus que sans imprimante retenue (première
+/// impression, imprimante désappairée) : son choix est alors retenu. Le
+/// nombre d'exemplaires se règle dans l'aperçu (`TicketCopiesOption`) ;
+/// [initialCopies] est ce nombre, rendu tel quel avec l'imprimante.
 Future<ThermalPrintChoice?> showThermalPrinterPicker(
   BuildContext context, {
   required List<ThermalPrinter> printers,
@@ -70,8 +68,6 @@ class _ThermalPrinterPickerDialog extends StatefulWidget {
 
 class _ThermalPrinterPickerDialogState
     extends State<_ThermalPrinterPickerDialog> {
-  late int _copies = widget.initialCopies;
-
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -88,11 +84,6 @@ class _ThermalPrinterPickerDialogState
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            _CopiesStepper(
-              copies: _copies,
-              onChanged: (value) => setState(() => _copies = value),
-            ),
-            const Divider(height: 1, color: AppColors.border),
             Flexible(
               child: ListView(
                 shrinkWrap: true,
@@ -111,7 +102,10 @@ class _ThermalPrinterPickerDialogState
                       ),
                       subtitle: Text(printer.macAddress),
                       onTap: () => Navigator.of(context).pop(
-                        ThermalPrintChoice(printer: printer, copies: _copies),
+                        ThermalPrintChoice(
+                          printer: printer,
+                          copies: widget.initialCopies,
+                        ),
                       ),
                     ),
                 ],
@@ -126,70 +120,6 @@ class _ThermalPrinterPickerDialogState
           child: Text(l10n.cancel),
         ),
       ],
-    );
-  }
-}
-
-/// « Exemplaires  (−) 2 (+) ».
-///
-/// Les deux bornes **désactivent** leur bouton plutôt que de le cacher : le
-/// compteur ne change pas de forme sous le doigt.
-class _CopiesStepper extends StatelessWidget {
-  final int copies;
-  final ValueChanged<int> onChanged;
-
-  const _CopiesStepper({required this.copies, required this.onChanged});
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    final theme = Theme.of(context);
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.lg,
-        vertical: AppSpacing.xs,
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: Text(
-              l10n.ticketCopiesLabel,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: AppColors.textPrimary,
-              ),
-            ),
-          ),
-          IconButton(
-            tooltip: l10n.ticketCopiesDecrease,
-            icon: const Icon(Icons.remove_circle_outline),
-            color: AppColors.textPrimary,
-            onPressed: copies > TicketCopies.min
-                ? () => onChanged(copies - 1)
-                : null,
-          ),
-          SizedBox(
-            width: AppDimensions.ticketCopiesValueWidth,
-            child: Text(
-              '$copies',
-              key: const ValueKey('ticketCopiesValue'),
-              textAlign: TextAlign.center,
-              style: theme.textTheme.titleMedium?.copyWith(
-                color: AppColors.textPrimary,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-          ),
-          IconButton(
-            tooltip: l10n.ticketCopiesIncrease,
-            icon: const Icon(Icons.add_circle_outline),
-            color: AppColors.textPrimary,
-            onPressed: copies < TicketCopies.max
-                ? () => onChanged(copies + 1)
-                : null,
-          ),
-        ],
-      ),
     );
   }
 }

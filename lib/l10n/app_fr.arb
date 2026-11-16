@@ -5899,6 +5899,88 @@
   "ticketPrinterProblemBluetoothOff": "Bluetooth éteint — impression PDF à la place.",
   "ticketPrinterProblemNoPrinter": "Aucune imprimante appairée — impression PDF à la place.",
   "ticketPrinterProblemUnreachable": "Imprimante injoignable, éteinte ou hors de portée — impression PDF à la place.",
+  "ticketPrinterCausePermission": "l'autorisation « Appareils à proximité » n'est pas accordée à l'application.",
+  "ticketPrinterCauseBluetoothOff": "le Bluetooth est éteint.",
+  "ticketPrinterCauseNoPrinter": "aucune imprimante n'est appairée à cette tablette.",
+  "ticketPrinterCauseUnreachable": "l'imprimante est injoignable, éteinte ou hors de portée.",
+  "ticketSentToPrinter": "Ticket envoyé sur {printer}.",
+  "@ticketSentToPrinter": {
+    "description": "Après un ticket thermique : l'imprimante n'est plus demandée à chaque fois, l'écran dit où le ticket est parti.",
+    "placeholders": {
+      "printer": {
+        "type": "String"
+      }
+    }
+  },
+  "ticketsPrinterUsed": "Imprimante : {printer}.",
+  "@ticketsPrinterUsed": {
+    "placeholders": {
+      "printer": {
+        "type": "String"
+      }
+    }
+  },
+  "subMenuTicketPrinter": "Imprimante de tickets",
+  "ticketPrinterSubtitle": "Où sortent les tickets de cette tablette, et en combien d'exemplaires.",
+  "ticketPrinterPermissionTitle": "Autorisation Bluetooth",
+  "ticketPrinterPermissionGranted": "« Appareils à proximité » est accordée : l'application peut joindre l'imprimante.",
+  "ticketPrinterPermissionMissing": "Il manque l'autorisation « Appareils à proximité » ({permissions}) : sans elle, aucun ticket ne part sur l'imprimante.",
+  "@ticketPrinterPermissionMissing": {
+    "placeholders": {
+      "permissions": {
+        "type": "String"
+      }
+    }
+  },
+  "ticketPrinterPermissionAllow": "Autoriser",
+  "ticketPrinterPermissionOpenSettings": "Ouvrir les réglages Android",
+  "ticketPrinterPermissionManagedHint": "Tablette gérée par une console de gestion de parc : accordez ces permissions dans la politique de l'application (« Automatically granted »), Android ne les demandera pas.",
+  "ticketPrinterTitle": "Imprimante",
+  "ticketPrinterChoose": "Choisissez l'imprimante de ce guichet : les tickets y partiront sans question.",
+  "ticketPrinterGone": "L'imprimante retenue ({printer}) n'est plus appairée. Choisissez-en une autre.",
+  "@ticketPrinterGone": {
+    "placeholders": {
+      "printer": {
+        "type": "String"
+      }
+    }
+  },
+  "ticketPrinterPairHint": "Aucune imprimante n'est appairée : appairez-la dans les réglages Bluetooth d'Android, puis revenez ici.",
+  "ticketPrinterBluetoothOffHint": "Le Bluetooth est éteint : allumez-le pour voir les imprimantes.",
+  "ticketPrinterUnreachableHint": "La liste des imprimantes n'a pas pu se lire.",
+  "ticketPrinterWaitPermission": "Les imprimantes s'afficheront une fois l'autorisation accordée.",
+  "ticketPrinterTestPrint": "Imprimer un ticket d'essai",
+  "ticketPrinterTestSent": "Ticket d'essai envoyé sur {printer}.",
+  "@ticketPrinterTestSent": {
+    "placeholders": {
+      "printer": {
+        "type": "String"
+      }
+    }
+  },
+  "ticketPrinterTestFailed": "Le ticket d'essai n'est pas parti : {cause}",
+  "@ticketPrinterTestFailed": {
+    "placeholders": {
+      "cause": {
+        "type": "String"
+      }
+    }
+  },
+  "ticketPrinterTestHeading": "TICKET D'ESSAI",
+  "ticketPrinterTestBody": "Cette imprimante est prête pour les tickets.",
+  "ticketCopiesDefaultTitle": "Exemplaires par défaut",
+  "ticketCopiesDefaultHint": "Chaque ticket sort en ce nombre d'exemplaires. Pour un ticket précis, le nombre se change au moment d'imprimer.",
+  "ticketPrinterSpoolerNote": "Sur ce poste, les tickets passent par l'imprimante du système : seul le nombre d'exemplaires se règle ici.",
+  "ticketPrinterLoading": "Lecture des réglages d'impression",
+  "ticketCopiesUseSchool": "Reprendre le réglage de l'école",
+  "boutiqueReceiptPrintedOn": "Ticket imprimé sur {printer}.",
+  "@boutiqueReceiptPrintedOn": {
+    "placeholders": {
+      "printer": {
+        "type": "String"
+      }
+    }
+  },
   "paymentAnomalyBannerTitle": "Trop-perçu à arbitrer",
   "paymentAnomalyBannerFallback": "Un encaissement dépasse le reste dû.",
   "paymentAnomalyAcknowledgeLabel": "Traité",

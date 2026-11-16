@@ -326,6 +326,9 @@ const Map<String, Map<String, ModuleAccess>> kModuleAccessRegistry = {
     // caisse : une seule définition, pour que les deux portes s'ouvrent et se
     // ferment ensemble.
     MenuConstants.facturationsId: kBillingReadAccess,
+    // Qui encaisse ET sort des tickets règle son imprimante. `editique.read`
+    // seul ouvrait le menu Finances au secrétariat, pour ce seul écran.
+    MenuConstants.ticketPrinterId: kTicketPrinterSettingsAccess,
   },
   // Le contrôle ne lit que des créances et leur solde : `finance.charge.read`
   // suffit, et c'est exactement ce que détient le secrétariat. Qui le détient
@@ -566,6 +569,12 @@ const Map<String, ModuleAccess> kStandaloneRouteAccess = {
 /// toujours la lecture avec l'écriture ; mais les droits se règlent école par
 /// école, et rien n'interdit de retirer l'une sans l'autre.
 const ModuleAccess kTicketPrintAccess = ModuleAccess([Perm.editiqueRead]);
+
+/// Finances ▸ Imprimante de tickets : le guichet qui encaisse et imprime.
+const ModuleAccess kTicketPrinterSettingsAccess = ModuleAccess([
+  Perm.editiqueRead,
+  Perm.financePaymentRead,
+], requiresAll: true);
 
 /// « Relancer » le reçu qu'un accusé n'a pas rapporté
 /// (`POST /finance/payments/{id}/receipt`).

@@ -21,6 +21,7 @@ import 'package:school_app_flutter/features/documents/presentation/ticket/therma
 import 'package:school_app_flutter/features/documents/presentation/ticket/thermal_ticket_printer.dart';
 import 'package:school_app_flutter/features/school/data/school_logo_band_loader.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
+import 'package:school_app_flutter/features/documents/presentation/ticket/ticket_copies_stepper.dart';
 
 /// Montre le ticket d'annulation du versement [paymentId], puis l'imprime
 /// depuis le pied de l'aperçu (continuité des tickets RC, lot B) — à la fin du
@@ -90,6 +91,7 @@ Future<bool> printCancellationTicket(
   if (!context.mounted) return false;
 
   var printed = false;
+  final chosenCopies = ValueNotifier(copies);
   await showEteeloDocumentViewer(
     context,
     title: model.labels.title,
@@ -99,6 +101,7 @@ Future<bool> printCancellationTicket(
       reference: model.receiptNumber,
     ),
     previewBuilder: previewBuilder,
+    printOptions: TicketCopiesOption(copies: chosenCopies),
     closeAfterPrint: true,
     onPrint: () async {
       if (printsTicketsThroughSpooler) {
@@ -107,7 +110,7 @@ Future<bool> printCancellationTicket(
           name: model.receiptNumber,
           cutNotice: cutNotice,
           logoBand: logoBand,
-          copies: copies,
+          copies: chosenCopies.value,
         );
         if (!accepted) {
           messenger?.showSnackBar(
@@ -121,12 +124,13 @@ Future<bool> printCancellationTicket(
         paymentId: paymentId,
         lines: lines,
         logoBand: logoBand,
-        copies: copies,
+        copies: chosenCopies.value,
         messenger: messenger,
         l10n: l10n,
       );
     },
   );
+  chosenCopies.dispose();
   return printed;
 }
 
@@ -145,7 +149,12 @@ Future<bool> _sendToThermalPrinter(
     initialCopies: copies,
   );
   switch (outcome) {
-    case ThermalTicketPrinted():
+    case ThermalTicketPrinted(:final printer):
+      if (printer != null) {
+        messenger?.showSnackBar(
+          SnackBar(content: Text(l10n.ticketSentToPrinter(printer.label))),
+        );
+      }
       await getIt<MarkCancellationTicketPrintedUseCase>()(paymentId);
       return true;
     case ThermalTicketFailed(:final problem):

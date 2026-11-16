@@ -63,6 +63,7 @@ import 'package:school_app_flutter/features/schedule/presentation/pages/schedule
 import 'package:school_app_flutter/features/staff/presentation/pages/staff_attendance_page.dart';
 import 'package:school_app_flutter/features/staff/presentation/pages/staff_file_page.dart';
 import 'package:school_app_flutter/features/home/presentation/widget/shell/shell_under_construction.dart';
+import 'package:school_app_flutter/features/finance/presentation/pages/ticket_printer_settings_page.dart';
 
 /// L'écran que la coquille affiche pour un sous-menu.
 ///
@@ -130,6 +131,8 @@ class ShellScreen extends StatelessWidget {
       // menait bel et bien, et l'écran répondait « page en cours de
       // développement » — alors que la route existait et que le module était
       // entier. Un sous-menu déclaré au registre DOIT avoir son cas ici.
+      case MenuConstants.ticketPrinterId:
+        return const TicketPrinterSettingsPage();
       case MenuConstants.boutiqueAchatsId:
         return const BoutiquePage();
 

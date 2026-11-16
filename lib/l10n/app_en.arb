@@ -5815,6 +5815,87 @@
   "ticketPrinterProblemBluetoothOff": "Bluetooth is off — printing as PDF instead.",
   "ticketPrinterProblemNoPrinter": "No paired printer — printing as PDF instead.",
   "ticketPrinterProblemUnreachable": "Printer unreachable, off or out of range — printing as PDF instead.",
+  "ticketPrinterCausePermission": "the Nearby devices permission is not granted to the app.",
+  "ticketPrinterCauseBluetoothOff": "Bluetooth is off.",
+  "ticketPrinterCauseNoPrinter": "no printer is paired with this tablet.",
+  "ticketPrinterCauseUnreachable": "the printer is unreachable, off or out of range.",
+  "ticketSentToPrinter": "Ticket sent to {printer}.",
+  "@ticketSentToPrinter": {
+    "placeholders": {
+      "printer": {
+        "type": "String"
+      }
+    }
+  },
+  "ticketsPrinterUsed": "Printer: {printer}.",
+  "@ticketsPrinterUsed": {
+    "placeholders": {
+      "printer": {
+        "type": "String"
+      }
+    }
+  },
+  "subMenuTicketPrinter": "Ticket printer",
+  "ticketPrinterSubtitle": "Where this tablet's tickets print, and how many copies.",
+  "ticketPrinterPermissionTitle": "Bluetooth permission",
+  "ticketPrinterPermissionGranted": "Nearby devices is granted: the app can reach the printer.",
+  "ticketPrinterPermissionMissing": "The Nearby devices permission is missing ({permissions}): without it, no ticket reaches the printer.",
+  "@ticketPrinterPermissionMissing": {
+    "placeholders": {
+      "permissions": {
+        "type": "String"
+      }
+    }
+  },
+  "ticketPrinterPermissionAllow": "Allow",
+  "ticketPrinterPermissionOpenSettings": "Open Android settings",
+  "ticketPrinterPermissionManagedHint": "Tablet managed by a device management console: grant these permissions in the app's policy (\"Automatically granted\"); Android will not ask for them.",
+  "ticketPrinterTitle": "Printer",
+  "ticketPrinterChoose": "Choose this desk's printer: tickets will go to it without a question.",
+  "ticketPrinterGone": "The saved printer ({printer}) is no longer paired. Choose another one.",
+  "@ticketPrinterGone": {
+    "placeholders": {
+      "printer": {
+        "type": "String"
+      }
+    }
+  },
+  "ticketPrinterPairHint": "No printer is paired: pair it in Android's Bluetooth settings, then come back here.",
+  "ticketPrinterBluetoothOffHint": "Bluetooth is off: turn it on to see the printers.",
+  "ticketPrinterUnreachableHint": "The printer list could not be read.",
+  "ticketPrinterWaitPermission": "Printers will show once the permission is granted.",
+  "ticketPrinterTestPrint": "Print a test ticket",
+  "ticketPrinterTestSent": "Test ticket sent to {printer}.",
+  "@ticketPrinterTestSent": {
+    "placeholders": {
+      "printer": {
+        "type": "String"
+      }
+    }
+  },
+  "ticketPrinterTestFailed": "The test ticket did not print: {cause}",
+  "@ticketPrinterTestFailed": {
+    "placeholders": {
+      "cause": {
+        "type": "String"
+      }
+    }
+  },
+  "ticketPrinterTestHeading": "TEST TICKET",
+  "ticketPrinterTestBody": "This printer is ready for tickets.",
+  "ticketCopiesDefaultTitle": "Default copies",
+  "ticketCopiesDefaultHint": "Each ticket prints this many copies. For a given ticket, the number can be changed when printing.",
+  "ticketPrinterSpoolerNote": "On this computer, tickets go through the system printer: only the number of copies is set here.",
+  "ticketPrinterLoading": "Reading print settings",
+  "ticketCopiesUseSchool": "Use the school's setting",
+  "boutiqueReceiptPrintedOn": "Ticket printed on {printer}.",
+  "@boutiqueReceiptPrintedOn": {
+    "placeholders": {
+      "printer": {
+        "type": "String"
+      }
+    }
+  },
   "paymentAnomalyBannerTitle": "Overpayment to arbitrate",
   "paymentAnomalyBannerFallback": "A payment exceeds the amount still due.",
   "paymentAnomalyAcknowledgeLabel": "Handled",

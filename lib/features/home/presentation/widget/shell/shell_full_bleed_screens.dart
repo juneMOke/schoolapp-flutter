@@ -14,6 +14,7 @@ const Set<String> shellFullBleedSubMenuIds = {
   MenuConstants.reInscriptionsId,
   MenuConstants.premiereInscriptionId,
   MenuConstants.facturationsId,
+  MenuConstants.ticketPrinterId,
   MenuConstants.recouvrementDashboardId,
   MenuConstants.recouvrementControlId,
   MenuConstants.boutiqueDashboardId,

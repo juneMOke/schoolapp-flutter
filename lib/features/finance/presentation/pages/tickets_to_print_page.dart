@@ -14,10 +14,11 @@ import 'package:school_app_flutter/core/widgets/app_page_background.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_empty_result.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_error_result.dart';
+import 'package:school_app_flutter/features/documents/data/printing/thermal_printer_permission.dart';
 import 'package:school_app_flutter/features/documents/domain/entities/ticket_print_job.dart';
-import 'package:school_app_flutter/features/documents/presentation/ticket/provisional_ticket_print_flow.dart';
 import 'package:school_app_flutter/features/documents/presentation/ticket/ticket_batch_print_flow.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/ticket_print_queue_cubit.dart';
+import 'package:school_app_flutter/features/finance/presentation/widgets/tickets_to_print/ticket_batch_summary.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/tickets_to_print/tickets_to_print_list.dart';
 import 'package:school_app_flutter/features/home/presentation/widget/off_shell_top_bar.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
@@ -28,7 +29,7 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 /// Un ticket ne sort qu'avec le numéro définitif de son reçu. Hors ligne, il
 /// attend ici ; une fois le versement acquitté, le caissier le coche — seul ou
 /// avec les autres —, relit l'aperçu et lance l'impression. Rien ne s'imprime
-/// de soi-même : l'imprimante est choisie à chaque lancement.
+/// de soi-même.
 class TicketsToPrintPage extends StatelessWidget {
   const TicketsToPrintPage({super.key});
 
@@ -61,17 +62,23 @@ class TicketsToPrintView extends StatelessWidget {
     if (cubit.isClosed) return;
     await cubit.load();
 
-    final problem = outcome.problem;
-    final lines = [
-      if (outcome.printed > 0) l10n.ticketsToPrintDone(outcome.printed),
-      if (outcome.spoolerFailed) l10n.ticketPrintFailed,
-      if (problem != null)
-        l10n.ticketsToPrintStopped(thermalPrinterProblemMessage(l10n, problem)),
-      if (outcome.skipped > 0) l10n.ticketsToPrintSkipped(outcome.skipped),
-    ];
-    if (lines.isNotEmpty) {
-      messenger?.showSnackBar(SnackBar(content: Text(lines.join('\n'))));
-    }
+    final summary = ticketBatchSummary(l10n, outcome);
+    if (summary == null) return;
+    messenger?.showSnackBar(
+      SnackBar(
+        content: Text(summary.text),
+        // Une permission refusée ne se redemande plus depuis l'application
+        // (refus définitif, ou politique de la flotte) : les réglages sont le
+        // seul chemin, il doit être sous la main.
+        action: summary.offersSettings
+            ? SnackBarAction(
+                label: l10n.settings,
+                onPressed: () =>
+                    getIt<ThermalPrinterPermission>().openSettings(),
+              )
+            : null,
+      ),
+    );
   }
 
   Future<void> _retry(BuildContext context, TicketPrintJob job) async {

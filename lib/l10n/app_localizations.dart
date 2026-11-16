@@ -14160,6 +14160,198 @@ abstract class AppLocalizations {
   /// **'Printer unreachable, off or out of range — printing as PDF instead.'**
   String get ticketPrinterProblemUnreachable;
 
+  /// No description provided for @ticketPrinterCausePermission.
+  ///
+  /// In en, this message translates to:
+  /// **'the Nearby devices permission is not granted to the app.'**
+  String get ticketPrinterCausePermission;
+
+  /// No description provided for @ticketPrinterCauseBluetoothOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Bluetooth is off.'**
+  String get ticketPrinterCauseBluetoothOff;
+
+  /// No description provided for @ticketPrinterCauseNoPrinter.
+  ///
+  /// In en, this message translates to:
+  /// **'no printer is paired with this tablet.'**
+  String get ticketPrinterCauseNoPrinter;
+
+  /// No description provided for @ticketPrinterCauseUnreachable.
+  ///
+  /// In en, this message translates to:
+  /// **'the printer is unreachable, off or out of range.'**
+  String get ticketPrinterCauseUnreachable;
+
+  /// No description provided for @ticketSentToPrinter.
+  ///
+  /// In en, this message translates to:
+  /// **'Ticket sent to {printer}.'**
+  String ticketSentToPrinter(String printer);
+
+  /// No description provided for @ticketsPrinterUsed.
+  ///
+  /// In en, this message translates to:
+  /// **'Printer: {printer}.'**
+  String ticketsPrinterUsed(String printer);
+
+  /// No description provided for @subMenuTicketPrinter.
+  ///
+  /// In en, this message translates to:
+  /// **'Ticket printer'**
+  String get subMenuTicketPrinter;
+
+  /// No description provided for @ticketPrinterSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Where this tablet\'s tickets print, and how many copies.'**
+  String get ticketPrinterSubtitle;
+
+  /// No description provided for @ticketPrinterPermissionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Bluetooth permission'**
+  String get ticketPrinterPermissionTitle;
+
+  /// No description provided for @ticketPrinterPermissionGranted.
+  ///
+  /// In en, this message translates to:
+  /// **'Nearby devices is granted: the app can reach the printer.'**
+  String get ticketPrinterPermissionGranted;
+
+  /// No description provided for @ticketPrinterPermissionMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'The Nearby devices permission is missing ({permissions}): without it, no ticket reaches the printer.'**
+  String ticketPrinterPermissionMissing(String permissions);
+
+  /// No description provided for @ticketPrinterPermissionAllow.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow'**
+  String get ticketPrinterPermissionAllow;
+
+  /// No description provided for @ticketPrinterPermissionOpenSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Android settings'**
+  String get ticketPrinterPermissionOpenSettings;
+
+  /// No description provided for @ticketPrinterPermissionManagedHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tablet managed by a device management console: grant these permissions in the app\'s policy (\"Automatically granted\"); Android will not ask for them.'**
+  String get ticketPrinterPermissionManagedHint;
+
+  /// No description provided for @ticketPrinterTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Printer'**
+  String get ticketPrinterTitle;
+
+  /// No description provided for @ticketPrinterChoose.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose this desk\'s printer: tickets will go to it without a question.'**
+  String get ticketPrinterChoose;
+
+  /// No description provided for @ticketPrinterGone.
+  ///
+  /// In en, this message translates to:
+  /// **'The saved printer ({printer}) is no longer paired. Choose another one.'**
+  String ticketPrinterGone(String printer);
+
+  /// No description provided for @ticketPrinterPairHint.
+  ///
+  /// In en, this message translates to:
+  /// **'No printer is paired: pair it in Android\'s Bluetooth settings, then come back here.'**
+  String get ticketPrinterPairHint;
+
+  /// No description provided for @ticketPrinterBluetoothOffHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Bluetooth is off: turn it on to see the printers.'**
+  String get ticketPrinterBluetoothOffHint;
+
+  /// No description provided for @ticketPrinterUnreachableHint.
+  ///
+  /// In en, this message translates to:
+  /// **'The printer list could not be read.'**
+  String get ticketPrinterUnreachableHint;
+
+  /// No description provided for @ticketPrinterWaitPermission.
+  ///
+  /// In en, this message translates to:
+  /// **'Printers will show once the permission is granted.'**
+  String get ticketPrinterWaitPermission;
+
+  /// No description provided for @ticketPrinterTestPrint.
+  ///
+  /// In en, this message translates to:
+  /// **'Print a test ticket'**
+  String get ticketPrinterTestPrint;
+
+  /// No description provided for @ticketPrinterTestSent.
+  ///
+  /// In en, this message translates to:
+  /// **'Test ticket sent to {printer}.'**
+  String ticketPrinterTestSent(String printer);
+
+  /// No description provided for @ticketPrinterTestFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The test ticket did not print: {cause}'**
+  String ticketPrinterTestFailed(String cause);
+
+  /// No description provided for @ticketPrinterTestHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'TEST TICKET'**
+  String get ticketPrinterTestHeading;
+
+  /// No description provided for @ticketPrinterTestBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This printer is ready for tickets.'**
+  String get ticketPrinterTestBody;
+
+  /// No description provided for @ticketCopiesDefaultTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Default copies'**
+  String get ticketCopiesDefaultTitle;
+
+  /// No description provided for @ticketCopiesDefaultHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Each ticket prints this many copies. For a given ticket, the number can be changed when printing.'**
+  String get ticketCopiesDefaultHint;
+
+  /// No description provided for @ticketPrinterSpoolerNote.
+  ///
+  /// In en, this message translates to:
+  /// **'On this computer, tickets go through the system printer: only the number of copies is set here.'**
+  String get ticketPrinterSpoolerNote;
+
+  /// No description provided for @ticketPrinterLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Reading print settings'**
+  String get ticketPrinterLoading;
+
+  /// No description provided for @ticketCopiesUseSchool.
+  ///
+  /// In en, this message translates to:
+  /// **'Use the school\'s setting'**
+  String get ticketCopiesUseSchool;
+
+  /// No description provided for @boutiqueReceiptPrintedOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Ticket printed on {printer}.'**
+  String boutiqueReceiptPrintedOn(String printer);
+
   /// No description provided for @paymentAnomalyBannerTitle.
   ///
   /// In en, this message translates to:

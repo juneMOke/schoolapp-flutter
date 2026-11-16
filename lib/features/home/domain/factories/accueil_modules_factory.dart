@@ -148,6 +148,11 @@ class AccueilModulesFactory {
           subMenuId: MenuConstants.facturationsId,
           title: l10n.subMenuBilling,
         ),
+        _page(
+          menuId: menuId,
+          subMenuId: MenuConstants.ticketPrinterId,
+          title: l10n.subMenuTicketPrinter,
+        ),
       ],
     );
   }

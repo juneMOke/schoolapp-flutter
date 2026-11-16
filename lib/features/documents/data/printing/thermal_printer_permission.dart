@@ -51,3 +51,25 @@ enum ThermalPrinterPermissionState {
   /// qui évite de proposer un bouton qui ne peut plus rien faire.
   permanentlyDenied,
 }
+
+/// Les deux permissions du groupe « Appareils à proximité » que l'impression
+/// exige (Android 12+).
+enum NearbyPermission {
+  /// `BLUETOOTH_CONNECT` : ouvrir la liaison avec l'imprimante.
+  connect,
+
+  /// `BLUETOOTH_SCAN` : le plugin annule une découverte avant de connecter.
+  scan,
+}
+
+/// Laquelle manque, une à une.
+///
+/// Android les range dans le même groupe et les accorde ensemble quand c'est
+/// l'utilisateur qui répond. Une gestion de parc (Android Enterprise), elle,
+/// fixe chaque permission séparément : une tablette peut recevoir SCAN sans
+/// CONNECT, et l'écran de réglage doit dire laquelle demander à
+/// l'administrateur.
+abstract interface class ThermalPrinterPermissionDetails {
+  /// Ne lève jamais ; sur Android 11 et antérieurs, rien ne manque.
+  Future<Set<NearbyPermission>> missing();
+}

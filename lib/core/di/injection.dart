@@ -159,6 +159,8 @@ import 'package:school_app_flutter/features/documents/data/local/editique_docume
 // Import debug — la mémoire d'imprimante du banc, sous kDebugMode.
 import 'package:school_app_flutter/dev/ticket_bench_printer_store.dart';
 import 'package:school_app_flutter/features/documents/data/printing/permission_handler_thermal_permission.dart';
+import 'package:school_app_flutter/features/documents/data/printing/secure_ticket_printer_settings_store.dart';
+import 'package:school_app_flutter/features/documents/domain/printing/ticket_printer_settings.dart';
 import 'package:school_app_flutter/features/documents/data/printing/print_bluetooth_thermal_channel.dart';
 import 'package:school_app_flutter/features/documents/data/printing/thermal_printer_adapter.dart';
 import 'package:school_app_flutter/features/documents/data/printing/thermal_printer_channel.dart';
@@ -251,6 +253,8 @@ import 'package:school_app_flutter/features/student/presentation/bloc/parent_blo
 import 'package:school_app_flutter/features/student/presentation/bloc/student_bloc.dart';
 import 'package:school_app_flutter/core/database/tenant/tenant_scope.dart';
 import 'package:school_app_flutter/core/database/tenant/tenant_session.dart';
+import 'package:school_app_flutter/features/finance/presentation/bloc/ticket_printer/ticket_printer_settings_cubit.dart';
+import 'package:school_app_flutter/core/device/desktop_platform.dart';
 
 final GetIt getIt = GetIt.instance;
 
@@ -1113,17 +1117,25 @@ Future<void> configureDependencies({
   getIt.registerLazySingleton<ThermalPrinterPermission>(
     () => const PermissionHandlerThermalPermission(),
   );
+  getIt.registerLazySingleton<ThermalPrinterPermissionDetails>(
+    () => const PermissionHandlerThermalPermission(),
+  );
   // L'adaptateur consulte la permission pour CONSTATER `BLUETOOTH_SCAN`, que le
   // canal natif ne sait pas voir. Sans elle, il déclarerait tout prêt et
   // l'impression échouerait en désignant la mauvaise cause.
+  // L'imprimante et les exemplaires de cette tablette (Finances ▸ Imprimante
+  // de tickets) : propres à l'appareil, jamais synchronisés.
+  getIt.registerLazySingleton<TicketPrinterSettingsStore>(
+    () => SecureTicketPrinterSettingsStore(getIt<FlutterSecureStorage>()),
+  );
   getIt.registerLazySingleton<ThermalPrinterPort>(
     () => ThermalPrinterAdapter(
       getIt<ThermalPrinterChannel>(),
       getIt<ThermalPrinterPermission>(),
     ),
   );
-  // Mémoire d'imprimante du banc de calage, jamais de la production : le ticket
-  // demande l'imprimante à chaque impression. Enregistrée sous `kDebugMode`
+  // Mémoire d'imprimante du banc de calage, distincte de celle des guichets
+  // (`TicketPrinterSettingsStore`). Enregistrée sous `kDebugMode`
   // comme les routes qu'elle sert, donc absente du build release.
   if (kDebugMode) {
     getIt.registerLazySingleton<TicketBenchPrinterStore>(
@@ -1528,10 +1540,24 @@ Future<void> configureDependencies({
     ),
   );
 
-  // Le défaut d'exemplaires d'un ticket, lu du même `ref_school` : le
-  // réglage de l'école, ou un exemplaire.
+  // Le défaut d'exemplaires d'un ticket : le réglage de la tablette, sinon
+  // celui de l'école (`ref_school`), sinon un exemplaire.
+  // Finances ▸ Imprimante de tickets.
+  getIt.registerFactory<TicketPrinterSettingsCubit>(
+    () => TicketPrinterSettingsCubit(
+      getIt<ThermalPrinterPort>(),
+      getIt<ThermalPrinterPermission>(),
+      getIt<ThermalPrinterPermissionDetails>(),
+      getIt<TicketPrinterSettingsStore>(),
+      getIt<ResolveTicketCopiesUseCase>(),
+      thermal: !printsTicketsThroughSpooler,
+    ),
+  );
   getIt.registerFactory<ResolveTicketCopiesUseCase>(
-    () => ResolveTicketCopiesUseCase(getIt<SchoolRepository>()),
+    () => ResolveTicketCopiesUseCase(
+      getIt<SchoolRepository>(),
+      device: getIt<TicketPrinterSettingsStore>(),
+    ),
   );
 
   // Factory, comme tout BLoC — et comme `SyncStatusCubit`, qui tient pourtant

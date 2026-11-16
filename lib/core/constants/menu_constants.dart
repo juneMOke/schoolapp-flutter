@@ -84,6 +84,9 @@ class MenuConstants {
   static const String financesDashboardId = 'finances-dashboard';
   static const String facturationsId = 'facturations';
 
+  /// L'imprimante de tickets de la tablette et ses exemplaires par défaut.
+  static const String ticketPrinterId = 'imprimante-tickets';
+
   /// « Tickets à imprimer », page imbriquée sous Facturations. Un seul
   /// littéral pour la route ET sa garde (`kNestedRouteAccess`) : renommer l'un
   /// sans l'autre ouvrirait la page en silence.

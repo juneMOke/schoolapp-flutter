@@ -15,6 +15,7 @@ import 'package:school_app_flutter/features/documents/domain/ticket/ticket_recei
 import 'package:school_app_flutter/features/documents/domain/usecases/ticket_print_trace_use_cases.dart';
 import 'package:school_app_flutter/features/documents/presentation/ticket/provisional_ticket_printer.dart';
 import 'package:school_app_flutter/features/documents/presentation/ticket/thermal_ticket_outcome.dart';
+import 'package:school_app_flutter/features/documents/presentation/ticket/ticket_copies_stepper.dart';
 import 'package:school_app_flutter/features/documents/presentation/ticket/thermal_ticket_printer.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
@@ -163,6 +164,7 @@ Future<void> printProvisionalTicketWithFallback(
   );
   if (!context.mounted) return;
 
+  final copies = ValueNotifier(defaultCopies);
   await showEteeloDocumentViewer(
     context,
     title: model.labels.documentTitle,
@@ -172,6 +174,8 @@ Future<void> printProvisionalTicketWithFallback(
       reference: model.reference,
     ),
     previewBuilder: previewBuilder,
+    // Les exemplaires de cette impression-ci, partis du réglage.
+    printOptions: TicketCopiesOption(copies: copies),
     // Le papier est sorti (ou la cause est dite) : garder l'aperçu n'a plus
     // d'objet, et le message d'échec doit redevenir atteignable.
     closeAfterPrint: true,
@@ -184,7 +188,7 @@ Future<void> printProvisionalTicketWithFallback(
             model: model,
             cutNotice: cutNotice,
             logoBand: logoBand,
-            copies: defaultCopies,
+            copies: copies.value,
             messenger: messenger,
             l10n: l10n,
           )
@@ -194,11 +198,12 @@ Future<void> printProvisionalTicketWithFallback(
             paymentId: paymentId,
             cutNotice: cutNotice,
             logoBand: logoBand,
-            defaultCopies: defaultCopies,
+            defaultCopies: copies.value,
             messenger: messenger,
             l10n: l10n,
           ),
   );
+  copies.dispose();
 }
 
 /// Sort le papier : la thermique, puis le filet PDF si elle n'a pas pu.
@@ -226,7 +231,12 @@ Future<void> _sendTicketToPrinter(
     // Le seul signal qui prouve qu'un papier existe. On le retient ici, et
     // nulle part ailleurs : c'est lui qui retirera le rattrapage d'impression
     // du détail de ce versement.
-    case ThermalTicketPrinted():
+    case ThermalTicketPrinted(:final printer):
+      if (printer != null) {
+        messenger?.showSnackBar(
+          SnackBar(content: Text(l10n.ticketSentToPrinter(printer.label))),
+        );
+      }
       await getIt<MarkTicketPrintedUseCase>()(paymentId);
       return;
 
@@ -296,4 +306,16 @@ String thermalPrinterProblemMessage(
   ThermalPrinterProblem.bluetoothOff => l10n.ticketPrinterProblemBluetoothOff,
   ThermalPrinterProblem.noPrinterSelected => l10n.ticketPrinterProblemNoPrinter,
   ThermalPrinterProblem.unreachable => l10n.ticketPrinterProblemUnreachable,
+};
+
+/// La seule cause, sans la suite : là où rien ne part en PDF (l'impression
+/// par lot de « Tickets à imprimer » s'arrête), annoncer un repli serait faux.
+String thermalPrinterProblemCause(
+  AppLocalizations l10n,
+  ThermalPrinterProblem problem,
+) => switch (problem) {
+  ThermalPrinterProblem.permissionDenied => l10n.ticketPrinterCausePermission,
+  ThermalPrinterProblem.bluetoothOff => l10n.ticketPrinterCauseBluetoothOff,
+  ThermalPrinterProblem.noPrinterSelected => l10n.ticketPrinterCauseNoPrinter,
+  ThermalPrinterProblem.unreachable => l10n.ticketPrinterCauseUnreachable,
 };

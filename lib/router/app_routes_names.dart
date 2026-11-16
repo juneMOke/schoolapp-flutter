@@ -68,6 +68,10 @@ class AppRoutesNames {
       '/finances/${MenuConstants.facturationsId}'
       '/detail/$studentId/$academicYearId/encaissement';
 
+  /// Finances ▸ Imprimante de tickets — réglage propre à l'appareil.
+  static const String ticketPrinter =
+      '/finances/${MenuConstants.ticketPrinterId}';
+
   /// Tickets à imprimer — les tickets que ce poste doit encore sortir, avec le
   /// numéro définitif de leur reçu (continuité des tickets RC, lot D). Écran
   /// plein poussé au-dessus de Facturation, depuis le bandeau d'alerte.

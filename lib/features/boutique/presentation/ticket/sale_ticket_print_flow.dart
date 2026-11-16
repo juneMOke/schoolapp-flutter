@@ -13,6 +13,7 @@ import 'package:school_app_flutter/features/documents/data/ticket/pdf_ticket_ren
 import 'package:school_app_flutter/features/documents/presentation/ticket/thermal_ticket_outcome.dart';
 import 'package:school_app_flutter/features/documents/presentation/ticket/thermal_ticket_printer.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
+import 'package:school_app_flutter/features/documents/presentation/ticket/ticket_copies_stepper.dart';
 
 /// Montre le ticket de vente au comptoir, puis l'imprime.
 ///
@@ -80,11 +81,13 @@ Future<bool> printSaleTicket(
   // trace doit être posée.
   var printed = false;
 
+  final chosenCopies = ValueNotifier(defaultCopies);
   await showEteeloDocumentViewer(
     context,
     title: title,
     document: PrintableDocument(bytes: preview, fileName: '$title.pdf'),
     previewBuilder: previewBuilder,
+    printOptions: TicketCopiesOption(copies: chosenCopies),
     // Le ticket est tiré : l'aperçu se referme, et le message d'échec éventuel
     // redevient atteignable — sous une modale, ses appuis seraient avalés.
     closeAfterPrint: true,
@@ -92,13 +95,21 @@ Future<bool> printSaleTicket(
       final outcome = await printThermalBytes(
         context,
         bytes: EscPosTicketRenderer.renderLines(lines),
-        initialCopies: defaultCopies,
+        initialCopies: chosenCopies.value,
       );
 
       switch (outcome) {
-        case ThermalTicketPrinted():
+        case ThermalTicketPrinted(:final printer):
           printed = true;
-          messenger?.showSnackBar(SnackBar(content: Text(printedNotice)));
+          messenger?.showSnackBar(
+            SnackBar(
+              content: Text(
+                printer == null
+                    ? printedNotice
+                    : l10n.boutiqueReceiptPrintedOn(printer.label),
+              ),
+            ),
+          );
         // Le caissier a fermé la liste : le geste demandé a été repris.
         // Insister par un message serait lui reprocher son propre choix.
         case ThermalTicketCancelled():
@@ -109,6 +120,7 @@ Future<bool> printSaleTicket(
       }
     },
   );
+  chosenCopies.dispose();
 
   return printed;
 }

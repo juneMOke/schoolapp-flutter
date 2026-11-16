@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:dartz/dartz.dart';
@@ -13,9 +12,12 @@ import 'package:school_app_flutter/features/documents/domain/printing/ticket_cop
 import 'package:school_app_flutter/features/documents/domain/ticket/ticket_receipt_model.dart';
 import 'package:school_app_flutter/features/documents/presentation/ticket/thermal_ticket_outcome.dart';
 import 'package:school_app_flutter/features/documents/presentation/ticket/thermal_ticket_printer.dart';
+import 'package:school_app_flutter/features/documents/presentation/ticket/ticket_copies_stepper.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 import 'package:school_app_flutter/core/money/money.dart';
 import 'package:school_app_flutter/core/money/money_bag.dart';
+import 'package:school_app_flutter/features/documents/domain/printing/ticket_printer_settings.dart';
+import '../../../../test_helpers/memory_ticket_printer_settings.dart';
 
 const _netum = ThermalPrinter(
   name: 'NT-8003DD',
@@ -139,6 +141,9 @@ void main() {
     port = _FakePort();
     permission = _FakePermission();
     getIt
+      ..registerSingleton<TicketPrinterSettingsStore>(
+        MemoryTicketPrinterSettings(),
+      )
       ..registerSingleton<ThermalPrinterPort>(port)
       ..registerSingleton<ThermalPrinterPermission>(permission);
   });
@@ -149,11 +154,9 @@ void main() {
   ///
   /// [choose] est joué une fois la liste ouverte : le nom de l'imprimante à
   /// taper, ou `null` pour fermer sans choisir.
-  /// [more] appuie autant de fois sur (+) avant de choisir.
   Future<ThermalTicketOutcome> print(
     WidgetTester tester, {
     String? choose = 'NT-8003DD',
-    int more = 0,
     int initialCopies = 1,
   }) async {
     late BuildContext captured;
@@ -178,11 +181,6 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    for (var i = 0; i < more; i++) {
-      await tester.tap(find.byTooltip('Un exemplaire de plus'));
-      await tester.pump();
-    }
-
     if (find.byType(AlertDialog).evaluate().isNotEmpty) {
       await tester.tap(find.text(choose ?? 'Annuler'));
       await tester.pumpAndSettle();
@@ -204,15 +202,95 @@ void main() {
       expect(port.sent.single.take(2), equals([0x1B, 0x40]));
     });
 
-    testWidgets('demande le choix à CHAQUE ticket', (tester) async {
+    testWidgets('choisie une fois, l imprimante est retenue', (tester) async {
       port.printers = const [_netum, _other];
 
+      await print(tester, choose: 'POS-58');
+      // Le second ticket part sans question, sur la même imprimante.
+      final second = await print(tester, choose: 'NT-8003DD');
+
+      expect(port.sentTo, equals([_other.macAddress, _other.macAddress]));
+      expect(
+        second,
+        isA<ThermalTicketPrinted>().having((o) => o.printer, 'printer', _other),
+      );
+    });
+
+    testWidgets('l imprimante retenue n est plus appairée : on redemande', (
+      tester,
+    ) async {
+      (getIt<TicketPrinterSettingsStore>() as MemoryTicketPrinterSettings)
+          .printer = const ThermalPrinter(
+        name: 'Ancienne',
+        macAddress: '00:00:00:00:00:00',
+      );
+
       await print(tester);
+
+      expect(port.sentTo, equals([_netum.macAddress]));
+      expect(
+        (await getIt<TicketPrinterSettingsStore>().read()).printer,
+        _netum,
+      );
+    });
+
+    testWidgets('un choix dont l envoi échoue n est pas retenu', (
+      tester,
+    ) async {
+      // Un casque touché par erreur ne devient pas l'imprimante du guichet.
+      port
+        ..printers = const [_netum, _other]
+        ..sendProblem = ThermalPrinterProblem.unreachable;
+
       await print(tester, choose: 'POS-58');
 
-      // Rien n'est mémorisé : une tablette déplacée d'un guichet à l'autre ne
-      // doit pas sortir le reçu d'un parent dans la pièce d'à côté.
-      expect(port.sentTo, equals([_netum.macAddress, _other.macAddress]));
+      expect(
+        (await getIt<TicketPrinterSettingsStore>().read()).printer,
+        isNull,
+      );
+    });
+
+    testWidgets('la retenue injoignable est oubliée : le choix revient', (
+      tester,
+    ) async {
+      final store =
+          getIt<TicketPrinterSettingsStore>() as MemoryTicketPrinterSettings;
+      store.printer = _netum;
+      port.sendProblem = ThermalPrinterProblem.unreachable;
+
+      await print(tester);
+      expect(store.printer, isNull);
+
+      // Le ticket suivant redemande l'imprimante : le choix fait foi.
+      port
+        ..sendProblem = null
+        ..printers = const [_netum, _other];
+      await print(tester, choose: 'POS-58');
+      expect(port.sentTo.last, _other.macAddress);
+      expect(store.printer, _other);
+    });
+
+    testWidgets('Bluetooth éteint : la retenue reste retenue', (tester) async {
+      final store =
+          getIt<TicketPrinterSettingsStore>() as MemoryTicketPrinterSettings;
+      store.printer = _netum;
+      port.readyProblem = ThermalPrinterProblem.bluetoothOff;
+
+      await print(tester);
+
+      expect(store.printer, _netum);
+    });
+
+    testWidgets('l imprimante retenue garde le nombre d exemplaires demandé', (
+      tester,
+    ) async {
+      (getIt<TicketPrinterSettingsStore>() as MemoryTicketPrinterSettings)
+              .printer =
+          _netum;
+
+      await print(tester, initialCopies: 3);
+
+      expect(port.sentCopies, equals([3]));
     });
 
     testWidgets('une liste fermée n\'imprime rien et n\'est pas un échec', (
@@ -228,28 +306,16 @@ void main() {
   });
 
   group('exemplaires', () {
-    String shown(WidgetTester tester) => tester
-        .widget<Text>(find.byKey(const ValueKey('ticketCopiesValue')))
-        .data!;
-
-    IconButton button(WidgetTester tester, String tooltip) =>
-        tester.widget<IconButton>(
-          find.ancestor(
-            of: find.byTooltip(tooltip),
-            matching: find.byType(IconButton),
-          ),
-        );
-
     testWidgets('par défaut, un seul exemplaire', (tester) async {
       await print(tester);
 
       expect(port.sentCopies, equals([1]));
     });
 
-    testWidgets('le compteur réglé part avec l\'imprimante choisie', (
+    testWidgets('le nombre demandé part avec l imprimante choisie', (
       tester,
     ) async {
-      final outcome = await print(tester, more: 2);
+      final outcome = await print(tester, initialCopies: 3);
 
       expect(outcome, isA<ThermalTicketPrinted>());
       // UN envoi, qui porte le nombre : c'est le port qui assemble.
@@ -265,38 +331,42 @@ void main() {
       expect(port.sentCopies, equals([2]));
     });
 
-    testWidgets('le compteur est borné des deux côtés', (tester) async {
-      late BuildContext captured;
+    testWidgets('le compteur de l aperçu est borné des deux côtés', (
+      tester,
+    ) async {
+      final copies = ValueNotifier(1);
+      addTearDown(copies.dispose);
       await tester.pumpWidget(
         MaterialApp(
           locale: const Locale('fr'),
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
-          home: Builder(
-            builder: (context) {
-              captured = context;
-              return const SizedBox.shrink();
-            },
-          ),
+          home: Scaffold(body: TicketCopiesOption(copies: copies)),
         ),
       );
-      unawaited(printThermalTicket(captured, model: _model));
-      await tester.pumpAndSettle();
+      String shown() => tester
+          .widget<Text>(find.byKey(const ValueKey('ticketCopiesValue')))
+          .data!;
+      IconButton button(String tooltip) => tester.widget<IconButton>(
+        find.ancestor(
+          of: find.byTooltip(tooltip),
+          matching: find.byType(IconButton),
+        ),
+      );
 
-      expect(shown(tester), '1');
-      expect(button(tester, 'Un exemplaire de moins').onPressed, isNull);
-
+      expect(shown(), '1');
+      expect(button('Un exemplaire de moins').onPressed, isNull);
       for (var i = 0; i < 10; i++) {
-        final plus = button(tester, 'Un exemplaire de plus');
+        final plus = button('Un exemplaire de plus');
         if (plus.onPressed == null) break;
         plus.onPressed!();
         await tester.pump();
       }
 
       // Une erreur de saisie ne doit pas pouvoir vider le rouleau.
-      expect(shown(tester), '${TicketCopies.max}');
-      expect(button(tester, 'Un exemplaire de plus').onPressed, isNull);
-      expect(button(tester, 'Un exemplaire de moins').onPressed, isNotNull);
+      expect(shown(), '${TicketCopies.max}');
+      expect(copies.value, TicketCopies.max);
+      expect(button('Un exemplaire de plus').onPressed, isNull);
     });
 
     testWidgets('un envoi raté rend le nombre choisi, pour le repli PDF', (
@@ -304,7 +374,7 @@ void main() {
     ) async {
       port.sendProblem = ThermalPrinterProblem.unreachable;
 
-      final outcome = await print(tester, more: 1);
+      final outcome = await print(tester, initialCopies: 2);
 
       expect((outcome as ThermalTicketFailed).copies, 2);
     });
