@@ -9,6 +9,7 @@ import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/core/widgets/app_page_background.dart';
+import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_page_header.dart';
 import 'package:school_app_flutter/features/documents/presentation/ticket/ticket_copies_stepper.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/ticket_printer/ticket_printer_settings_cubit.dart';
@@ -142,6 +143,18 @@ class _TicketPrinterSettingsViewState extends State<TicketPrinterSettingsView> {
                 color: AppColors.textSecondary,
               ),
             ),
+            if (state.copiesFromDevice) ...[
+              const SizedBox(height: AppSpacing.sm),
+              Align(
+                alignment: AlignmentDirectional.centerStart,
+                child: EteeloButton.ghost(
+                  label: l10n.ticketCopiesUseSchool,
+                  icon: Icons.undo,
+                  onPressed: cubit.useSchoolCopies,
+                  fullWidth: false,
+                ),
+              ),
+            ],
           ],
         ),
       ),

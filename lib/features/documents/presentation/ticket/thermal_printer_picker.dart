@@ -68,8 +68,6 @@ class _ThermalPrinterPickerDialog extends StatefulWidget {
 
 class _ThermalPrinterPickerDialogState
     extends State<_ThermalPrinterPickerDialog> {
-  late final int _copies = widget.initialCopies;
-
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -104,7 +102,10 @@ class _ThermalPrinterPickerDialogState
                       ),
                       subtitle: Text(printer.macAddress),
                       onTap: () => Navigator.of(context).pop(
-                        ThermalPrintChoice(printer: printer, copies: _copies),
+                        ThermalPrintChoice(
+                          printer: printer,
+                          copies: widget.initialCopies,
+                        ),
                       ),
                     ),
                 ],

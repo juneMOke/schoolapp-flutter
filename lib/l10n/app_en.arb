@@ -5887,6 +5887,15 @@
   "ticketCopiesDefaultHint": "Each ticket prints this many copies. For a given ticket, the number can be changed when printing.",
   "ticketPrinterSpoolerNote": "On this computer, tickets go through the system printer: only the number of copies is set here.",
   "ticketPrinterLoading": "Reading print settings",
+  "ticketCopiesUseSchool": "Use the school's setting",
+  "boutiqueReceiptPrintedOn": "Ticket printed on {printer}.",
+  "@boutiqueReceiptPrintedOn": {
+    "placeholders": {
+      "printer": {
+        "type": "String"
+      }
+    }
+  },
   "paymentAnomalyBannerTitle": "Overpayment to arbitrate",
   "paymentAnomalyBannerFallback": "A payment exceeds the amount still due.",
   "paymentAnomalyAcknowledgeLabel": "Handled",

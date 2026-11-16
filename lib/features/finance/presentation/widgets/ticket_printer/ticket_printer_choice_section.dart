@@ -50,7 +50,10 @@ class TicketPrinterChoiceSection extends StatelessWidget {
               trailing: printer.macAddress == selected?.macAddress
                   ? const Icon(Icons.check_circle, color: AppColors.success)
                   : null,
-              onTap: () => onSelect(printer),
+              // L'essai en cours garde la liaison : pas de changement pendant.
+              onTap: state.test == TicketPrinterTest.sending
+                  ? null
+                  : () => onSelect(printer),
             ),
           if (selected != null &&
               state.printers.isNotEmpty &&
@@ -92,7 +95,9 @@ class TicketPrinterChoiceSection extends StatelessWidget {
         ),
       ),
       if (state.test == TicketPrinterTest.sent)
-        _Note(l10n.ticketPrinterTestSent(selected.label)),
+        _Note(
+          l10n.ticketPrinterTestSent((state.testPrinter ?? selected).label),
+        ),
       if (state.test == TicketPrinterTest.failed && problem != null)
         _Note(
           l10n.ticketPrinterTestFailed(

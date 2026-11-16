@@ -71,6 +71,7 @@ Future<ThermalTicketOutcome> printThermalBytes(
   );
   return chosen.fold((outcome) async => outcome, (choice) async {
     final problem = await sendThermalBytes(bytes, choice);
+    await rememberTicketPrinter(choice.printer, problem);
     return problem == null
         ? ThermalTicketPrinted(printer: choice.printer)
         : ThermalTicketFailed(problem, copies: choice.copies);
@@ -153,9 +154,27 @@ Future<Either<ThermalTicketOutcome, ThermalPrintChoice>> chooseThermalPrinter(
     initialCopies: initialCopies,
   );
   if (chosen == null) return const Left(ThermalTicketCancelled());
-  // Choisie une fois, retenue : les tickets suivants y partent directement.
-  await settings.savePrinter(chosen.printer);
+  // Retenue seulement une fois le ticket sorti (`printThermalBytes`) : un
+  // casque touché par erreur ne devient pas l'imprimante du guichet.
   return Right(chosen);
+}
+
+/// Ce qu'un envoi apprend de l'imprimante visée : sortie, elle devient celle
+/// du guichet ; injoignable alors qu'elle était retenue, elle est oubliée —
+/// le sélecteur reviendra au ticket suivant. Sans cela, un appareil retenu
+/// par erreur (un casque appairé) recevrait tous les tickets en échec, sans
+/// que personne ne puisse le changer hors de Finances ▸ Imprimante de tickets.
+Future<void> rememberTicketPrinter(
+  ThermalPrinter printer,
+  ThermalPrinterProblem? problem,
+) async {
+  final settings = getIt<TicketPrinterSettingsStore>();
+  if (problem == null) return settings.savePrinter(printer);
+  if (problem != ThermalPrinterProblem.unreachable) return;
+  final remembered = (await settings.read()).printer;
+  if (remembered?.macAddress == printer.macAddress) {
+    await settings.savePrinter(null);
+  }
 }
 
 /// Envoie [bytes] — **un** exemplaire — à l'imprimante de [choice], autant de

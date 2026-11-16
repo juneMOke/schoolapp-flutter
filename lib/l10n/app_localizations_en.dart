@@ -8948,6 +8948,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ticketPrinterLoading => 'Reading print settings';
 
   @override
+  String get ticketCopiesUseSchool => 'Use the school\'s setting';
+
+  @override
+  String boutiqueReceiptPrintedOn(String printer) {
+    return 'Ticket printed on $printer.';
+  }
+
+  @override
   String get paymentAnomalyBannerTitle => 'Overpayment to arbitrate';
 
   @override

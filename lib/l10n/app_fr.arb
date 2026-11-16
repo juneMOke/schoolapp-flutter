@@ -5972,6 +5972,15 @@
   "ticketCopiesDefaultHint": "Chaque ticket sort en ce nombre d'exemplaires. Pour un ticket précis, le nombre se change au moment d'imprimer.",
   "ticketPrinterSpoolerNote": "Sur ce poste, les tickets passent par l'imprimante du système : seul le nombre d'exemplaires se règle ici.",
   "ticketPrinterLoading": "Lecture des réglages d'impression",
+  "ticketCopiesUseSchool": "Reprendre le réglage de l'école",
+  "boutiqueReceiptPrintedOn": "Ticket imprimé sur {printer}.",
+  "@boutiqueReceiptPrintedOn": {
+    "placeholders": {
+      "printer": {
+        "type": "String"
+      }
+    }
+  },
   "paymentAnomalyBannerTitle": "Trop-perçu à arbitrer",
   "paymentAnomalyBannerFallback": "Un encaissement dépasse le reste dû.",
   "paymentAnomalyAcknowledgeLabel": "Traité",

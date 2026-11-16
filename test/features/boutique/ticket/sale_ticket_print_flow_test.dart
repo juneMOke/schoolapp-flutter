@@ -145,7 +145,7 @@ void main() {
 
     expect(port.sentTo, equals([_netum.macAddress]));
     expect(port.sentBytes.single, isNotEmpty);
-    expect(find.text('Ticket imprimé. Ticket envoyé sur NT-8003DD.'), findsOne);
+    expect(find.text('Ticket imprimé sur NT-8003DD.'), findsOne);
     // Vrai : le papier est sorti, l'appelant peut noter la trace.
     expect(returned, isTrue);
   });

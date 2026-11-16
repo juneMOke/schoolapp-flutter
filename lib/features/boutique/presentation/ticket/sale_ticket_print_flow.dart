@@ -106,7 +106,7 @@ Future<bool> printSaleTicket(
               content: Text(
                 printer == null
                     ? printedNotice
-                    : '$printedNotice ${l10n.ticketSentToPrinter(printer.label)}',
+                    : l10n.boutiqueReceiptPrintedOn(printer.label),
               ),
             ),
           );

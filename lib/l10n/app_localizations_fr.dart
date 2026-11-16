@@ -9028,6 +9028,14 @@ class AppLocalizationsFr extends AppLocalizations {
   String get ticketPrinterLoading => 'Lecture des réglages d\'impression';
 
   @override
+  String get ticketCopiesUseSchool => 'Reprendre le réglage de l\'école';
+
+  @override
+  String boutiqueReceiptPrintedOn(String printer) {
+    return 'Ticket imprimé sur $printer.';
+  }
+
+  @override
   String get paymentAnomalyBannerTitle => 'Trop-perçu à arbitrer';
 
   @override

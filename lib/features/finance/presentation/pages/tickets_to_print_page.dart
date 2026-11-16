@@ -10,16 +10,15 @@ import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
 import 'package:school_app_flutter/core/constants/menu_constants.dart';
 import 'package:school_app_flutter/core/di/injection.dart';
-import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/core/widgets/app_page_background.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_empty_result.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_error_result.dart';
 import 'package:school_app_flutter/features/documents/data/printing/thermal_printer_permission.dart';
 import 'package:school_app_flutter/features/documents/domain/entities/ticket_print_job.dart';
-import 'package:school_app_flutter/features/documents/presentation/ticket/provisional_ticket_print_flow.dart';
 import 'package:school_app_flutter/features/documents/presentation/ticket/ticket_batch_print_flow.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/ticket_print_queue_cubit.dart';
+import 'package:school_app_flutter/features/finance/presentation/widgets/tickets_to_print/ticket_batch_summary.dart';
 import 'package:school_app_flutter/features/finance/presentation/widgets/tickets_to_print/tickets_to_print_list.dart';
 import 'package:school_app_flutter/features/home/presentation/widget/off_shell_top_bar.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
@@ -247,29 +246,4 @@ class _PrintBar extends StatelessWidget {
       ),
     );
   }
-}
-
-/// Ce que le lot dit en se terminant ; `null` quand il n'a rien à dire.
-///
-/// Un lot arrêté n'imprime **rien** en PDF : la cause se dit seule, sans le
-/// « impression PDF à la place » du ticket isolé.
-({String text, bool offersSettings})? ticketBatchSummary(
-  AppLocalizations l10n,
-  TicketBatchOutcome outcome,
-) {
-  final problem = outcome.problem;
-  final lines = [
-    if (outcome.printed > 0) l10n.ticketsToPrintDone(outcome.printed),
-    if (outcome.printed > 0 && outcome.printer != null)
-      l10n.ticketsPrinterUsed(outcome.printer!.label),
-    if (outcome.spoolerFailed) l10n.ticketPrintFailed,
-    if (problem != null)
-      l10n.ticketsToPrintStopped(thermalPrinterProblemCause(l10n, problem)),
-    if (outcome.skipped > 0) l10n.ticketsToPrintSkipped(outcome.skipped),
-  ];
-  if (lines.isEmpty) return null;
-  return (
-    text: lines.join('\n'),
-    offersSettings: problem == ThermalPrinterProblem.permissionDenied,
-  );
 }

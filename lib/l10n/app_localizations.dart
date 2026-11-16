@@ -14340,6 +14340,18 @@ abstract class AppLocalizations {
   /// **'Reading print settings'**
   String get ticketPrinterLoading;
 
+  /// No description provided for @ticketCopiesUseSchool.
+  ///
+  /// In en, this message translates to:
+  /// **'Use the school\'s setting'**
+  String get ticketCopiesUseSchool;
+
+  /// No description provided for @boutiqueReceiptPrintedOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Ticket printed on {printer}.'**
+  String boutiqueReceiptPrintedOn(String printer);
+
   /// No description provided for @paymentAnomalyBannerTitle.
   ///
   /// In en, this message translates to:

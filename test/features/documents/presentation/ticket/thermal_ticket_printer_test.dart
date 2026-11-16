@@ -234,6 +234,53 @@ void main() {
       );
     });
 
+    testWidgets('un choix dont l envoi échoue n est pas retenu', (
+      tester,
+    ) async {
+      // Un casque touché par erreur ne devient pas l'imprimante du guichet.
+      port
+        ..printers = const [_netum, _other]
+        ..sendProblem = ThermalPrinterProblem.unreachable;
+
+      await print(tester, choose: 'POS-58');
+
+      expect(
+        (await getIt<TicketPrinterSettingsStore>().read()).printer,
+        isNull,
+      );
+    });
+
+    testWidgets('la retenue injoignable est oubliée : le choix revient', (
+      tester,
+    ) async {
+      final store =
+          getIt<TicketPrinterSettingsStore>() as MemoryTicketPrinterSettings;
+      store.printer = _netum;
+      port.sendProblem = ThermalPrinterProblem.unreachable;
+
+      await print(tester);
+      expect(store.printer, isNull);
+
+      // Le ticket suivant redemande l'imprimante : le choix fait foi.
+      port
+        ..sendProblem = null
+        ..printers = const [_netum, _other];
+      await print(tester, choose: 'POS-58');
+      expect(port.sentTo.last, _other.macAddress);
+      expect(store.printer, _other);
+    });
+
+    testWidgets('Bluetooth éteint : la retenue reste retenue', (tester) async {
+      final store =
+          getIt<TicketPrinterSettingsStore>() as MemoryTicketPrinterSettings;
+      store.printer = _netum;
+      port.readyProblem = ThermalPrinterProblem.bluetoothOff;
+
+      await print(tester);
+
+      expect(store.printer, _netum);
+    });
+
     testWidgets('l imprimante retenue garde le nombre d exemplaires demandé', (
       tester,
     ) async {

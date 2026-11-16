@@ -199,9 +199,8 @@ Future<TicketBatchOutcome> _sendToSpooler(
 /// Imprime [jobs] — les tickets cochés de « Tickets à imprimer », dans
 /// l'ordre des numéros (continuité des tickets RC, lot D).
 ///
-/// L'imprimante se choisit **une fois** pour le lot, avec le nombre
-/// d'exemplaires de l'école : la redemander à chaque ticket rendrait le lot
-/// inutilisable, la mémoriser ferait sortir des reçus dans la pièce d'à côté.
+/// Une imprimante pour tout le lot — celle de la tablette, sinon choisie une
+/// fois —, au nombre d'exemplaires réglé dans l'aperçu.
 /// Puis les tickets partent **un par un** : chacun est marqué imprimé dès que
 /// SON envoi a réussi, et la première panne arrête le lot — les suivants
 /// restent dans la file, cochés, prêts à relancer.
@@ -250,6 +249,7 @@ Future<TicketBatchOutcome> _sendToThermalPrinter(
       printer,
     );
     if (problem != null) {
+      await rememberTicketPrinter(printer.printer, problem);
       await recordProblem(job, problem.name);
       return TicketBatchOutcome(
         printed: printed,
@@ -263,6 +263,7 @@ Future<TicketBatchOutcome> _sendToThermalPrinter(
     await markPrinted(job);
     printed++;
   }
+  await rememberTicketPrinter(printer.printer, null);
   return TicketBatchOutcome(
     printed: printed,
     skipped: batch.skipped,

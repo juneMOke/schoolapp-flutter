@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:dartz/dartz.dart';
@@ -24,10 +25,17 @@ const _pos = ThermalPrinter(name: 'POS-58', macAddress: 'AA:BB:CC:DD');
 
 class _Port implements ThermalPrinterPort {
   List<ThermalPrinter> printers = const [_netum, _pos];
+  ThermalPrinterProblem? readyProblem;
+  Completer<void>? gate;
   final List<String> sentTo = [];
 
   @override
-  Future<Either<Failure, Unit>> ensureReady() async => const Right(unit);
+  Future<Either<Failure, Unit>> ensureReady() async {
+    final problem = readyProblem;
+    return problem == null
+        ? const Right(unit)
+        : Left(ThermalPrinterFailure(problem));
+  }
 
   @override
   Future<Either<Failure, List<ThermalPrinter>>> pairedPrinters() async =>
@@ -40,6 +48,7 @@ class _Port implements ThermalPrinterPort {
     int copies = 1,
   }) async {
     sentTo.add(macAddress);
+    await gate?.future;
     return const Right(unit);
   }
 }
@@ -184,5 +193,62 @@ void main() {
     expect(find.textContaining('imprimante du système'), findsOneWidget);
     expect(find.text('Autorisation Bluetooth'), findsNothing);
     expect(find.text('Exemplaires par défaut'), findsOneWidget);
+  });
+
+  testAtReferenceFormats('l état complet tient sur tous les formats', (
+    tester,
+    _,
+  ) async {
+    store
+      ..printer = _netum
+      ..copies = 3;
+    await open(tester);
+
+    expect(find.text('NT-8003DD'), findsOneWidget);
+    expect(find.text('Imprimer un ticket d\'essai'), findsOneWidget);
+    expect(find.text('Reprendre le réglage de l\'école'), findsOneWidget);
+  });
+
+  testWidgets('pendant un essai, l imprimante ne change pas', (tester) async {
+    store.printer = _pos;
+    port.gate = Completer<void>();
+    await open(tester);
+
+    await tester.tap(find.text('Imprimer un ticket d\'essai'));
+    await tester.pump();
+    await tester.tap(find.text('NT-8003DD'));
+    await tester.pump();
+    expect(store.printer, _pos);
+
+    port.gate!.complete();
+    await tester.pumpAndSettle();
+    expect(port.sentTo, [_pos.macAddress]);
+    expect(find.text('Ticket d\'essai envoyé sur POS-58.'), findsOneWidget);
+  });
+
+  testWidgets('les exemplaires reviennent au réglage de l école', (
+    tester,
+  ) async {
+    store.copies = 4;
+    await open(tester);
+    expect(find.text('4'), findsOneWidget);
+
+    await tester.ensureVisible(find.text('Reprendre le réglage de l\'école'));
+    await tester.tap(find.text('Reprendre le réglage de l\'école'));
+    await tester.pumpAndSettle();
+
+    expect(store.copies, isNull);
+    expect(find.text('2'), findsOneWidget);
+    expect(find.text('Reprendre le réglage de l\'école'), findsNothing);
+  });
+
+  testWidgets('un refus vu par le canal natif se dit comme une permission', (
+    tester,
+  ) async {
+    port.readyProblem = ThermalPrinterProblem.permissionDenied;
+    await open(tester);
+
+    expect(find.textContaining('BLUETOOTH_CONNECT'), findsOneWidget);
+    expect(find.text('Autoriser'), findsOneWidget);
   });
 }

@@ -1,4 +1,3 @@
-import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/features/documents/data/printing/thermal_printer_permission.dart';
@@ -8,80 +7,9 @@ import 'package:school_app_flutter/features/documents/domain/printing/thermal_pr
 import 'package:school_app_flutter/features/documents/domain/printing/ticket_copies.dart';
 import 'package:school_app_flutter/features/documents/domain/printing/ticket_printer_settings.dart';
 import 'package:school_app_flutter/features/documents/domain/usecases/resolve_ticket_copies_use_case.dart';
+import 'package:school_app_flutter/features/finance/presentation/bloc/ticket_printer/ticket_printer_settings_state.dart';
 
-enum TicketPrinterTest { idle, sending, sent, failed }
-
-class TicketPrinterSettingsState extends Equatable {
-  final bool loading;
-
-  /// Les permissions « Appareils à proximité » qui manquent.
-  final Set<NearbyPermission> missing;
-
-  /// Android ne la redemandera plus (refus définitif, ou gestion de parc) :
-  /// seuls les réglages, ou la console d'administration, la débloquent.
-  final bool blocked;
-
-  /// Pourquoi la liste des imprimantes n'a pas pu se lire (Bluetooth éteint…).
-  final ThermalPrinterProblem? problem;
-  final List<ThermalPrinter> printers;
-  final ThermalPrinter? selected;
-  final int copies;
-  final TicketPrinterTest test;
-  final ThermalPrinterProblem? testProblem;
-
-  const TicketPrinterSettingsState({
-    this.loading = true,
-    this.missing = const {},
-    this.blocked = false,
-    this.problem,
-    this.printers = const [],
-    this.selected,
-    this.copies = TicketCopies.fallback,
-    this.test = TicketPrinterTest.idle,
-    this.testProblem,
-  });
-
-  /// L'imprimante retenue n'est plus parmi les appairées.
-  bool get selectedGone =>
-      selected != null &&
-      printers.isNotEmpty &&
-      printers.every((p) => p.macAddress != selected!.macAddress);
-
-  TicketPrinterSettingsState copyWith({
-    bool? loading,
-    Set<NearbyPermission>? missing,
-    bool? blocked,
-    ThermalPrinterProblem? Function()? problem,
-    List<ThermalPrinter>? printers,
-    ThermalPrinter? Function()? selected,
-    int? copies,
-    TicketPrinterTest? test,
-    ThermalPrinterProblem? Function()? testProblem,
-  }) => TicketPrinterSettingsState(
-    loading: loading ?? this.loading,
-    missing: missing ?? this.missing,
-    blocked: blocked ?? this.blocked,
-    problem: problem == null ? this.problem : problem(),
-    printers: printers ?? this.printers,
-    selected: selected == null ? this.selected : selected(),
-    copies: copies ?? this.copies,
-    test: test ?? this.test,
-    testProblem: testProblem == null ? this.testProblem : testProblem(),
-  );
-
-  @override
-  List<Object?> get props => [
-    loading,
-    missing,
-    blocked,
-    problem,
-    printers,
-    selected,
-    copies,
-    test,
-    testProblem,
-  ];
-}
+export 'ticket_printer_settings_state.dart';
 
 /// Finances ▸ Imprimante de tickets : l'autorisation Bluetooth, l'imprimante
 /// de la tablette et ses exemplaires par défaut.
@@ -114,6 +42,7 @@ class TicketPrinterSettingsCubit extends Cubit<TicketPrinterSettingsState> {
       loading: false,
       selected: () => settings.printer,
       copies: copies,
+      copiesFromDevice: settings.copies != null,
     );
     if (!thermal) return emit(next);
 
@@ -129,6 +58,19 @@ class TicketPrinterSettingsCubit extends Cubit<TicketPrinterSettingsState> {
           : ThermalPrinterProblem.unreachable,
       (_) => null,
     );
+    // Le canal natif constate un refus que le détail n'a pas vu : c'est
+    // CONNECT, la seule qu'il sache lire. L'écran le dit au même endroit.
+    if (problem == ThermalPrinterProblem.permissionDenied) {
+      if (!isClosed) {
+        emit(
+          next.copyWith(
+            missing: const {NearbyPermission.connect},
+            printers: const [],
+          ),
+        );
+      }
+      return;
+    }
     if (problem != null) {
       if (!isClosed) {
         emit(next.copyWith(problem: () => problem, printers: const []));
@@ -167,6 +109,9 @@ class TicketPrinterSettingsCubit extends Cubit<TicketPrinterSettingsState> {
   Future<void> openSystemSettings() => _permission.openSettings();
 
   Future<void> select(ThermalPrinter printer) async {
+    // Pendant un essai, la liaison est à lui : changer d'imprimante lancerait
+    // un second envoi qui couperait le premier.
+    if (state.test == TicketPrinterTest.sending) return;
     await _store.savePrinter(printer);
     if (!isClosed) {
       emit(
@@ -181,8 +126,18 @@ class TicketPrinterSettingsCubit extends Cubit<TicketPrinterSettingsState> {
 
   Future<void> copiesChanged(int copies) async {
     final value = TicketCopies.clamp(copies);
-    emit(state.copyWith(copies: value));
+    emit(state.copyWith(copies: value, copiesFromDevice: true));
     await _store.saveCopies(value);
+  }
+
+  /// La tablette rend la main au réglage de l'école, qui suivra ses
+  /// changements.
+  Future<void> useSchoolCopies() async {
+    await _store.saveCopies(null);
+    final copies = await _copies();
+    if (!isClosed) {
+      emit(state.copyWith(copies: copies, copiesFromDevice: false));
+    }
   }
 
   /// Un ticket d'essai, un exemplaire, sur l'imprimante retenue.
@@ -190,7 +145,11 @@ class TicketPrinterSettingsCubit extends Cubit<TicketPrinterSettingsState> {
     final printer = state.selected;
     if (printer == null || state.test == TicketPrinterTest.sending) return;
     emit(
-      state.copyWith(test: TicketPrinterTest.sending, testProblem: () => null),
+      state.copyWith(
+        test: TicketPrinterTest.sending,
+        testPrinter: () => printer,
+        testProblem: () => null,
+      ),
     );
     final sent = await _port.printBytes(
       EscPosTicketRenderer.renderLines(lines),

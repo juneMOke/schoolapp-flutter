@@ -437,28 +437,30 @@ void main() {
       expect(port.sentCopies, equals([2]));
     });
 
-    testWidgets('un échec AVANT le compteur : le défaut de l école', (
-      tester,
-    ) async {
-      schools.ticketCopies = 2;
-      port.readyProblem = ThermalPrinterProblem.bluetoothOff;
+    testWidgets(
+      'un échec AVANT le choix de l imprimante : le défaut de l école',
+      (tester) async {
+        schools.ticketCopies = 2;
+        port.readyProblem = ThermalPrinterProblem.bluetoothOff;
 
-      await run(tester);
+        await run(tester);
 
-      // Personne n'a vu le compteur : c'est le réglage de l'école qui décide
-      // du nombre de feuilles, pas un « 1 » par défaut.
-      expect(pageCount(printing.laidOut.last), 2);
-    });
+        // Personne n'a vu le compteur : c'est le réglage de l'école qui décide
+        // du nombre de feuilles, pas un « 1 » par défaut.
+        expect(pageCount(printing.laidOut.last), 2);
+      },
+    );
 
-    testWidgets('un échec AVANT le compteur : le défaut, un exemplaire', (
-      tester,
-    ) async {
-      port.readyProblem = ThermalPrinterProblem.bluetoothOff;
+    testWidgets(
+      'un échec AVANT le choix de l imprimante : le défaut, un exemplaire',
+      (tester) async {
+        port.readyProblem = ThermalPrinterProblem.bluetoothOff;
 
-      await run(tester);
+        await run(tester);
 
-      expect(pageCount(printing.laidOut.last), 1);
-    });
+        expect(pageCount(printing.laidOut.last), 1);
+      },
+    );
   });
 
   testWidgets('les deux sorties rendent le MÊME ticket', (tester) async {

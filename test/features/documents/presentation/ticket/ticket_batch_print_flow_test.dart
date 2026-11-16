@@ -35,6 +35,8 @@ import 'package:school_app_flutter/features/school/domain/entities/school.dart';
 import 'package:school_app_flutter/features/school/domain/entities/school_logo.dart';
 import 'package:school_app_flutter/features/school/domain/repositories/school_repository.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
+import 'package:school_app_flutter/features/documents/domain/printing/ticket_printer_settings.dart';
+import '../../../../test_helpers/memory_ticket_printer_settings.dart';
 
 const _printer = ThermalPrintChoice(
   printer: ThermalPrinter(name: 'NT-8003DD', macAddress: 'DC:0D:30:11:22:33'),
@@ -76,6 +78,9 @@ void main() {
         CurrentUserContext()..set('u-1', schoolId: 'ecole-1'),
       )
       ..registerSingleton<SchoolLogoBandLoader>(_NoBand())
+      ..registerSingleton<TicketPrinterSettingsStore>(
+        MemoryTicketPrinterSettings(),
+      )
       ..registerFactory<ResolveTicketCopiesUseCase>(
         () => ResolveTicketCopiesUseCase(_Schools()),
       )
@@ -296,6 +301,19 @@ void main() {
       expect(outcome?.cancelled, isTrue);
       expect(sent, isEmpty);
       expect(queue.printed, isEmpty);
+    });
+
+    testWidgets('le compteur de l aperçu part avec le lot', (tester) async {
+      await open(tester);
+
+      // Le défaut de l'école (3), plus un, pour ce lot seulement.
+      await tester.tap(find.byTooltip('Un exemplaire de plus'));
+      await tester.pump();
+      await tester.tap(find.text('Imprimer'));
+      await tester.pumpAndSettle();
+
+      expect(askedCopies, [4]);
+      expect(outcome?.printed, 2);
     });
 
     testWidgets('tablette : Imprimer sort le lot et solde la file', (
