@@ -8833,6 +8833,21 @@ class AppLocalizationsEn extends AppLocalizations {
       'Printer unreachable, off or out of range — printing as PDF instead.';
 
   @override
+  String get ticketPrinterCausePermission =>
+      'the Nearby devices permission is not granted to the app.';
+
+  @override
+  String get ticketPrinterCauseBluetoothOff => 'Bluetooth is off.';
+
+  @override
+  String get ticketPrinterCauseNoPrinter =>
+      'no printer is paired with this tablet.';
+
+  @override
+  String get ticketPrinterCauseUnreachable =>
+      'the printer is unreachable, off or out of range.';
+
+  @override
   String get paymentAnomalyBannerTitle => 'Overpayment to arbitrate';
 
   @override

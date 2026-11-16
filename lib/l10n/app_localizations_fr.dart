@@ -8911,6 +8911,21 @@ class AppLocalizationsFr extends AppLocalizations {
       'Imprimante injoignable, éteinte ou hors de portée — impression PDF à la place.';
 
   @override
+  String get ticketPrinterCausePermission =>
+      'l\'autorisation « Appareils à proximité » n\'est pas accordée à l\'application.';
+
+  @override
+  String get ticketPrinterCauseBluetoothOff => 'le Bluetooth est éteint.';
+
+  @override
+  String get ticketPrinterCauseNoPrinter =>
+      'aucune imprimante n\'est appairée à cette tablette.';
+
+  @override
+  String get ticketPrinterCauseUnreachable =>
+      'l\'imprimante est injoignable, éteinte ou hors de portée.';
+
+  @override
   String get paymentAnomalyBannerTitle => 'Trop-perçu à arbitrer';
 
   @override

@@ -14160,6 +14160,30 @@ abstract class AppLocalizations {
   /// **'Printer unreachable, off or out of range — printing as PDF instead.'**
   String get ticketPrinterProblemUnreachable;
 
+  /// No description provided for @ticketPrinterCausePermission.
+  ///
+  /// In en, this message translates to:
+  /// **'the Nearby devices permission is not granted to the app.'**
+  String get ticketPrinterCausePermission;
+
+  /// No description provided for @ticketPrinterCauseBluetoothOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Bluetooth is off.'**
+  String get ticketPrinterCauseBluetoothOff;
+
+  /// No description provided for @ticketPrinterCauseNoPrinter.
+  ///
+  /// In en, this message translates to:
+  /// **'no printer is paired with this tablet.'**
+  String get ticketPrinterCauseNoPrinter;
+
+  /// No description provided for @ticketPrinterCauseUnreachable.
+  ///
+  /// In en, this message translates to:
+  /// **'the printer is unreachable, off or out of range.'**
+  String get ticketPrinterCauseUnreachable;
+
   /// No description provided for @paymentAnomalyBannerTitle.
   ///
   /// In en, this message translates to:

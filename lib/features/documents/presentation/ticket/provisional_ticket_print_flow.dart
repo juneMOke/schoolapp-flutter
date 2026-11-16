@@ -297,3 +297,15 @@ String thermalPrinterProblemMessage(
   ThermalPrinterProblem.noPrinterSelected => l10n.ticketPrinterProblemNoPrinter,
   ThermalPrinterProblem.unreachable => l10n.ticketPrinterProblemUnreachable,
 };
+
+/// La seule cause, sans la suite : là où rien ne part en PDF (l'impression
+/// par lot de « Tickets à imprimer » s'arrête), annoncer un repli serait faux.
+String thermalPrinterProblemCause(
+  AppLocalizations l10n,
+  ThermalPrinterProblem problem,
+) => switch (problem) {
+  ThermalPrinterProblem.permissionDenied => l10n.ticketPrinterCausePermission,
+  ThermalPrinterProblem.bluetoothOff => l10n.ticketPrinterCauseBluetoothOff,
+  ThermalPrinterProblem.noPrinterSelected => l10n.ticketPrinterCauseNoPrinter,
+  ThermalPrinterProblem.unreachable => l10n.ticketPrinterCauseUnreachable,
+};
