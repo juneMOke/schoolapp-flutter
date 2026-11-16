@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/theme/app_motion.dart';
 import 'package:school_app_flutter/core/components/tables/eteelo_column_table.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
@@ -178,11 +179,11 @@ class _StatusCell extends StatelessWidget {
       runSpacing: AppSpacing.xs,
       children: [
         if (provisional)
-          Tooltip(message: l10n.treasuryReportProvisionalHint, child: status)
+          _Hint(message: l10n.treasuryReportProvisionalHint, child: status)
         else
           status,
         if (report.archived)
-          Tooltip(
+          _Hint(
             message: l10n.treasuryReportArchivedHint,
             child: _Badge(
               icon: Icons.inventory_2_outlined,
@@ -195,6 +196,23 @@ class _StatusCell extends StatelessWidget {
       ],
     );
   }
+}
+
+/// L'explication d'une pastille : au survol sur un poste, à l'appui au doigt
+/// (l'appui long ne se devine pas), assez longtemps pour une phrase.
+class _Hint extends StatelessWidget {
+  final String message;
+  final Widget child;
+
+  const _Hint({required this.message, required this.child});
+
+  @override
+  Widget build(BuildContext context) => Tooltip(
+    message: message,
+    triggerMode: TooltipTriggerMode.tap,
+    showDuration: AppMotion.tooltipShowDuration,
+    child: child,
+  );
 }
 
 class _Badge extends StatelessWidget {

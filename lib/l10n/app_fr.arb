@@ -12947,6 +12947,8 @@
   "treasuryGapTag": "Écart",
   "treasuryCellGap": "écart {gap}",
   "@treasuryCellGap": {"placeholders": {"gap": {"type": "String"}}},
+  "treasuryCellJustification": "« {justification} »",
+  "@treasuryCellJustification": {"placeholders": {"justification": {"type": "String"}}},
   "treasuryPeriodClosing": "Reste en fin de période",
   "treasurySeeDay": "Voir la journée de cette caisse",
   "treasuryReportsTitle": "Rapports de caisse",

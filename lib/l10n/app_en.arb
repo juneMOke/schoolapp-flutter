@@ -12776,6 +12776,8 @@
   "treasuryGapTag": "Gap",
   "treasuryCellGap": "gap {gap}",
   "@treasuryCellGap": {"placeholders": {"gap": {"type": "String"}}},
+  "treasuryCellJustification": "“{justification}”",
+  "@treasuryCellJustification": {"placeholders": {"justification": {"type": "String"}}},
   "treasuryPeriodClosing": "Balance at period end",
   "treasurySeeDay": "See this register's day",
   "treasuryReportsTitle": "Cash reports",

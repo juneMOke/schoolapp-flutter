@@ -35562,6 +35562,12 @@ abstract class AppLocalizations {
   /// **'gap {gap}'**
   String treasuryCellGap(String gap);
 
+  /// No description provided for @treasuryCellJustification.
+  ///
+  /// In en, this message translates to:
+  /// **'“{justification}”'**
+  String treasuryCellJustification(String justification);
+
   /// No description provided for @treasuryPeriodClosing.
   ///
   /// In en, this message translates to:

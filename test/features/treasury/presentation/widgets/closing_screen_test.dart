@@ -322,6 +322,16 @@ void main() {
     expect(find.text('Non clôturée'), findsOneWidget);
   });
 
+  testWidgets('la semaine montre la justification d un écart sur sa ligne', (
+    tester,
+  ) async {
+    setTestWindow(tester, const Size(1280, 1400));
+    await _pump(tester, treasuryDay([usdDay(), cdfDay()]));
+    await tester.tap(find.text('Hebdomadaire'));
+    await tester.pumpAndSettle();
+    expect(find.text('« Erreur de rendu de monnaie »'), findsOneWidget);
+  });
+
   testWidgets('toucher une journée de la semaine la rouvre en Journalier', (
     tester,
   ) async {

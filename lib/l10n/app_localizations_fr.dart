@@ -23280,6 +23280,11 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
+  String treasuryCellJustification(String justification) {
+    return '« $justification »';
+  }
+
+  @override
   String get treasuryPeriodClosing => 'Reste en fin de période';
 
   @override

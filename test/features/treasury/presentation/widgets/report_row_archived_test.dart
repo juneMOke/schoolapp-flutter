@@ -56,4 +56,26 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Archivé'), findsNothing);
   });
+
+  testWidgets('au doigt, un appui sur « Archivé » dit pourquoi', (
+    tester,
+  ) async {
+    setTestWindow(tester, const Size(360, 740));
+    await tester.pumpWidget(
+      treasuryHost(
+        ReportsTable(
+          reports: [TreasuryWire.reportFromJson(_json(archived: true))],
+          today: demoDay,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Archivé'));
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(
+      find.text('Contenu figé ; le PDF porte un QR de vérification.'),
+      findsOneWidget,
+    );
+    await tester.pumpAndSettle(const Duration(seconds: 4));
+  });
 }
