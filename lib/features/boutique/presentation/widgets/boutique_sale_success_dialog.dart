@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/features/boutique/presentation/bloc/sale_receipt_watch_cubit.dart';
+import 'package:school_app_flutter/features/boutique/presentation/widgets/boutique_sale_receipt_banner.dart';
 import 'package:school_app_flutter/core/components/dialogs/eteelo_dialog_body.dart';
 import 'package:school_app_flutter/core/components/dialogs/eteelo_dialog_dark_header.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
-import 'package:school_app_flutter/features/boutique/domain/entities/provisional_sale_reference.dart';
 import 'package:school_app_flutter/features/boutique/domain/entities/recorded_sale.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 import 'package:school_app_flutter/core/money/money_format.dart';
@@ -17,29 +19,37 @@ import 'package:school_app_flutter/features/boutique/data/local/boutique_sale_lo
 /// même issue — panier vidé, retour au catalogue. Un chemin qui laisserait la
 /// vente encaissée à l'écran ferait recomposer la suivante par-dessus.
 ///
-/// Le sous-titre dit **lequel des deux documents** le porteur tient : un ticket
-/// provisoire et un reçu scellé se ressemblent au comptoir, et c'est le seul
-/// endroit où l'écran peut lever le doute.
+/// Le ticket ne sort qu'avec le **numéro définitif** du reçu : le bandeau dit
+/// qu'il se scelle, puis le numéro dès qu'il arrive, et « Imprimer » ne s'offre
+/// qu'à ce moment-là. Faute de numéro dans le délai, le ticket s'imprimera
+/// depuis la fiche de la vente.
 class BoutiqueSaleSuccessDialog extends StatefulWidget {
   final RecordedSale sale;
 
-  /// Imprime le ticket. **Aucun échec ici n'est un échec d'encaissement** : la
-  /// vente est déjà écrite, et le papier ne coûte que du papier.
-  final Future<void> Function() onPrint;
+  /// Guette le numéro du reçu. Créé et refermé par l'appelant.
+  final SaleReceiptWatchCubit watch;
+
+  /// Imprime le ticket de la vente telle que relue — celle qui porte le
+  /// numéro. **Aucun échec ici n'est un échec d'encaissement** : la vente est
+  /// déjà écrite, et le papier ne coûte que du papier.
+  final Future<void> Function(RecordedSale sale) onPrint;
 
   const BoutiqueSaleSuccessDialog({
     super.key,
     required this.sale,
+    required this.watch,
     required this.onPrint,
   });
 
   static Future<void> show(
     BuildContext context, {
     required RecordedSale sale,
-    required Future<void> Function() onPrint,
+    required SaleReceiptWatchCubit watch,
+    required Future<void> Function(RecordedSale sale) onPrint,
   }) => showDialog<void>(
     context: context,
-    builder: (_) => BoutiqueSaleSuccessDialog(sale: sale, onPrint: onPrint),
+    builder: (_) =>
+        BoutiqueSaleSuccessDialog(sale: sale, watch: watch, onPrint: onPrint),
   );
 
   @override
@@ -52,10 +62,10 @@ class _BoutiqueSaleSuccessDialogState extends State<BoutiqueSaleSuccessDialog> {
   /// de laisser empiler deux envois vers la même machine.
   bool _isPrinting = false;
 
-  Future<void> _print() async {
+  Future<void> _print(RecordedSale sale) async {
     setState(() => _isPrinting = true);
     try {
-      await widget.onPrint();
+      await widget.onPrint(sale);
     } finally {
       if (mounted) setState(() => _isPrinting = false);
     }
@@ -67,9 +77,22 @@ class _BoutiqueSaleSuccessDialogState extends State<BoutiqueSaleSuccessDialog> {
     final theme = Theme.of(context);
     final sale = widget.sale;
     final total = sale.lines.totals.entries.map(MoneyFormat.format).join(' · ');
-    final receiptNumber = sale.sale.receiptNumber;
-    final sealed = receiptNumber != null;
+    return BlocBuilder<SaleReceiptWatchCubit, SaleReceiptWatchState>(
+      bloc: widget.watch,
+      builder: (context, watch) => _dialog(context, l10n, theme, total, watch),
+    );
+  }
 
+  Widget _dialog(
+    BuildContext context,
+    AppLocalizations l10n,
+    ThemeData theme,
+    String total,
+    SaleReceiptWatchState watch,
+  ) {
+    final numbered = watch.phase == SaleReceiptPhase.numbered
+        ? watch.sale
+        : null;
     return Dialog(
       backgroundColor: AppColors.surfaceRaised,
       surfaceTintColor: Colors.transparent,
@@ -133,53 +156,7 @@ class _BoutiqueSaleSuccessDialogState extends State<BoutiqueSaleSuccessDialog> {
                 ),
               ),
               const SizedBox(height: AppDimensions.spacingM),
-              // Le sous-titre dit LEQUEL des deux documents le porteur tient :
-              // un ticket provisoire et un reçu scellé se ressemblent au
-              // comptoir, et c'est le seul endroit où l'écran lève le doute.
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppDimensions.spacingM,
-                  vertical: AppDimensions.spacingS,
-                ),
-                decoration: BoxDecoration(
-                  color: sealed
-                      ? AppColors.vertSavane.withValues(alpha: 0.06)
-                      : AppColors.warning.withValues(alpha: 0.08),
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(
-                    color: sealed
-                        ? AppColors.vertSavane.withValues(alpha: 0.25)
-                        : AppColors.warning.withValues(alpha: 0.30),
-                  ),
-                ),
-                child: Row(
-                  children: [
-                    Icon(
-                      sealed
-                          ? Icons.verified_outlined
-                          : Icons.schedule_outlined,
-                      size: 16,
-                      color: sealed ? AppColors.vertSavane : AppColors.warning,
-                    ),
-                    const SizedBox(width: AppDimensions.spacingS),
-                    Expanded(
-                      child: Text(
-                        sealed
-                            ? l10n.boutiqueReceiptBannerSealed(receiptNumber)
-                            : l10n.boutiqueReceiptBannerProvisional(
-                                ProvisionalSaleReference.of(sale.id),
-                              ),
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: sealed
-                              ? AppColors.vertSavane
-                              : AppColors.warning,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+              BoutiqueSaleReceiptBanner(watch: watch),
             ],
           ),
           footer: [
@@ -191,7 +168,11 @@ class _BoutiqueSaleSuccessDialogState extends State<BoutiqueSaleSuccessDialog> {
                   Expanded(
                     flex: 2,
                     child: OutlinedButton.icon(
-                      onPressed: _isPrinting ? null : _print,
+                      // Pas de numéro, pas de ticket : le bouton attend le
+                      // reçu scellé, comme au guichet de perception.
+                      onPressed: _isPrinting || numbered == null
+                          ? null
+                          : () => _print(numbered),
                       icon: _isPrinting
                           ? const SizedBox(
                               width: 16,

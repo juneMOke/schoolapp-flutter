@@ -9435,9 +9435,12 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
-  String boutiqueReceiptBannerProvisional(String reference) {
-    return '$reference · provisoire, sera scellé à la synchro';
-  }
+  String get boutiqueReceiptBannerAwaiting =>
+      'Reçu en cours de scellement : le ticket s\'imprime dès son numéro.';
+
+  @override
+  String get boutiqueReceiptBannerDeferred =>
+      'Reçu pas encore scellé : le ticket s\'imprimera depuis la fiche de la vente, après la synchronisation.';
 
   @override
   String boutiqueReceiptBannerSealed(String reference) {
@@ -10120,6 +10123,10 @@ class AppLocalizationsFr extends AppLocalizations {
   String boutiqueSaleDetailTicketPrintedAt(String date) {
     return 'Ticket imprimé le $date';
   }
+
+  @override
+  String get boutiqueSaleDetailTicketAwaitingNumber =>
+      'Le ticket s\'imprimera dès que le reçu aura son numéro.';
 
   @override
   String get boutiqueSaleDetailTicketNeverPrinted =>

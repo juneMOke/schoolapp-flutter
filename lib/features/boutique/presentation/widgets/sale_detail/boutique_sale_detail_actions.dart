@@ -36,7 +36,11 @@ class BoutiqueSaleDetailActions extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         FilledButton.icon(
-          onPressed: isPrinting ? null : onPrintTicket,
+          // Pas de numéro définitif, pas de ticket : le bouton attend le
+          // reçu scellé, et la phrase dessous dit pourquoi.
+          onPressed: isPrinting || !detail.hasReceiptNumber
+              ? null
+              : onPrintTicket,
           icon: isPrinting
               ? const SizedBox.square(
                   dimension: AppDimensions.boutiqueSaleSpinnerSize,
@@ -69,7 +73,9 @@ class BoutiqueSaleDetailActions extends StatelessWidget {
         ),
         const SizedBox(height: AppDimensions.spacingXS),
         Text(
-          detail.ticketPrintedAt == null
+          !detail.hasReceiptNumber
+              ? l10n.boutiqueSaleDetailTicketAwaitingNumber
+              : detail.ticketPrintedAt == null
               ? l10n.boutiqueSaleDetailTicketNeverPrinted
               : l10n.boutiqueSaleDetailTicketPrintedAt(
                   formatSchoolDateTime(detail.ticketPrintedAt!),

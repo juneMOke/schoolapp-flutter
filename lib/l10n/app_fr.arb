@@ -6200,14 +6200,8 @@
       }
     }
   },
-  "boutiqueReceiptBannerProvisional": "{reference} · provisoire, sera scellé à la synchro",
-  "@boutiqueReceiptBannerProvisional": {
-    "placeholders": {
-      "reference": {
-        "type": "String"
-      }
-    }
-  },
+  "boutiqueReceiptBannerAwaiting": "Reçu en cours de scellement : le ticket s'imprime dès son numéro.",
+  "boutiqueReceiptBannerDeferred": "Reçu pas encore scellé : le ticket s'imprimera depuis la fiche de la vente, après la synchronisation.",
   "boutiqueReceiptBannerSealed": "{reference} · scellé",
   "@boutiqueReceiptBannerSealed": {
     "placeholders": {
@@ -6691,6 +6685,7 @@
   "boutiqueSaleDetailPrintTicket": "Imprimer le ticket",
   "boutiqueSaleDetailReprintTicket": "Réimprimer le ticket",
   "boutiqueSaleDetailTicketPrintedAt": "Ticket imprimé le {date}",
+  "boutiqueSaleDetailTicketAwaitingNumber": "Le ticket s'imprimera dès que le reçu aura son numéro.",
   "boutiqueSaleDetailTicketNeverPrinted": "Ticket jamais imprimé depuis cette tablette.",
   "boutiqueSaleDetailOpenReceipt": "Ouvrir le reçu scellé",
   "boutiqueSaleDetailReceiptPending": "Le reçu sera scellé à la synchronisation. Le ticket fait foi en attendant.",

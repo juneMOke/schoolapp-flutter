@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:dartz/dartz.dart';
 import 'package:school_app_flutter/core/device/device_identity_service.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
@@ -40,6 +42,11 @@ class BoutiqueSaleRepositoryImpl implements BoutiqueSaleRepository {
   /// fabriquer un couple perçu/vendu que la base ne justifierait pas.
   final ExchangeRateReader? _rates;
 
+  /// Pousse l'outbox sans l'attendre, juste après l'écriture : le ticket ne
+  /// sort qu'avec le numéro définitif, que seul l'ACK apporte. Même geste que
+  /// l'encaissement d'un versement.
+  final Future<void> Function()? _flush;
+
   const BoutiqueSaleRepositoryImpl({
     required BoutiqueSaleWriteDao dao,
     required CurrentUserContext currentUser,
@@ -48,13 +55,15 @@ class BoutiqueSaleRepositoryImpl implements BoutiqueSaleRepository {
     Clock now = systemClock,
     DateTime Function() wallClock = DateTime.now,
     ExchangeRateReader? rates,
+    Future<void> Function()? flush,
   }) : _dao = dao,
        _currentUser = currentUser,
        _ids = ids,
        _device = device,
        _now = now,
        _wallClock = wallClock,
-       _rates = rates;
+       _rates = rates,
+       _flush = flush;
 
   @override
   Future<Either<Failure, RecordedSale>> recordSale({
@@ -251,12 +260,21 @@ class BoutiqueSaleRepositoryImpl implements BoutiqueSaleRepository {
         ],
       );
 
+      _flushQuietly();
       return Right(RecordedSale(sale: sale, lines: lines));
     } catch (e) {
       // L'écriture est atomique : si elle échoue, RIEN n'a été posé, et le
       // guichet peut réessayer sans risque de double vente.
       return Left(StorageFailure('Vente non enregistrée : $e'));
     }
+  }
+
+  /// Le flush part sans être attendu, et ne peut rien faire échouer : la vente
+  /// est écrite, une synchro qui lève ne la reprend pas.
+  void _flushQuietly() {
+    final flush = _flush;
+    if (flush == null) return;
+    unawaited(flush().catchError((Object _) {}));
   }
 
   /// Le règlement d'une devise du panier, tel que le comptoir l'a décidé.

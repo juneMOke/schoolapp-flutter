@@ -14982,11 +14982,17 @@ abstract class AppLocalizations {
   /// **'Sale collected · {total}'**
   String boutiqueReceiptBannerTitle(String total);
 
-  /// No description provided for @boutiqueReceiptBannerProvisional.
+  /// No description provided for @boutiqueReceiptBannerAwaiting.
   ///
   /// In en, this message translates to:
-  /// **'{reference} · provisional, will be sealed on sync'**
-  String boutiqueReceiptBannerProvisional(String reference);
+  /// **'Receipt being sealed: the ticket prints as soon as it has its number.'**
+  String get boutiqueReceiptBannerAwaiting;
+
+  /// No description provided for @boutiqueReceiptBannerDeferred.
+  ///
+  /// In en, this message translates to:
+  /// **'Receipt not sealed yet: print the ticket from the sale record after sync.'**
+  String get boutiqueReceiptBannerDeferred;
 
   /// No description provided for @boutiqueReceiptBannerSealed.
   ///
@@ -15976,6 +15982,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Ticket printed on {date}'**
   String boutiqueSaleDetailTicketPrintedAt(String date);
+
+  /// No description provided for @boutiqueSaleDetailTicketAwaitingNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'The ticket can be printed once the receipt has its number.'**
+  String get boutiqueSaleDetailTicketAwaitingNumber;
 
   /// No description provided for @boutiqueSaleDetailTicketNeverPrinted.
   ///

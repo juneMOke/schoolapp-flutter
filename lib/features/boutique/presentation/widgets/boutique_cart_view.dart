@@ -2,6 +2,8 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 import 'package:school_app_flutter/core/widgets/app_snack_bar.dart';
 import 'package:school_app_flutter/core/money/cash_register_lock.dart';
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/features/boutique/domain/usecases/mark_sale_ticket_printed_use_case.dart';
+import 'package:school_app_flutter/features/boutique/presentation/bloc/sale_receipt_watch_cubit.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/di/injection.dart';
@@ -143,12 +145,18 @@ class _BoutiqueCartViewState extends State<BoutiqueCartView> {
   ///
   /// ⚠️ **Aucun échec ici n'est un échec d'encaissement** : la vente est déjà
   /// écrite, et le papier ne coûte que du papier.
-  Future<void> _print(RecordedSale sale) => printSaleTicket(
-    context,
-    sale: sale,
-    levelLabels: {for (final level in widget.levels) level.id: level.label},
-    messenger: ScaffoldMessenger.maybeOf(context),
-  );
+  ///
+  /// Un ticket sorti de la thermique est noté, comme depuis la fiche de la
+  /// vente : la fiche ne doit pas l'annoncer « non imprimé ».
+  Future<void> _print(RecordedSale sale) async {
+    final printed = await printSaleTicket(
+      context,
+      sale: sale,
+      levelLabels: {for (final level in widget.levels) level.id: level.label},
+      messenger: ScaffoldMessenger.maybeOf(context),
+    );
+    if (printed) await getIt<MarkSaleTicketPrintedUseCase>()(sale.id);
+  }
 
   /// L'appareil est-il hors ligne ?
   ///
@@ -241,14 +249,19 @@ class _BoutiqueCartViewState extends State<BoutiqueCartView> {
     _isClosingSale = true;
     final bloc = context.read<BoutiqueBloc>();
     final navigator = Navigator.of(context);
+    // Le numéro du reçu arrive avec l'ACK, quelques secondes après l'écriture :
+    // la modale le guette, et n'offre le ticket qu'avec lui.
+    final watch = getIt<SaleReceiptWatchCubit>()..watch(sale);
     try {
       await BoutiqueSaleSuccessDialog.show(
         context,
         sale: sale,
-        onPrint: () => _print(sale),
+        watch: watch,
+        onPrint: _print,
       );
     } finally {
       _isClosingSale = false;
+      await watch.close();
     }
     bloc.add(const BoutiqueNewSaleStarted());
     // Dans la colonne de la caisse, le panier vide reste en place pour la

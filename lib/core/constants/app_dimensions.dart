@@ -106,6 +106,9 @@ class AppDimensions {
   static const enrollmentDuplicateDialogMaxWidth = 480.0;
   static const boutiqueDialogMaxWidth = 420.0;
 
+  /// Icône (ou indicateur d'attente) du bandeau d'état du reçu de vente.
+  static const boutiqueReceiptBannerIcon = 16.0;
+
   // Fiche d'une vente (boutique) : cartes, gestes, bandeau du montant.
   static const boutiqueSaleCardRadius = 14.0;
   static const boutiqueSaleActionHeight = 52.0;

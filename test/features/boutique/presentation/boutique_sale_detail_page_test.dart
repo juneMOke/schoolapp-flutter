@@ -203,10 +203,30 @@ void main() {
   testWidgets('ticket jamais imprimé : le libellé dit IMPRIMER', (
     tester,
   ) async {
-    await pumpDetail(tester, detail: _detail());
+    await pumpDetail(
+      tester,
+      detail: _detail(sale: _sale(receiptNumber: 'ETL-RV-2526-000413')),
+    );
 
     expect(find.text('Imprimer le ticket'), findsOneWidget);
     expect(find.textContaining('jamais imprimé'), findsOneWidget);
+  });
+
+  testWidgets('sans numéro de reçu, IMPRIMER attend et dit pourquoi', (
+    tester,
+  ) async {
+    // Le ticket ne sort qu'avec le numéro définitif, comme au guichet de
+    // perception : le bouton reste là, inactif, avec sa raison dessous.
+    await pumpDetail(tester, detail: _detail());
+
+    final button = tester.widget<FilledButton>(
+      find.widgetWithText(FilledButton, 'Imprimer le ticket'),
+    );
+    expect(button.onPressed, isNull);
+    expect(
+      find.text('Le ticket s\'imprimera dès que le reçu aura son numéro.'),
+      findsOneWidget,
+    );
   });
 
   testWidgets('ticket déjà sorti : le libellé dit RÉIMPRIMER, et la date', (
@@ -217,7 +237,10 @@ void main() {
     await pumpDetail(
       tester,
       // 9 h 15 UTC = 10 h 15 à Kinshasa, quel que soit le fuseau du poste.
-      detail: _detail(printedAt: DateTime.utc(2026, 8, 30, 9, 15)),
+      detail: _detail(
+        sale: _sale(receiptNumber: 'ETL-RV-2526-000413'),
+        printedAt: DateTime.utc(2026, 8, 30, 9, 15),
+      ),
     );
 
     expect(find.text('Réimprimer le ticket'), findsOneWidget);

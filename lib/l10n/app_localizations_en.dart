@@ -9355,9 +9355,12 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String boutiqueReceiptBannerProvisional(String reference) {
-    return '$reference · provisional, will be sealed on sync';
-  }
+  String get boutiqueReceiptBannerAwaiting =>
+      'Receipt being sealed: the ticket prints as soon as it has its number.';
+
+  @override
+  String get boutiqueReceiptBannerDeferred =>
+      'Receipt not sealed yet: print the ticket from the sale record after sync.';
 
   @override
   String boutiqueReceiptBannerSealed(String reference) {
@@ -10035,6 +10038,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String boutiqueSaleDetailTicketPrintedAt(String date) {
     return 'Ticket printed on $date';
   }
+
+  @override
+  String get boutiqueSaleDetailTicketAwaitingNumber =>
+      'The ticket can be printed once the receipt has its number.';
 
   @override
   String get boutiqueSaleDetailTicketNeverPrinted =>

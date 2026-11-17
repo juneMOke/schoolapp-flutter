@@ -67,12 +67,14 @@ void main() {
   BoutiqueSaleRepositoryImpl repoWith({
     String? schoolId = 'E1',
     String? uid = 'u1',
+    Future<void> Function()? flush,
   }) => BoutiqueSaleRepositoryImpl(
     dao: dao,
     currentUser: CurrentUserContext()..set(uid, schoolId: schoolId),
     ids: _SeqIds(),
     device: device,
     now: () => 1000,
+    flush: flush,
   );
 
   setUp(() async {
@@ -185,6 +187,38 @@ void main() {
     expect(line['school_level_id'], 'humanites');
     // Le nom est figé : le reçu doit le nommer même si la fiche bouge.
     expect(line['beneficiary_name'], 'David Mwepu');
+  });
+
+  group('la vente part tout de suite', () {
+    // Le ticket ne sort qu'avec le numéro du reçu, que seul l'ACK apporte :
+    // attendre le prochain battement de synchro ferait patienter le client.
+    test('une vente écrite déclenche la synchro', () async {
+      var flushes = 0;
+      final result = await repoWith(
+        flush: () async => flushes++,
+      ).recordSale(cart: _readyCart(), academicYearId: 'ay-1');
+
+      expect(result.isRight(), isTrue);
+      expect(flushes, 1);
+    });
+
+    test('une synchro qui lève ne reprend pas la vente', () async {
+      final result = await repoWith(
+        flush: () async => throw StateError('réseau'),
+      ).recordSale(cart: _readyCart(), academicYearId: 'ay-1');
+
+      expect(result.isRight(), isTrue);
+      expect(await db.query('boutique_sales'), hasLength(1));
+    });
+
+    test('un panier refusé ne déclenche rien', () async {
+      var flushes = 0;
+      await repoWith(
+        flush: () async => flushes++,
+      ).recordSale(cart: const BoutiqueCart(), academicYearId: 'ay-1');
+
+      expect(flushes, 0);
+    });
   });
 
   group('gardes locales — ne jamais subir un refus serveur', () {

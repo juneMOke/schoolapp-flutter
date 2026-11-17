@@ -37,6 +37,10 @@ class SaleDetail extends Equatable {
   bool get hasSealedReceipt =>
       (sale.sale.receiptDocumentId ?? '').trim().isNotEmpty;
 
+  /// Le reçu a-t-il son numéro définitif ? Sans lui, aucun ticket ne sort.
+  bool get hasReceiptNumber =>
+      (sale.sale.receiptNumber ?? '').trim().isNotEmpty;
+
   bool get ticketWasPrinted => ticketPrintedAt != null;
 
   /// La vente a-t-elle quelque chose à **réclamer** au serveur ?
