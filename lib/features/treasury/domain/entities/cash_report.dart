@@ -59,12 +59,17 @@ class CashReport extends Equatable {
   final String title;
   final CashReportStatus status;
 
-  /// La plage contient aujourd'hui (« jusqu'à aujourd'hui »).
+  /// Provisoire dont la plage contient aujourd'hui (« jusqu'à aujourd'hui »).
+  /// Un rapport définitif est toujours à `false`, même si sa plage finit
+  /// aujourd'hui (V213 : clôturé, il est archivé le jour même).
   final bool inProgress;
   final List<TreasuryCurrency> currencies;
 
-  /// Archivé (V212) : définitif, dernière journée passée, contenu figé — ses
-  /// signataires ne changent plus et son PDF porte un QR de vérification.
+  /// Archivé : définitif dès que toutes ses caisses sont clôturées, y compris
+  /// le jour même (V213), contenu figé — ses signataires ne changent plus et
+  /// son PDF porte un QR de vérification. Peut repasser à `false` : rouvrir
+  /// la clôture du jour annule l'archive (son QR dit alors « Document
+  /// annulé ») ; la clôture suivante en crée une nouvelle, avec un nouveau QR.
   final bool archived;
   final DateTime? archivedAt;
 
