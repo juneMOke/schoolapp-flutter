@@ -6346,6 +6346,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get syncAggregatePayment => 'Payment';
 
   @override
+  String get syncAggregateSaleReceipt => 'Sale receipt';
+
+  @override
   String get syncAggregatePaymentReceipt => 'Payment receipt';
 
   @override

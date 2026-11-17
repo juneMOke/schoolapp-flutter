@@ -6396,6 +6396,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get syncAggregatePayment => 'Paiement';
 
   @override
+  String get syncAggregateSaleReceipt => 'Reçu de vente';
+
+  @override
   String get syncAggregatePaymentReceipt => 'Reçu d\'un paiement';
 
   @override

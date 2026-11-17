@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:school_app_flutter/core/offline/outbox_dao.dart';
 import 'package:school_app_flutter/core/offline/outbox_entry.dart';
 import 'package:school_app_flutter/core/offline/sync_state.dart';
+import 'package:school_app_flutter/features/boutique/data/local/boutique_receipt_recovery_dao.dart';
 import 'package:school_app_flutter/features/boutique/data/local/boutique_sale_local_models.dart';
 import 'package:school_app_flutter/features/boutique/data/sync/boutique_sale_sync_models.dart';
 import 'package:sqflite_common/sqlite_api.dart';
@@ -80,14 +81,14 @@ class BoutiqueSaleWriteDao {
   /// moyen de le retrouver.
   ///
   /// Un ACK **sans document** n'est pas un échec : la vente est enregistrée
-  /// côté serveur, la caisse garde son ticket provisoire et réclamera le scellé
-  /// plus tard.
+  /// côté serveur. La marque « reçu manquant » est posée dans la même
+  /// transaction, et réclamera le scellé sans geste du guichet.
   Future<void> applySaleAck(
     String saleId,
     BoutiqueSaleResponse ack, {
     required int nowMs,
-  }) async {
-    await _db.update(
+  }) => _db.transaction((txn) async {
+    await txn.update(
       'boutique_sales',
       {
         'sync_status': 'SYNCED',
@@ -110,14 +111,24 @@ class BoutiqueSaleWriteDao {
       final lineId = divergence.lineId;
       final catalogPrice = divergence.catalogPriceInCents;
       if (lineId == null || catalogPrice == null) continue;
-      await _db.update(
+      await txn.update(
         'boutique_sale_lines',
         {'catalog_price_in_cents': catalogPrice},
         where: 'id = ?',
         whereArgs: [lineId],
       );
     }
-  }
+
+    // L'ACK n'a rapporté aucun numéro : le ticket attendrait pour toujours.
+    // La marque le réclamera, au prochain flush.
+    if ((ack.receiptNumber ?? '').trim().isEmpty) {
+      await BoutiqueReceiptRecoveryDao.markMissingIn(
+        txn,
+        saleId: saleId,
+        nowMs: nowMs,
+      );
+    }
+  });
 
   /// Pose sur une vente le reçu que la **réclamation** vient d'obtenir.
   ///

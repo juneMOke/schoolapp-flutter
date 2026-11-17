@@ -4132,6 +4132,7 @@
   },
   "syncAggregateEnrollment": "Inscription",
   "syncAggregatePayment": "Paiement",
+  "syncAggregateSaleReceipt": "Reçu de vente",
   "syncAggregatePaymentReceipt": "Reçu d'un paiement",
   "syncAggregateAttendance": "Présence",
   "syncAggregateDisciplinaryCase": "Cas disciplinaire",

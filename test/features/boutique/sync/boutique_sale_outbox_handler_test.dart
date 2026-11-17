@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:school_app_flutter/features/boutique/data/local/boutique_receipt_recovery_dao.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:school_app_flutter/core/offline/outbox_dependency_gate.dart';
 import 'package:school_app_flutter/core/offline/outbox_entry.dart';
@@ -240,8 +241,41 @@ void main() {
       expect(result.outcome, OutboxDispatchOutcome.acked);
       final row = await saleRow();
       expect(row['sync_status'], 'SYNCED');
-      // La caisse garde son ticket provisoire, et réclamera le scellé.
       expect(row['receipt_number'], isNull);
+      // Le ticket attend le numéro : la marque le réclamera au prochain flush.
+      final marks = await db.query(
+        'outbox',
+        where: 'aggregate_type = ?',
+        whereArgs: [BoutiqueReceiptRecoveryDao.aggregateType],
+      );
+      expect(marks, hasLength(1));
+      expect(marks.single['aggregate_id'], _saleId);
+    });
+
+    test('un ACK qui rapporte le numéro ne pose AUCUNE marque', () async {
+      when(() => api.commitSale(any(), any())).thenAnswer(
+        (_) async => const BoutiqueSaleResponse(
+          saleId: _saleId,
+          documents: [
+            SealedSaleDocument(
+              type: 'SALE_RECEIPT',
+              documentNumber: 'ETL-RV-2526-000413',
+              status: 'DEFINITIVE',
+            ),
+          ],
+        ),
+      );
+
+      await handlerWith(
+        OutboxDependencyState.ready,
+      ).dispatch(_entry(_request()));
+
+      final marks = await db.query(
+        'outbox',
+        where: 'aggregate_type = ?',
+        whereArgs: [BoutiqueReceiptRecoveryDao.aggregateType],
+      );
+      expect(marks, isEmpty);
     });
 
     test('une divergence de prix est CONSIGNÉE, sans bloquer', () async {

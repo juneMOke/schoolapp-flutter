@@ -10213,6 +10213,12 @@ abstract class AppLocalizations {
   /// **'Payment'**
   String get syncAggregatePayment;
 
+  /// No description provided for @syncAggregateSaleReceipt.
+  ///
+  /// In en, this message translates to:
+  /// **'Sale receipt'**
+  String get syncAggregateSaleReceipt;
+
   /// No description provided for @syncAggregatePaymentReceipt.
   ///
   /// In en, this message translates to:
