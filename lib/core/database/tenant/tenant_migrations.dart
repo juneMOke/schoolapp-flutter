@@ -168,6 +168,21 @@ Future<void> migrateTenantDatabase(
   if (upTo(80)) {
     await _createTables(db, treasuryTables);
   }
+  if (upTo(81)) {
+    await _addSaleReceiptTicketFields(db);
+  }
+}
+
+/// v81 — le jour d'émission et l'URL de vérification du reçu de vente (`RV`),
+/// que le ticket boutique imprime comme celui de perception : « Date : » le
+/// jour d'émission, le QR en pied.
+///
+/// Additif, nullable, **aucune reprise** : sans ces valeurs, le ticket imprime
+/// la date de la vente et sort sans QR, comme avant. Garde de table et de
+/// colonne, même raison qu'à la v72.
+Future<void> _addSaleReceiptTicketFields(DatabaseExecutor db) async {
+  await _addColumnIfTable(db, 'boutique_sales', 'receipt_emitted_on');
+  await _addColumnIfTable(db, 'boutique_sales', 'receipt_verification_url');
 }
 
 /// Escalier de `device.db`. Né en v49 : aucun palier en dessous, et les

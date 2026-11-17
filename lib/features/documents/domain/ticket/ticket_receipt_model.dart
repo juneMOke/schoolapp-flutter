@@ -4,6 +4,7 @@ import 'package:school_app_flutter/core/money/money.dart';
 import 'package:school_app_flutter/core/money/money_bag.dart';
 import 'package:school_app_flutter/features/documents/domain/ticket/ticket_labels.dart';
 import 'package:school_app_flutter/features/documents/domain/ticket/ticket_lines.dart';
+import 'package:school_app_flutter/features/documents/domain/ticket/ticket_sections.dart';
 
 // Les lignes et les libellés vivent dans leurs propres fichiers depuis qu'un
 // troisième bloc d'argent est venu s'ajouter — mais ils restent visibles d'ici.
@@ -140,6 +141,17 @@ class TicketReceiptModel extends Equatable {
   /// Le numéro du payeur. **Seul, il garde le bloc** : il a été tapé, donc il
   /// désigne quelqu'un.
   final String? payerPhoneNumber;
+
+  /// L'en-tête de l'école, sous la forme que partagent tous les tickets de
+  /// caisse (`TicketSections.schoolHeader`).
+  TicketSchoolHeader get school => TicketSchoolHeader(
+    name: schoolName,
+    address: schoolAddress,
+    locality: schoolLocality,
+    email: schoolEmail,
+    phone: schoolPhone,
+    tillPhone: schoolTillPhone,
+  );
 
   /// Y a-t-il quelqu'un à nommer comme payeur ? Décidé ici plutôt qu'à l'œil du
   /// gabarit, pour que la règle du bloc soit à un seul endroit.

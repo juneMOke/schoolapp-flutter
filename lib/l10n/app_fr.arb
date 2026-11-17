@@ -4132,6 +4132,7 @@
   },
   "syncAggregateEnrollment": "Inscription",
   "syncAggregatePayment": "Paiement",
+  "syncAggregateSaleReceipt": "Reçu de vente",
   "syncAggregatePaymentReceipt": "Reçu d'un paiement",
   "syncAggregateAttendance": "Présence",
   "syncAggregateDisciplinaryCase": "Cas disciplinaire",
@@ -5593,7 +5594,6 @@
   "enrollmentDashboardEntriesReportTitle": "Registre des inscrits",
   "financeTillReportTitle": "Rapport des paiements",
   "recouvrementRelanceListTitle": "Liste de relance",
-  "boutiqueTicketDocumentTitle": "Ticket de vente",
   "editiqueViewerReceiptTitle": "Reçu de paiement",
   "editiqueViewerLoadingTitle": "Préparation du document…",
   "editiqueViewerLoadingMessage": "Le serveur produit la pièce. Cela peut prendre quelques secondes.",
@@ -6163,7 +6163,7 @@
   "boutiqueConfirmAmountReceived": "Montant reçu",
   "boutiqueConfirmNotice": "Le total est payé en une fois : pas de paiement partiel, pas de créance boutique.",
   "boutiqueConfirmNewPayerPrefix": "Ce payeur est nouveau : son numéro et son identité entrent au répertoire avec la vente.",
-  "boutiqueConfirmOfflineSuffix": "Hors ligne : un ticket provisoire est imprimé, et le reçu définitif sera scellé à la synchronisation.",
+  "boutiqueConfirmOfflineSuffix": "Hors ligne : la vente est enregistrée, et le ticket s'imprimera depuis sa fiche une fois le reçu scellé à la synchronisation.",
   "boutiqueConfirmCancel": "Annuler",
   "boutiqueConfirmAction": "Encaisser {total}",
   "@boutiqueConfirmAction": {
@@ -6185,14 +6185,9 @@
   "editiqueViewerSaleReceiptTitle": "Reçu de vente",
   "documentsHintSaleReceipt": "Reçu d'une vente de la boutique. Il ne concerne ni le minerval ni les frais scolaires, et se retrouve depuis la caisse — pas depuis le dossier d'un élève.",
   "boutiqueTicketTitle": "Reçu de vente — Boutique",
-  "boutiqueTicketProvisionalBanner": "Document provisoire",
-  "boutiqueTicketProvisionalNotice": "Reçu définitif scellé à la synchronisation.",
-  "boutiqueTicketSealedNotice": "Reçu scellé — vaut quittance",
-  "boutiqueTicketPayerLabel": "PAYEUR :",
-  "boutiqueTicketPhoneLabel": "Tél.",
-  "boutiqueTicketCashierLabel": "Caissier :",
-  "boutiqueTicketTotalLabel": "TOTAL",
-  "boutiqueTicketCashReceivedLabel": "Espèces reçues",
+  "boutiqueTicketAwaitingNumber": "Le reçu de cette vente n'a pas encore son numéro : le ticket s'imprimera après la synchronisation.",
+  "boutiqueTicketArticlesLabel": "Articles",
+  "boutiqueTicketTotalLabel": "Total",
   "boutiqueTicketRemainingLabel": "Reste à payer",
   "boutiqueTicketBeneficiaryPrefix": "pour",
   "boutiqueTicketSizePrefix": "T.",
@@ -6206,14 +6201,8 @@
       }
     }
   },
-  "boutiqueReceiptBannerProvisional": "{reference} · provisoire, sera scellé à la synchro",
-  "@boutiqueReceiptBannerProvisional": {
-    "placeholders": {
-      "reference": {
-        "type": "String"
-      }
-    }
-  },
+  "boutiqueReceiptBannerAwaiting": "Reçu en cours de scellement : le ticket s'imprime dès son numéro.",
+  "boutiqueReceiptBannerDeferred": "Reçu pas encore scellé : le ticket s'imprimera depuis la fiche de la vente, après la synchronisation.",
   "boutiqueReceiptBannerSealed": "{reference} · scellé",
   "@boutiqueReceiptBannerSealed": {
     "placeholders": {
@@ -6697,9 +6686,10 @@
   "boutiqueSaleDetailPrintTicket": "Imprimer le ticket",
   "boutiqueSaleDetailReprintTicket": "Réimprimer le ticket",
   "boutiqueSaleDetailTicketPrintedAt": "Ticket imprimé le {date}",
+  "boutiqueSaleDetailTicketAwaitingNumber": "Le ticket s'imprimera dès que le reçu aura son numéro.",
   "boutiqueSaleDetailTicketNeverPrinted": "Ticket jamais imprimé depuis cette tablette.",
   "boutiqueSaleDetailOpenReceipt": "Ouvrir le reçu scellé",
-  "boutiqueSaleDetailReceiptPending": "Le reçu sera scellé à la synchronisation. Le ticket fait foi en attendant.",
+  "boutiqueSaleDetailReceiptPending": "Le reçu sera scellé à la synchronisation : le ticket s'imprime avec son numéro.",
   "boutiqueSaleDetailClaimReceipt": "Réclamer le reçu scellé",
   "boutiqueSaleDetailClaimReceiptFailed": "Le reçu n'a pas pu être réclamé. Le ticket fait foi, et la réclamation peut être refaite sans risque.",
   "boutiqueSaleDetailReceiptNumberMissing": "Le reçu est scellé mais son numéro n'a pas été communiqué : la référence ci-dessus reste provisoire. Réclamez-le pour obtenir le numéro définitif.",

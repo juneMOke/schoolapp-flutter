@@ -1,6 +1,10 @@
 import 'package:dartz/dartz.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:get_it/get_it.dart';
+import 'package:school_app_flutter/features/boutique/domain/entities/sale_detail.dart';
+import 'package:school_app_flutter/features/boutique/domain/usecases/get_boutique_sale_detail_use_case.dart';
+import 'package:school_app_flutter/features/boutique/presentation/bloc/sale_receipt_watch_cubit.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/core/offline/id_generator.dart';
@@ -27,6 +31,8 @@ class _MockGetCatalog extends Mock implements GetBoutiqueCatalogUseCase {}
 class _MockFindPayer extends Mock implements FindBoutiquePayerUseCase {}
 
 class _MockRecordSale extends Mock implements RecordBoutiqueSaleUseCase {}
+
+class _MockGetDetail extends Mock implements GetBoutiqueSaleDetailUseCase {}
 
 class _SeqIds implements IdGenerator {
   int _n = 0;
@@ -73,14 +79,44 @@ const _recorded = RecordedSale(
   lines: [],
 );
 
+/// La vente telle que l'ACK la laisse : numérotée.
+final _numbered = RecordedSale(
+  sale: BoutiqueSaleLocalModel(
+    id: _recorded.sale.id,
+    schoolId: 'E1',
+    academicYearId: 'ay-1',
+    payerLastName: 'Ndombo',
+    soldAt: '2026-08-29T11:42:00Z',
+    receiptNumber: 'ETL-RV-2526-000413',
+    updatedAt: 1,
+  ),
+  lines: const [],
+);
+
 void main() {
+  late _MockGetDetail getDetail;
   late _MockGetCatalog getCatalog;
   late _MockFindPayer findPayer;
   late _MockRecordSale recordSale;
 
   setUpAll(() => registerFallbackValue(const BoutiqueCart()));
 
+  tearDown(GetIt.I.reset);
+
   setUp(() {
+    // La modale guette le numéro du reçu : relu toutes les 10 ms, abandonné au
+    // bout de 50 — le délai de la caisse, ramené à l'échelle du test.
+    getDetail = _MockGetDetail();
+    when(
+      () => getDetail(any()),
+    ).thenAnswer((_) async => const Right(SaleDetail(sale: _recorded)));
+    GetIt.I.registerFactory<SaleReceiptWatchCubit>(
+      () => SaleReceiptWatchCubit(
+        getDetail,
+        every: const Duration(milliseconds: 10),
+        giveUpAfter: const Duration(milliseconds: 50),
+      ),
+    );
     getCatalog = _MockGetCatalog();
     findPayer = _MockFindPayer();
     recordSale = _MockRecordSale();
@@ -192,23 +228,63 @@ void main() {
     expect(find.text('Imprimer'), findsOneWidget);
   });
 
-  testWidgets('sans numéro de reçu, la modale annonce le PROVISOIRE', (
-    tester,
-  ) async {
-    // Un ticket provisoire et un reçu scellé se ressemblent au comptoir : c'est
-    // le seul endroit où l'écran peut lever le doute.
-    when(
-      () => recordSale(
-        cart: any(named: 'cart'),
-        academicYearId: any(named: 'academicYearId'),
-        cashierName: any(named: 'cashierName'),
-      ),
-    ).thenAnswer((_) async => const Right(_recorded));
+  /// L'état du bouton « Imprimer » de la modale.
+  bool printEnabled(WidgetTester tester) =>
+      tester
+          .widget<OutlinedButton>(
+            find.widgetWithText(OutlinedButton, 'Imprimer'),
+          )
+          .onPressed !=
+      null;
 
-    await pumpCartPage(tester, seed: ready());
-    await collect(tester);
+  group('le ticket attend le numéro du reçu', () {
+    setUp(() {
+      when(
+        () => recordSale(
+          cart: any(named: 'cart'),
+          academicYearId: any(named: 'academicYearId'),
+          cashierName: any(named: 'cashierName'),
+        ),
+      ).thenAnswer((_) async => const Right(_recorded));
+    });
 
-    expect(find.textContaining('provisoire'), findsOneWidget);
+    testWidgets('le numéro arrive : il s\'affiche, et IMPRIMER s\'ouvre', (
+      tester,
+    ) async {
+      when(
+        () => getDetail(any()),
+      ).thenAnswer((_) async => Right(SaleDetail(sale: _numbered)));
+
+      await pumpCartPage(tester, seed: ready());
+      await collect(tester);
+
+      expect(find.textContaining('ETL-RV-2526-000413'), findsOneWidget);
+      expect(printEnabled(tester), isTrue);
+    });
+
+    testWidgets('il n\'arrive pas : IMPRIMER reste fermé, la fiche prendra le '
+        'relais', (tester) async {
+      await pumpCartPage(tester, seed: ready());
+      await tester.tap(find.text('Encaisser en espèces'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.textContaining('Encaisser 15'));
+      await tester.pump();
+      await tester.pump();
+
+      // Pendant l'attente : le bandeau le dit, le bouton est inactif.
+      expect(find.textContaining('en cours de scellement'), findsOneWidget);
+      expect(printEnabled(tester), isFalse);
+
+      // Le délai passe sans numéro.
+      await tester.pump(const Duration(milliseconds: 100));
+      await tester.pumpAndSettle();
+      expect(
+        find.textContaining('depuis la fiche de la vente'),
+        findsOneWidget,
+      );
+      expect(printEnabled(tester), isFalse);
+      expect(find.textContaining('PROV-'), findsNothing);
+    });
   });
 
   testWidgets('« Terminer » vide le panier ET rend le catalogue', (

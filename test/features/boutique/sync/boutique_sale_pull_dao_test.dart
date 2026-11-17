@@ -11,6 +11,8 @@ BoutiqueSaleDeltaDto _delta({
   String id = 'vente-1',
   String? receiptDocumentId,
   String? receiptNumber,
+  String? receiptEmittedOn,
+  String? receiptVerificationUrl,
   String? payerName = 'NDOMBO Lelo Willy',
   String? payerLastName = 'Ndombo',
   String? collectedByName = 'Moke Junior',
@@ -30,6 +32,8 @@ BoutiqueSaleDeltaDto _delta({
   soldAt: '2026-08-29T11:42:00Z',
   receiptDocumentId: receiptDocumentId,
   receiptNumber: receiptNumber,
+  receiptEmittedOn: receiptEmittedOn,
+  receiptVerificationUrl: receiptVerificationUrl,
   lines:
       lines ??
       const [
@@ -148,6 +152,74 @@ void main() {
 
       expect(
         (await db.query('boutique_sales')).single['receipt_number'],
+        isNull,
+      );
+    });
+  });
+
+  group('date d\'émission et QR du reçu (v81)', () {
+    const url = 'https://verify.eteeloconnect.com/d/abc';
+
+    test('descendus par le delta, ils sont écrits', () async {
+      await apply([
+        _delta(
+          receiptDocumentId: 'doc-1',
+          receiptNumber: 'ETL-RV-1',
+          receiptEmittedOn: '2026-11-17',
+          receiptVerificationUrl: url,
+        ),
+      ]);
+
+      final row = (await db.query('boutique_sales')).single;
+      expect(row['receipt_emitted_on'], '2026-11-17');
+      expect(row['receipt_verification_url'], url);
+    });
+
+    test('tus par le delta, ceux de la même pièce survivent', () async {
+      await apply([_delta(receiptDocumentId: 'doc-1')]);
+      await db.update('boutique_sales', {
+        'receipt_emitted_on': '2026-11-17',
+        'receipt_verification_url': url,
+      });
+
+      await apply([_delta(receiptDocumentId: 'doc-1')]);
+
+      final row = (await db.query('boutique_sales')).single;
+      expect(row['receipt_emitted_on'], '2026-11-17');
+      expect(row['receipt_verification_url'], url);
+    });
+
+    test('…mais pas sur une AUTRE pièce', () async {
+      await apply([_delta(receiptDocumentId: 'doc-1')]);
+      await db.update('boutique_sales', {
+        'receipt_emitted_on': '2026-11-17',
+        'receipt_verification_url': url,
+      });
+
+      await apply([_delta(receiptDocumentId: 'doc-2')]);
+
+      final row = (await db.query('boutique_sales')).single;
+      expect(row['receipt_emitted_on'], isNull);
+      expect(row['receipt_verification_url'], isNull);
+    });
+
+    test('le fil : receiptEmittedAt lu au jour, URL douteuse écartée', () {
+      Map<String, dynamic> json(Object? url) => {
+        'id': 'vente-1',
+        'academicYearId': 'ay-1',
+        'soldAt': '2026-11-17T08:00:00Z',
+        'receiptEmittedAt': '2026-11-17T00:00:00Z',
+        'receiptVerificationUrl': url,
+        'serverUpdatedAt': '2026-11-17T08:05:00Z',
+      };
+
+      final dto = BoutiqueSaleDeltaDto.fromJson(json(url));
+      expect(dto.receiptEmittedOn, '2026-11-17');
+      expect(dto.receiptVerificationUrl, url);
+      expect(
+        BoutiqueSaleDeltaDto.fromJson(
+          json('http://verify.example/d/abc'),
+        ).receiptVerificationUrl,
         isNull,
       );
     });

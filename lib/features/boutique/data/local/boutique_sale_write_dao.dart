@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:school_app_flutter/core/offline/outbox_dao.dart';
 import 'package:school_app_flutter/core/offline/outbox_entry.dart';
 import 'package:school_app_flutter/core/offline/sync_state.dart';
+import 'package:school_app_flutter/features/boutique/data/local/boutique_receipt_recovery_dao.dart';
 import 'package:school_app_flutter/features/boutique/data/local/boutique_sale_local_models.dart';
 import 'package:school_app_flutter/features/boutique/data/sync/boutique_sale_sync_models.dart';
 import 'package:sqflite_common/sqlite_api.dart';
@@ -80,21 +81,41 @@ class BoutiqueSaleWriteDao {
   /// moyen de le retrouver.
   ///
   /// Un ACK **sans document** n'est pas un échec : la vente est enregistrée
-  /// côté serveur, la caisse garde son ticket provisoire et réclamera le scellé
-  /// plus tard.
+  /// côté serveur. La marque « reçu manquant » est posée dans la même
+  /// transaction, et réclamera le scellé sans geste du guichet.
   Future<void> applySaleAck(
     String saleId,
     BoutiqueSaleResponse ack, {
     required int nowMs,
-  }) async {
-    await _db.update(
+  }) => _db.transaction((txn) async {
+    // Un ACK rejoué peut taire ce qu'un pull a déjà posé (numéro, jour
+    // d'émission, QR). Une valeur absente n'écrase donc JAMAIS une valeur
+    // connue — sauf si l'ACK désigne une autre pièce.
+    final kept = await _receiptOf(txn, saleId);
+    final ackDocumentId = _nonEmpty(ack.receiptDocumentId);
+    final keep =
+        kept != null &&
+        (ackDocumentId == null || ackDocumentId == kept['receipt_document_id']);
+    String? merged(String? fresh, String column) =>
+        _nonEmpty(fresh) ?? (keep ? kept[column] as String? : null);
+    final number = merged(ack.receiptNumber, 'receipt_number');
+
+    await txn.update(
       'boutique_sales',
       {
         'sync_status': 'SYNCED',
         'sync_error': null,
         'synced_at': nowMs,
-        'receipt_document_id': ack.receiptDocumentId,
-        'receipt_number': ack.receiptNumber,
+        'receipt_document_id': merged(ackDocumentId, 'receipt_document_id'),
+        'receipt_number': number,
+        'receipt_emitted_on': merged(
+          ack.receiptEmittedOn,
+          'receipt_emitted_on',
+        ),
+        'receipt_verification_url': merged(
+          ack.receiptVerificationUrl,
+          'receipt_verification_url',
+        ),
         'updated_at': nowMs,
       },
       where: 'id = ?',
@@ -108,13 +129,47 @@ class BoutiqueSaleWriteDao {
       final lineId = divergence.lineId;
       final catalogPrice = divergence.catalogPriceInCents;
       if (lineId == null || catalogPrice == null) continue;
-      await _db.update(
+      await txn.update(
         'boutique_sale_lines',
         {'catalog_price_in_cents': catalogPrice},
         where: 'id = ?',
         whereArgs: [lineId],
       );
     }
+
+    // Aucun numéro, ni rapporté ni déjà connu : le ticket attendrait pour
+    // toujours. La marque le réclamera.
+    if (number == null) {
+      await BoutiqueReceiptRecoveryDao.markMissingIn(
+        txn,
+        saleId: saleId,
+        nowMs: nowMs,
+      );
+    }
+  });
+
+  static Future<Map<String, Object?>?> _receiptOf(
+    DatabaseExecutor txn,
+    String saleId,
+  ) async {
+    final rows = await txn.query(
+      'boutique_sales',
+      columns: const [
+        'receipt_document_id',
+        'receipt_number',
+        'receipt_emitted_on',
+        'receipt_verification_url',
+      ],
+      where: 'id = ?',
+      whereArgs: [saleId],
+      limit: 1,
+    );
+    return rows.isEmpty ? null : rows.first;
+  }
+
+  static String? _nonEmpty(String? value) {
+    final trimmed = value?.trim() ?? '';
+    return trimmed.isEmpty ? null : trimmed;
   }
 
   /// Pose sur une vente le reçu que la **réclamation** vient d'obtenir.
@@ -135,12 +190,18 @@ class BoutiqueSaleWriteDao {
     required int nowMs,
     String? documentId,
     String? documentNumber,
+    String? emittedOn,
+    String? verificationUrl,
   }) async {
     final claimed = <String, Object?>{
       if ((documentId ?? '').trim().isNotEmpty)
         'receipt_document_id': documentId!.trim(),
       if ((documentNumber ?? '').trim().isNotEmpty)
         'receipt_number': documentNumber!.trim(),
+      if ((emittedOn ?? '').trim().isNotEmpty)
+        'receipt_emitted_on': emittedOn!.trim(),
+      if ((verificationUrl ?? '').trim().isNotEmpty)
+        'receipt_verification_url': verificationUrl!.trim(),
     };
     // Rien d'exploitable : on ne bouge pas `updated_at` pour une non-écriture,
     // sinon la vente paraîtrait avoir changé alors que rien n'a changé.

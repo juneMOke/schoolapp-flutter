@@ -1,5 +1,6 @@
 import 'package:school_app_flutter/core/database/projections/enrollment_suspension_sql.dart';
 import 'package:sqflite_common/sqlite_api.dart';
+import 'package:school_app_flutter/features/documents/domain/ticket/ticket_sections.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/entities/payment_correction_status.dart';
 import 'package:school_app_flutter/features/finance/offline/data/local/payment_in_force_sql.dart';
 
@@ -716,4 +717,14 @@ class TicketSchoolRow {
     final commune = municipality?.trim();
     return (commune != null && commune.isNotEmpty) ? commune : null;
   }
+
+  /// L'en-tête que tous les tickets de caisse impriment.
+  TicketSchoolHeader toHeader() => TicketSchoolHeader(
+    name: name,
+    address: address,
+    locality: locality,
+    email: email,
+    phone: phone,
+    tillPhone: tillPhone,
+  );
 }

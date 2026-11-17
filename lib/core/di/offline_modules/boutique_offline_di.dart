@@ -19,6 +19,9 @@ import 'package:school_app_flutter/features/boutique/domain/usecases/get_boutiqu
 import 'package:school_app_flutter/core/money/exchange_rate_reader.dart';
 import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
+import 'package:school_app_flutter/features/boutique/data/local/boutique_receipt_recovery_dao.dart';
+import 'package:school_app_flutter/features/boutique/data/sync/boutique_sale_receipt_recovery_handler.dart';
+import 'package:school_app_flutter/features/boutique/presentation/bloc/sale_receipt_watch_cubit.dart';
 import 'package:sqflite_common/sqlite_api.dart';
 import 'package:school_app_flutter/core/device/device_identity_service.dart';
 import 'package:school_app_flutter/core/offline/sync_engine.dart';
@@ -132,6 +135,7 @@ void registerBoutiqueOffline(GetIt getIt) {
       ids: getIt<IdGenerator>(),
       device: getIt<DeviceIdentityService>(),
       rates: getIt<ExchangeRateReader>(),
+      flush: () => getIt<SyncEngine>().flush(),
     ),
   );
   getIt.registerFactory<RecordBoutiqueSaleUseCase>(
@@ -160,6 +164,12 @@ void registerBoutiqueOffline(GetIt getIt) {
   );
   getIt.registerFactory<GetBoutiqueSaleDetailUseCase>(
     () => GetBoutiqueSaleDetailUseCase(getIt<BoutiqueHistoryRepository>()),
+  );
+  getIt.registerFactory<SaleReceiptWatchCubit>(
+    () => SaleReceiptWatchCubit(
+      getIt<GetBoutiqueSaleDetailUseCase>(),
+      nudge: () => getIt<SyncEngine>().flush(),
+    ),
   );
   getIt.registerFactory<MarkSaleTicketPrintedUseCase>(
     () => MarkSaleTicketPrintedUseCase(getIt<BoutiqueHistoryRepository>()),
@@ -231,6 +241,15 @@ void registerBoutiqueOffline(GetIt getIt) {
       dependency: (studentId, academicYearId) => getIt<EnrollmentReadDao>()
           .studentEnrollmentDependency(studentId, academicYearId),
       extras: getIt<Map<String, dynamic>>(),
+    ),
+  );
+  // Reçu de vente qu'un accusé n'a pas rapporté : réclamé par la route
+  // d'émission, idempotente — le ticket n'imprime qu'avec son numéro.
+  getIt<SyncEngine>().registerHandler(
+    BoutiqueSaleReceiptRecoveryHandler(
+      receipts: () => getIt<BoutiqueReceiptRepository>(),
+      dao: BoutiqueReceiptRecoveryDao(getIt<Database>()),
+      currentUser: getIt<CurrentUserContext>(),
     ),
   );
 }

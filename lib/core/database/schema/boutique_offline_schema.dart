@@ -116,6 +116,8 @@ const TableSchema boutiqueSalesTable = TableSchema(
       sold_at TEXT NOT NULL,
       receipt_document_id TEXT,
       receipt_number TEXT,
+      receipt_emitted_on TEXT,
+      receipt_verification_url TEXT,
       device_id TEXT,
       sync_status TEXT NOT NULL DEFAULT 'PENDING_SYNC',
       sync_error TEXT,

@@ -43,6 +43,14 @@ class BoutiqueSaleLocalModel extends Equatable {
 
   final String? receiptDocumentId;
   final String? receiptNumber;
+
+  /// Jour d'émission du reçu scellé (`YYYY-MM-DD`, v81) : la date principale
+  /// du ticket. `null` tant que le serveur ne l'a pas dit — le ticket imprime
+  /// alors la date de la vente.
+  final String? receiptEmittedOn;
+
+  /// URL du QR du reçu scellé (v81). `null` = ticket sans QR.
+  final String? receiptVerificationUrl;
   final String? deviceId;
   final String syncStatus;
   final int updatedAt;
@@ -61,6 +69,8 @@ class BoutiqueSaleLocalModel extends Equatable {
     required this.soldAt,
     this.receiptDocumentId,
     this.receiptNumber,
+    this.receiptEmittedOn,
+    this.receiptVerificationUrl,
     this.deviceId,
     this.syncStatus = 'PENDING_SYNC',
     required this.updatedAt,
@@ -80,6 +90,8 @@ class BoutiqueSaleLocalModel extends Equatable {
     'sold_at': soldAt,
     'receipt_document_id': receiptDocumentId,
     'receipt_number': receiptNumber,
+    'receipt_emitted_on': receiptEmittedOn,
+    'receipt_verification_url': receiptVerificationUrl,
     'device_id': deviceId,
     'sync_status': syncStatus,
     'updated_at': updatedAt,
@@ -100,6 +112,8 @@ class BoutiqueSaleLocalModel extends Equatable {
         soldAt: map['sold_at'] as String,
         receiptDocumentId: map['receipt_document_id'] as String?,
         receiptNumber: map['receipt_number'] as String?,
+        receiptEmittedOn: map['receipt_emitted_on'] as String?,
+        receiptVerificationUrl: map['receipt_verification_url'] as String?,
         deviceId: map['device_id'] as String?,
         syncStatus: (map['sync_status'] as String?) ?? 'PENDING_SYNC',
         updatedAt: (map['updated_at'] as num?)?.toInt() ?? 0,
@@ -124,6 +138,8 @@ class BoutiqueSaleLocalModel extends Equatable {
     soldAt,
     receiptDocumentId,
     receiptNumber,
+    receiptEmittedOn,
+    receiptVerificationUrl,
     deviceId,
     syncStatus,
     updatedAt,

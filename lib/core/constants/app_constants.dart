@@ -889,7 +889,11 @@ class AppConstants {
   // v80 (2026-11-15) : `treasury_closures`, les clôtures de caisse descendues
   // par `treasury.closures` — une devise close aujourd'hui n'encaisse plus en
   // espèces (R11). Table neuve, remplie par le flux. Palier d'école.
-  static const int offlineDbSchemaVersion = 80;
+  // v81 (2026-11-17) : `boutique_sales.receipt_emitted_on` et
+  // `receipt_verification_url` — la date d'émission et le QR du reçu de vente,
+  // imprimés sur le ticket boutique. Deux colonnes nullables, aucun backfill.
+  // Palier d'école.
+  static const int offlineDbSchemaVersion = 81;
 
   /// Dernière version de la base unique HÉRITÉE : là où l'escalier
   /// `migrateOfflineDatabase` s'arrête pour toujours.

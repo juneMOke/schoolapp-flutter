@@ -105,6 +105,8 @@ class BoutiqueReceiptRepositoryImpl implements BoutiqueReceiptRepository {
         nowMs: _now(),
         documentId: document.documentId,
         documentNumber: document.documentNumber,
+        emittedOn: document.emittedOn,
+        verificationUrl: document.verificationUrl,
       );
     } catch (_) {
       // Rien à dire au guichet : la pièce est là, et c'est ce qu'il a demandé.

@@ -2,10 +2,11 @@ import 'package:school_app_flutter/features/documents/domain/ticket/ticket_chars
 import 'package:school_app_flutter/features/documents/domain/ticket/ticket_line.dart';
 import 'package:school_app_flutter/core/money/money.dart';
 import 'package:school_app_flutter/core/money/money_bag.dart';
-import 'package:school_app_flutter/core/money/money_format.dart';
 import 'package:school_app_flutter/features/documents/domain/ticket/ticket_receipt_model.dart';
 import 'package:school_app_flutter/features/documents/domain/ticket/ticket_text_primitives.dart';
-import 'package:school_app_flutter/features/documents/domain/ticket/ticket_qr_band.dart';
+import 'package:school_app_flutter/features/documents/domain/ticket/ticket_money_sections.dart';
+import 'package:school_app_flutter/features/documents/domain/ticket/ticket_sections.dart';
+import 'package:school_app_flutter/features/documents/domain/ticket/ticket_sheet.dart';
 
 /// Met le reçu provisoire en **lignes de caractères**.
 ///
@@ -45,92 +46,20 @@ abstract final class TicketTextLayout {
     TicketReceiptModel model, {
     int columns = defaultColumns,
   }) {
-    final width = columns < 24 ? 24 : columns;
-    final lines = <String>[];
+    final sheet = TicketSheet(columns);
+    final width = sheet.width;
+    final lines = sheet.lines;
+    void emphasised(void Function() build) => sheet.emphasised(build);
 
-    // Les indices des lignes grasses. Un ensemble plutôt qu'une liste
-    // parallèle : la seconde devrait rester alignée sur la première à chaque
-    // `addAll`, ce qui est exactement le genre d'invariant qui se casse en
-    // silence.
-    final bold = <int>{};
-
-    /// Une ligne d'en-tête NOMMÉE, centrée, et **escamotée quand elle est
-    /// vide** — la règle de tout l'en-tête, étendue aux lignes à libellé.
-    ///
-    /// `_addOptional` ferait le même escamotage mais aligne à gauche ; ici les
-    /// lignes d'école sont centrées, et une seule d'entre elles cadrée à gauche
-    /// se lirait comme un défaut de composition.
-    ///
-    /// ## Le repli : le libellé au-dessus, jamais le numéro coupé
-    ///
-    /// « Tél. Promoteur : +243 000 000 000 » fait 33 caractères. Il tient à 48
-    /// et **déborde à 32** — le papier 58 mm —, où `_centered` le replierait sur
-    /// les espaces et rendrait `+243 000 000` puis `000` : un numéro coupé en
-    /// deux, que personne ne peut composer.
-    ///
-    /// Quand les deux ne tiennent pas ensemble, le libellé prend donc sa propre
-    /// ligne et la valeur la suivante, entière. C'est la règle que le gabarit
-    /// applique déjà partout où une valeur ne rentre pas — `_addPair` reporte le
-    /// montant, `_addTotal` revient à une ligne par devise : **on ne tronque
-    /// jamais une valeur, on la reporte.**
-    void centeredOptional(String label, String? value) {
-      final trimmed = value?.trim() ?? '';
-      if (trimmed.isEmpty) return;
-      // Mesure sur la forme TRANSLITTÉRÉE, des deux côtés : c'est elle qui
-      // s'imprime, et « é » → « e » ne change pas la longueur mais « œ » si.
-      final oneLine = TicketCharset.printable('$label $trimmed');
-      if (oneLine.length <= width) {
-        lines.addAll(_centered(oneLine, width));
-        return;
-      }
-      lines.addAll(_centered(label, width));
-      lines.addAll(_centered(trimmed, width));
-    }
-
-    /// Marque en gras TOUT ce que [build] ajoute — une ligne ou dix.
-    void emphasised(void Function() build) {
-      final from = lines.length;
-      build();
-      for (var i = from; i < lines.length; i++) {
-        bold.add(i);
-      }
-    }
-
-    // ── Z1 — l'établissement, en-tête complet : nom, adresse, localité, email,
-    // téléphone. Le logo, lui, n'est PAS ici : c'est une bande posée par chaque
-    // renderer en amont de ces lignes. Une image ne passe pas par le pivot
-    // `List<String>`, et c'est ce pivot qui rend vérifiable le critère
-    // d'acceptation de l'ADR — même contenu textuel entre les deux sorties. Le
-    // précédent est celui de `cutNotice` : ce qui appartient au SUPPORT est posé
-    // par le renderer, jamais par le gabarit.
-    //
-    // Aucune garde à écrire sur les lignes optionnelles : `_centered('')` rend
-    // une liste VIDE, donc un champ absent ne laisse pas même une ligne
-    // d'espaces. Une école mal renseignée sort un en-tête plus COURT, jamais un
-    // en-tête troué — et sur une pièce, une ligne blanche se lirait comme une
-    // mention effacée.
-    emphasised(
-      () => lines.addAll(_centered(model.schoolName.toUpperCase(), width)),
+    // ── Z1 — l'établissement, en-tête complet (`TicketSections.schoolHeader`,
+    // partagé avec le ticket de vente boutique). Le logo, lui, est une bande
+    // posée par chaque renderer en amont de ces lignes.
+    TicketSections.schoolHeader(
+      sheet,
+      model.school,
+      schoolPhoneLabel: model.labels.schoolPhoneLabel,
+      tillPhoneLabel: model.labels.tillPhoneLabel,
     );
-    lines.addAll(_centered(model.schoolAddress ?? '', width));
-    lines.addAll(_centered(model.schoolLocality ?? '', width));
-    lines.addAll(_centered(model.schoolEmail ?? '', width));
-
-    // Les DEUX téléphones, chacun sur sa ligne et chacun NOMMÉ.
-    //
-    // L'en-tête n'en portait qu'un, nu comme les autres lignes d'école. Le
-    // second ne pouvait pas y entrer ainsi : deux numéros sans libellé laissent
-    // le parent deviner lequel appeler pour une question de paiement, ce qui
-    // est précisément la question que le numéro de caisse existe pour clore.
-    // Nommer le second oblige donc à nommer le premier — c'est le prix de
-    // l'ajout, et il se paie en libellés, pas en lignes.
-    //
-    // ⚠️ Nommés, mais toujours ESCAMOTABLES : un libellé sans numéro se lirait
-    // comme un numéro effacé. `centeredOptional` garde donc la règle de tout
-    // l'en-tête — un champ absent ne laisse pas même une ligne d'espaces —, là
-    // où `_centered('$label ')` aurait imprimé le libellé seul.
-    centeredOptional(model.labels.schoolPhoneLabel, model.schoolPhone);
-    centeredOptional(model.labels.tillPhoneLabel, model.schoolTillPhone);
     lines.add(_rule(width));
 
     // Nature de la pièce, sous l'en-tête : quelqu'un qui trie une liasse de fin
@@ -192,100 +121,41 @@ abstract final class TicketTextLayout {
         _wrapped('${model.labels.editionLabel} ${model.edition}', width),
       );
     }
-    // La date prend enfin un libellé — elle occupait jusqu'ici le créneau de
-    // gauche sans être nommée. L'heure reste calée à DROITE sur la même ligne :
-    // « Date : » + `JJ/MM/AAAA` fait 16 caractères, l'heure 5, il reste 27
-    // colonnes de battement à 48 et 11 à 32. Aucune ligne de papier ajoutée.
-    //
-    // Un ticket définitif dont on connaît le jour d'émission prend CE jour en
-    // date principale, sans heure — c'est une date, pas l'instant du
-    // scellement. La saisie passe dessous, date et heure : « Saisi le ».
-    final issuedOn = model.isProvisional ? null : model.receiptIssuedOn;
-    if (issuedOn == null) {
-      _addPair(
-        lines,
-        '${model.labels.dateLabel} ${_formatDate(model.paidAt)}',
-        _formatTime(model.paidAt),
-        width,
-      );
-    } else {
-      lines.addAll(
-        _wrapped('${model.labels.dateLabel} ${_formatDate(issuedOn)}', width),
-      );
-      _addPair(
-        lines,
-        '${model.labels.enteredAtLabel} ${_formatDate(model.paidAt)}',
-        _formatTime(model.paidAt),
-        width,
-      );
-    }
-    _addOptional(
-      lines,
-      model.labels.cashierLabel,
-      model.cashierFullName,
-      width,
+    // La date, puis le caissier (`TicketSections.dateAndCashier`). Un ticket
+    // définitif dont on connaît le jour d'émission prend CE jour en date
+    // principale ; la saisie passe dessous, « Saisi le ».
+    TicketSections.dateAndCashier(
+      sheet,
+      dateLabel: model.labels.dateLabel,
+      enteredAtLabel: model.labels.enteredAtLabel,
+      enteredAt: model.paidAt,
+      issuedOn: model.isProvisional ? null : model.receiptIssuedOn,
+      cashierLabel: model.labels.cashierLabel,
+      cashierFullName: model.cashierFullName,
     );
     lines.add(_rule(width));
 
-    // ── Le payeur, quand il y en a un.
-    //
-    // **Le bloc ENTIER disparaît sinon** — ni cadre vide, ni tiret. Sur une
-    // pièce, une mention laissée vide se lit comme une mention EFFACÉE et invite
-    // à chercher ce qu'on aurait retiré ; mieux vaut n'avoir rien à lire que
-    // quelque chose à interpréter.
-    //
-    // Un téléphone SEUL garde le bloc : il a été tapé, donc il désigne
-    // quelqu'un. Même règle que le ticket de vente boutique, et il le faut —
-    // deux pièces du même acte qui divergent se paient au rapprochement de
-    // caisse.
-    if (model.hasPayer) {
-      final payerName = model.payerFullName?.trim() ?? '';
-      if (payerName.isNotEmpty) {
-        lines.addAll(
-          _wrapped(
-            '${model.labels.payerLabel} ${payerName.toUpperCase()}',
-            width,
-          ),
-        );
-      }
-      _addOptional(
-        lines,
-        model.labels.phoneLabel,
-        model.payerPhoneNumber,
-        width,
-      );
-      lines.add(_rule(width));
-    }
+    // ── Le payeur, quand il y en a un (`TicketSections.payer`) : le bloc entier
+    // disparaît sinon, un téléphone seul le garde.
+    TicketSections.payer(
+      sheet,
+      payerLabel: model.labels.payerLabel,
+      phoneLabel: model.labels.phoneLabel,
+      fullName: model.payerFullName,
+      phoneNumber: model.payerPhoneNumber,
+    );
 
     // ── Z5 — l'argent. Montant reçu et répartition sont des FAITS : ils
     // s'impriment sans réserve (RG-012-13 — la répartition est une saisie, pas
     // un calcul). Seul le solde est incertain, et lui seul porte la mention.
-    // Une ligne PAR DEVISE : un versement peut solder une créance en dollars et
-    // une en francs. Les additionner imprimerait, sur la pièce que le payeur
-    // emporte, un chiffre qui n'est l'argent de personne.
-    emphasised(
-      () => _addMoneyBag(
-        lines,
-        model.labels.amountReceivedLabel,
-        model.amountReceived,
-        width,
-      ),
+    // Une ligne PAR DEVISE, puis le taux de chaque règlement converti
+    // (`TicketMoneySections.amountReceived`, partagé avec le ticket de vente).
+    TicketMoneySections.amountReceived(
+      sheet,
+      amountReceivedLabel: model.labels.amountReceivedLabel,
+      rateLabel: model.labels.rateLabel,
+      tenders: model.tenders,
     );
-
-    // Le taux, sous le montant reçu, et **seulement** quand les deux unités
-    // divergent. C'est le chiffre que le parent conteste au guichet : le laisser
-    // déduire par division lui ferait lire un taux dérivé de l'arrondi. Un
-    // « 1,00 » sur un règlement ordinaire, à l'inverse, ferait chercher ce qui a
-    // été converti — d'où le filtre sur l'identité.
-    for (final tender in model.tenders) {
-      if (tender.isIdentity) continue;
-      _addPair(
-        lines,
-        model.labels.rateLabel,
-        _formatRate(tender, width),
-        width,
-      );
-    }
 
     // Part du montant reçu qu'aucune créance n'absorbe. Elle EXISTE : un
     // versement peut dépasser le dû (`isOptimisticallyOverpaid`), le paiement
@@ -506,94 +376,29 @@ abstract final class TicketTextLayout {
       lines.addAll(_centeredWrapped(model.labels.keepTicketNotice, width));
     }
 
-    // ── La zone à signer, juste avant les remerciements.
-    //
-    // C'est le CAISSIER qui signe : sur un papier que le parent emporte, la
-    // signature du parent ne vaudrait que contre une souche, et la thermique
-    // n'en produit aucune.
-    //
-    // Trois lignes, dans cet ordre, parce que c'est la forme d'une vraie zone
-    // de signature : le libellé dit qui signe, le blanc donne la hauteur du
-    // geste, le trait dit où il s'arrête. On signe AU-DESSUS du trait — le
-    // remplacer par un pointillé sur la ligne du libellé ferait signer dans une
-    // hauteur de ligne thermique, soit deux millimètres.
-    //
-    // ⚠️ Conditionnée au libellé, comme le titre du solde : `_wrapped('')` rend
-    // une liste VIDE, et un trait à signer sans rien qui dise qui signe ne se
-    // remplit pas. Une traduction incomplète escamote la zone entière plutôt
-    // que d'imprimer deux blancs et un trait orphelins.
-    final signature = _wrapped(model.labels.signatureLabel, width);
-    if (signature.isNotEmpty) {
-      lines.add(_rule(width));
-      emphasised(() => lines.addAll(signature));
-      lines.add('');
-      lines.add('');
-      // Le trait, à DROITE et sur la moitié de la laize : une signature se pose
-      // à droite sur une pièce, et la moitié suffit — plus large, il toucherait
-      // le bord que la thermique n'imprime jamais tout à fait.
-      //
-      // En pointillé, jamais en trait plein ni en soulignés : le gabarit pose
-      // déjà ses filets en `-` pour cette raison (le rendu thermique d'un trait
-      // continu bave), et un pointillé se distingue d'un filet de section.
-      lines.add(('.' * (width ~/ 2)).padLeft(width));
-      lines.add(_rule(width));
-    }
+    // ── La signature, le QR de vérification et le pied : blocs partagés avec
+    // le ticket de vente (`TicketSections.closing`). Jamais de QR sur un ticket
+    // provisoire — il le ferait passer pour officiel.
+    TicketSections.closing(
+      sheet,
+      signatureLabel: model.labels.signatureLabel,
+      verificationNotice: model.labels.verificationNotice,
+      verificationUrl: model.isProvisional ? null : model.verificationUrl,
+      thanksNotice: model.labels.thanksNotice,
+      editorNotice: model.labels.editorNotice,
+      editorSite: model.labels.editorSite,
+    );
 
-    // ── Le QR de vérification, juste avant le pied : scanné, il dit si le
-    // reçu est en vigueur, annulé ou remplacé (révision de D-4). Jamais sur un
-    // ticket provisoire — le QR le ferait passer pour officiel. Sa ligne vaut
-    // `''` dans le pivot textuel ; les renderers le dessinent à cette place.
-    final verificationUrl = model.isProvisional ? null : model.verificationUrl;
-    int? qrAt;
-    if (verificationUrl != null &&
-        TicketQrBand.fits(verificationUrl, columns: width)) {
-      lines.addAll(_centeredWrapped(model.labels.verificationNotice, width));
-      qrAt = lines.length;
-      lines.add('');
-    }
-
-    // Le pied, sur les deux sorties et dans tous les cas.
-    //
-    // L'adresse est sur sa PROPRE ligne, et sans schéma : deux lignes courtes
-    // valent mieux qu'une longue qui se replierait au hasard, l'adresse isolée
-    // se recopie, et un `http://` imprimé sur un papier que des familles gardent
-    // annoncerait un transport non chiffré.
-    lines.addAll(_centeredWrapped(model.labels.thanksNotice, width));
-    lines.addAll(_centered(model.labels.editorNotice, width));
-    lines.addAll(_centered(model.labels.editorSite, width));
-
-    return [
-      for (var i = 0; i < lines.length; i++)
-        if (i == qrAt)
-          TicketLine.qr(verificationUrl!)
-        else
-          TicketLine(lines[i], bold: bold.contains(i)),
-    ];
+    return sheet.build();
   }
 
-  /// Un libellé, puis **une ligne par devise**.
-  ///
-  /// Le libellé ne se répète pas : il coiffe la première ligne, les suivantes
-  /// s'alignent sous elle. Sur 32 colonnes, le répéter mangerait la largeur du
-  /// montant — et un ticket se recompte, il ne se déchiffre pas.
+  /// Un libellé, puis **une ligne par devise** (`TicketMoneySections.addMoneyBag`).
   static void _addMoneyBag(
     List<String> lines,
     String label,
     MoneyBag bag,
     int width,
-  ) {
-    if (bag.isEmpty) return;
-    var first = true;
-    for (final amount in bag.entries) {
-      _addPair(
-        lines,
-        first ? label : '',
-        formatAmount(amount.amountInCents, amount.currency),
-        width,
-      );
-      first = false;
-    }
-  }
+  ) => TicketMoneySections.addMoneyBag(lines, label, bag, width);
 
   /// Le total du solde : **une seule ligne**, les devises reliées par un `+`.
   ///
@@ -671,39 +476,10 @@ abstract final class TicketTextLayout {
   static bool _totalRepeatsHistory(List<TicketHistoryEntry> history) =>
       history.length == 1;
 
-  /// Le taux, tel qu'il s'imprime : « 1 666,67 FC / $ ».
-  ///
-  /// Deux décimales, celles-là mêmes qui sont stockées — la saisie est
-  /// contrainte au centième pour que l'imprimé et le stocké soient le MÊME
-  /// nombre. Un taux arrondi à l'affichage ne ferait pas retomber le parent sur
-  /// son total.
-  ///
-  /// Sur un ticket étroit, la forme « FC / \$ » cède à la seule devise reçue : la
-  /// paire tient rarement à droite de « Taux » en 32 colonnes, et c'est le
-  /// nombre qui compte.
-  static String _formatRate(TicketTenderLine tender, int width) {
-    final value = tender.rate.formatted(space: MoneyFormat.thermalSpace);
-    final quote = MoneyFormat.symbolOf(tender.currency);
-    if (width < 40) return '$value $quote';
-    final base = MoneyFormat.symbolOf(tender.pivotCurrency);
-    return '$value $quote / $base';
-  }
-
-  /// Montant en centimes → « 1 234 FC », « 425,00 $ ».
-  ///
-  /// Façade sur [MoneyFormat], qui porte désormais la règle : les décimales se
-  /// décident sur la **devise**, et `CDF` s'écrit « FC ». Le ticket écrivait
-  /// jusqu'ici « 1 234,00 CDF » — deux décimales sur une devise qui n'en a pas,
-  /// et le code ISO à la place de l'abréviation d'usage.
-  ///
-  /// Formateur **pur**, sans données de locale à initialiser : le ticket doit
-  /// pouvoir être rendu dans un test unitaire comme dans un isolat d'impression.
-  /// L'espace de groupement est l'**ordinaire** — une imprimante thermique ne
-  /// rend pas l'insécable.
-  static String formatAmount(int cents, String currency) => MoneyFormat.format(
-    Money.parse(cents, currency),
-    space: MoneyFormat.thermalSpace,
-  );
+  /// Montant en centimes → « 1 234 FC », « 425,00 $ » : le formateur de tous
+  /// les tickets de caisse (`TicketMoneySections.formatAmount`).
+  static String formatAmount(int cents, String currency) =>
+      TicketMoneySections.formatAmount(cents, currency);
 
   // ── Primitives de mise en page ──────────────────────────────────────────────
   //
@@ -733,8 +509,6 @@ abstract final class TicketTextLayout {
   ) => TicketTextPrimitives.addPair(lines, rawLabel, rawValue, width);
 
   static String _formatDate(DateTime at) => TicketTextPrimitives.formatDate(at);
-
-  static String _formatTime(DateTime at) => TicketTextPrimitives.formatTime(at);
 
   static List<String> _wrapped(String text, int width) =>
       TicketTextPrimitives.wrapped(text, width);

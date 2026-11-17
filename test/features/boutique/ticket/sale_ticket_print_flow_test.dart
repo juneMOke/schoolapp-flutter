@@ -3,14 +3,20 @@ import 'dart:typed_data';
 import 'package:dartz/dartz.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:pdf/pdf.dart';
+import 'package:printing/printing.dart';
+// ignore: implementation_imports
+import 'package:printing/src/interface.dart';
+import 'package:school_app_flutter/features/documents/domain/ticket/ticket_logo_band.dart';
+import 'package:school_app_flutter/features/documents/domain/ticket/ticket_lines.dart';
+import 'package:school_app_flutter/features/documents/domain/ticket/ticket_sections.dart';
+import 'package:school_app_flutter/features/school/data/school_logo_band_loader.dart';
 import 'package:school_app_flutter/features/school/domain/repositories/school_repository.dart';
 import 'package:school_app_flutter/features/school/domain/entities/school_logo.dart';
 import 'package:school_app_flutter/features/school/domain/entities/school.dart';
 import 'package:school_app_flutter/features/documents/domain/usecases/resolve_ticket_copies_use_case.dart';
 import 'package:school_app_flutter/core/di/injection.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
-import 'package:school_app_flutter/core/money/money.dart';
-import 'package:school_app_flutter/core/money/money_bag.dart';
 import 'package:school_app_flutter/features/boutique/data/local/boutique_sale_local_models.dart';
 import 'package:school_app_flutter/features/boutique/data/ticket/sale_ticket_composer.dart';
 import 'package:school_app_flutter/features/boutique/domain/entities/recorded_sale.dart';
@@ -31,12 +37,12 @@ const _netum = ThermalPrinter(
 /// L'enchaînement de la caisse boutique, tel que le comptoir le vit :
 /// **on voit le ticket, puis on l'imprime — et rien ne part sans un appui.**
 ///
-/// ⚠️ Ce chemin n'a **aucun repli PDF**, contrairement au ticket de perception :
-/// la vente est déjà écrite, et un papier de secours qui ressemblerait au reçu
-/// scellé ferait exactement la confusion que l'ADR-013 refuse. Le spouleur n'est
-/// donc jamais sollicité ici — et comme aucune plateforme d'impression n'est
-/// installée dans ce test, tout appel au spouleur ferait lever, donc rougir.
+/// Le même chemin que le ticket de perception : un ticket ne sort qu'avec son
+/// numéro définitif, et une thermique en échec passe la main au système (PDF)
+/// pour que le client reparte avec un papier.
 void main() {
+  late _FakePrinting printing;
+  late _FakeBandLoader bandLoader;
   late _FakePort port;
   late _FakePermission permission;
   late _FakeComposer composer;
@@ -45,6 +51,9 @@ void main() {
 
   setUp(() {
     schools = _FakeSchools();
+    printing = _FakePrinting();
+    PrintingPlatform.instance = printing;
+    bandLoader = _FakeBandLoader();
     port = _FakePort();
     permission = _FakePermission();
     composer = _FakeComposer();
@@ -55,6 +64,7 @@ void main() {
       ..registerSingleton<ThermalPrinterPort>(port)
       ..registerSingleton<ThermalPrinterPermission>(permission)
       ..registerSingleton<SaleTicketComposer>(composer)
+      ..registerSingleton<SchoolLogoBandLoader>(bandLoader)
       ..registerFactory<ResolveTicketCopiesUseCase>(
         () => ResolveTicketCopiesUseCase(schools),
       );
@@ -130,9 +140,8 @@ void main() {
     await tester.tap(find.text('go'));
     await tester.pumpAndSettle();
 
-    // Le titre nomme la PIÈCE, et surtout pas « Reçu de vente » : celui-là
-    // désigne le scellé, et le provisoire doit rester dissemblable.
-    expect(find.text('Ticket de vente'), findsOne);
+    // Le titre de la pièce, comme le ticket de perception nomme la sienne.
+    expect(find.text('Reçu de vente — Boutique'), findsOne);
     expect(find.text('Imprimer'), findsOne);
     // Rien n'est encore parti.
     expect(port.sentTo, isEmpty);
@@ -193,7 +202,7 @@ void main() {
     expect(find.byType(SnackBar), findsNothing);
   });
 
-  testWidgets('Bluetooth éteint : la cause est dite, et rien n est marqué', (
+  testWidgets('Bluetooth éteint : la cause est dite, puis le PDF sort', (
     tester,
   ) async {
     port.readyProblem = ThermalPrinterProblem.bluetoothOff;
@@ -201,13 +210,40 @@ void main() {
     await run(tester);
 
     expect(
+      find.text('Bluetooth éteint — impression PDF à la place.'),
+      findsOne,
+    );
+    // Le client repart avec un papier : le système a reçu le PDF.
+    expect(printing.laidOut, hasLength(1));
+    // Faux : rien ne dit que la feuille est sortie.
+    expect(returned, isFalse);
+  });
+
+  testWidgets('sans numéro définitif, aucun aperçu ne s ouvre', (tester) async {
+    composer.awaitingNumber = true;
+    returned = null;
+    await tester.pumpWidget(harness());
+    await tester.tap(find.text('go'));
+    await tester.pumpAndSettle();
+
+    expect(
       find.text(
-        'Le ticket n\'a pas pu être imprimé. La vente est enregistrée — vous '
-        'pouvez réessayer.',
+        'Le reçu de cette vente n\'a pas encore son numéro : le ticket '
+        's\'imprimera après la synchronisation.',
       ),
       findsOne,
     );
+    expect(find.text('Imprimer'), findsNothing);
+    expect(port.sentTo, isEmpty);
     expect(returned, isFalse);
+  });
+
+  testWidgets('le logo de l école de la vente part avec le ticket', (
+    tester,
+  ) async {
+    await run(tester);
+
+    expect(bandLoader.askedFor, ['E1']);
   });
 }
 
@@ -238,28 +274,100 @@ RecordedSale _recorded() => const RecordedSale(
 /// Rend un modèle fixe : ce fichier éprouve l'ENCHAÎNEMENT, pas la composition
 /// — celle-ci a ses propres tests, sur une vraie base.
 class _FakeComposer implements SaleTicketComposer {
+  bool awaitingNumber = false;
+
   @override
-  Future<SaleTicketModel> compose(
+  Future<Either<Failure, SaleTicketModel>> compose(
     RecordedSale recorded, {
     required SaleTicketLabels labels,
     required Map<String, String> levelLabels,
-  }) async => SaleTicketModel(
-    schoolName: 'Complexe scolaire La Colombe',
-    reference: 'PROV-TAB1-0001',
-    isProvisional: true,
-    soldAt: DateTime(2026, 8, 29, 11, 42),
-    lines: const [
-      SaleTicketLine(
-        label: 'Polo Lacoste',
-        quantity: 1,
-        unitPriceInCents: 1500,
-        lineTotalInCents: 1500,
-        currency: 'USD',
+  }) async {
+    if (awaitingNumber) return const Left(ReceiptAwaitingNumberFailure());
+    return Right(
+      SaleTicketModel(
+        school: const TicketSchoolHeader(name: 'Complexe scolaire La Colombe'),
+        receiptNumber: 'ETL-RV-2526-000413',
+        soldAt: DateTime(2026, 8, 29, 11, 42),
+        lines: const [
+          SaleTicketLine(
+            label: 'Polo Lacoste',
+            quantity: 1,
+            unitPriceInCents: 1500,
+            lineTotalInCents: 1500,
+            currency: 'USD',
+          ),
+        ],
+        tenders: const [
+          TicketTenderLine(
+            amountInCents: 1500,
+            currency: 'USD',
+            pivotCurrency: 'USD',
+          ),
+        ],
+        labels: labels,
       ),
-    ],
-    totals: MoneyBag.of(const [Money(1500, 'USD')]),
-    labels: labels,
-  );
+    );
+  }
+}
+
+class _FakeBandLoader implements SchoolLogoBandLoader {
+  final List<String?> askedFor = [];
+
+  @override
+  Future<TicketLogoBand?> thermalBand(String? schoolId) async {
+    askedFor.add(schoolId);
+    return null;
+  }
+}
+
+/// Le spouleur, réduit à ce que le repli lui demande.
+class _FakePrinting extends PrintingPlatform {
+  final List<Uint8List> laidOut = [];
+
+  @override
+  Future<bool> layoutPdf(
+    Printer? printer,
+    LayoutCallback onLayout,
+    String name,
+    PdfPageFormat format,
+    bool dynamicLayout,
+    bool usePrinterSettings,
+    OutputType outputType,
+    bool forceCustomPrintPaper,
+  ) async {
+    laidOut.add(await onLayout(PdfPageFormat.a4));
+    return true;
+  }
+
+  @override
+  Future<PrintingInfo> info() async => throw UnimplementedError();
+
+  @override
+  Future<List<Printer>> listPrinters() => throw UnimplementedError();
+
+  @override
+  Future<Printer?> pickPrinter(Rect bounds) => throw UnimplementedError();
+
+  @override
+  Future<bool> sharePdf(
+    Uint8List bytes,
+    String filename,
+    Rect bounds,
+    String? subject,
+    String? body,
+    List<String>? emails,
+  ) => throw UnimplementedError();
+
+  @override
+  Future<Uint8List> convertHtml(
+    String html,
+    String? baseUrl,
+    PdfPageFormat format,
+  ) => throw UnimplementedError();
+
+  @override
+  Stream<PdfRaster> raster(Uint8List document, List<int>? pages, double dpi) =>
+      throw UnimplementedError();
 }
 
 class _FakePort implements ThermalPrinterPort {

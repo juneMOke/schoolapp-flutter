@@ -6346,6 +6346,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get syncAggregatePayment => 'Payment';
 
   @override
+  String get syncAggregateSaleReceipt => 'Sale receipt';
+
+  @override
   String get syncAggregatePaymentReceipt => 'Payment receipt';
 
   @override
@@ -8200,9 +8203,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get recouvrementRelanceListTitle => 'Reminder list';
 
   @override
-  String get boutiqueTicketDocumentTitle => 'Sale ticket';
-
-  @override
   String get editiqueViewerReceiptTitle => 'Payment receipt';
 
   @override
@@ -9297,7 +9297,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get boutiqueConfirmOfflineSuffix =>
-      'Offline: a provisional ticket is printed, and the final receipt will be sealed on sync.';
+      'Offline: the sale is recorded, and its ticket can be printed from the sale record once the receipt is sealed on sync.';
 
   @override
   String get boutiqueConfirmCancel => 'Cancel';
@@ -9327,28 +9327,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get boutiqueTicketTitle => 'Sale receipt — Shop';
 
   @override
-  String get boutiqueTicketProvisionalBanner => 'Provisional document';
+  String get boutiqueTicketAwaitingNumber =>
+      'This sale\'s receipt has no number yet: the ticket will print after sync.';
 
   @override
-  String get boutiqueTicketProvisionalNotice => 'Final receipt sealed on sync.';
+  String get boutiqueTicketArticlesLabel => 'Items';
 
   @override
-  String get boutiqueTicketSealedNotice => 'Sealed receipt — valid discharge';
-
-  @override
-  String get boutiqueTicketPayerLabel => 'PAYER:';
-
-  @override
-  String get boutiqueTicketPhoneLabel => 'Tel.';
-
-  @override
-  String get boutiqueTicketCashierLabel => 'Cashier:';
-
-  @override
-  String get boutiqueTicketTotalLabel => 'TOTAL';
-
-  @override
-  String get boutiqueTicketCashReceivedLabel => 'Cash received';
+  String get boutiqueTicketTotalLabel => 'Total';
 
   @override
   String get boutiqueTicketRemainingLabel => 'Remaining';
@@ -9372,9 +9358,12 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String boutiqueReceiptBannerProvisional(String reference) {
-    return '$reference · provisional, will be sealed on sync';
-  }
+  String get boutiqueReceiptBannerAwaiting =>
+      'Receipt being sealed: the ticket prints as soon as it has its number.';
+
+  @override
+  String get boutiqueReceiptBannerDeferred =>
+      'Receipt not sealed yet: print the ticket from the sale record after sync.';
 
   @override
   String boutiqueReceiptBannerSealed(String reference) {
@@ -10054,6 +10043,10 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get boutiqueSaleDetailTicketAwaitingNumber =>
+      'The ticket can be printed once the receipt has its number.';
+
+  @override
   String get boutiqueSaleDetailTicketNeverPrinted =>
       'Ticket never printed from this tablet.';
 
@@ -10062,7 +10055,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get boutiqueSaleDetailReceiptPending =>
-      'The receipt will be sealed at synchronisation. The ticket stands in the meantime.';
+      'The receipt will be sealed on sync: the ticket prints with its number.';
 
   @override
   String get boutiqueSaleDetailClaimReceipt => 'Claim the sealed receipt';

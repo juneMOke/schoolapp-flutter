@@ -6396,6 +6396,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get syncAggregatePayment => 'Paiement';
 
   @override
+  String get syncAggregateSaleReceipt => 'Reçu de vente';
+
+  @override
   String get syncAggregatePaymentReceipt => 'Reçu d\'un paiement';
 
   @override
@@ -8276,9 +8279,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String get recouvrementRelanceListTitle => 'Liste de relance';
 
   @override
-  String get boutiqueTicketDocumentTitle => 'Ticket de vente';
-
-  @override
   String get editiqueViewerReceiptTitle => 'Reçu de paiement';
 
   @override
@@ -9377,7 +9377,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get boutiqueConfirmOfflineSuffix =>
-      'Hors ligne : un ticket provisoire est imprimé, et le reçu définitif sera scellé à la synchronisation.';
+      'Hors ligne : la vente est enregistrée, et le ticket s\'imprimera depuis sa fiche une fois le reçu scellé à la synchronisation.';
 
   @override
   String get boutiqueConfirmCancel => 'Annuler';
@@ -9407,29 +9407,14 @@ class AppLocalizationsFr extends AppLocalizations {
   String get boutiqueTicketTitle => 'Reçu de vente — Boutique';
 
   @override
-  String get boutiqueTicketProvisionalBanner => 'Document provisoire';
+  String get boutiqueTicketAwaitingNumber =>
+      'Le reçu de cette vente n\'a pas encore son numéro : le ticket s\'imprimera après la synchronisation.';
 
   @override
-  String get boutiqueTicketProvisionalNotice =>
-      'Reçu définitif scellé à la synchronisation.';
+  String get boutiqueTicketArticlesLabel => 'Articles';
 
   @override
-  String get boutiqueTicketSealedNotice => 'Reçu scellé — vaut quittance';
-
-  @override
-  String get boutiqueTicketPayerLabel => 'PAYEUR :';
-
-  @override
-  String get boutiqueTicketPhoneLabel => 'Tél.';
-
-  @override
-  String get boutiqueTicketCashierLabel => 'Caissier :';
-
-  @override
-  String get boutiqueTicketTotalLabel => 'TOTAL';
-
-  @override
-  String get boutiqueTicketCashReceivedLabel => 'Espèces reçues';
+  String get boutiqueTicketTotalLabel => 'Total';
 
   @override
   String get boutiqueTicketRemainingLabel => 'Reste à payer';
@@ -9453,9 +9438,12 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
-  String boutiqueReceiptBannerProvisional(String reference) {
-    return '$reference · provisoire, sera scellé à la synchro';
-  }
+  String get boutiqueReceiptBannerAwaiting =>
+      'Reçu en cours de scellement : le ticket s\'imprime dès son numéro.';
+
+  @override
+  String get boutiqueReceiptBannerDeferred =>
+      'Reçu pas encore scellé : le ticket s\'imprimera depuis la fiche de la vente, après la synchronisation.';
 
   @override
   String boutiqueReceiptBannerSealed(String reference) {
@@ -10140,6 +10128,10 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
+  String get boutiqueSaleDetailTicketAwaitingNumber =>
+      'Le ticket s\'imprimera dès que le reçu aura son numéro.';
+
+  @override
   String get boutiqueSaleDetailTicketNeverPrinted =>
       'Ticket jamais imprimé depuis cette tablette.';
 
@@ -10148,7 +10140,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get boutiqueSaleDetailReceiptPending =>
-      'Le reçu sera scellé à la synchronisation. Le ticket fait foi en attendant.';
+      'Le reçu sera scellé à la synchronisation : le ticket s\'imprime avec son numéro.';
 
   @override
   String get boutiqueSaleDetailClaimReceipt => 'Réclamer le reçu scellé';

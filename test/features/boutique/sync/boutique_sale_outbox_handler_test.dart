@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:school_app_flutter/features/boutique/data/local/boutique_receipt_recovery_dao.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:school_app_flutter/core/offline/outbox_dependency_gate.dart';
 import 'package:school_app_flutter/core/offline/outbox_entry.dart';
@@ -197,6 +198,34 @@ void main() {
       expect(row['receipt_number'], 'ETL-RV-2526-000413');
     });
 
+    test('l\'ACK pose la date d\'émission et le QR du reçu', () async {
+      when(() => api.commitSale(any(), any())).thenAnswer(
+        (_) async => BoutiqueSaleResponse.fromJson(const {
+          'sale': {'id': _saleId, 'receiptDocumentId': 'doc-1'},
+          'documents': [
+            {
+              'type': 'SALE_RECEIPT',
+              'documentNumber': 'ETL-RV-2526-000413',
+              'status': 'DEFINITIVE',
+              'emittedAt': '2026-11-17T00:00:00Z',
+              'verificationUrl': 'https://verify.eteeloconnect.com/d/abc',
+            },
+          ],
+        }),
+      );
+
+      await handlerWith(
+        OutboxDependencyState.ready,
+      ).dispatch(_entry(_request()));
+
+      final row = await saleRow();
+      expect(row['receipt_emitted_on'], '2026-11-17');
+      expect(
+        row['receipt_verification_url'],
+        'https://verify.eteeloconnect.com/d/abc',
+      );
+    });
+
     test('un ACK SANS document acquitte quand même la vente', () async {
       // Le scellement est best-effort et hors transaction : un échec
       // d'imprimerie laisse la vente enregistrée. La refuser ici la ferait
@@ -212,8 +241,103 @@ void main() {
       expect(result.outcome, OutboxDispatchOutcome.acked);
       final row = await saleRow();
       expect(row['sync_status'], 'SYNCED');
-      // La caisse garde son ticket provisoire, et réclamera le scellé.
       expect(row['receipt_number'], isNull);
+      // Le ticket attend le numéro : la marque le réclamera au prochain flush.
+      final marks = await db.query(
+        'outbox',
+        where: 'aggregate_type = ?',
+        whereArgs: [BoutiqueReceiptRecoveryDao.aggregateType],
+      );
+      expect(marks, hasLength(1));
+      expect(marks.single['aggregate_id'], _saleId);
+    });
+
+    test('un ACK rejoué ne fait pas perdre ce qu\'un pull a posé', () async {
+      // Le POST est parti, la réponse s'est perdue ; entre-temps le pull a
+      // descendu la vente numérotée. Le rejeu rend un ACK plus pauvre.
+      await db.update('boutique_sales', {
+        'receipt_document_id': 'doc-1',
+        'receipt_number': 'ETL-RV-2526-000413',
+        'receipt_emitted_on': '2026-11-17',
+        'receipt_verification_url': 'https://verify.eteeloconnect.com/d/abc',
+      });
+      when(() => api.commitSale(any(), any())).thenAnswer(
+        (_) async => const BoutiqueSaleResponse(
+          saleId: _saleId,
+          receiptDocumentId: 'doc-1',
+          documents: [
+            SealedSaleDocument(
+              type: 'SALE_RECEIPT',
+              documentNumber: 'ETL-RV-2526-000413',
+              status: 'DEFINITIVE',
+            ),
+          ],
+        ),
+      );
+
+      await handlerWith(
+        OutboxDependencyState.ready,
+      ).dispatch(_entry(_request()));
+
+      final row = await saleRow();
+      expect(row['receipt_emitted_on'], '2026-11-17');
+      expect(
+        row['receipt_verification_url'],
+        'https://verify.eteeloconnect.com/d/abc',
+      );
+    });
+
+    test(
+      'un ACK sans document garde le numéro déjà connu, sans marque',
+      () async {
+        await db.update('boutique_sales', {
+          'receipt_document_id': 'doc-1',
+          'receipt_number': 'ETL-RV-2526-000413',
+        });
+        when(
+          () => api.commitSale(any(), any()),
+        ).thenAnswer((_) async => const BoutiqueSaleResponse(saleId: _saleId));
+
+        await handlerWith(
+          OutboxDependencyState.ready,
+        ).dispatch(_entry(_request()));
+
+        final row = await saleRow();
+        expect(row['receipt_document_id'], 'doc-1');
+        expect(row['receipt_number'], 'ETL-RV-2526-000413');
+        final marks = await db.query(
+          'outbox',
+          where: 'aggregate_type = ?',
+          whereArgs: [BoutiqueReceiptRecoveryDao.aggregateType],
+        );
+        expect(marks, isEmpty);
+      },
+    );
+
+    test('un ACK qui rapporte le numéro ne pose AUCUNE marque', () async {
+      when(() => api.commitSale(any(), any())).thenAnswer(
+        (_) async => const BoutiqueSaleResponse(
+          saleId: _saleId,
+          documents: [
+            SealedSaleDocument(
+              type: 'SALE_RECEIPT',
+              documentNumber: 'ETL-RV-2526-000413',
+              status: 'DEFINITIVE',
+            ),
+          ],
+        ),
+      );
+
+      await handlerWith(
+        OutboxDependencyState.ready,
+      ).dispatch(_entry(_request()));
+
+      final marks = await db.query(
+        'outbox',
+        where: 'aggregate_type = ?',
+        whereArgs: [BoutiqueReceiptRecoveryDao.aggregateType],
+      );
+      expect(marks, isEmpty);
     });
 
     test('une divergence de prix est CONSIGNÉE, sans bloquer', () async {
