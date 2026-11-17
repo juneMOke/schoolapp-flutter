@@ -1,4 +1,4 @@
-/// Tables de la Paie du personnel (module Ressources humaines, sous-module C).
+/// Tables de la Paie du personnel (RH · Paie).
 ///
 /// La tablette **calcule pour afficher**, le serveur **recalcule pour figer** :
 /// avant validation, une ligne du livre n'existe nulle part — elle se calcule

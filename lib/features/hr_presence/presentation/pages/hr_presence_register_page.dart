@@ -22,11 +22,8 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 import 'package:school_app_flutter/core/presence/presentation/presence_day_leave_guard.dart';
 import 'package:school_app_flutter/features/staff/presentation/widgets/attendance/register/staff_register_actions.dart';
 
-/// RH · Présences ▸ Registre du jour — le registre du Pointage, seul, sans les
-/// onglets de l'ancien écran.
-///
-/// Le même registre que Ressources humaines ▸ Pointage, laissé en place : même
-/// lecture locale, mêmes envois, même verrou du jour. C'est le seul écran du
+/// RH · Présences ▸ Registre du jour — le registre du Pointage : lecture
+/// locale, gestes en file d'envoi, verrou du jour. C'est le seul écran du
 /// module qui fonctionne hors ligne (D1). Le jour, la vue et les filtres
 /// tiennent dans l'adresse ([HrRegisterLocation]).
 class HrPresenceRegisterPage extends StatelessWidget {

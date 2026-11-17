@@ -1,4 +1,4 @@
-/// Tables du Pointage du personnel (module Ressources humaines, sous-module B).
+/// Tables du Pointage du personnel (RH · Présences).
 ///
 /// Deux flux descendent (`hr.staff-attendance`, `hr.staff-attendance-locks`,
 /// sous `hr.attendance.read`), trois écritures remontent : un pointage, un

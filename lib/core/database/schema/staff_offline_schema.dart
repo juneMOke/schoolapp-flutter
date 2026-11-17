@@ -1,4 +1,5 @@
-/// Tables du fichier du personnel (module Ressources humaines, sous-module A).
+/// Tables du fichier du personnel (RH · Personnel ; lues aussi par RH ·
+/// Présences et RH · Paie).
 ///
 /// Trois flux, trois droits, trois tables — et c'est la frontière de sécurité,
 /// pas une commodité :
