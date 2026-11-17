@@ -95,6 +95,8 @@ class BoutiqueSaleWriteDao {
         'synced_at': nowMs,
         'receipt_document_id': ack.receiptDocumentId,
         'receipt_number': ack.receiptNumber,
+        'receipt_emitted_on': ack.receiptEmittedOn,
+        'receipt_verification_url': ack.receiptVerificationUrl,
         'updated_at': nowMs,
       },
       where: 'id = ?',
@@ -135,12 +137,18 @@ class BoutiqueSaleWriteDao {
     required int nowMs,
     String? documentId,
     String? documentNumber,
+    String? emittedOn,
+    String? verificationUrl,
   }) async {
     final claimed = <String, Object?>{
       if ((documentId ?? '').trim().isNotEmpty)
         'receipt_document_id': documentId!.trim(),
       if ((documentNumber ?? '').trim().isNotEmpty)
         'receipt_number': documentNumber!.trim(),
+      if ((emittedOn ?? '').trim().isNotEmpty)
+        'receipt_emitted_on': emittedOn!.trim(),
+      if ((verificationUrl ?? '').trim().isNotEmpty)
+        'receipt_verification_url': verificationUrl!.trim(),
     };
     // Rien d'exploitable : on ne bouge pas `updated_at` pour une non-écriture,
     // sinon la vente paraîtrait avoir changé alors que rien n'a changé.

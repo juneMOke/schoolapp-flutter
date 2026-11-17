@@ -10,6 +10,8 @@ library;
 
 import 'package:school_app_flutter/core/money/exchange_rate.dart';
 import 'package:school_app_flutter/core/money/money.dart';
+import 'package:school_app_flutter/features/documents/domain/receipt_emission_day.dart';
+import 'package:school_app_flutter/features/documents/domain/receipt_verification_url.dart';
 import 'package:school_app_flutter/core/money/money_bag.dart';
 import 'package:school_app_flutter/core/money/tender_composition.dart';
 
@@ -301,13 +303,30 @@ class SealedSaleDocument {
   final String? documentNumber;
   final String? status;
 
-  const SealedSaleDocument({this.type, this.documentNumber, this.status});
+  /// Jour d'émission (`YYYY-MM-DD`), lu dans `emittedAt` sans conversion de
+  /// fuseau — même lecture que l'ACK d'un versement. `null` tant que le
+  /// serveur ne l'envoie pas (demande D1 au back).
+  final String? emittedOn;
+
+  /// URL du QR de la pièce, écartée si absente ou douteuse. `null` tant que le
+  /// serveur ne l'envoie pas (demande D1 au back).
+  final String? verificationUrl;
+
+  const SealedSaleDocument({
+    this.type,
+    this.documentNumber,
+    this.status,
+    this.emittedOn,
+    this.verificationUrl,
+  });
 
   factory SealedSaleDocument.fromJson(Map<String, dynamic> j) =>
       SealedSaleDocument(
         type: j['type'] as String?,
         documentNumber: j['documentNumber'] as String?,
         status: j['status'] as String?,
+        emittedOn: ReceiptEmissionDay.fromIso(j['emittedAt']),
+        verificationUrl: ReceiptVerificationUrl.normalize(j['verificationUrl']),
       );
 }
 
@@ -384,6 +403,14 @@ class BoutiqueSaleResponse {
   /// Le numéro du reçu, quand il existe.
   String? get receiptNumber =>
       documents.isEmpty ? null : documents.first.documentNumber;
+
+  /// Le jour d'émission du reçu, quand le serveur le donne.
+  String? get receiptEmittedOn =>
+      documents.isEmpty ? null : documents.first.emittedOn;
+
+  /// L'URL du QR du reçu, quand le serveur la donne.
+  String? get receiptVerificationUrl =>
+      documents.isEmpty ? null : documents.first.verificationUrl;
 
   /// Parsing **tolérant** : un ACK dont la forme surprend ne doit pas faire
   /// échouer un encaissement déjà acquitté côté serveur.

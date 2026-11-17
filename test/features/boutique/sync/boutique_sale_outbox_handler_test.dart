@@ -197,6 +197,34 @@ void main() {
       expect(row['receipt_number'], 'ETL-RV-2526-000413');
     });
 
+    test('l\'ACK pose la date d\'émission et le QR du reçu', () async {
+      when(() => api.commitSale(any(), any())).thenAnswer(
+        (_) async => BoutiqueSaleResponse.fromJson(const {
+          'sale': {'id': _saleId, 'receiptDocumentId': 'doc-1'},
+          'documents': [
+            {
+              'type': 'SALE_RECEIPT',
+              'documentNumber': 'ETL-RV-2526-000413',
+              'status': 'DEFINITIVE',
+              'emittedAt': '2026-11-17T00:00:00Z',
+              'verificationUrl': 'https://verify.eteeloconnect.com/d/abc',
+            },
+          ],
+        }),
+      );
+
+      await handlerWith(
+        OutboxDependencyState.ready,
+      ).dispatch(_entry(_request()));
+
+      final row = await saleRow();
+      expect(row['receipt_emitted_on'], '2026-11-17');
+      expect(
+        row['receipt_verification_url'],
+        'https://verify.eteeloconnect.com/d/abc',
+      );
+    });
+
     test('un ACK SANS document acquitte quand même la vente', () async {
       // Le scellement est best-effort et hors transaction : un échec
       // d'imprimerie laisse la vente enregistrée. La refuser ici la ferait

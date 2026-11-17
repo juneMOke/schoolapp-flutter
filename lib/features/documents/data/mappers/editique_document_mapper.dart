@@ -40,6 +40,10 @@ class EditiqueDocumentMapper {
   /// réémission sous le même numéro.
   static const String _editionHeader = 'x-document-edition';
 
+  /// Numéro de la pièce scellée, posé sur toute réponse PDF scellée (contrat
+  /// du 2026-11-17). Prime sur le nom de fichier, qui reste le repli.
+  static const String _documentNumberHeader = 'x-document-number';
+
   /// Posé à `true` sur une réémission qui rend une remplaçante déjà scellée,
   /// absent sinon — jamais `false`.
   static const String _replayedHeader = 'x-document-replayed';
@@ -71,9 +75,13 @@ class EditiqueDocumentMapper {
     final headerFileName = ContentDispositionParser.fileName(
       _firstHeader(headers, 'content-disposition'),
     );
-    final documentNumber = ContentDispositionParser.documentNumber(
-      headerFileName,
-    );
+    final announcedNumber = _firstHeader(
+      headers,
+      _documentNumberHeader,
+    )?.trim();
+    final documentNumber = (announcedNumber?.isNotEmpty ?? false)
+        ? announcedNumber
+        : ContentDispositionParser.documentNumber(headerFileName);
 
     return Right(
       EditiqueDocument(

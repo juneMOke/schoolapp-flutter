@@ -41,6 +41,9 @@ class BoutiqueSalePullDao {
     await _db.transaction((txn) async {
       for (final sale in sales) {
         final kept = await _localOnly(txn, sale.id);
+        final samePiece =
+            sale.receiptDocumentId != null &&
+            sale.receiptDocumentId == kept.receiptDocumentId;
         await txn.insert('boutique_sales', {
           'id': sale.id,
           'school_id': schoolId,
@@ -68,11 +71,16 @@ class BoutiqueSalePullDao {
           // la réclamation — mais seulement pour la MÊME pièce : un numéro
           // n'est jamais inventé, ni reporté sur une pièce qu'il ne désigne pas.
           'receipt_number':
-              sale.receiptNumber ??
-              (sale.receiptDocumentId != null &&
-                      sale.receiptDocumentId == kept.receiptDocumentId
-                  ? kept.receiptNumber
-                  : null),
+              sale.receiptNumber ?? (samePiece ? kept.receiptNumber : null),
+          // Même règle pour la date d'émission et le QR : ce que le delta tait
+          // et que le poste tient de l'ACK ou de la réclamation survit, pour la
+          // même pièce seulement.
+          'receipt_emitted_on':
+              sale.receiptEmittedOn ??
+              (samePiece ? kept.receiptEmittedOn : null),
+          'receipt_verification_url':
+              sale.receiptVerificationUrl ??
+              (samePiece ? kept.receiptVerificationUrl : null),
           'ticket_printed_at': kept.ticketPrintedAt,
           'sync_status': 'SYNCED',
           'sync_error': null,
@@ -161,6 +169,8 @@ class BoutiqueSalePullDao {
       columns: const [
         'receipt_document_id',
         'receipt_number',
+        'receipt_emitted_on',
+        'receipt_verification_url',
         'ticket_printed_at',
       ],
       where: 'id = ?',
@@ -177,6 +187,8 @@ class BoutiqueSalePullDao {
     return _LocalOnly(
       receiptDocumentId: row?['receipt_document_id'] as String?,
       receiptNumber: row?['receipt_number'] as String?,
+      receiptEmittedOn: row?['receipt_emitted_on'] as String?,
+      receiptVerificationUrl: row?['receipt_verification_url'] as String?,
       ticketPrintedAt: row?['ticket_printed_at'] as int?,
       beneficiaryNames: {
         for (final line in lines)
@@ -190,6 +202,8 @@ class BoutiqueSalePullDao {
 class _LocalOnly {
   final String? receiptDocumentId;
   final String? receiptNumber;
+  final String? receiptEmittedOn;
+  final String? receiptVerificationUrl;
   final int? ticketPrintedAt;
 
   /// Clé (ligne, élève) : un nom ne survit que si la ligne désigne encore le
@@ -199,6 +213,8 @@ class _LocalOnly {
   const _LocalOnly({
     this.receiptDocumentId,
     this.receiptNumber,
+    this.receiptEmittedOn,
+    this.receiptVerificationUrl,
     this.ticketPrintedAt,
     this.beneficiaryNames = const {},
   });

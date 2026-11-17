@@ -20,6 +20,7 @@ HttpResponse<Uint8List> _response({
   String? verificationUrl,
   String? edition,
   String? replayed,
+  String? documentNumber,
 }) {
   final headerMap = <String, List<String>>{};
   if (contentType != null) {
@@ -39,6 +40,9 @@ HttpResponse<Uint8List> _response({
   }
   if (edition != null) {
     headerMap['x-document-edition'] = <String>[edition];
+  }
+  if (documentNumber != null) {
+    headerMap['x-document-number'] = <String>[documentNumber];
   }
   if (replayed != null) {
     headerMap['x-document-replayed'] = <String>[replayed];
@@ -73,6 +77,30 @@ void main() {
       expect(document.documentNumber, 'ETL-AI-2526-000087');
       expect(document.bytes, _pdfBytes());
       expect(document.isReplayable, isTrue);
+    });
+
+    test('X-Document-Number prime sur le nom de fichier', () {
+      final document = EditiqueDocumentMapper.map(
+        _response(
+          contentDisposition: 'attachment; filename="recu.pdf"',
+          documentNumber: ' ETL-RV-2526-000123 ',
+        ),
+        EditiqueDocumentType.saleReceipt,
+      ).getOrElse(() => throw StateError('attendu Right'));
+
+      expect(document.documentNumber, 'ETL-RV-2526-000123');
+    });
+
+    test('un X-Document-Number vide laisse le nom de fichier décider', () {
+      final document = EditiqueDocumentMapper.map(
+        _response(
+          contentDisposition: 'attachment; filename="ETL-RV-2526-000123.pdf"',
+          documentNumber: '  ',
+        ),
+        EditiqueDocumentType.saleReceipt,
+      ).getOrElse(() => throw StateError('attendu Right'));
+
+      expect(document.documentNumber, 'ETL-RV-2526-000123');
     });
 
     test('retient l\'identifiant d\'archive annoncé par le serveur', () {

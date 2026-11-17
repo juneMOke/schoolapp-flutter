@@ -2,6 +2,8 @@ import 'package:school_app_flutter/core/money/exchange_rate.dart';
 import 'package:school_app_flutter/core/offline/keyset_page.dart';
 import 'package:school_app_flutter/core/money/money.dart';
 import 'package:school_app_flutter/core/money/money_bag.dart';
+import 'package:school_app_flutter/features/documents/domain/receipt_emission_day.dart';
+import 'package:school_app_flutter/features/documents/domain/receipt_verification_url.dart';
 
 /// Une vente telle qu'un delta de synchronisation la décrit.
 ///
@@ -48,6 +50,13 @@ class BoutiqueSaleDeltaDto {
   /// [receiptDocumentId] l'est, et aussi quand l'annuaire ne le résout plus.
   final String? receiptNumber;
 
+  /// Jour d'émission du reçu (`receiptEmittedAt`, demande D3 au back) : `null`
+  /// tant que le serveur ne l'envoie pas.
+  final String? receiptEmittedOn;
+
+  /// URL du QR du reçu (`receiptVerificationUrl`, demande D3 au back).
+  final String? receiptVerificationUrl;
+
   final List<BoutiqueSaleLineDeltaDto> lines;
 
   /// Ce qui est réellement **entré dans le tiroir**, une entrée par devise
@@ -78,6 +87,8 @@ class BoutiqueSaleDeltaDto {
     required this.soldAt,
     this.receiptDocumentId,
     this.receiptNumber,
+    this.receiptEmittedOn,
+    this.receiptVerificationUrl,
     this.lines = const [],
     this.tenders = const [],
     required this.serverUpdatedAt,
@@ -105,6 +116,10 @@ class BoutiqueSaleDeltaDto {
         soldAt: j['soldAt'] as String,
         receiptDocumentId: j['receiptDocumentId'] as String?,
         receiptNumber: j['receiptNumber'] as String?,
+        receiptEmittedOn: ReceiptEmissionDay.fromIso(j['receiptEmittedAt']),
+        receiptVerificationUrl: ReceiptVerificationUrl.normalize(
+          j['receiptVerificationUrl'],
+        ),
         lines: [
           for (final line in (j['lines'] as List<dynamic>? ?? const []))
             if (line is Map<String, dynamic>)

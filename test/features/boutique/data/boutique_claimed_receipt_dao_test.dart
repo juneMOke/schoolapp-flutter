@@ -66,6 +66,42 @@ void main() {
     expect(row['updated_at'], 900);
   });
 
+  test('elle pose la date d emission et le QR quand ils sont la', () async {
+    await seedSyncedSale(receiptNumber: 'ETL-RV-1', receiptDocumentId: 'doc-7');
+
+    await dao.applyClaimedReceipt(
+      's-1',
+      nowMs: 900,
+      emittedOn: '2026-11-17',
+      verificationUrl: 'https://verify.eteeloconnect.com/d/abc',
+    );
+
+    final row = await saleRow();
+    expect(row['receipt_number'], 'ETL-RV-1');
+    expect(row['receipt_emitted_on'], '2026-11-17');
+    expect(
+      row['receipt_verification_url'],
+      'https://verify.eteeloconnect.com/d/abc',
+    );
+  });
+
+  test('une date ou un QR absents n ecrasent pas ceux deja connus', () async {
+    await seedSyncedSale(receiptNumber: 'ETL-RV-1', receiptDocumentId: 'doc-7');
+    await db.update('boutique_sales', {
+      'receipt_emitted_on': '2026-11-16',
+      'receipt_verification_url': 'https://verify.eteeloconnect.com/d/old',
+    });
+
+    await dao.applyClaimedReceipt('s-1', nowMs: 900, documentId: 'doc-7');
+
+    final row = await saleRow();
+    expect(row['receipt_emitted_on'], '2026-11-16');
+    expect(
+      row['receipt_verification_url'],
+      'https://verify.eteeloconnect.com/d/old',
+    );
+  });
+
   test('elle ne touche PAS l etat de synchro', () async {
     // C'est ce qui la distingue d'`applySaleAck` : la synchro de cette vente
     // n'est pas en cause, et la réécrire ferait passer pour neuf un
