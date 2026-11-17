@@ -19742,30 +19742,6 @@ abstract class AppLocalizations {
   /// **'The file could not be read. Try again.'**
   String get documentCaptureReadError;
 
-  /// Menu of the Human resources module.
-  ///
-  /// In en, this message translates to:
-  /// **'Human resources'**
-  String get menuHumanResources;
-
-  /// Sub-menu: the school's central staff file.
-  ///
-  /// In en, this message translates to:
-  /// **'Staff file'**
-  String get subMenuStaffFile;
-
-  /// Description of the Human resources card on the home page.
-  ///
-  /// In en, this message translates to:
-  /// **'The staff file: the school\'s staff, their contract and their records.'**
-  String get accueilModuleHumanResourcesDescription;
-
-  /// Surtitre de la liste du personnel.
-  ///
-  /// In en, this message translates to:
-  /// **'Human resources'**
-  String get staffFileEyebrow;
-
   /// Titre de la liste du personnel.
   ///
   /// In en, this message translates to:
@@ -19777,42 +19753,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Everyone who works at the school: teachers, administrative and support staff.'**
   String get staffFileSubtitle;
-
-  /// Carte de synthèse : nombre d'agents au fichier.
-  ///
-  /// In en, this message translates to:
-  /// **'Headcount'**
-  String get staffStatHeadcount;
-
-  /// Sous-ligne de l'effectif : agents « contrat à poser ».
-  ///
-  /// In en, this message translates to:
-  /// **'{count} without a current contract'**
-  String staffStatHeadcountNoContract(int count);
-
-  /// Carte de synthèse : agents à qui manquent des pièces exigées.
-  ///
-  /// In en, this message translates to:
-  /// **'Incomplete files'**
-  String get staffStatIncomplete;
-
-  /// Sous-ligne des dossiers incomplets.
-  ///
-  /// In en, this message translates to:
-  /// **'Required documents missing'**
-  String get staffStatIncompleteSub;
-
-  /// Carte de synthèse : fiches et pièces pas encore envoyées.
-  ///
-  /// In en, this message translates to:
-  /// **'On this tablet'**
-  String get staffStatPending;
-
-  /// Sous-ligne de la carte « Sur la tablette ».
-  ///
-  /// In en, this message translates to:
-  /// **'Will be sent when the network is back'**
-  String get staffStatPendingSub;
 
   /// Libellé du champ de recherche.
   ///
@@ -19880,12 +19820,6 @@ abstract class AppLocalizations {
   /// **'Contract'**
   String get staffContractLabel;
 
-  /// Filtre de contrat : aucune restriction.
-  ///
-  /// In en, this message translates to:
-  /// **'All'**
-  String get staffContractAll;
-
   /// Statut de contrat : salarié de l'école.
   ///
   /// In en, this message translates to:
@@ -19909,12 +19843,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No contract yet'**
   String get staffContractNone;
-
-  /// Filtre : agents dont le dossier est incomplet.
-  ///
-  /// In en, this message translates to:
-  /// **'Incomplete file'**
-  String get staffIncompleteFilter;
 
   /// Jauge du dossier : toutes les pièces exigées sont versées.
   ///
@@ -19975,12 +19903,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Sync'**
   String get staffTableSync;
-
-  /// Pied de la liste : effectif total du fichier.
-  ///
-  /// In en, this message translates to:
-  /// **'{count, plural, =0{No staff in the file} =1{1 staff member in the file} other{{count} staff members in the file}}'**
-  String staffFooterCount(int count);
 
   /// Vide : le fichier ne compte aucun agent.
   ///
@@ -21038,53 +20960,17 @@ abstract class AppLocalizations {
   /// **'The staff file has not reached this tablet yet. You can already create staff members: the others will appear at the next connection.'**
   String get staffFileNotYetSynced;
 
-  /// No description provided for @subMenuStaffAttendance.
-  ///
-  /// In en, this message translates to:
-  /// **'Attendance'**
-  String get subMenuStaffAttendance;
-
   /// No description provided for @accueilStaffAttendanceShort.
   ///
   /// In en, this message translates to:
   /// **'Attendance'**
   String get accueilStaffAttendanceShort;
 
-  /// No description provided for @staffAttendanceTabRegister.
-  ///
-  /// In en, this message translates to:
-  /// **'Daily register'**
-  String get staffAttendanceTabRegister;
-
-  /// No description provided for @staffAttendanceTabRegisterSubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'{marked} / {total} marked'**
-  String staffAttendanceTabRegisterSubtitle(int marked, int total);
-
   /// No description provided for @staffAttendanceTabAgent.
   ///
   /// In en, this message translates to:
   /// **'Monthly sheet'**
   String get staffAttendanceTabAgent;
-
-  /// No description provided for @staffAttendanceTabAgentSubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'By staff member · {month}'**
-  String staffAttendanceTabAgentSubtitle(String month);
-
-  /// No description provided for @staffAttendanceTabRecap.
-  ///
-  /// In en, this message translates to:
-  /// **'Monthly summary'**
-  String get staffAttendanceTabRecap;
-
-  /// No description provided for @staffAttendanceTabRecapSubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Totals → Payroll'**
-  String get staffAttendanceTabRecapSubtitle;
 
   /// No description provided for @presenceMarkBadgeToMark.
   ///
@@ -21770,12 +21656,6 @@ abstract class AppLocalizations {
   /// **'Attendance'**
   String get presenceMarkKpiPresences;
 
-  /// No description provided for @staffAttendanceKpiDaysWorked.
-  ///
-  /// In en, this message translates to:
-  /// **'Days worked'**
-  String get staffAttendanceKpiDaysWorked;
-
   /// No description provided for @presenceMarkKpiRatio.
   ///
   /// In en, this message translates to:
@@ -21878,12 +21758,6 @@ abstract class AppLocalizations {
   /// **'Hourly work'**
   String get staffAttendanceTotalHours;
 
-  /// No description provided for @presenceMarkTotalLateMinutes.
-  ///
-  /// In en, this message translates to:
-  /// **'Minutes late'**
-  String get presenceMarkTotalLateMinutes;
-
   /// No description provided for @presenceMarkTotalUnjustified.
   ///
   /// In en, this message translates to:
@@ -21895,12 +21769,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Days not marked'**
   String get presenceMarkTotalNotMarked;
-
-  /// No description provided for @staffAttendanceRecapLegend.
-  ///
-  /// In en, this message translates to:
-  /// **'U = unexcused · E = excused · a row opens the monthly sheet'**
-  String get staffAttendanceRecapLegend;
 
   /// No description provided for @staffAttendanceClose.
   ///
@@ -29595,7 +29463,7 @@ abstract class AppLocalizations {
   /// Note de renvoi en bas du tableau de bord.
   ///
   /// In en, this message translates to:
-  /// **'Attendance and payroll have their own modules: Attendance and Payroll, under Human resources.'**
+  /// **'Attendance and payroll have their own modules: HR · Attendance and HR · Payroll.'**
   String get hrDashboardFootnote;
 
   /// Tableau de bord vide.
