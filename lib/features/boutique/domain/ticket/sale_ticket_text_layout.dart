@@ -1,5 +1,6 @@
 import 'package:school_app_flutter/features/boutique/domain/ticket/sale_ticket_model.dart';
 import 'package:school_app_flutter/features/documents/domain/ticket/ticket_line.dart';
+import 'package:school_app_flutter/features/documents/domain/ticket/ticket_money_sections.dart';
 import 'package:school_app_flutter/features/documents/domain/ticket/ticket_sections.dart';
 import 'package:school_app_flutter/features/documents/domain/ticket/ticket_sheet.dart';
 import 'package:school_app_flutter/features/documents/domain/ticket/ticket_text_layout.dart';
@@ -93,7 +94,7 @@ abstract final class SaleTicketTextLayout {
       TicketTextPrimitives.addPair(
         lines,
         '${line.quantity} x ${line.label}',
-        TicketSections.formatAmount(line.lineTotalInCents, line.currency),
+        TicketMoneySections.formatAmount(line.lineTotalInCents, line.currency),
         width,
       );
       lines.addAll(TicketTextPrimitives.wrapped(_metaOf(line, labels), width));
@@ -114,8 +115,13 @@ abstract final class SaleTicketTextLayout {
     // ── L'argent. Le total du panier en devises de catalogue, puis ce qui est
     // entré dans le tiroir — les deux diffèrent dès qu'un franc paie un
     // article tarifé en dollars, et le taux le dit.
-    TicketSections.addMoneyBag(lines, labels.totalLabel, model.totals, width);
-    TicketSections.amountReceived(
+    TicketMoneySections.addMoneyBag(
+      lines,
+      labels.totalLabel,
+      model.totals,
+      width,
+    );
+    TicketMoneySections.amountReceived(
       sheet,
       amountReceivedLabel: labels.amountReceivedLabel,
       rateLabel: labels.rateLabel,
@@ -123,7 +129,7 @@ abstract final class SaleTicketTextLayout {
     );
     // ⚠️ TOUJOURS imprimé, et toujours à zéro : la preuve visuelle du comptant
     // intégral (invariant I-5), une ligne par devise du panier.
-    TicketSections.addMoneyBag(
+    TicketMoneySections.addMoneyBag(
       lines,
       labels.remainingLabel,
       model.remaining,
@@ -154,7 +160,7 @@ abstract final class SaleTicketTextLayout {
   /// article à prix unique n'a ni niveau ni taille.
   static String _metaOf(SaleTicketLine line, SaleTicketLabels labels) {
     final parts = <String>[
-      '${TicketSections.formatAmount(line.unitPriceInCents, line.currency)} '
+      '${TicketMoneySections.formatAmount(line.unitPriceInCents, line.currency)} '
           '${labels.unitSuffix}',
       if (line.levelLabel != null && line.levelLabel!.trim().isNotEmpty)
         line.levelLabel!.trim(),

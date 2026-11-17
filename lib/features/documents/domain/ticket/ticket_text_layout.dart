@@ -4,6 +4,7 @@ import 'package:school_app_flutter/core/money/money.dart';
 import 'package:school_app_flutter/core/money/money_bag.dart';
 import 'package:school_app_flutter/features/documents/domain/ticket/ticket_receipt_model.dart';
 import 'package:school_app_flutter/features/documents/domain/ticket/ticket_text_primitives.dart';
+import 'package:school_app_flutter/features/documents/domain/ticket/ticket_money_sections.dart';
 import 'package:school_app_flutter/features/documents/domain/ticket/ticket_sections.dart';
 import 'package:school_app_flutter/features/documents/domain/ticket/ticket_sheet.dart';
 
@@ -148,8 +149,8 @@ abstract final class TicketTextLayout {
     // s'impriment sans réserve (RG-012-13 — la répartition est une saisie, pas
     // un calcul). Seul le solde est incertain, et lui seul porte la mention.
     // Une ligne PAR DEVISE, puis le taux de chaque règlement converti
-    // (`TicketSections.amountReceived`, partagé avec le ticket de vente).
-    TicketSections.amountReceived(
+    // (`TicketMoneySections.amountReceived`, partagé avec le ticket de vente).
+    TicketMoneySections.amountReceived(
       sheet,
       amountReceivedLabel: model.labels.amountReceivedLabel,
       rateLabel: model.labels.rateLabel,
@@ -391,13 +392,13 @@ abstract final class TicketTextLayout {
     return sheet.build();
   }
 
-  /// Un libellé, puis **une ligne par devise** (`TicketSections.addMoneyBag`).
+  /// Un libellé, puis **une ligne par devise** (`TicketMoneySections.addMoneyBag`).
   static void _addMoneyBag(
     List<String> lines,
     String label,
     MoneyBag bag,
     int width,
-  ) => TicketSections.addMoneyBag(lines, label, bag, width);
+  ) => TicketMoneySections.addMoneyBag(lines, label, bag, width);
 
   /// Le total du solde : **une seule ligne**, les devises reliées par un `+`.
   ///
@@ -476,9 +477,9 @@ abstract final class TicketTextLayout {
       history.length == 1;
 
   /// Montant en centimes → « 1 234 FC », « 425,00 $ » : le formateur de tous
-  /// les tickets de caisse (`TicketSections.formatAmount`).
+  /// les tickets de caisse (`TicketMoneySections.formatAmount`).
   static String formatAmount(int cents, String currency) =>
-      TicketSections.formatAmount(cents, currency);
+      TicketMoneySections.formatAmount(cents, currency);
 
   // ── Primitives de mise en page ──────────────────────────────────────────────
   //
