@@ -60,8 +60,6 @@ import 'package:school_app_flutter/features/resultats/presentation/pages/resulta
 import 'package:school_app_flutter/features/resultats/presentation/pages/resultats_feature_scope.dart';
 import 'package:school_app_flutter/features/schedule/presentation/pages/schedule_coordinator_page.dart';
 import 'package:school_app_flutter/features/schedule/presentation/pages/schedule_feature_scope.dart';
-import 'package:school_app_flutter/features/staff/presentation/pages/staff_attendance_page.dart';
-import 'package:school_app_flutter/features/staff/presentation/pages/staff_file_page.dart';
 import 'package:school_app_flutter/features/home/presentation/widget/shell/shell_under_construction.dart';
 import 'package:school_app_flutter/features/finance/presentation/pages/ticket_printer_settings_page.dart';
 
@@ -167,10 +165,6 @@ class ShellScreen extends StatelessWidget {
         return const CashClosingPage();
       case MenuConstants.treasuryConfigId:
         return const CashRegistersPage();
-      case MenuConstants.hrStaffFileId:
-        return const StaffFilePage();
-      case MenuConstants.hrStaffAttendanceId:
-        return const StaffAttendancePage();
       case MenuConstants.hrPayrollDashboardId:
         return const PayrollDashboardPage();
       case MenuConstants.hrPayrollId:

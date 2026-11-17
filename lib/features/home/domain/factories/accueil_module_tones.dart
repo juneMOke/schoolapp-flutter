@@ -75,16 +75,12 @@ class AccueilModuleTones {
     // Entre la Boutique et les Dépenses (terre toutes deux) : l'ardoise, qui
     // la distingue de ses deux voisines.
     MenuConstants.treasuryMenuId: _bleuArdoise,
-    // Des personnes, pas de l'argent : la famille bleue, comme Inscriptions.
-    MenuConstants.hrMenuId: _bleuProfond,
-    // Voisin des Ressources humaines dans la grille : l'ardoise, pour que les
-    // deux cartes ne se confondent pas.
+    // Les trois cartes RH — des personnes, pas de l'argent : la famille
+    // bleue, en alternant ardoise et bleu profond pour que deux voisines ne
+    // se confondent pas. L'ardoise de RH · Personnel la sépare des Dépenses
+    // (terre), celle de RH · Paie des Classes (terre).
     MenuConstants.hrPersonnelMenuId: _bleuArdoise,
-    // Troisième carte RH : retour au bleu profond, que l'ardoise de RH ·
-    // Personnel sépare des Ressources humaines.
     MenuConstants.hrPresenceMenuId: _bleuProfond,
-    // Quatrième carte RH, entre RH · Présences (bleu profond) et les Classes
-    // (terre) : l'ardoise, distincte de ses deux voisines.
     MenuConstants.hrPayrollMenuId: _bleuArdoise,
     MenuConstants.classesMenuId: _terreFoncee,
     MenuConstants.coursesMenuId: _bleuArdoise,

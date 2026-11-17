@@ -163,9 +163,9 @@ abstract final class PayrollLedgerNotices {
                 label: l10n.payrollOpenStaffFile,
                 onPressed: () => navigation.add(
                   SubMenuItemSelected(
-                    menuId: MenuConstants.hrMenuId,
-                    subMenuId: MenuConstants.hrStaffFileId,
-                    title: l10n.subMenuStaffFile,
+                    menuId: MenuConstants.hrPersonnelMenuId,
+                    subMenuId: MenuConstants.hrPersonnelFileId,
+                    title: l10n.subMenuHrPersonnelFile,
                   ),
                 ),
                 fullWidth: false,

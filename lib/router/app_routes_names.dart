@@ -14,6 +14,18 @@ class AppRoutesNames {
   static const String homeSubMenu = 'home-sub-menu';
   static const String homeSubMenuRoute = '/home/:subMenuId';
 
+  /// L'adresse de coquille d'un sous-menu de l'ancien menu Ressources
+  /// humaines, réécrite vers celui qui l'a repris ; la fin de l'adresse (fiche
+  /// d'un agent) et la requête suivent. `null` pour toute autre adresse.
+  static String? legacyHrShellRedirect(Uri uri) {
+    final segments = uri.pathSegments;
+    if (segments.length < 2 || '/${segments.first}' != homePath) return null;
+    final target = MenuConstants.legacyHrSubMenuRedirects[segments[1]];
+    if (target == null) return null;
+    final path = [segments.first, target, ...segments.skip(2)].join('/');
+    return uri.replace(path: '/$path').toString();
+  }
+
   static String homeSubMenuPath(String? subMenuId) =>
       subMenuId == null ||
           subMenuId.isEmpty ||
@@ -156,10 +168,6 @@ class AppRoutesNames {
     required String subMenuId,
     required String agentId,
   }) => '${homeSubMenuPath(subMenuId)}/${Uri.encodeComponent(agentId)}';
-  static const String hrStaffFile =
-      '/${MenuConstants.hrMenuId}/${MenuConstants.hrStaffFileId}';
-  static const String hrStaffAttendance =
-      '/${MenuConstants.hrMenuId}/${MenuConstants.hrStaffAttendanceId}';
   static const String hrPayrollDashboard =
       '/${MenuConstants.hrPayrollMenuId}/${MenuConstants.hrPayrollDashboardId}';
   static const String hrPayroll =

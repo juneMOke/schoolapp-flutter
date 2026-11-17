@@ -49,20 +49,18 @@ class MenuConstants {
   /// propre : ce n'est ni de la scolarité ni de la caisse.
   static const String communicationMenuId = 'communication';
 
-  /// Les ressources humaines — le fichier central des agents de l'école, puis
-  /// le Pointage qui le lit ; la Paie a son propre module ([hrPayrollMenuId]). Un menu propre : un
-  /// agent n'est ni un élève ni une écriture de caisse.
-  static const String hrMenuId = 'ressources-humaines';
+  /// L'ancien menu Ressources humaines, éclaté en RH · Personnel, RH ·
+  /// Présences et RH · Paie. Il n'est plus offert : son adresse ne sert qu'à
+  /// rediriger un favori ou un lien partagé vers le module qui l'a repris
+  /// (cf. [legacyHrSubMenuRedirects]).
+  static const String legacyHrMenuId = 'ressources-humaines';
 
   /// RH · Personnel — combien d'agents, qui ils sont, et où est la fiche de
-  /// chacun. Un module neuf, posé À CÔTÉ de [hrMenuId] (laissé tel quel) :
-  /// il lit le même fichier local, donc la même vérité, mais avec ses propres
-  /// écrans.
+  /// chacun, lus dans le fichier local du personnel.
   static const String hrPersonnelMenuId = 'rh-personnel';
 
   /// RH · Présences — qui est venu, à quelle heure, et ce qui part à la paie.
-  /// Un module neuf, posé après RH · Personnel ; l'onglet Pointage des
-  /// [hrMenuId] reste en place à côté (même registre, même verrou).
+  /// Posé après RH · Personnel.
   static const String hrPresenceMenuId = 'rh-presences';
 
   /// RH · Paie — le livre du mois, les avances, les arriérés et le barème
@@ -139,13 +137,17 @@ class MenuConstants {
   /// reste, et la clôture du soir.
   static const String treasuryClosingId = 'tr-cloture';
 
-  /// Le fichier du personnel : tous les agents de l'école, leur contrat et
-  /// leur dossier administratif.
-  static const String hrStaffFileId = 'fichier-du-personnel';
+  /// Les sous-menus de l'ancien menu Ressources humaines, et l'écran qui les
+  /// a repris. Une ancienne adresse — `/ressources-humaines/{id}` comme
+  /// `/home/{id}` — mène au remplaçant au lieu d'une page introuvable.
+  static const String hrStaffFileLegacyId = 'fichier-du-personnel';
+  static const String hrStaffAttendanceLegacyId = 'pointage';
 
-  /// Le Pointage du personnel : le registre du jour, la fiche mensuelle d'un
-  /// agent et le récapitulatif du mois.
-  static const String hrStaffAttendanceId = 'pointage';
+  /// Les mêmes, rapportés au sous-menu qui les remplace dans la coquille.
+  static const Map<String, String> legacyHrSubMenuRedirects = {
+    hrStaffFileLegacyId: hrPersonnelFileId,
+    hrStaffAttendanceLegacyId: hrPresenceRegisterId,
+  };
 
   /// RH · Paie ▸ Tableau de bord : prévu et réel, payé et non payé, prêts,
   /// arriérés, et ce que chaque salarié perçoit (spec TB).
