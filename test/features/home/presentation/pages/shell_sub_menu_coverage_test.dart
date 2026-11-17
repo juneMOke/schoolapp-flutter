@@ -99,8 +99,6 @@ const Map<String, String> _constants = {
   'treasuryClosingId': 'tr-cloture',
   'communicationAnnouncementsId': 'communication-communiques',
   'communicationTemplatesId': 'communication-modeles',
-  'hrStaffFileId': 'fichier-du-personnel',
-  'hrStaffAttendanceId': 'pointage',
   'hrPayrollDashboardId': 'paie-tableau-de-bord',
   'hrPayrollId': 'paie',
   'hrPayrollAdvancesId': 'paie-avances',

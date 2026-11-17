@@ -8,9 +8,9 @@ import 'package:school_app_flutter/features/hr_personnel/presentation/helpers/hr
 import 'package:school_app_flutter/features/staff/domain/entities/staff_file_snapshot.dart';
 import 'package:school_app_flutter/features/staff/presentation/bloc/staff_snapshot_source.dart';
 
-/// Un écran RH · Personnel : lecture **locale** du fichier du personnel — la
-/// même que celle du module Ressources humaines, donc la même vérité —, et
-/// filtres en mémoire.
+/// Un écran RH · Personnel : lecture **locale** du fichier du personnel —
+/// celle que lisent aussi RH · Présences et RH · Paie, donc la même vérité —,
+/// et filtres en mémoire.
 ///
 /// Une instance par écran : le Tableau de bord et le Fichier gardent chacun
 /// leur recherche, leur catégorie et leur ordre.

@@ -5,8 +5,6 @@ import 'package:school_app_flutter/core/presence/domain/presence_edited_days.dar
 import 'package:school_app_flutter/core/presence/presentation/presence_day_navigation.dart';
 import 'package:school_app_flutter/features/staff/domain/entities/staff_enums.dart';
 import 'package:school_app_flutter/features/staff/domain/services/staff_day_register.dart';
-import 'package:school_app_flutter/features/staff/domain/services/staff_file_query.dart';
-import 'package:school_app_flutter/features/staff/domain/services/staff_month_recap.dart';
 import 'package:school_app_flutter/core/presence/domain/school_day_calendar.dart';
 import 'package:school_app_flutter/features/staff/domain/usecases/staff_attendance_use_cases.dart';
 import 'package:school_app_flutter/features/staff/presentation/bloc/staff_attendance_commands.dart';
@@ -16,11 +14,11 @@ import 'package:school_app_flutter/features/staff/presentation/bloc/staff_sync_s
 import 'package:school_app_flutter/core/components/controls/collection_view_mode.dart';
 import 'package:school_app_flutter/core/presence/domain/presence_status.dart';
 
-/// Le Pointage : lecture locale, filtres en mémoire, gestes en file d'envoi.
+/// Le registre du Pointage (RH · Présences ▸ Registre) : lecture locale,
+/// filtres en mémoire, gestes en file d'envoi.
 ///
-/// La tablette lit **deux mois** au plus — celui du registre et celui de la
-/// fiche et du récapitulatif — et ne relit la base qu'en changeant de plage,
-/// après un geste, ou quand un pull ou un flush la périme.
+/// La tablette lit le mois du jour affiché, et ne relit la base qu'en
+/// changeant de mois, après un geste, ou quand un pull ou un flush la périme.
 class StaffAttendanceCubit extends Cubit<StaffAttendanceState>
     implements PresenceDayNavigation {
   final LoadStaffAttendanceUseCase _load;
@@ -78,7 +76,7 @@ class StaffAttendanceCubit extends Cubit<StaffAttendanceState>
     // Deux lectures se croisent (un lien ?jour= juste après load, un signal
     // de synchro) : seule la dernière demandée écrit.
     final ticket = ++_readSeq;
-    final (from, to) = _range(state.day, state.month);
+    final (from, to) = _range(state.day);
     final result = await _load(from: from, to: to);
     if (isClosed || ticket != _readSeq) return;
     result.fold(
@@ -106,12 +104,12 @@ class StaffAttendanceCubit extends Cubit<StaffAttendanceState>
     }
   }
 
-  /// Les jours lus : le mois du registre et le mois de la fiche.
-  static (String, String) _range(String day, String month) {
-    final months = [SchoolDayCalendar.monthOf(day), month]..sort();
+  /// Les jours lus : le mois du registre.
+  static (String, String) _range(String day) {
+    final month = SchoolDayCalendar.monthOf(day);
     return (
-      SchoolDayCalendar.firstOf(months.first),
-      SchoolDayCalendar.daysOf(months.last).last,
+      SchoolDayCalendar.firstOf(month),
+      SchoolDayCalendar.daysOf(month).last,
     );
   }
 
@@ -125,10 +123,6 @@ class StaffAttendanceCubit extends Cubit<StaffAttendanceState>
 
   @override
   String get lastShownDay => state.lastWorkDay;
-
-  void setTab(StaffAttendanceTab tab) {
-    if (tab != state.tab) emit(state.copyWith(tab: tab));
-  }
 
   /// Le jour ouvré précédent ou suivant ; jamais au-delà d'aujourd'hui.
   @override
@@ -156,34 +150,10 @@ class StaffAttendanceCubit extends Cubit<StaffAttendanceState>
     final start = state.snapshot.schoolYear?.start;
     if (day.compareTo(state.today) > 0 || day == state.day) return;
     if (start != null && day.compareTo(start) < 0) return;
-    final reload = _range(day, state.month) != _range(state.day, state.month);
+    final reload = _range(day) != _range(state.day);
     emit(state.copyWith(day: day));
     if (reload) await refresh();
   }
-
-  /// Le mois précédent ou suivant ; jamais au-delà du mois en cours.
-  Future<void> stepMonth(int direction) async {
-    if (direction < 0 && !state.canStepMonthBack) return;
-    final month = SchoolDayCalendar.addMonths(state.month, direction);
-    if (month.compareTo(state.today.substring(0, 7)) > 0) return;
-    emit(state.copyWith(month: month));
-    await refresh();
-  }
-
-  Future<void> goCurrentMonth() async {
-    final month = state.today.substring(0, 7);
-    if (month == state.month) return;
-    emit(state.copyWith(month: month));
-    await refresh();
-  }
-
-  /// Ouvre la fiche mensuelle d'un agent (depuis le sélecteur ou le récap).
-  void openAgent(String staffMemberId) => emit(
-    state.copyWith(
-      agentId: () => staffMemberId,
-      tab: StaffAttendanceTab.agentMonth,
-    ),
-  );
 
   // ── Filtres ───────────────────────────────────────────────────────────
 
@@ -210,18 +180,6 @@ class StaffAttendanceCubit extends Cubit<StaffAttendanceState>
   void setViewMode(CollectionViewMode mode) {
     if (mode != state.viewMode) emit(state.copyWith(viewMode: mode));
   }
-
-  void toggleRecapContract(StaffContractFilter? filter) =>
-      emit(state.copyWith(recapQuery: state.recapQuery.toggleContract(filter)));
-
-  void setRecapText(String text) {
-    if (text != state.recapQuery.text) {
-      emit(state.copyWith(recapQuery: state.recapQuery.withText(text)));
-    }
-  }
-
-  void resetRecapFilters() =>
-      emit(state.copyWith(recapQuery: StaffRecapQuery.none));
 
   // ── Gestes ────────────────────────────────────────────────────────────
 

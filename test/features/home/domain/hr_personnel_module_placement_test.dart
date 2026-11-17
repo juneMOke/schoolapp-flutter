@@ -7,9 +7,8 @@ import 'package:school_app_flutter/features/home/domain/factories/menu_factory.d
 import 'package:school_app_flutter/l10n/app_localizations_fr.dart';
 import 'package:school_app_flutter/router/app_routes_names.dart';
 
-/// RH · Personnel est un module PROPRE, posé après les Ressources humaines
-/// qu'il laisse intactes : son tableau de bord, puis son fichier, tous deux
-/// sous `hr.staff.read`.
+/// RH · Personnel est un module PROPRE, posé après les Dépenses : son tableau
+/// de bord, puis son fichier, tous deux sous `hr.staff.read`.
 void main() {
   final l10n = AppLocalizationsFr();
   final tousDroits = Perm.values.map((p) => p.wire).toList();
@@ -37,7 +36,7 @@ void main() {
     );
   });
 
-  test('il suit les Ressources humaines, qui restent en place', () {
+  test('il suit les Dépenses : premier des trois modules RH', () {
     final ids = MenuFactory.createMenuItems(
       l10n,
       permissions: tousDroits,
@@ -45,7 +44,7 @@ void main() {
 
     expect(
       ids.indexOf(MenuConstants.hrPersonnelMenuId),
-      ids.indexOf(MenuConstants.hrMenuId) + 1,
+      ids.indexOf(MenuConstants.expenseMenuId) + 1,
     );
   });
 

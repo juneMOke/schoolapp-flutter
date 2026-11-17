@@ -50,7 +50,6 @@ import 'package:school_app_flutter/features/staff/data/repositories/staff_reposi
 import 'package:school_app_flutter/features/staff/domain/repositories/staff_repository.dart';
 import 'package:school_app_flutter/features/staff/domain/usecases/load_staff_file_use_case.dart';
 import 'package:school_app_flutter/features/staff/domain/usecases/sync_staff_pulls_use_case.dart';
-import 'package:school_app_flutter/features/staff/presentation/bloc/staff_file_cubit.dart';
 import 'package:school_app_flutter/features/staff/presentation/bloc/staff_snapshot_source.dart';
 import 'package:school_app_flutter/core/offline/current_user_context.dart';
 import 'package:school_app_flutter/core/offline/keyset_pull_runner.dart';
@@ -150,9 +149,6 @@ void registerStaffOffline(GetIt getIt) {
       bus: getIt<PullCompletionBus>(),
       engine: getIt<SyncEngine>(),
     ),
-  );
-  getIt.registerFactory<StaffFileCubit>(
-    () => StaffFileCubit(source: getIt<StaffSnapshotSource>()),
   );
   // RH · Personnel : une instance par écran (tableau de bord, fichier), sur la
   // même lecture locale.

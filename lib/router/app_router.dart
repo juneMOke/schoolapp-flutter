@@ -31,8 +31,6 @@ import 'package:school_app_flutter/features/payroll/presentation/pages/payroll_a
 import 'package:school_app_flutter/features/payroll/presentation/pages/payroll_dashboard_page.dart';
 import 'package:school_app_flutter/features/payroll/presentation/pages/payroll_settings_page.dart';
 import 'package:school_app_flutter/features/payroll/presentation/pages/payroll_page.dart';
-import 'package:school_app_flutter/features/staff/presentation/pages/staff_attendance_page.dart';
-import 'package:school_app_flutter/features/staff/presentation/pages/staff_file_page.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/context/enrollment_detail_intent.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/pages/enrollment_detail_page.dart';
 import 'package:school_app_flutter/features/documents/presentation/pages/documents_feature_scope.dart';
@@ -395,6 +393,10 @@ class AppRouter {
       path: AppRoutesNames.homeSubMenuRoute,
       name: AppRoutesNames.homeSubMenu,
       onExit: RouteExitGuard.onExitOfPage(_shellPageKey),
+      // Un sous-menu de l'ancien menu Ressources humaines mène à celui qui l'a
+      // repris ; la fin de l'adresse (fiche d'un agent) et la requête suivent.
+      redirect: (context, state) =>
+          AppRoutesNames.legacyHrShellRedirect(state.uri),
       pageBuilder: (context, state) =>
           _shellPage(state.pathParameters['subMenuId']),
       // `nouveau` avant `:agentId`, qui le prendrait pour un identifiant.
@@ -529,30 +531,19 @@ class AppRouter {
       path: AppRoutesNames.communicationTemplates,
       builder: (context, state) => const AnnouncementTemplatesPage(),
     ),
-    // Ressources humaines : le fichier du personnel, le Pointage et la Paie,
-    // chacun son cubit, monté par sa page.
-    GoRoute(
-      path: AppRoutesNames.hrStaffFile,
-      // La fiche d'un agent et le formulaire de contrat sont poussés par-dessus
-      // (`Navigator`) : Précédent du navigateur quitte cette route, et consulte
-      // donc leur garde.
-      onExit: RouteExitGuard.onExit,
-      builder: (context, state) => const StaffFilePage(),
-    ),
-    GoRoute(
-      path: AppRoutesNames.hrStaffAttendance,
-      builder: (context, state) => const StaffAttendancePage(),
-    ),
-    // Les anciennes adresses de la Paie, sous Ressources humaines : un
-    // favori ou un lien partagé retrouve RH · Paie.
-    for (final subMenuId in const [
-      MenuConstants.hrPayrollId,
-      MenuConstants.hrPayrollArrearsId,
-    ])
+    // L'ancien menu Ressources humaines, éclaté en trois modules : un favori
+    // ou un lien partagé retrouve l'écran qui a repris la page — RH ·
+    // Personnel, RH · Présences ou RH · Paie.
+    for (final MapEntry(key: legacyId, value: target) in const {
+      MenuConstants.hrStaffFileLegacyId: AppRoutesNames.hrPersonnelFile,
+      MenuConstants.hrStaffAttendanceLegacyId:
+          AppRoutesNames.hrPresenceRegister,
+      MenuConstants.hrPayrollId: AppRoutesNames.hrPayroll,
+      MenuConstants.hrPayrollArrearsId: AppRoutesNames.hrPayrollArrears,
+    }.entries)
       GoRoute(
-        path: '/${MenuConstants.hrMenuId}/$subMenuId',
-        redirect: (context, state) =>
-            '/${MenuConstants.hrPayrollMenuId}/$subMenuId',
+        path: '/${MenuConstants.legacyHrMenuId}/$legacyId',
+        redirect: (context, state) => target,
       ),
     GoRoute(
       path: AppRoutesNames.hrPayrollDashboard,

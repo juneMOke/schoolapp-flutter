@@ -49,6 +49,12 @@ void main() {
         '`BoutiqueSaleRoutes` la ramène à l\'écran',
     '/dev/components': 'galerie de composants, kDebugMode uniquement',
     '/dev/ticket-print': 'banc de calage thermique, kDebugMode uniquement',
+    '/ressources-humaines/fichier-du-personnel':
+        'ancienne adresse du fichier du personnel : elle ne rend rien et '
+        'redirige vers RH · Personnel, lui-même gardé',
+    '/ressources-humaines/pointage':
+        'ancienne adresse du Pointage : elle ne rend rien et redirige vers le '
+        'registre de RH · Présences, lui-même gardé',
     '/boutique/boutique-historique':
         'ancienne adresse de l\'historique : elle ne rend rien et redirige '
         'vers le tableau de bord, lui-même gardé',

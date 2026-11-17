@@ -30,7 +30,6 @@ class MenuFactory {
       _createBoutiqueMenu(l10n),
       _createTreasuryMenu(l10n),
       _createExpenseMenu(l10n),
-      _createHrMenu(l10n),
       _createHrPersonnelMenu(l10n),
       _createHrPresenceMenu(l10n),
       _createHrPayrollMenu(l10n),
@@ -284,8 +283,6 @@ class MenuFactory {
     );
   }
 
-  /// Menu Ressources humaines. Le fichier du personnel d'abord, puis le
-  /// Pointage qui le lit, puis la Paie qui lit les deux.
   /// Menu Communication — les communiqués aux parents, puis leurs modèles.
   static MenuItem _createCommunicationMenu(AppLocalizations l10n) {
     return MenuItem(
@@ -307,28 +304,8 @@ class MenuFactory {
     );
   }
 
-  static MenuItem _createHrMenu(AppLocalizations l10n) {
-    return MenuItem(
-      id: MenuConstants.hrMenuId,
-      title: l10n.menuHumanResources,
-      icon: Icons.badge_outlined,
-      subMenus: [
-        SubMenuItem(
-          id: MenuConstants.hrStaffFileId,
-          title: l10n.subMenuStaffFile,
-          route: AppRoutesNames.hrStaffFile,
-        ),
-        SubMenuItem(
-          id: MenuConstants.hrStaffAttendanceId,
-          title: l10n.subMenuStaffAttendance,
-          route: AppRoutesNames.hrStaffAttendance,
-        ),
-      ],
-    );
-  }
-
-  /// RH · Personnel — un module à part, posé après les Ressources humaines
-  /// qu'il ne remplace pas (encore) : le même fichier, d'autres écrans.
+  /// RH · Personnel — le tableau de bord, puis le fichier du personnel. Le
+  /// premier des trois modules RH : Présences et Paie lisent ses agents.
   static MenuItem _createHrPersonnelMenu(AppLocalizations l10n) {
     return MenuItem(
       id: MenuConstants.hrPersonnelMenuId,

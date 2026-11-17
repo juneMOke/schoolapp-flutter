@@ -2264,7 +2264,7 @@
   "accueilModulesTitle": "Où souhaitez-vous aller ?",
   "accueilModulesIntro": "Ces modules couvrent la vie de l'école — chaque bloc ouvre son tableau de bord ou ses pages.",
   "accueilModuleInscriptionsDescription": "Premières inscriptions, réinscriptions et pré-inscriptions de vos élèves.",
-  "accueilModuleFinancesDescription": "Recettes, facturation et suivi du recouvrement des frais scolaires.",
+  "accueilModuleFinancesDescription": "Encaissements de l'école, facturation des élèves et impression des tickets.",
   "accueilModuleFeeControlDescription": "Pour un frais donné, qui l'a soldé, qui n'a versé qu'une part, qui n'a rien versé.",
   "accueilModuleBoutiqueDescription": "Caisse au comptant des articles de l'école et suivi des ventes.",
   "accueilModuleClassesDescription": "Composition des classes et liste des élèves par cycle.",
@@ -8635,22 +8635,6 @@
   "@documentCaptureReadError": {
     "description": "La plateforme n'a pas rendu le fichier."
   },
-  "menuHumanResources": "Ressources humaines",
-  "@menuHumanResources": {
-    "description": "Menu du module Ressources humaines."
-  },
-  "subMenuStaffFile": "Fichier du personnel",
-  "@subMenuStaffFile": {
-    "description": "Sous-menu : le fichier central des agents de l'école."
-  },
-  "accueilModuleHumanResourcesDescription": "Le fichier du personnel : les agents de l'école, leur contrat et leur dossier.",
-  "@accueilModuleHumanResourcesDescription": {
-    "description": "Description de la carte Ressources humaines sur l'accueil."
-  },
-  "staffFileEyebrow": "Ressources humaines",
-  "@staffFileEyebrow": {
-    "description": "Surtitre de la liste du personnel."
-  },
   "staffFileTitle": "Fichier du personnel",
   "@staffFileTitle": {
     "description": "Titre de la liste du personnel."
@@ -8658,35 +8642,6 @@
   "staffFileSubtitle": "Tous les agents de l'école : enseignants, administratifs et personnel d'appui.",
   "@staffFileSubtitle": {
     "description": "Sous-titre de la liste du personnel."
-  },
-  "staffStatHeadcount": "Effectif",
-  "@staffStatHeadcount": {
-    "description": "Carte de synthèse : nombre d'agents au fichier."
-  },
-  "staffStatHeadcountNoContract": "{count} sans contrat en vigueur",
-  "@staffStatHeadcountNoContract": {
-    "description": "Sous-ligne de l'effectif : agents « contrat à poser ».",
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "staffStatIncomplete": "Dossiers incomplets",
-  "@staffStatIncomplete": {
-    "description": "Carte de synthèse : agents à qui manquent des pièces exigées."
-  },
-  "staffStatIncompleteSub": "Pièces exigées manquantes",
-  "@staffStatIncompleteSub": {
-    "description": "Sous-ligne des dossiers incomplets."
-  },
-  "staffStatPending": "Sur la tablette",
-  "@staffStatPending": {
-    "description": "Carte de synthèse : fiches et pièces pas encore envoyées."
-  },
-  "staffStatPendingSub": "Partiront au retour du réseau",
-  "@staffStatPendingSub": {
-    "description": "Sous-ligne de la carte « Sur la tablette »."
   },
   "staffSearchLabel": "Rechercher",
   "@staffSearchLabel": {
@@ -8732,10 +8687,6 @@
   "@staffContractLabel": {
     "description": "Libellé des filtres et de la colonne de contrat."
   },
-  "staffContractAll": "Tous",
-  "@staffContractAll": {
-    "description": "Filtre de contrat : aucune restriction."
-  },
   "staffContractPermanent": "Permanent",
   "@staffContractPermanent": {
     "description": "Statut de contrat : salarié de l'école."
@@ -8751,10 +8702,6 @@
   "staffContractNone": "Contrat à poser",
   "@staffContractNone": {
     "description": "Agent sans contrat en vigueur."
-  },
-  "staffIncompleteFilter": "Dossier incomplet",
-  "@staffIncompleteFilter": {
-    "description": "Filtre : agents dont le dossier est incomplet."
   },
   "staffDossierComplete": "Dossier complet",
   "@staffDossierComplete": {
@@ -8803,15 +8750,6 @@
   "staffTableSync": "Synchro",
   "@staffTableSync": {
     "description": "En-tête de colonne."
-  },
-  "staffFooterCount": "{count, plural, =0{Aucun agent au fichier} =1{1 agent au fichier} other{{count} agents au fichier}}",
-  "@staffFooterCount": {
-    "description": "Pied de la liste : effectif total du fichier.",
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
   },
   "staffEmptyFileTitle": "Aucun agent dans le fichier",
   "@staffEmptyFileTitle": {
@@ -9577,14 +9515,8 @@
   "@staffFileNotYetSynced": {
     "description": "Bandeau : fichier jamais reçu, la saisie reste possible."
   },
-  "subMenuStaffAttendance": "Pointage & présences",
   "accueilStaffAttendanceShort": "Pointage",
-  "staffAttendanceTabRegister": "Registre du jour",
-  "staffAttendanceTabRegisterSubtitle": "{marked} / {total} pointés",
   "staffAttendanceTabAgent": "Fiche mensuelle",
-  "staffAttendanceTabAgentSubtitle": "Par agent · {month}",
-  "staffAttendanceTabRecap": "Récapitulatif du mois",
-  "staffAttendanceTabRecapSubtitle": "Totaux → Paie",
   "presenceMarkBadgeToMark": "{count} à pointer",
   "presenceMarkBadgeValidated": "Validé",
   "presenceMarkBadgeToClose": "À clôturer",
@@ -9699,7 +9631,6 @@
   "presenceMarkNextMonth": "Mois suivant",
   "presenceMarkCurrentMonth": "Revenir au mois en cours",
   "presenceMarkKpiPresences": "Présences",
-  "staffAttendanceKpiDaysWorked": "Jours prestés",
   "presenceMarkKpiRatio": "{value} / {days}",
   "presenceMarkKpiLates": "Retards",
   "presenceMarkKpiLatesDetail": "{minutes} min · {unjustified} non justifiés",
@@ -9717,10 +9648,8 @@
   "staffAttendanceRecapColSync": "Synchro",
   "presenceMarkTotalRate": "Taux de présence",
   "staffAttendanceTotalHours": "Heures de vacation",
-  "presenceMarkTotalLateMinutes": "Minutes de retard",
   "presenceMarkTotalUnjustified": "Absences non justifiées",
   "presenceMarkTotalNotMarked": "Jours non pointés",
-  "staffAttendanceRecapLegend": "NJ = non justifiée · J = justifiée · touchez une ligne pour ouvrir la fiche mensuelle",
   "staffAttendanceClose": "Clôturer le mois",
   "staffAttendanceCloseTitle": "Clôturer {month} ?",
   "staffAttendanceCloseHours": "{hours} de vacation, que la Paie relit dans les pointages",
@@ -11818,7 +11747,7 @@
   "hrRosterEmptyMessage": "Modifiez la recherche ou retirez le filtre « {scope} ».",
   "hrRosterShowAll": "Tout afficher",
   "hrRosterFooter": "Touchez un agent pour ouvrir sa fiche",
-  "hrDashboardFootnote": "La présence et la paie ont leurs propres modules : Pointage & présences et Paie, sous Ressources humaines.",
+  "hrDashboardFootnote": "La présence et la paie ont leurs propres modules : RH · Présences et RH · Paie.",
   "hrDashboardEmptyTitle": "Aucun agent dans le fichier",
   "hrDashboardEmptyMessage": "Le fichier du personnel est vide. Enregistrez le premier agent : sa fiche, son contrat et les pièces de son dossier.",
   "hrDashboardEmptyAction": "Ajouter un agent",

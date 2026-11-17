@@ -8,8 +8,7 @@ import 'package:school_app_flutter/l10n/app_localizations_fr.dart';
 import 'package:school_app_flutter/router/app_routes_names.dart';
 
 /// RH · Présences est un module PROPRE, posé après RH · Personnel, sous
-/// `hr.attendance.read`. L'onglet Pointage des Ressources humaines reste en
-/// place à côté.
+/// `hr.attendance.read`.
 void main() {
   final l10n = AppLocalizationsFr();
   final tousDroits = Perm.values.map((p) => p.wire).toList();
@@ -48,19 +47,11 @@ void main() {
     );
   });
 
-  test('il suit RH · Personnel, et le Pointage reste en place', () {
+  test('il suit RH · Personnel', () {
     final ids = menuIds(tousDroits);
     expect(
       ids.indexOf(MenuConstants.hrPresenceMenuId),
       ids.indexOf(MenuConstants.hrPersonnelMenuId) + 1,
-    );
-    final hr = MenuFactory.createMenuItems(
-      l10n,
-      permissions: tousDroits,
-    ).firstWhere((menu) => menu.id == MenuConstants.hrMenuId);
-    expect(
-      hr.subMenus.map((sub) => sub.id),
-      contains(MenuConstants.hrStaffAttendanceId),
     );
   });
 

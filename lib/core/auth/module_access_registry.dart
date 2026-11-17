@@ -381,19 +381,10 @@ const Map<String, Map<String, ModuleAccess>> kModuleAccessRegistry = {
     MenuConstants.treasuryClosingId: ModuleAccess([Perm.treasuryRead]),
     MenuConstants.treasuryConfigId: ModuleAccess([Perm.treasuryRead]),
   },
-  // Le fichier se LIT sous `hr.staff.read` ; créer ou modifier une fiche,
-  // poser un contrat, verser une pièce seront gardés geste par geste. Tant que
-  // le serveur ne sème pas `hr.staff.read` (lot back H0), le menu reste masqué
-  // pour toute l'école.
-  MenuConstants.hrMenuId: {
-    MenuConstants.hrStaffFileId: ModuleAccess([Perm.hrStaffRead]),
-    // Le Pointage se lit sous `hr.attendance.read` ; pointer et clore sont
-    // gardés geste par geste.
-    MenuConstants.hrStaffAttendanceId: ModuleAccess([Perm.hrAttendanceRead]),
-  },
-  // RH · Personnel : les deux écrans lisent le MÊME fichier local que les
-  // Ressources humaines, sous le même droit. Créer ou modifier une fiche reste
-  // gardé geste par geste ([kStaffWriteAccess]).
+  // RH · Personnel : les deux écrans lisent le fichier local du personnel
+  // sous `hr.staff.read`. Tant que le serveur ne sème pas ce droit, le module
+  // reste masqué. Créer ou modifier une fiche reste gardé geste par geste
+  // ([kStaffWriteAccess]).
   MenuConstants.hrPersonnelMenuId: {
     MenuConstants.hrPersonnelDashboardId: ModuleAccess([Perm.hrStaffRead]),
     MenuConstants.hrPersonnelFileId: ModuleAccess([Perm.hrStaffRead]),

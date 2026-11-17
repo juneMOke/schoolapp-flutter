@@ -2317,7 +2317,7 @@
   "accueilModulesTitle": "Where would you like to go?",
   "accueilModulesIntro": "These modules cover the life of the school — each block opens its dashboard or its pages.",
   "accueilModuleInscriptionsDescription": "New enrolments, re-enrolments and pre-enrolments for your students.",
-  "accueilModuleFinancesDescription": "Revenue, invoicing and tracking of school fee collection.",
+  "accueilModuleFinancesDescription": "School payments received, student billing and ticket printing.",
   "accueilModuleFeeControlDescription": "For a given fee: who has settled it, who has paid only part of it, who has paid nothing.",
   "accueilModuleBoutiqueDescription": "Cash till for school items, and sales follow-up.",
   "accueilModuleClassesDescription": "Class composition and student lists by cycle.",
@@ -8408,22 +8408,6 @@
   "@documentCaptureReadError": {
     "description": "The platform did not return the file."
   },
-  "menuHumanResources": "Human resources",
-  "@menuHumanResources": {
-    "description": "Menu of the Human resources module."
-  },
-  "subMenuStaffFile": "Staff file",
-  "@subMenuStaffFile": {
-    "description": "Sub-menu: the school's central staff file."
-  },
-  "accueilModuleHumanResourcesDescription": "The staff file: the school's staff, their contract and their records.",
-  "@accueilModuleHumanResourcesDescription": {
-    "description": "Description of the Human resources card on the home page."
-  },
-  "staffFileEyebrow": "Human resources",
-  "@staffFileEyebrow": {
-    "description": "Surtitre de la liste du personnel."
-  },
   "staffFileTitle": "Staff file",
   "@staffFileTitle": {
     "description": "Titre de la liste du personnel."
@@ -8431,35 +8415,6 @@
   "staffFileSubtitle": "Everyone who works at the school: teachers, administrative and support staff.",
   "@staffFileSubtitle": {
     "description": "Sous-titre de la liste du personnel."
-  },
-  "staffStatHeadcount": "Headcount",
-  "@staffStatHeadcount": {
-    "description": "Carte de synthèse : nombre d'agents au fichier."
-  },
-  "staffStatHeadcountNoContract": "{count} without a current contract",
-  "@staffStatHeadcountNoContract": {
-    "description": "Sous-ligne de l'effectif : agents « contrat à poser ».",
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "staffStatIncomplete": "Incomplete files",
-  "@staffStatIncomplete": {
-    "description": "Carte de synthèse : agents à qui manquent des pièces exigées."
-  },
-  "staffStatIncompleteSub": "Required documents missing",
-  "@staffStatIncompleteSub": {
-    "description": "Sous-ligne des dossiers incomplets."
-  },
-  "staffStatPending": "On this tablet",
-  "@staffStatPending": {
-    "description": "Carte de synthèse : fiches et pièces pas encore envoyées."
-  },
-  "staffStatPendingSub": "Will be sent when the network is back",
-  "@staffStatPendingSub": {
-    "description": "Sous-ligne de la carte « Sur la tablette »."
   },
   "staffSearchLabel": "Search",
   "@staffSearchLabel": {
@@ -8505,10 +8460,6 @@
   "@staffContractLabel": {
     "description": "Libellé des filtres et de la colonne de contrat."
   },
-  "staffContractAll": "All",
-  "@staffContractAll": {
-    "description": "Filtre de contrat : aucune restriction."
-  },
   "staffContractPermanent": "Permanent",
   "@staffContractPermanent": {
     "description": "Statut de contrat : salarié de l'école."
@@ -8524,10 +8475,6 @@
   "staffContractNone": "No contract yet",
   "@staffContractNone": {
     "description": "Agent sans contrat en vigueur."
-  },
-  "staffIncompleteFilter": "Incomplete file",
-  "@staffIncompleteFilter": {
-    "description": "Filtre : agents dont le dossier est incomplet."
   },
   "staffDossierComplete": "File complete",
   "@staffDossierComplete": {
@@ -8576,15 +8523,6 @@
   "staffTableSync": "Sync",
   "@staffTableSync": {
     "description": "En-tête de colonne."
-  },
-  "staffFooterCount": "{count, plural, =0{No staff in the file} =1{1 staff member in the file} other{{count} staff members in the file}}",
-  "@staffFooterCount": {
-    "description": "Pied de la liste : effectif total du fichier.",
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
   },
   "staffEmptyFileTitle": "No staff in the file",
   "@staffEmptyFileTitle": {
@@ -9115,16 +9053,8 @@
   "staffContractCancelConfirmMessage": "It will leave the calculation, with no replacement. The change is sent to the server and cannot be undone from the tablet.",
   "staffContractCancelConfirmKeep": "Go back",
   "staffFileNotYetSynced": "The staff file has not reached this tablet yet. You can already create staff members: the others will appear at the next connection.",
-  "subMenuStaffAttendance": "Attendance",
   "accueilStaffAttendanceShort": "Attendance",
-  "staffAttendanceTabRegister": "Daily register",
-  "staffAttendanceTabRegisterSubtitle": "{marked} / {total} marked",
-  "@staffAttendanceTabRegisterSubtitle": {"placeholders": {"marked": {"type": "int"}, "total": {"type": "int"}}},
   "staffAttendanceTabAgent": "Monthly sheet",
-  "staffAttendanceTabAgentSubtitle": "By staff member · {month}",
-  "@staffAttendanceTabAgentSubtitle": {"placeholders": {"month": {"type": "String"}}},
-  "staffAttendanceTabRecap": "Monthly summary",
-  "staffAttendanceTabRecapSubtitle": "Totals → Payroll",
   "presenceMarkBadgeToMark": "{count} to mark",
   "@presenceMarkBadgeToMark": {"placeholders": {"count": {"type": "int"}}},
   "presenceMarkBadgeValidated": "Validated",
@@ -9263,7 +9193,6 @@
   "presenceMarkNextMonth": "Next month",
   "presenceMarkCurrentMonth": "Back to the current month",
   "presenceMarkKpiPresences": "Attendance",
-  "staffAttendanceKpiDaysWorked": "Days worked",
   "presenceMarkKpiRatio": "{value} / {days}",
   "@presenceMarkKpiRatio": {"placeholders": {"value": {"type": "int"}, "days": {"type": "int"}}},
   "presenceMarkKpiLates": "Late arrivals",
@@ -9285,10 +9214,8 @@
   "staffAttendanceRecapColSync": "Sync",
   "presenceMarkTotalRate": "Attendance rate",
   "staffAttendanceTotalHours": "Hourly work",
-  "presenceMarkTotalLateMinutes": "Minutes late",
   "presenceMarkTotalUnjustified": "Unjustified absences",
   "presenceMarkTotalNotMarked": "Days not marked",
-  "staffAttendanceRecapLegend": "U = unexcused · E = excused · a row opens the monthly sheet",
   "staffAttendanceClose": "Close the month",
   "staffAttendanceCloseTitle": "Close {month}?",
   "@staffAttendanceCloseTitle": {"placeholders": {"month": {"type": "String"}}},
@@ -11441,7 +11368,7 @@
   "@hrRosterFooter": {
     "description": "Pied de la liste."
   },
-  "hrDashboardFootnote": "Attendance and payroll have their own modules: Attendance and Payroll, under Human resources.",
+  "hrDashboardFootnote": "Attendance and payroll have their own modules: HR · Attendance and HR · Payroll.",
   "@hrDashboardFootnote": {
     "description": "Note de renvoi en bas du tableau de bord."
   },

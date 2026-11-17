@@ -5,7 +5,6 @@ import 'package:school_app_flutter/features/hr_personnel/presentation/pages/hr_p
 import 'package:school_app_flutter/features/staff/domain/entities/staff_enums.dart';
 import 'package:school_app_flutter/features/staff/presentation/widgets/grid/staff_agent_card.dart';
 import 'package:school_app_flutter/features/staff/presentation/widgets/list/staff_agent_table.dart';
-import 'package:school_app_flutter/features/staff/presentation/widgets/stats/staff_stats_band.dart';
 
 import '../hr_personnel_builders.dart';
 import 'hr_personnel_harness.dart';
@@ -31,7 +30,6 @@ void main() {
     );
 
     expect(find.byType(StaffAgentCard), findsNWidgets(3));
-    expect(find.byType(StaffStatsBand), findsNothing);
     expect(find.text('Dossier incomplet'), findsNothing);
     expect(find.text('3 agents au fichier'), findsOneWidget);
     expect(tester.takeException(), isNull);

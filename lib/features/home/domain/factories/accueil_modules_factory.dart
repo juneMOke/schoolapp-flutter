@@ -12,9 +12,10 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 /// pour rester cohérents avec la sidebar (le `\n` de « Composition des classes »
 /// est neutralisé). Les titres de pavés réutilisent les titres de menus.
 ///
-/// Plusieurs modules n'ont pas de tableau de bord (Cours, Résultats, Boutique,
-/// Configuration) : leur page d'entrée est simplement leur premier sous-module
-/// (cf. `AccueilModule.entry`).
+/// Un module qui a un tableau de bord le déclare par [_dashboard] : la ligne
+/// est mise en avant et la carte s'ouvre dessus. Les autres (Cours, Résultats,
+/// Communication, Configuration) s'ouvrent sur leur premier sous-module (cf.
+/// `AccueilModule.entry`).
 class AccueilModulesFactory {
   const AccueilModulesFactory._();
 
@@ -37,7 +38,6 @@ class AccueilModulesFactory {
       _boutique(l10n),
       _treasury(l10n),
       _expenses(l10n),
-      _humanResources(l10n),
       _hrPersonnel(l10n),
       _hrPresence(l10n),
       _hrPayroll(l10n),
@@ -61,18 +61,21 @@ class AccueilModulesFactory {
   }
 
   /// Sous-module « Tableau de bord » — libellé partagé avec la sidebar.
+  /// [title] reprend celui du sous-menu quand le module a sa propre clé.
   static AccueilSubModule _dashboard(
     AppLocalizations l10n, {
     required String menuId,
     required String subMenuId,
+    String? title,
   }) {
+    final label = title ?? l10n.subMenuDashboard;
     return AccueilSubModule(
-      label: l10n.subMenuDashboard,
+      label: label,
       isDashboard: true,
       target: AccueilNavTarget(
         menuId: menuId,
         subMenuId: subMenuId,
-        title: l10n.subMenuDashboard,
+        title: label,
       ),
     );
   }
@@ -251,7 +254,8 @@ class AccueilModulesFactory {
       icon: Icons.savings_outlined,
       tone: AccueilModuleTones.of(menuId),
       subModules: [
-        _page(
+        _dashboard(
+          l10n,
           menuId: menuId,
           subMenuId: MenuConstants.treasuryDashboardId,
           title: l10n.subMenuTreasuryDashboard,
@@ -270,30 +274,6 @@ class AccueilModulesFactory {
     );
   }
 
-  /// Les ressources humaines — une carte propre, comme le menu.
-  static AccueilModule _humanResources(AppLocalizations l10n) {
-    const menuId = MenuConstants.hrMenuId;
-    return AccueilModule(
-      id: menuId,
-      title: l10n.menuHumanResources,
-      description: l10n.accueilModuleHumanResourcesDescription,
-      icon: Icons.badge_outlined,
-      tone: AccueilModuleTones.of(menuId),
-      subModules: [
-        _page(
-          menuId: menuId,
-          subMenuId: MenuConstants.hrStaffFileId,
-          title: l10n.subMenuStaffFile,
-        ),
-        _page(
-          menuId: menuId,
-          subMenuId: MenuConstants.hrStaffAttendanceId,
-          title: l10n.subMenuStaffAttendance,
-        ),
-      ],
-    );
-  }
-
   /// RH · Personnel — une carte propre, comme le menu.
   static AccueilModule _hrPersonnel(AppLocalizations l10n) {
     const menuId = MenuConstants.hrPersonnelMenuId;
@@ -304,10 +284,10 @@ class AccueilModulesFactory {
       icon: Icons.groups_outlined,
       tone: AccueilModuleTones.of(menuId),
       subModules: [
-        _page(
+        _dashboard(
+          l10n,
           menuId: menuId,
           subMenuId: MenuConstants.hrPersonnelDashboardId,
-          title: l10n.subMenuDashboard,
         ),
         _page(
           menuId: menuId,
@@ -328,10 +308,10 @@ class AccueilModulesFactory {
       icon: Icons.payments_outlined,
       tone: AccueilModuleTones.of(menuId),
       subModules: [
-        _page(
+        _dashboard(
+          l10n,
           menuId: menuId,
           subMenuId: MenuConstants.hrPayrollDashboardId,
-          title: l10n.subMenuDashboard,
         ),
         _page(
           menuId: menuId,
@@ -367,10 +347,10 @@ class AccueilModulesFactory {
       icon: Icons.event_available_outlined,
       tone: AccueilModuleTones.of(menuId),
       subModules: [
-        _page(
+        _dashboard(
+          l10n,
           menuId: menuId,
           subMenuId: MenuConstants.hrPresenceDashboardId,
-          title: l10n.subMenuDashboard,
         ),
         _page(
           menuId: menuId,

@@ -2748,7 +2748,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get accueilModuleFinancesDescription =>
-      'Recettes, facturation et suivi du recouvrement des frais scolaires.';
+      'Encaissements de l\'école, facturation des élèves et impression des tickets.';
 
   @override
   String get accueilModuleFeeControlDescription =>
@@ -12739,44 +12739,11 @@ class AppLocalizationsFr extends AppLocalizations {
       'Le fichier n\'a pas pu être lu. Réessayez.';
 
   @override
-  String get menuHumanResources => 'Ressources humaines';
-
-  @override
-  String get subMenuStaffFile => 'Fichier du personnel';
-
-  @override
-  String get accueilModuleHumanResourcesDescription =>
-      'Le fichier du personnel : les agents de l\'école, leur contrat et leur dossier.';
-
-  @override
-  String get staffFileEyebrow => 'Ressources humaines';
-
-  @override
   String get staffFileTitle => 'Fichier du personnel';
 
   @override
   String get staffFileSubtitle =>
       'Tous les agents de l\'école : enseignants, administratifs et personnel d\'appui.';
-
-  @override
-  String get staffStatHeadcount => 'Effectif';
-
-  @override
-  String staffStatHeadcountNoContract(int count) {
-    return '$count sans contrat en vigueur';
-  }
-
-  @override
-  String get staffStatIncomplete => 'Dossiers incomplets';
-
-  @override
-  String get staffStatIncompleteSub => 'Pièces exigées manquantes';
-
-  @override
-  String get staffStatPending => 'Sur la tablette';
-
-  @override
-  String get staffStatPendingSub => 'Partiront au retour du réseau';
 
   @override
   String get staffSearchLabel => 'Rechercher';
@@ -12813,9 +12780,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String get staffContractLabel => 'Contrat';
 
   @override
-  String get staffContractAll => 'Tous';
-
-  @override
   String get staffContractPermanent => 'Permanent';
 
   @override
@@ -12826,9 +12790,6 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get staffContractNone => 'Contrat à poser';
-
-  @override
-  String get staffIncompleteFilter => 'Dossier incomplet';
 
   @override
   String get staffDossierComplete => 'Dossier complet';
@@ -12861,18 +12822,6 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get staffTableSync => 'Synchro';
-
-  @override
-  String staffFooterCount(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '$count agents au fichier',
-      one: '1 agent au fichier',
-      zero: 'Aucun agent au fichier',
-    );
-    return '$_temp0';
-  }
 
   @override
   String get staffEmptyFileTitle => 'Aucun agent dans le fichier';
@@ -13488,32 +13437,10 @@ class AppLocalizationsFr extends AppLocalizations {
       'Le fichier du personnel n\'a pas encore été reçu sur cette tablette. Vous pouvez déjà créer des agents : les autres apparaîtront à la prochaine connexion.';
 
   @override
-  String get subMenuStaffAttendance => 'Pointage & présences';
-
-  @override
   String get accueilStaffAttendanceShort => 'Pointage';
 
   @override
-  String get staffAttendanceTabRegister => 'Registre du jour';
-
-  @override
-  String staffAttendanceTabRegisterSubtitle(int marked, int total) {
-    return '$marked / $total pointés';
-  }
-
-  @override
   String get staffAttendanceTabAgent => 'Fiche mensuelle';
-
-  @override
-  String staffAttendanceTabAgentSubtitle(String month) {
-    return 'Par agent · $month';
-  }
-
-  @override
-  String get staffAttendanceTabRecap => 'Récapitulatif du mois';
-
-  @override
-  String get staffAttendanceTabRecapSubtitle => 'Totaux → Paie';
 
   @override
   String presenceMarkBadgeToMark(int count) {
@@ -13969,9 +13896,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String get presenceMarkKpiPresences => 'Présences';
 
   @override
-  String get staffAttendanceKpiDaysWorked => 'Jours prestés';
-
-  @override
   String presenceMarkKpiRatio(int value, int days) {
     return '$value / $days';
   }
@@ -14031,17 +13955,10 @@ class AppLocalizationsFr extends AppLocalizations {
   String get staffAttendanceTotalHours => 'Heures de vacation';
 
   @override
-  String get presenceMarkTotalLateMinutes => 'Minutes de retard';
-
-  @override
   String get presenceMarkTotalUnjustified => 'Absences non justifiées';
 
   @override
   String get presenceMarkTotalNotMarked => 'Jours non pointés';
-
-  @override
-  String get staffAttendanceRecapLegend =>
-      'NJ = non justifiée · J = justifiée · touchez une ligne pour ouvrir la fiche mensuelle';
 
   @override
   String get staffAttendanceClose => 'Clôturer le mois';
@@ -19221,7 +19138,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get hrDashboardFootnote =>
-      'La présence et la paie ont leurs propres modules : Pointage & présences et Paie, sous Ressources humaines.';
+      'La présence et la paie ont leurs propres modules : RH · Présences et RH · Paie.';
 
   @override
   String get hrDashboardEmptyTitle => 'Aucun agent dans le fichier';

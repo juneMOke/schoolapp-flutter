@@ -29,9 +29,9 @@ class StaffRegisterEmpty extends StatelessWidget {
           icon: Icons.badge_outlined,
           onPressed: () => context.read<NavigationBloc>().add(
             SubMenuItemSelected(
-              menuId: MenuConstants.hrMenuId,
-              subMenuId: MenuConstants.hrStaffFileId,
-              title: l10n.subMenuStaffFile,
+              menuId: MenuConstants.hrPersonnelMenuId,
+              subMenuId: MenuConstants.hrPersonnelFileId,
+              title: l10n.subMenuHrPersonnelFile,
             ),
           ),
           fullWidth: false,
