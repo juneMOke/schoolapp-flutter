@@ -166,7 +166,10 @@ void registerBoutiqueOffline(GetIt getIt) {
     () => GetBoutiqueSaleDetailUseCase(getIt<BoutiqueHistoryRepository>()),
   );
   getIt.registerFactory<SaleReceiptWatchCubit>(
-    () => SaleReceiptWatchCubit(getIt<GetBoutiqueSaleDetailUseCase>()),
+    () => SaleReceiptWatchCubit(
+      getIt<GetBoutiqueSaleDetailUseCase>(),
+      nudge: () => getIt<SyncEngine>().flush(),
+    ),
   );
   getIt.registerFactory<MarkSaleTicketPrintedUseCase>(
     () => MarkSaleTicketPrintedUseCase(getIt<BoutiqueHistoryRepository>()),

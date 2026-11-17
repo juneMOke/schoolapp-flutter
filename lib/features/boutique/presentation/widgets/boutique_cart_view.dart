@@ -167,8 +167,9 @@ class _BoutiqueCartViewState extends State<BoutiqueCartView> {
   /// confort, sur un client qui a déjà payé.
   ///
   /// En cas de doute on annonce **hors ligne** : c'est la formulation la plus
-  /// prudente, puisqu'elle promet un ticket provisoire — ce qui est de toute
-  /// façon vrai à cet instant, le reçu n'étant scellé qu'au push.
+  /// prudente, puisqu'elle annonce que le ticket attendra la synchronisation
+  /// — ce qui est de toute façon vrai à cet instant, le reçu n'étant scellé
+  /// qu'au push.
   Future<bool> _isOffline() async {
     try {
       return !await getIt<ConnectivityService>().isOnline();

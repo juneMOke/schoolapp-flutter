@@ -19,14 +19,23 @@ class SaleReceiptWatchCubit extends Cubit<SaleReceiptWatchState> {
   final GetBoutiqueSaleDetailUseCase _detail;
   final Duration _every;
   final Duration _giveUpAfter;
+
+  /// Relance la synchro tant que le numéro manque. La marque « reçu manquant »
+  /// naît PENDANT le flush qui applique l'ACK, et n'en fait donc pas partie :
+  /// sans relance, elle attendrait le battement suivant (45 s), bien après que
+  /// la modale a renoncé (30 s). Un flush déjà en cours se contente de rendre
+  /// la main.
+  final Future<void> Function()? _nudge;
   Timer? _timer;
 
   SaleReceiptWatchCubit(
     this._detail, {
     Duration every = AppConstants.receiptNumberPollInterval,
     Duration giveUpAfter = AppConstants.receiptNumberWaitLimit,
+    Future<void> Function()? nudge,
   }) : _every = every,
        _giveUpAfter = giveUpAfter,
+       _nudge = nudge,
        super(const SaleReceiptWatchState());
 
   /// Commence à guetter [sale]. Une vente déjà numérotée est rendue tout de
@@ -71,9 +80,19 @@ class SaleReceiptWatchCubit extends Cubit<SaleReceiptWatchState> {
   Future<bool> _check(String saleId) async {
     final read = await _detail(saleId);
     final sale = read.fold((_) => null, (detail) => detail.sale);
-    if (isClosed || sale == null || _numberOf(sale) == null) return false;
+    if (isClosed || sale == null) return false;
+    if (_numberOf(sale) == null) {
+      _nudgeQuietly();
+      return false;
+    }
     emit(SaleReceiptWatchState(phase: SaleReceiptPhase.numbered, sale: sale));
     return true;
+  }
+
+  void _nudgeQuietly() {
+    final nudge = _nudge;
+    if (nudge == null) return;
+    unawaited(nudge().catchError((Object _) {}));
   }
 
   static String? _numberOf(RecordedSale sale) {

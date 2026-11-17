@@ -6163,7 +6163,7 @@
   "boutiqueConfirmAmountReceived": "Montant reçu",
   "boutiqueConfirmNotice": "Le total est payé en une fois : pas de paiement partiel, pas de créance boutique.",
   "boutiqueConfirmNewPayerPrefix": "Ce payeur est nouveau : son numéro et son identité entrent au répertoire avec la vente.",
-  "boutiqueConfirmOfflineSuffix": "Hors ligne : un ticket provisoire est imprimé, et le reçu définitif sera scellé à la synchronisation.",
+  "boutiqueConfirmOfflineSuffix": "Hors ligne : la vente est enregistrée, et le ticket s'imprimera depuis sa fiche une fois le reçu scellé à la synchronisation.",
   "boutiqueConfirmCancel": "Annuler",
   "boutiqueConfirmAction": "Encaisser {total}",
   "@boutiqueConfirmAction": {
@@ -6689,7 +6689,7 @@
   "boutiqueSaleDetailTicketAwaitingNumber": "Le ticket s'imprimera dès que le reçu aura son numéro.",
   "boutiqueSaleDetailTicketNeverPrinted": "Ticket jamais imprimé depuis cette tablette.",
   "boutiqueSaleDetailOpenReceipt": "Ouvrir le reçu scellé",
-  "boutiqueSaleDetailReceiptPending": "Le reçu sera scellé à la synchronisation. Le ticket fait foi en attendant.",
+  "boutiqueSaleDetailReceiptPending": "Le reçu sera scellé à la synchronisation : le ticket s'imprime avec son numéro.",
   "boutiqueSaleDetailClaimReceipt": "Réclamer le reçu scellé",
   "boutiqueSaleDetailClaimReceiptFailed": "Le reçu n'a pas pu être réclamé. Le ticket fait foi, et la réclamation peut être refaite sans risque.",
   "boutiqueSaleDetailReceiptNumberMissing": "Le reçu est scellé mais son numéro n'a pas été communiqué : la référence ci-dessus reste provisoire. Réclamez-le pour obtenir le numéro définitif.",

@@ -14889,7 +14889,7 @@ abstract class AppLocalizations {
   /// No description provided for @boutiqueConfirmOfflineSuffix.
   ///
   /// In en, this message translates to:
-  /// **'Offline: a provisional ticket is printed, and the final receipt will be sealed on sync.'**
+  /// **'Offline: the sale is recorded, and its ticket can be printed from the sale record once the receipt is sealed on sync.'**
   String get boutiqueConfirmOfflineSuffix;
 
   /// No description provided for @boutiqueConfirmCancel.
@@ -16010,7 +16010,7 @@ abstract class AppLocalizations {
   /// No description provided for @boutiqueSaleDetailReceiptPending.
   ///
   /// In en, this message translates to:
-  /// **'The receipt will be sealed at synchronisation. The ticket stands in the meantime.'**
+  /// **'The receipt will be sealed on sync: the ticket prints with its number.'**
   String get boutiqueSaleDetailReceiptPending;
 
   /// No description provided for @boutiqueSaleDetailClaimReceipt.

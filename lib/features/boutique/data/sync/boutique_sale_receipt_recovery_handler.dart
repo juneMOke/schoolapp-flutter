@@ -52,14 +52,17 @@ class BoutiqueSaleReceiptRecoveryHandler implements OutboxSyncHandler {
     }
 
     final claimed = await _receipts().claimSaleReceipt(saleId);
-    return claimed.fold(_refused, (document) {
-      // Sans numéro lisible, le ticket resterait bloqué : le rejeu rend la
-      // même pièce, et l'en-tête finira par le porter.
-      final number = document.documentNumber?.trim() ?? '';
-      return number.isEmpty
-          ? const OutboxDispatchResult.retry('Reçu rendu sans numéro lisible')
-          : const OutboxDispatchResult.acked();
-    });
+    if (claimed.isLeft()) {
+      return claimed.fold(_refused, (_) => const OutboxDispatchResult.acked());
+    }
+    // Ce qui compte, c'est ce que la BASE porte désormais : la réclamation
+    // consigne sans lever, et un numéro rendu mais non écrit laisserait le
+    // ticket bloqué. Le rejeu rend la même pièce.
+    final stored = await _dao.receiptNumberOf(saleId);
+    if (stored == null) return const OutboxDispatchResult.acked();
+    return stored.isEmpty
+        ? const OutboxDispatchResult.retry('Numéro du reçu non consigné')
+        : const OutboxDispatchResult.acked();
   }
 
   static OutboxDispatchResult _refused(Failure failure) {

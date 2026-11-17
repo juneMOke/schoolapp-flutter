@@ -6078,7 +6078,7 @@
   "boutiqueConfirmAmountReceived": "Amount received",
   "boutiqueConfirmNotice": "The total is paid in one go: no partial payment, no shop debt.",
   "boutiqueConfirmNewPayerPrefix": "This payer is new: their number and identity join the directory with the sale.",
-  "boutiqueConfirmOfflineSuffix": "Offline: a provisional ticket is printed, and the final receipt will be sealed on sync.",
+  "boutiqueConfirmOfflineSuffix": "Offline: the sale is recorded, and its ticket can be printed from the sale record once the receipt is sealed on sync.",
   "boutiqueConfirmCancel": "Cancel",
   "boutiqueConfirmAction": "Collect {total}",
   "@boutiqueConfirmAction": {
@@ -6604,7 +6604,7 @@
   "boutiqueSaleDetailTicketAwaitingNumber": "The ticket can be printed once the receipt has its number.",
   "boutiqueSaleDetailTicketNeverPrinted": "Ticket never printed from this tablet.",
   "boutiqueSaleDetailOpenReceipt": "Open the sealed receipt",
-  "boutiqueSaleDetailReceiptPending": "The receipt will be sealed at synchronisation. The ticket stands in the meantime.",
+  "boutiqueSaleDetailReceiptPending": "The receipt will be sealed on sync: the ticket prints with its number.",
   "boutiqueSaleDetailClaimReceipt": "Claim the sealed receipt",
   "boutiqueSaleDetailClaimReceiptFailed": "The receipt could not be claimed. The ticket stands, and claiming it again is safe.",
   "boutiqueSaleDetailReceiptNumberMissing": "The receipt is sealed but its number was not sent: the reference above stays provisional. Claim it to obtain the final number.",

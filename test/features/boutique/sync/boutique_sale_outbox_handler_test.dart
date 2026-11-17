@@ -252,6 +252,68 @@ void main() {
       expect(marks.single['aggregate_id'], _saleId);
     });
 
+    test('un ACK rejoué ne fait pas perdre ce qu\'un pull a posé', () async {
+      // Le POST est parti, la réponse s'est perdue ; entre-temps le pull a
+      // descendu la vente numérotée. Le rejeu rend un ACK plus pauvre.
+      await db.update('boutique_sales', {
+        'receipt_document_id': 'doc-1',
+        'receipt_number': 'ETL-RV-2526-000413',
+        'receipt_emitted_on': '2026-11-17',
+        'receipt_verification_url': 'https://verify.eteeloconnect.com/d/abc',
+      });
+      when(() => api.commitSale(any(), any())).thenAnswer(
+        (_) async => const BoutiqueSaleResponse(
+          saleId: _saleId,
+          receiptDocumentId: 'doc-1',
+          documents: [
+            SealedSaleDocument(
+              type: 'SALE_RECEIPT',
+              documentNumber: 'ETL-RV-2526-000413',
+              status: 'DEFINITIVE',
+            ),
+          ],
+        ),
+      );
+
+      await handlerWith(
+        OutboxDependencyState.ready,
+      ).dispatch(_entry(_request()));
+
+      final row = await saleRow();
+      expect(row['receipt_emitted_on'], '2026-11-17');
+      expect(
+        row['receipt_verification_url'],
+        'https://verify.eteeloconnect.com/d/abc',
+      );
+    });
+
+    test(
+      'un ACK sans document garde le numéro déjà connu, sans marque',
+      () async {
+        await db.update('boutique_sales', {
+          'receipt_document_id': 'doc-1',
+          'receipt_number': 'ETL-RV-2526-000413',
+        });
+        when(
+          () => api.commitSale(any(), any()),
+        ).thenAnswer((_) async => const BoutiqueSaleResponse(saleId: _saleId));
+
+        await handlerWith(
+          OutboxDependencyState.ready,
+        ).dispatch(_entry(_request()));
+
+        final row = await saleRow();
+        expect(row['receipt_document_id'], 'doc-1');
+        expect(row['receipt_number'], 'ETL-RV-2526-000413');
+        final marks = await db.query(
+          'outbox',
+          where: 'aggregate_type = ?',
+          whereArgs: [BoutiqueReceiptRecoveryDao.aggregateType],
+        );
+        expect(marks, isEmpty);
+      },
+    );
+
     test('un ACK qui rapporte le numéro ne pose AUCUNE marque', () async {
       when(() => api.commitSale(any(), any())).thenAnswer(
         (_) async => const BoutiqueSaleResponse(

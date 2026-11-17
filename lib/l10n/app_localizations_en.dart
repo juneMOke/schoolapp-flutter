@@ -9297,7 +9297,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get boutiqueConfirmOfflineSuffix =>
-      'Offline: a provisional ticket is printed, and the final receipt will be sealed on sync.';
+      'Offline: the sale is recorded, and its ticket can be printed from the sale record once the receipt is sealed on sync.';
 
   @override
   String get boutiqueConfirmCancel => 'Cancel';
@@ -10055,7 +10055,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get boutiqueSaleDetailReceiptPending =>
-      'The receipt will be sealed at synchronisation. The ticket stands in the meantime.';
+      'The receipt will be sealed on sync: the ticket prints with its number.';
 
   @override
   String get boutiqueSaleDetailClaimReceipt => 'Claim the sealed receipt';

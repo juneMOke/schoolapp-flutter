@@ -88,16 +88,34 @@ class BoutiqueSaleWriteDao {
     BoutiqueSaleResponse ack, {
     required int nowMs,
   }) => _db.transaction((txn) async {
+    // Un ACK rejoué peut taire ce qu'un pull a déjà posé (numéro, jour
+    // d'émission, QR). Une valeur absente n'écrase donc JAMAIS une valeur
+    // connue — sauf si l'ACK désigne une autre pièce.
+    final kept = await _receiptOf(txn, saleId);
+    final ackDocumentId = _nonEmpty(ack.receiptDocumentId);
+    final keep =
+        kept != null &&
+        (ackDocumentId == null || ackDocumentId == kept['receipt_document_id']);
+    String? merged(String? fresh, String column) =>
+        _nonEmpty(fresh) ?? (keep ? kept[column] as String? : null);
+    final number = merged(ack.receiptNumber, 'receipt_number');
+
     await txn.update(
       'boutique_sales',
       {
         'sync_status': 'SYNCED',
         'sync_error': null,
         'synced_at': nowMs,
-        'receipt_document_id': ack.receiptDocumentId,
-        'receipt_number': ack.receiptNumber,
-        'receipt_emitted_on': ack.receiptEmittedOn,
-        'receipt_verification_url': ack.receiptVerificationUrl,
+        'receipt_document_id': merged(ackDocumentId, 'receipt_document_id'),
+        'receipt_number': number,
+        'receipt_emitted_on': merged(
+          ack.receiptEmittedOn,
+          'receipt_emitted_on',
+        ),
+        'receipt_verification_url': merged(
+          ack.receiptVerificationUrl,
+          'receipt_verification_url',
+        ),
         'updated_at': nowMs,
       },
       where: 'id = ?',
@@ -119,9 +137,9 @@ class BoutiqueSaleWriteDao {
       );
     }
 
-    // L'ACK n'a rapporté aucun numéro : le ticket attendrait pour toujours.
-    // La marque le réclamera, au prochain flush.
-    if ((ack.receiptNumber ?? '').trim().isEmpty) {
+    // Aucun numéro, ni rapporté ni déjà connu : le ticket attendrait pour
+    // toujours. La marque le réclamera.
+    if (number == null) {
       await BoutiqueReceiptRecoveryDao.markMissingIn(
         txn,
         saleId: saleId,
@@ -129,6 +147,30 @@ class BoutiqueSaleWriteDao {
       );
     }
   });
+
+  static Future<Map<String, Object?>?> _receiptOf(
+    DatabaseExecutor txn,
+    String saleId,
+  ) async {
+    final rows = await txn.query(
+      'boutique_sales',
+      columns: const [
+        'receipt_document_id',
+        'receipt_number',
+        'receipt_emitted_on',
+        'receipt_verification_url',
+      ],
+      where: 'id = ?',
+      whereArgs: [saleId],
+      limit: 1,
+    );
+    return rows.isEmpty ? null : rows.first;
+  }
+
+  static String? _nonEmpty(String? value) {
+    final trimmed = value?.trim() ?? '';
+    return trimmed.isEmpty ? null : trimmed;
+  }
 
   /// Pose sur une vente le reçu que la **réclamation** vient d'obtenir.
   ///

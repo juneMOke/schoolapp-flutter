@@ -9377,7 +9377,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get boutiqueConfirmOfflineSuffix =>
-      'Hors ligne : un ticket provisoire est imprimé, et le reçu définitif sera scellé à la synchronisation.';
+      'Hors ligne : la vente est enregistrée, et le ticket s\'imprimera depuis sa fiche une fois le reçu scellé à la synchronisation.';
 
   @override
   String get boutiqueConfirmCancel => 'Annuler';
@@ -10140,7 +10140,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get boutiqueSaleDetailReceiptPending =>
-      'Le reçu sera scellé à la synchronisation. Le ticket fait foi en attendant.';
+      'Le reçu sera scellé à la synchronisation : le ticket s\'imprime avec son numéro.';
 
   @override
   String get boutiqueSaleDetailClaimReceipt => 'Réclamer le reçu scellé';

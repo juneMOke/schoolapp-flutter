@@ -46,7 +46,7 @@ void main() {
 
   setUp(() async {
     db = await openFullOfflineDb();
-    receipts = _FakeReceipts();
+    receipts = _FakeReceipts(() => db);
   });
   tearDown(() async => db.close());
 
@@ -112,6 +112,19 @@ void main() {
     expect(result.outcome, OutboxDispatchOutcome.retry);
   });
 
+  test('un numéro rendu mais NON consigné se réclame encore', () async {
+    // La réclamation avale l'échec d'écriture locale : seule la base dit si
+    // le ticket est devenu imprimable.
+    await seedSale();
+    receipts
+      ..result = Right(_document())
+      ..consigns = false;
+
+    final result = await handler().dispatch(_entry());
+
+    expect(result.outcome, OutboxDispatchOutcome.retry);
+  });
+
   test('un numéro déjà là (pull, geste manuel) : rien à réclamer', () async {
     await seedSale(number: 'ETL-RV-2526-000413');
 
@@ -162,17 +175,32 @@ void main() {
   });
 }
 
+/// La réclamation telle que la production la fait : elle consigne le numéro
+/// rendu sur la vente — sauf quand [consigns] simule une écriture perdue.
 class _FakeReceipts implements BoutiqueReceiptRepository {
+  final Database Function() _db;
   Either<Failure, EditiqueDocument> result = const Left(
     ServerFailure('non configuré'),
   );
+  bool consigns = true;
   final List<String> claimed = [];
+
+  _FakeReceipts(this._db);
 
   @override
   Future<Either<Failure, EditiqueDocument>> claimSaleReceipt(
     String saleId,
   ) async {
     claimed.add(saleId);
+    final number = result.fold((_) => null, (d) => d.documentNumber);
+    if (consigns && number != null) {
+      await _db().update(
+        'boutique_sales',
+        {'receipt_number': number},
+        where: 'id = ?',
+        whereArgs: [saleId],
+      );
+    }
     return result;
   }
 }

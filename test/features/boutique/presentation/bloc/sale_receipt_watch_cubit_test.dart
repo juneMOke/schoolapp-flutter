@@ -79,6 +79,45 @@ void main() {
     expect(watch.state.sale?.id, 's-1');
   });
 
+  test('tant que le numéro manque, la synchro est relancée', () async {
+    // La marque « reçu manquant » naît pendant le flush qui applique l'ACK :
+    // sans relance, elle attendrait le battement suivant.
+    when(
+      () => getDetail('s-1'),
+    ).thenAnswer((_) async => Right(SaleDetail(sale: _sale())));
+    var nudges = 0;
+    final watch = SaleReceiptWatchCubit(
+      getDetail,
+      every: const Duration(milliseconds: 5),
+      giveUpAfter: const Duration(milliseconds: 20),
+      nudge: () async => nudges++,
+    );
+    addTearDown(watch.close);
+
+    await watch.watch(_sale());
+    await Future<void>.delayed(const Duration(milliseconds: 40));
+
+    expect(nudges, greaterThan(1));
+  });
+
+  test('une relance qui lève ne casse pas le guet', () async {
+    when(
+      () => getDetail('s-1'),
+    ).thenAnswer((_) async => Right(SaleDetail(sale: _sale())));
+    final watch = SaleReceiptWatchCubit(
+      getDetail,
+      every: const Duration(milliseconds: 5),
+      giveUpAfter: const Duration(milliseconds: 20),
+      nudge: () async => throw StateError('réseau'),
+    );
+    addTearDown(watch.close);
+
+    await watch.watch(_sale());
+    await Future<void>.delayed(const Duration(milliseconds: 60));
+
+    expect(watch.state.phase, SaleReceiptPhase.deferred);
+  });
+
   test('une relecture en échec ne vaut pas un numéro', () async {
     when(
       () => getDetail('s-1'),
