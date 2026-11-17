@@ -2735,7 +2735,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get accueilModuleFinancesDescription =>
-      'Revenue, invoicing and tracking of school fee collection.';
+      'School payments received, student billing and ticket printing.';
 
   @override
   String get accueilModuleFeeControlDescription =>

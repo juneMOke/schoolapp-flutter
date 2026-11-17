@@ -2748,7 +2748,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get accueilModuleFinancesDescription =>
-      'Recettes, facturation et suivi du recouvrement des frais scolaires.';
+      'Encaissements de l\'école, facturation des élèves et impression des tickets.';
 
   @override
   String get accueilModuleFeeControlDescription =>

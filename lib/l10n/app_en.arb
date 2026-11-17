@@ -2317,7 +2317,7 @@
   "accueilModulesTitle": "Where would you like to go?",
   "accueilModulesIntro": "These modules cover the life of the school — each block opens its dashboard or its pages.",
   "accueilModuleInscriptionsDescription": "New enrolments, re-enrolments and pre-enrolments for your students.",
-  "accueilModuleFinancesDescription": "Revenue, invoicing and tracking of school fee collection.",
+  "accueilModuleFinancesDescription": "School payments received, student billing and ticket printing.",
   "accueilModuleFeeControlDescription": "For a given fee: who has settled it, who has paid only part of it, who has paid nothing.",
   "accueilModuleBoutiqueDescription": "Cash till for school items, and sales follow-up.",
   "accueilModuleClassesDescription": "Class composition and student lists by cycle.",

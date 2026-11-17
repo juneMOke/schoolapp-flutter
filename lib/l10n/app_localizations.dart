@@ -4223,7 +4223,7 @@ abstract class AppLocalizations {
   /// No description provided for @accueilModuleFinancesDescription.
   ///
   /// In en, this message translates to:
-  /// **'Revenue, invoicing and tracking of school fee collection.'**
+  /// **'School payments received, student billing and ticket printing.'**
   String get accueilModuleFinancesDescription;
 
   /// No description provided for @accueilModuleFeeControlDescription.
