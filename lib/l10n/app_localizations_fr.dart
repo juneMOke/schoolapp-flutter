@@ -8276,9 +8276,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String get recouvrementRelanceListTitle => 'Liste de relance';
 
   @override
-  String get boutiqueTicketDocumentTitle => 'Ticket de vente';
-
-  @override
   String get editiqueViewerReceiptTitle => 'Reçu de paiement';
 
   @override
@@ -9407,29 +9404,14 @@ class AppLocalizationsFr extends AppLocalizations {
   String get boutiqueTicketTitle => 'Reçu de vente — Boutique';
 
   @override
-  String get boutiqueTicketProvisionalBanner => 'Document provisoire';
+  String get boutiqueTicketAwaitingNumber =>
+      'Le reçu de cette vente n\'a pas encore son numéro : le ticket s\'imprimera après la synchronisation.';
 
   @override
-  String get boutiqueTicketProvisionalNotice =>
-      'Reçu définitif scellé à la synchronisation.';
+  String get boutiqueTicketArticlesLabel => 'Articles';
 
   @override
-  String get boutiqueTicketSealedNotice => 'Reçu scellé — vaut quittance';
-
-  @override
-  String get boutiqueTicketPayerLabel => 'PAYEUR :';
-
-  @override
-  String get boutiqueTicketPhoneLabel => 'Tél.';
-
-  @override
-  String get boutiqueTicketCashierLabel => 'Caissier :';
-
-  @override
-  String get boutiqueTicketTotalLabel => 'TOTAL';
-
-  @override
-  String get boutiqueTicketCashReceivedLabel => 'Espèces reçues';
+  String get boutiqueTicketTotalLabel => 'Total';
 
   @override
   String get boutiqueTicketRemainingLabel => 'Reste à payer';

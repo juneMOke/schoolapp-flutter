@@ -13101,12 +13101,6 @@ abstract class AppLocalizations {
   /// **'Reminder list'**
   String get recouvrementRelanceListTitle;
 
-  /// No description provided for @boutiqueTicketDocumentTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Sale ticket'**
-  String get boutiqueTicketDocumentTitle;
-
   /// No description provided for @editiqueViewerReceiptTitle.
   ///
   /// In en, this message translates to:
@@ -14934,53 +14928,23 @@ abstract class AppLocalizations {
   /// **'Sale receipt — Shop'**
   String get boutiqueTicketTitle;
 
-  /// No description provided for @boutiqueTicketProvisionalBanner.
+  /// No description provided for @boutiqueTicketAwaitingNumber.
   ///
   /// In en, this message translates to:
-  /// **'Provisional document'**
-  String get boutiqueTicketProvisionalBanner;
+  /// **'This sale\'s receipt has no number yet: the ticket will print after sync.'**
+  String get boutiqueTicketAwaitingNumber;
 
-  /// No description provided for @boutiqueTicketProvisionalNotice.
+  /// No description provided for @boutiqueTicketArticlesLabel.
   ///
   /// In en, this message translates to:
-  /// **'Final receipt sealed on sync.'**
-  String get boutiqueTicketProvisionalNotice;
-
-  /// No description provided for @boutiqueTicketSealedNotice.
-  ///
-  /// In en, this message translates to:
-  /// **'Sealed receipt — valid discharge'**
-  String get boutiqueTicketSealedNotice;
-
-  /// No description provided for @boutiqueTicketPayerLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'PAYER:'**
-  String get boutiqueTicketPayerLabel;
-
-  /// No description provided for @boutiqueTicketPhoneLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Tel.'**
-  String get boutiqueTicketPhoneLabel;
-
-  /// No description provided for @boutiqueTicketCashierLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Cashier:'**
-  String get boutiqueTicketCashierLabel;
+  /// **'Items'**
+  String get boutiqueTicketArticlesLabel;
 
   /// No description provided for @boutiqueTicketTotalLabel.
   ///
   /// In en, this message translates to:
-  /// **'TOTAL'**
+  /// **'Total'**
   String get boutiqueTicketTotalLabel;
-
-  /// No description provided for @boutiqueTicketCashReceivedLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Cash received'**
-  String get boutiqueTicketCashReceivedLabel;
 
   /// No description provided for @boutiqueTicketRemainingLabel.
   ///

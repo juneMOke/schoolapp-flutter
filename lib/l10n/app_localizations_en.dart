@@ -8200,9 +8200,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get recouvrementRelanceListTitle => 'Reminder list';
 
   @override
-  String get boutiqueTicketDocumentTitle => 'Sale ticket';
-
-  @override
   String get editiqueViewerReceiptTitle => 'Payment receipt';
 
   @override
@@ -9327,28 +9324,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get boutiqueTicketTitle => 'Sale receipt — Shop';
 
   @override
-  String get boutiqueTicketProvisionalBanner => 'Provisional document';
+  String get boutiqueTicketAwaitingNumber =>
+      'This sale\'s receipt has no number yet: the ticket will print after sync.';
 
   @override
-  String get boutiqueTicketProvisionalNotice => 'Final receipt sealed on sync.';
+  String get boutiqueTicketArticlesLabel => 'Items';
 
   @override
-  String get boutiqueTicketSealedNotice => 'Sealed receipt — valid discharge';
-
-  @override
-  String get boutiqueTicketPayerLabel => 'PAYER:';
-
-  @override
-  String get boutiqueTicketPhoneLabel => 'Tel.';
-
-  @override
-  String get boutiqueTicketCashierLabel => 'Cashier:';
-
-  @override
-  String get boutiqueTicketTotalLabel => 'TOTAL';
-
-  @override
-  String get boutiqueTicketCashReceivedLabel => 'Cash received';
+  String get boutiqueTicketTotalLabel => 'Total';
 
   @override
   String get boutiqueTicketRemainingLabel => 'Remaining';

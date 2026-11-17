@@ -1,6 +1,8 @@
 import 'package:equatable/equatable.dart';
 import 'package:school_app_flutter/core/money/money.dart';
 import 'package:school_app_flutter/core/money/money_bag.dart';
+import 'package:school_app_flutter/features/documents/domain/ticket/ticket_lines.dart';
+import 'package:school_app_flutter/features/documents/domain/ticket/ticket_sections.dart';
 
 /// Une ligne du ticket de vente.
 class SaleTicketLine extends Equatable {
@@ -49,35 +51,28 @@ class SaleTicketLine extends Equatable {
 
 /// Libellés fixes du ticket de vente, injectés depuis `AppLocalizations`.
 ///
-/// Le modèle et son rendu restent **purs** — aucun `BuildContext`, aucune
-/// dépendance Flutter — tout en respectant l'interdiction des chaînes en dur :
-/// c'est l'appelant qui traduit, le gabarit qui arrange.
+/// Le modèle et son rendu restent **purs** — aucun `BuildContext` — tout en
+/// respectant l'interdiction des chaînes en dur : c'est l'appelant qui traduit,
+/// le gabarit qui arrange. Les libellés communs à tous les tickets de caisse
+/// (en-tête, date, payeur, montant reçu, signature, pied) sont ceux du ticket
+/// de perception : deux pièces de la même caisse disent la même chose.
 class SaleTicketLabels extends Equatable {
   /// « REÇU DE VENTE — BOUTIQUE », imprimé en tête.
   final String documentTitle;
 
-  /// « *** DOCUMENT PROVISOIRE *** » — le bandeau d'une pièce non scellée.
-  final String provisionalBanner;
-
-  /// « Reçu définitif scellé à la synchronisation. »
-  final String provisionalNotice;
-
-  /// « Reçu scellé — vaut quittance », quand le serveur a déjà répondu.
-  final String sealedNotice;
-
+  final String schoolPhoneLabel;
+  final String tillPhoneLabel;
+  final String referenceLabel;
+  final String dateLabel;
+  final String enteredAtLabel;
+  final String cashierLabel;
   final String payerLabel;
   final String phoneLabel;
-  final String cashierLabel;
-  final String totalLabel;
 
-  /// « Espèces reçues ».
-  final String cashReceivedLabel;
+  /// « Articles », titre du panier.
+  final String articlesLabel;
 
-  /// « Reste à payer » — **toujours imprimé**, et toujours à zéro : c'est la
-  /// preuve visuelle du comptant intégral (invariant I-5).
-  final String remainingLabel;
-
-  /// Préfixe d'une ligne de bénéficiaire : « ↳ pour ».
+  /// Préfixe d'une ligne de bénéficiaire : « pour ».
   final String beneficiaryPrefix;
 
   /// Abréviation de taille : « T. ».
@@ -86,133 +81,161 @@ class SaleTicketLabels extends Equatable {
   /// Suffixe de prix unitaire : « /u ».
   final String unitSuffix;
 
+  /// « TOTAL » — ce que le panier vaut, en devises de catalogue.
+  final String totalLabel;
+
+  /// « Montant reçu » — ce qui est entré dans le tiroir.
+  final String amountReceivedLabel;
+  final String rateLabel;
+
+  /// « Reste à payer » — **toujours imprimé**, et toujours à zéro : c'est la
+  /// preuve visuelle du comptant intégral (invariant I-5).
+  final String remainingLabel;
+
   /// « Aucun remboursement après remise de l'article. »
   final String noRefundNotice;
 
+  final String signatureLabel;
+  final String verificationNotice;
+  final String thanksNotice;
+  final String editorNotice;
+  final String editorSite;
+
   const SaleTicketLabels({
     required this.documentTitle,
-    required this.provisionalBanner,
-    required this.provisionalNotice,
-    required this.sealedNotice,
+    required this.schoolPhoneLabel,
+    required this.tillPhoneLabel,
+    required this.referenceLabel,
+    required this.dateLabel,
+    required this.enteredAtLabel,
+    required this.cashierLabel,
     required this.payerLabel,
     required this.phoneLabel,
-    required this.cashierLabel,
-    required this.totalLabel,
-    required this.cashReceivedLabel,
-    required this.remainingLabel,
+    required this.articlesLabel,
     required this.beneficiaryPrefix,
     required this.sizePrefix,
     required this.unitSuffix,
+    required this.totalLabel,
+    required this.amountReceivedLabel,
+    required this.rateLabel,
+    required this.remainingLabel,
     required this.noRefundNotice,
+    required this.signatureLabel,
+    required this.verificationNotice,
+    required this.thanksNotice,
+    required this.editorNotice,
+    required this.editorSite,
   });
 
   @override
   List<Object?> get props => [
     documentTitle,
-    provisionalBanner,
-    provisionalNotice,
-    sealedNotice,
+    schoolPhoneLabel,
+    tillPhoneLabel,
+    referenceLabel,
+    dateLabel,
+    enteredAtLabel,
+    cashierLabel,
     payerLabel,
     phoneLabel,
-    cashierLabel,
-    totalLabel,
-    cashReceivedLabel,
-    remainingLabel,
+    articlesLabel,
     beneficiaryPrefix,
     sizePrefix,
     unitSuffix,
+    totalLabel,
+    amountReceivedLabel,
+    rateLabel,
+    remainingLabel,
     noRefundNotice,
+    signatureLabel,
+    verificationNotice,
+    thanksNotice,
+    editorNotice,
+    editorSite,
   ];
 }
 
 /// Le ticket de vente boutique — **la preuve de paiement remise au comptoir**.
 ///
-/// C'est ce que le front produit, immédiatement et hors ligne : le reçu scellé,
-/// lui, est rendu par le serveur au push. Les deux coexistent, et le ticket dit
-/// **lequel des deux** le porteur tient.
+/// Il ne sort qu'avec le **numéro définitif** du reçu de vente (`ETL-RV-…`),
+/// comme le ticket de perception : plus de ticket provisoire, donc plus de
+/// mention « provisoire » ni de référence `PROV-` sur le papier.
 ///
 /// ⚠️ **Distinct du ticket de perception** (`TicketReceiptModel`), qui atteste
 /// un versement sur des créances scolaires et porte une répartition, un solde et
 /// un élève. Celui-ci n'a ni dette, ni reste, ni sujet élève : son sujet est le
-/// **payeur**, et les bénéficiaires vivent sur les lignes.
+/// **payeur**, et les bénéficiaires vivent sur les lignes. Les deux partagent en
+/// revanche tous les blocs de caisse (`TicketSections`).
 class SaleTicketModel extends Equatable {
-  final String schoolName;
-  final String? schoolAddress;
+  final TicketSchoolHeader school;
 
-  /// Numéro de la pièce : provisoire tant que le serveur n'a pas scellé.
-  final String reference;
+  /// Le numéro définitif du reçu de vente.
+  final String receiptNumber;
 
-  /// Vrai tant que le reçu n'est pas scellé — hors ligne, ou ACK sans document.
-  final bool isProvisional;
-
+  /// L'heure métier de la vente, à l'heure de l'école.
   final DateTime soldAt;
+
+  /// Le jour d'émission du reçu scellé — la date principale du ticket. `null`
+  /// tant que le serveur ne l'a pas dit : la date de la vente la remplace.
+  final DateTime? receiptIssuedOn;
+
+  /// L'URL du QR de vérification ; `null` = ticket sans QR.
+  final String? verificationUrl;
+
   final String? cashierFullName;
 
-  /// Le payeur, **quand il y en a un** (V114 serveur / v43 locale).
-  ///
-  /// `null` sur une vente anonyme — et `null`, jamais `''` : le gabarit escamote
-  /// alors le bloc payeur ENTIER plutôt que d'imprimer un cadre vide, qui sur
-  /// une pièce se lit comme une mention effacée. Un téléphone seul suffit à
-  /// garder le bloc : il a été saisi, donc il désigne quelqu'un.
+  /// Le payeur, **quand il y en a un** — `null`, jamais `''`, sur une vente
+  /// anonyme : le bloc payeur disparaît alors entier.
   final String? payerFullName;
   final String? payerPhoneNumber;
   final List<SaleTicketLine> lines;
 
-  /// Le total, **par devise** — dérivé des lignes. Un panier qui règle
-  /// 450,00 $ d'uniformes et 90 000 FC de manuels n'a pas de total unique, et
-  /// les additionner imprimerait, sur le reçu remis au client, un chiffre qui
-  /// n'est l'argent de personne.
-  final MoneyBag totals;
+  /// Ce qui est entré dans le tiroir, une ligne par règlement (devise posée,
+  /// taux gelé, devise de catalogue réglée). C'est le « Montant reçu ».
+  final List<TicketTenderLine> tenders;
   final SaleTicketLabels labels;
 
   const SaleTicketModel({
-    required this.schoolName,
-    this.schoolAddress,
-    required this.reference,
-    required this.isProvisional,
+    required this.school,
+    required this.receiptNumber,
     required this.soldAt,
+    this.receiptIssuedOn,
+    this.verificationUrl,
     this.cashierFullName,
     this.payerFullName,
     this.payerPhoneNumber,
     required this.lines,
-    required this.totals,
+    required this.tenders,
     required this.labels,
   });
 
-  /// Le montant reçu **est** le total : comptant intégral, en une fois.
-  ///
-  /// Il n'y a donc ni champ de saisie, ni calcul de monnaie, ni écart possible —
-  /// et c'est pourquoi le reste imprimé vaut toujours zéro.
-  MoneyBag get cashReceived => totals;
+  /// Le total, **par devise de catalogue** — dérivé des lignes. Un panier qui
+  /// règle 450,00 $ d'uniformes et 90 000 FC de manuels n'a pas de total
+  /// unique : les additionner imprimerait un chiffre qui n'est l'argent de
+  /// personne.
+  MoneyBag get totals => MoneyBag.sumBy(
+    lines,
+    (line) => Money.parse(line.lineTotalInCents, line.currency),
+  );
 
-  /// Y a-t-il un payeur à imprimer ?
-  ///
-  /// Le nom OU le numéro suffit. C'est la même règle que le reçu scellé, et il
-  /// le faut : deux pièces du même acte qui ne disent pas la même chose se
-  /// paient au premier rapprochement de caisse.
-  bool get hasPayer =>
-      (payerFullName?.trim().isNotEmpty ?? false) ||
-      (payerPhoneNumber?.trim().isNotEmpty ?? false);
-
-  /// Toujours zéro (invariant I-5). Exposé comme une valeur plutôt qu'écrit en
-  /// dur dans le gabarit : ce qui s'imprime est un fait du modèle, pas une
-  /// constante de mise en page.
-  /// Toujours zéro, **dans chaque devise encaissée** (invariant I-5).
+  /// Toujours zéro, **dans chaque devise du panier** (invariant I-5). Exposé
+  /// comme une valeur plutôt qu'écrit en dur dans le gabarit : ce qui
+  /// s'imprime est un fait du modèle, pas une constante de mise en page.
   MoneyBag get remaining =>
       MoneyBag.of([for (final t in totals.entries) Money(0, t.currency)]);
 
   @override
   List<Object?> get props => [
-    schoolName,
-    schoolAddress,
-    reference,
-    isProvisional,
+    school,
+    receiptNumber,
     soldAt,
+    receiptIssuedOn,
+    verificationUrl,
     cashierFullName,
     payerFullName,
     payerPhoneNumber,
     lines,
-    totals,
+    tenders,
     labels,
   ];
 }
