@@ -28,7 +28,16 @@ class OutboxDispatchResult {
   final OutboxDispatchOutcome outcome;
   final String? error;
 
-  const OutboxDispatchResult._(this.outcome, this.error);
+  /// Le serveur a refusé le **droit** (403 sans `detailCode`) : le moteur
+  /// retient l'entrée jusqu'au retour du droit (ADR-014 §13.3). Voir
+  /// [OutboxDispatchResult.permissionDenied].
+  final bool permissionDenied;
+
+  const OutboxDispatchResult._(
+    this.outcome,
+    this.error, {
+    this.permissionDenied = false,
+  });
 
   const OutboxDispatchResult.acked()
     : this._(OutboxDispatchOutcome.acked, null);
@@ -42,6 +51,14 @@ class OutboxDispatchResult {
 
   const OutboxDispatchResult.failed(String error)
     : this._(OutboxDispatchOutcome.failed, error);
+
+  /// Refus de **droit** : l'écriture n'est ni fautive ni perdue, son auteur
+  /// n'a plus — ou pas encore — la permission. Le handler la renvoie **avant**
+  /// tout effet local de refus (marquer « refusé », défaire une décision) : le
+  /// moteur retient l'entrée sans tentative consommée et la relance quand le
+  /// droit revient. Testé par `isOutboxPermissionDenial`.
+  const OutboxDispatchResult.permissionDenied()
+    : this._(OutboxDispatchOutcome.retry, 'HTTP_403', permissionDenied: true);
 
   /// Tablette partagée : une écriture d'un AUTRE compte ne part pas sous ce
   /// jeton (le serveur la refuserait en 403 terminal et la saisie serait

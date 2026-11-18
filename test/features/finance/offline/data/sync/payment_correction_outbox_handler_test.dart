@@ -31,6 +31,7 @@ import 'package:sqflite_common/sqlite_api.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../../../offline_full_db.dart';
+import '../../../../../helpers/permission_denial.dart';
 
 class _MockApi extends Mock implements FinanceSyncApi {}
 
@@ -431,11 +432,29 @@ void main() {
       expect(await statusOf(outcome.correctionId), 'REJECTED');
     });
 
-    test('un 403 rétablit l origine', () async {
+    test('un 403 sans code retient la correction sans rien rétablir '
+        '(droit retiré, ADR-014 §13.3)', () async {
       final origin = await syncedOrigin();
       final outcome = await correct(origin);
       expect(await remaining(), 15000);
-      when(() => api.correctPayment(any(), any())).thenThrow(_refusal(403));
+      when(
+        () => api.correctPayment(any(), any()),
+      ).thenThrow(permissionDenial403());
+
+      final result = await handler().dispatch(await correctionEntry());
+
+      expect(result.permissionDenied, isTrue);
+      expect(await statusOf(outcome.correctionId), isNot('REJECTED'));
+      expect(await remaining(), 15000);
+    });
+
+    test('un 403 avec code rétablit l origine', () async {
+      final origin = await syncedOrigin();
+      final outcome = await correct(origin);
+      expect(await remaining(), 15000);
+      when(
+        () => api.correctPayment(any(), any()),
+      ).thenThrow(_refusal(403, detailCode: 'SOME_BUSINESS_REFUSAL'));
 
       final result = await handler().dispatch(await correctionEntry());
 
@@ -503,7 +522,9 @@ void main() {
       final origin = await syncedOrigin();
       final first = await correct(origin, to: 5000);
       final second = await correct(first.replacementPaymentId!, to: 4000);
-      when(() => api.correctPayment(any(), any())).thenThrow(_refusal(403));
+      when(
+        () => api.correctPayment(any(), any()),
+      ).thenThrow(_refusal(403, detailCode: 'SOME_BUSINESS_REFUSAL'));
       await handler().dispatch(await entryFor(first.correctionId));
 
       final result = await handler().dispatch(

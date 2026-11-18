@@ -9,6 +9,8 @@ import 'package:school_app_flutter/core/offline/sync_engine.dart';
 import 'package:school_app_flutter/features/boutique/data/local/boutique_sale_write_dao.dart';
 import 'package:school_app_flutter/features/boutique/data/sync/boutique_sale_sync_models.dart';
 import 'package:school_app_flutter/features/boutique/data/sync/boutique_sync_api.dart';
+import 'package:school_app_flutter/core/offline/outbox_permission_guard.dart';
+import 'package:school_app_flutter/core/auth/module_access_registry.dart';
 
 /// Handler d'outbox de l'agrégat `BOUTIQUE_SALE`.
 ///
@@ -29,7 +31,8 @@ import 'package:school_app_flutter/features/boutique/data/sync/boutique_sync_api
 /// 2. **Idempotence** sur `sale.id` : un rejeu rend 200 et les mêmes valeurs.
 /// 3. **Classification des échecs** : transitoire pour le transport, les 5xx et
 ///    401/408/409/429 ; déterministe pour les autres 4xx.
-class BoutiqueSaleOutboxHandler implements OutboxSyncHandler {
+class BoutiqueSaleOutboxHandler
+    implements OutboxWriteAccess, OutboxSyncHandler {
   final BoutiqueSyncApi _api;
   final BoutiqueSaleWriteDao _dao;
   final OutboxDependencyGate _dependency;
@@ -50,6 +53,9 @@ class BoutiqueSaleOutboxHandler implements OutboxSyncHandler {
 
   @override
   String get aggregateType => BoutiqueSaleWriteDao.aggregateType;
+
+  @override
+  ModuleAccess? writeAccessFor(OutboxEntry entry) => kBoutiqueCollectAccess;
 
   @override
   Future<OutboxDispatchResult> dispatch(OutboxEntry entry) async {
@@ -143,6 +149,9 @@ class BoutiqueSaleOutboxHandler implements OutboxSyncHandler {
       return OutboxDispatchResult.retry(_reasonOf(e, status));
     }
 
+    if (isOutboxPermissionDenial(e)) {
+      return const OutboxDispatchResult.permissionDenied();
+    }
     final reason = _reasonOf(e, status);
     // La raison est écrite sur la vente ELLE-MÊME, pas seulement sur l'entrée
     // d'outbox : celle-ci disparaît à l'acquittement, et le guichet doit

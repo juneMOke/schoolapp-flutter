@@ -168,6 +168,25 @@ void main() {
     },
   );
 
+  test('403 sans code : droit retiré, le mois reste figé et rien n est refusé '
+      '(ADR-014 §13.3)', () async {
+    await record();
+    when(() => api.submitClosure(any(), any())).thenThrow(
+      refused(403, {'code': 'FORBIDDEN', 'message': 'Accès refusé.'}),
+    );
+
+    final result = await handler.dispatch(closureEntry());
+
+    expect(result.permissionDenied, isTrue);
+    expect(await closed(), isTrue);
+    final closure = await closures.closureOf(
+      classroomId: 'c1',
+      academicYearId: 'y1',
+      month: '2026-09',
+    );
+    expect(closure!.refusal, isNull);
+  });
+
   test('réseau : nouvel essai, le mois reste figé', () async {
     await record();
     when(() => api.submitClosure(any(), any())).thenThrow(

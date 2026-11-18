@@ -6340,6 +6340,10 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get syncHeldAwaitingPermission =>
+      'A permission was withdrawn from this account: the write is kept and will be sent once it is restored.';
+
+  @override
   String get syncAggregateEnrollment => 'Enrollment';
 
   @override

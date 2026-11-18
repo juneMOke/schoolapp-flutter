@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:school_app_flutter/core/offline/outbox_permission_guard.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/core/offline/current_user_context.dart';
 import 'package:school_app_flutter/core/offline/outbox_sync_handler.dart';
@@ -40,12 +41,16 @@ class EvaluationChildOutboxSupport {
   }
 
   /// Erreurs hors refus métier : 404 (évaluation pas encore acquittée) et
-  /// réseau, 5xx, 401 → nouvel essai ; 400 et 403 → terminal.
+  /// réseau, 5xx, 401 → nouvel essai ; 403 sans code (droit retiré) → retenu
+  /// jusqu'au retour du droit ; 400 et autre 403 → terminal.
   OutboxDispatchResult classify(DioException e) {
     final failure = e.error;
     final message = failure is Failure ? failure.message : e.message;
     if (e.response?.statusCode == 404) {
       return OutboxDispatchResult.retry(message);
+    }
+    if (isOutboxPermissionDenial(e)) {
+      return const OutboxDispatchResult.permissionDenied();
     }
     if (failure is ValidationFailure || failure is UnauthorizedFailure) {
       return OutboxDispatchResult.failed(message ?? 'Rejected');

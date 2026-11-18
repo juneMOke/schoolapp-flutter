@@ -9,6 +9,9 @@ import 'package:school_app_flutter/features/attendances/data/models/offline/just
 import 'package:school_app_flutter/features/attendances/data/remote/offline/justification/attendance_justification_api.dart';
 import 'package:school_app_flutter/features/attendances/data/remote/offline/justification/attendance_justification_local_data_source.dart';
 import 'package:school_app_flutter/features/attendances/domain/entities/justification/justification_enums.dart';
+import 'package:school_app_flutter/core/offline/outbox_permission_guard.dart';
+import 'package:school_app_flutter/core/auth/module_access_registry.dart';
+import 'package:school_app_flutter/core/auth/outbox_push_access.dart';
 
 /// Le code d'un `gestureId` déjà servi pour une AUTRE justification : un bug
 /// de tablette, rien que l'utilisateur puisse corriger.
@@ -34,7 +37,8 @@ const String kDecisionGestureIdConflictCode = 'DECISION_GESTURE_ID_CONFLICT';
 /// Dans les trois premiers cas d'échec l'entrée sort de la file par `acked` :
 /// le serveur a tranché, il n'y a plus rien à envoyer — la décision
 /// suivante sera un geste neuf.
-class JustificationDecisionOutboxHandler implements OutboxSyncHandler {
+class JustificationDecisionOutboxHandler
+    implements OutboxWriteAccess, OutboxSyncHandler {
   final AttendanceJustificationApi api;
   final AttendanceJustificationLocalDataSource justifications;
   final Map<String, dynamic> requiredAuth;
@@ -49,6 +53,9 @@ class JustificationDecisionOutboxHandler implements OutboxSyncHandler {
 
   @override
   String get aggregateType => kJustificationDecisionAggregateType;
+
+  @override
+  ModuleAccess? writeAccessFor(OutboxEntry entry) => kAttendanceAmendPushAccess;
 
   @override
   Future<OutboxDispatchResult> dispatch(OutboxEntry entry) async {
@@ -101,6 +108,9 @@ class JustificationDecisionOutboxHandler implements OutboxSyncHandler {
         currentUser.uid,
       );
       if (blocked != null) return blocked;
+      if (isOutboxPermissionDenial(e)) {
+        return const OutboxDispatchResult.permissionDenied();
+      }
       return _refuse(payload, JustificationRefusal.forbidden);
     }
     final failure = e.error;

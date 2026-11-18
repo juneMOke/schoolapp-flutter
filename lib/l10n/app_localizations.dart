@@ -10201,6 +10201,12 @@ abstract class AppLocalizations {
   /// **'{date} at {time}'**
   String syncErrorsQueuedAt(DateTime date, DateTime time);
 
+  /// Motif d une écriture retenue dans la file faute de droit (ADR-014 §13.3).
+  ///
+  /// In en, this message translates to:
+  /// **'A permission was withdrawn from this account: the write is kept and will be sent once it is restored.'**
+  String get syncHeldAwaitingPermission;
+
   /// No description provided for @syncAggregateEnrollment.
   ///
   /// In en, this message translates to:

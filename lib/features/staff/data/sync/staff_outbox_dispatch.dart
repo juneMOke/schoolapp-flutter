@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:dio/dio.dart';
+import 'package:school_app_flutter/core/offline/outbox_permission_guard.dart';
 import 'package:school_app_flutter/core/offline/outbox_sync_handler.dart';
 import 'package:school_app_flutter/features/staff/data/sync/staff_push_failure.dart';
 
@@ -43,6 +44,11 @@ abstract final class StaffOutboxDispatch {
       if (failure.isTombstoned && onTombstone != null) {
         await onTombstone();
         return const OutboxDispatchResult.acked();
+      }
+      // Droit retiré (403 sans `detailCode`) : AVANT `reject`, qui marquerait
+      // l'écriture refusée — elle attend le retour du droit (ADR-014 §13.3).
+      if (isOutboxPermissionDenial(e)) {
+        return const OutboxDispatchResult.permissionDenied();
       }
       if (failure.isTransient) {
         return OutboxDispatchResult.retry(failure.reason);

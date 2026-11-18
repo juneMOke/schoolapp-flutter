@@ -234,6 +234,9 @@ Future<void> registerOfflineCore(GetIt getIt, {Database? database}) async {
       // Garde d'attribution (tablette partagée) : ne jamais pousser sous le
       // jeton du porteur courant l'écriture hors ligne d'un autre compte.
       currentUser: getIt<CurrentUserContext>(),
+      // Pré-garde de permission (ADR-014 §13.3) : une écriture dont le droit a
+      // été retiré attend au lieu d'être refusée en terminal.
+      permissions: getIt<CurrentPermissions>(),
       // Un lot lié à l'école de son départ (MULTI_ECOLE_PLAN.md §10.1).
       scope: getIt<TenantScope>(),
     ),

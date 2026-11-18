@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:dio/dio.dart';
+import 'package:school_app_flutter/core/auth/outbox_push_access.dart';
 import 'package:school_app_flutter/core/offline/current_user_context.dart';
 import 'package:school_app_flutter/core/offline/outbox_entry.dart';
 import 'package:school_app_flutter/core/offline/outbox_sync_handler.dart';
@@ -11,6 +12,8 @@ import 'package:school_app_flutter/features/expense/data/sync/expense_push_failu
 import 'package:school_app_flutter/core/offline/outbox_school_guard.dart';
 import 'package:school_app_flutter/features/expense/data/sync/expense_sync_api.dart';
 import 'package:school_app_flutter/features/expense/data/sync/expense_sync_models.dart';
+import 'package:school_app_flutter/core/offline/outbox_permission_guard.dart';
+import 'package:school_app_flutter/core/auth/module_access_registry.dart';
 
 /// Handler d'outbox de l'agrégat `EXPENSE` — le contenu d'une dépense.
 ///
@@ -24,7 +27,7 @@ import 'package:school_app_flutter/features/expense/data/sync/expense_sync_model
 ///    avec elle au lieu d'être gelée en `SYNC_ERROR`.
 /// 4. **École** : une dépense d'une autre école du poste attend la session de
 ///    la sienne ([outboxForeignSchoolHold]).
-class ExpenseOutboxHandler implements OutboxSyncHandler {
+class ExpenseOutboxHandler implements OutboxWriteAccess, OutboxSyncHandler {
   final ExpenseSyncApi _api;
   final ExpenseSyncDao _dao;
   final CurrentUserContext _currentUser;
@@ -45,6 +48,24 @@ class ExpenseOutboxHandler implements OutboxSyncHandler {
 
   @override
   String get aggregateType => ExpenseWriteDao.aggregateType;
+
+  /// Une avance au personnel exige en plus `hr.pay.read`, vérifié dans le code
+  /// du serveur (`StaffAdvanceContent`). La tablette ne pose le bloc
+  /// `staffAdvance` que sur ce type de dépense.
+  @override
+  ModuleAccess? writeAccessFor(OutboxEntry entry) {
+    final ExpenseSyncRequestDto request;
+    try {
+      request = ExpenseSyncRequestDto.fromJson(
+        jsonDecode(entry.payload) as Map<String, dynamic>,
+      );
+    } catch (_) {
+      return null;
+    }
+    return request.expense.staffAdvance == null
+        ? kExpenseWriteAccess
+        : kStaffAdvancePushAccess;
+  }
 
   @override
   Future<OutboxDispatchResult> dispatch(OutboxEntry entry) async {
@@ -78,6 +99,9 @@ class ExpenseOutboxHandler implements OutboxSyncHandler {
         // s'efface, et l'entrée n'a plus rien à pousser.
         await _dao.deleteExpense(sent.id);
         return const OutboxDispatchResult.acked();
+      }
+      if (isOutboxPermissionDenial(e)) {
+        return const OutboxDispatchResult.permissionDenied();
       }
       if (failure.isTransient) {
         return OutboxDispatchResult.retry(failure.reason);

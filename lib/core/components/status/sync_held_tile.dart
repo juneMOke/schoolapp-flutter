@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/offline/outbox_permission_guard.dart'
+    show kOutboxAwaitingPermissionReason;
 import 'package:school_app_flutter/core/components/status/sync_aggregate_labels.dart';
 import 'package:school_app_flutter/core/offline/outbox_entry.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
@@ -68,9 +70,12 @@ class SyncHeldTile extends StatelessWidget {
           if (entry.lastError != null && entry.lastError!.isNotEmpty) ...[
             const SizedBox(height: AppSpacing.sm),
             // Motif brut, comme pour une erreur : c'est un diagnostic destiné à
-            // être lu au guichet, pas un message à reformuler.
+            // être lu au guichet, pas un message à reformuler. Seule la retenue
+            // faute de droit porte un code, traduit ici.
             Text(
-              entry.lastError!,
+              entry.lastError == kOutboxAwaitingPermissionReason
+                  ? l10n.syncHeldAwaitingPermission
+                  : entry.lastError!,
               style: AppTypography.bodySmall.copyWith(
                 color: AppColors.textSecondary,
               ),

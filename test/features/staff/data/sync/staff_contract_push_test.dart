@@ -25,6 +25,7 @@ import 'package:sqflite_common/sqlite_api.dart';
 
 import '../../../offline_full_db.dart';
 import '../../staff_fixtures.dart';
+import '../../../../helpers/permission_denial.dart';
 
 class _MockApi extends Mock implements StaffSyncApi {}
 
@@ -391,10 +392,26 @@ void main() {
         schoolId: 's-1',
         nowMs: 3,
       );
-      when(() => api.correctStaffContract(any(), any())).thenThrow(_http(403));
+      when(
+        () => api.correctStaffContract(any(), any()),
+      ).thenThrow(_http(422, detailCode: 'SOME_BUSINESS_REFUSAL'));
 
       expect((await dispatch()).outcome, OutboxDispatchOutcome.failed);
       expect((await row('c-2'))!['sync_status'], 'SYNCED');
+      expect((await row('c-1'))!['sync_error'], isNull);
+    });
+
+    test('403 sans code : droit retiré, la correction attend sans rien '
+        'refuser (ADR-014 §13.3)', () async {
+      await seedSyncedContract('c-1');
+      await correct();
+      when(
+        () => api.correctStaffContract(any(), any()),
+      ).thenThrow(permissionDenial403());
+
+      final result = await dispatch();
+
+      expect(result.permissionDenied, isTrue);
       expect((await row('c-1'))!['sync_error'], isNull);
     });
 

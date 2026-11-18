@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:school_app_flutter/core/offline/outbox_permission_guard.dart';
 import 'package:school_app_flutter/core/network/api_error_parser.dart';
 import 'package:school_app_flutter/features/academics/data/datasources/offline/evaluation_outbox_handler.dart'
     show kChapitreNotYetSyncedCode;
@@ -19,11 +20,17 @@ class ProgrammePushFailure {
   final String reason;
   final bool coursNotOwned;
 
+  /// Droit retiré : l'écriture attend le retour du droit au lieu d'être
+  /// refusée (ADR-014 §13.3). Lu par `isOutboxPermissionDenial` à la
+  /// construction, donc dans la zone du dispatch.
+  final bool isPermissionDenied;
+
   const ProgrammePushFailure._(
     this.status,
     this.detailCode,
     this.reason,
     this.coursNotOwned,
+    this.isPermissionDenied,
   );
 
   factory ProgrammePushFailure.of(DioException e) => ProgrammePushFailure._(
@@ -31,6 +38,7 @@ class ProgrammePushFailure {
     ApiErrorParser.detailCodeOf(e.response),
     ApiErrorParser.pushFailureReason(e),
     isCoursNotOwned(e),
+    isOutboxPermissionDenial(e),
   );
 
   static const Set<int> transientStatuses = {401, 408, 429};
@@ -48,6 +56,7 @@ class ProgrammePushFailure {
   ///
   /// Un 404 nu n'en dit pas autant pour un enregistrement (route absente,
   /// proxy) : effacer sur lui perdrait du travail jamais envoyé.
+
   bool get isGone => status == 410;
 
   /// Pour un retrait, l'objet absent suffit : le geste est acquis.

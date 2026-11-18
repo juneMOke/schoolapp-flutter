@@ -12,6 +12,8 @@ import 'package:school_app_flutter/features/staff/data/local/staff_member_write_
 import 'package:school_app_flutter/features/staff/data/sync/staff_member_push_dto.dart';
 import 'package:school_app_flutter/features/staff/data/sync/staff_push_failure.dart';
 import 'package:school_app_flutter/features/staff/data/sync/staff_sync_api.dart';
+import 'package:school_app_flutter/core/offline/outbox_permission_guard.dart';
+import 'package:school_app_flutter/core/auth/module_access_registry.dart';
 
 /// Handler d'outbox de l'agrégat `STAFF_MEMBER` — la fiche d'un agent.
 ///
@@ -24,7 +26,7 @@ import 'package:school_app_flutter/features/staff/data/sync/staff_sync_api.dart'
 ///    remplacée pendant le vol, auquel cas l'entrée repart avec elle.
 /// 4. **École** : une fiche d'une autre école du poste attend la session de la
 ///    sienne.
-class StaffMemberOutboxHandler implements OutboxSyncHandler {
+class StaffMemberOutboxHandler implements OutboxWriteAccess, OutboxSyncHandler {
   final StaffSyncApi _api;
   final StaffMemberSyncDao _dao;
   final CurrentUserContext _currentUser;
@@ -45,6 +47,9 @@ class StaffMemberOutboxHandler implements OutboxSyncHandler {
 
   @override
   String get aggregateType => StaffMemberWriteDao.aggregateType;
+
+  @override
+  ModuleAccess? writeAccessFor(OutboxEntry entry) => kStaffWriteAccess;
 
   @override
   Future<OutboxDispatchResult> dispatch(OutboxEntry entry) async {
@@ -76,6 +81,9 @@ class StaffMemberOutboxHandler implements OutboxSyncHandler {
       if (failure.isTombstoned) {
         await _dao.delete(sent.id);
         return const OutboxDispatchResult.acked();
+      }
+      if (isOutboxPermissionDenial(e)) {
+        return const OutboxDispatchResult.permissionDenied();
       }
       if (failure.isTransient) {
         return OutboxDispatchResult.retry(failure.reason);

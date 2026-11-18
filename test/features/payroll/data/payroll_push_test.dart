@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:school_app_flutter/core/auth/module_access_registry.dart';
 import 'package:school_app_flutter/core/offline/current_user_context.dart';
 import 'package:school_app_flutter/core/offline/outbox_dao.dart';
 import 'package:school_app_flutter/core/offline/outbox_entry.dart';
@@ -241,6 +242,34 @@ void main() {
       );
 
       expect(result.outcome, OutboxDispatchOutcome.blocked);
+    });
+
+    test('403 sans code : droit retiré, le versement attend sans être marqué '
+        'à régulariser (ADR-014 §13.3)', () async {
+      await disbursements.add(request(), schoolId: _school, nowMs: 10);
+      when(
+        () => api.submitDisbursement(any(), any()),
+      ).thenThrow(_http(403, body: {'code': 'FORBIDDEN'}));
+
+      final result = await handler().dispatch(
+        await entry(PayrollDisbursementDao.entryId('d-1')),
+      );
+
+      expect(result.permissionDenied, isTrue);
+      expect(
+        (await disbursements.forSchool(_school)).single.needsRegularization,
+        isFalse,
+      );
+    });
+
+    test('le droit de poussée suit la route : hr.pay.write', () async {
+      await disbursements.add(request(), schoolId: _school, nowMs: 10);
+      expect(
+        handler().writeAccessFor(
+          await entry(PayrollDisbursementDao.entryId('d-1')),
+        ),
+        kPayrollWriteAccess,
+      );
     });
 
     test(

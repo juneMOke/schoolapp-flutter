@@ -13,6 +13,9 @@ import 'package:school_app_flutter/features/academics/data/models/offline/evalua
 import 'package:school_app_flutter/features/academics/domain/entities/sujet/evaluation_sujet_codes.dart';
 import 'package:school_app_flutter/features/academics/data/repositories/offline/evaluation_offline_repository_impl.dart'
     show kEvaluationAggregateType;
+import 'package:school_app_flutter/core/offline/outbox_permission_guard.dart';
+import 'package:school_app_flutter/core/auth/module_access_registry.dart';
+import 'package:school_app_flutter/core/auth/outbox_push_access.dart';
 
 /// Code du 409 qui dit qu'un chapitre cité n'est pas encore arrivé au
 /// serveur : une attente, jamais un refus.
@@ -36,10 +39,11 @@ typedef ChapitresAwaitingAck = Future<bool> Function(List<String> chapitreIds);
 ///   évaluation `SYNC_ERROR` + code persisté (`rejection_code`, surfacé à
 ///   l'UI), **jamais de re-push** (à la création seulement, un rejeu idempotent
 ///   ressort en 200).
-/// - rejet métier (400 validation, 404 introuvable, 403 interdit) → failed
-///   (terminal). 401 reste transitoire (réussira après ré-auth).
+/// - rejet métier (400 validation, 404 introuvable, 403 porteur d'un code)
+///   → failed (terminal). Un 403 sans code (droit retiré) attend le retour du
+///   droit (ADR-014 §13.3). 401 reste transitoire (réussira après ré-auth).
 /// - réseau / 5xx / timeout / 401 → retry (backoff).
-class EvaluationOutboxHandler implements OutboxSyncHandler {
+class EvaluationOutboxHandler implements OutboxWriteAccess, OutboxSyncHandler {
   /// Codes applicatifs des backstops `422` (préfixe du message, DF-N).
   static const List<String> backstopCodes = [
     'PERIOD_CLOSED',
@@ -64,6 +68,9 @@ class EvaluationOutboxHandler implements OutboxSyncHandler {
 
   @override
   String get aggregateType => kEvaluationAggregateType;
+
+  @override
+  ModuleAccess? writeAccessFor(OutboxEntry entry) => kGradeWritePushAccess;
 
   @override
   Future<OutboxDispatchResult> dispatch(OutboxEntry entry) async {
@@ -121,6 +128,9 @@ class EvaluationOutboxHandler implements OutboxSyncHandler {
         return OutboxDispatchResult.failed(code);
       }
       final failure = e.error;
+      if (isOutboxPermissionDenial(e)) {
+        return const OutboxDispatchResult.permissionDenied();
+      }
       if (failure is ValidationFailure ||
           failure is NotFoundFailure ||
           failure is UnauthorizedFailure) {

@@ -12,6 +12,8 @@ import 'package:school_app_flutter/features/staff/data/local/staff_contract_writ
 import 'package:school_app_flutter/features/staff/data/sync/staff_contract_push_dto.dart';
 import 'package:school_app_flutter/features/staff/data/sync/staff_push_failure.dart';
 import 'package:school_app_flutter/features/staff/data/sync/staff_sync_api.dart';
+import 'package:school_app_flutter/core/offline/outbox_permission_guard.dart';
+import 'package:school_app_flutter/core/auth/module_access_registry.dart';
 
 /// Handler d'outbox de l'agrégat `STAFF_CONTRACT_CORRECTION` — la correction
 /// d'une période saisie par erreur.
@@ -20,7 +22,8 @@ import 'package:school_app_flutter/features/staff/data/sync/staff_sync_api.dart'
 /// serveur, la correction attend (`blocked`) ; le 409
 /// `STAFF_CONTRACT_NOT_YET_SYNCED` n'est qu'un filet. Un refus rend la période
 /// d'origine à la frise et efface le remplaçant, jamais accepté.
-class StaffContractCorrectionOutboxHandler implements OutboxSyncHandler {
+class StaffContractCorrectionOutboxHandler
+    implements OutboxWriteAccess, OutboxSyncHandler {
   final StaffSyncApi _api;
   final StaffContractSyncDao _dao;
   final CurrentUserContext _currentUser;
@@ -41,6 +44,9 @@ class StaffContractCorrectionOutboxHandler implements OutboxSyncHandler {
 
   @override
   String get aggregateType => StaffContractWriteDao.correctionAggregateType;
+
+  @override
+  ModuleAccess? writeAccessFor(OutboxEntry entry) => kPayrollWriteAccess;
 
   @override
   Future<OutboxDispatchResult> dispatch(OutboxEntry entry) async {
@@ -76,6 +82,9 @@ class StaffContractCorrectionOutboxHandler implements OutboxSyncHandler {
       final failure = StaffPushFailure.of(e);
       if (failure.isDependencyWait) {
         return OutboxDispatchResult.blocked(failure.reason);
+      }
+      if (isOutboxPermissionDenial(e)) {
+        return const OutboxDispatchResult.permissionDenied();
       }
       if (failure.isTransient) {
         return OutboxDispatchResult.retry(failure.reason);

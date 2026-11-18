@@ -16,6 +16,8 @@ import 'package:school_app_flutter/features/enrollment_suspension/data/local/enr
 import 'package:school_app_flutter/features/enrollment_suspension/data/sync/enrollment_suspension_api.dart';
 import 'package:school_app_flutter/features/enrollment_suspension/data/sync/suspension_gesture.dart';
 import 'package:school_app_flutter/features/enrollment_suspension/data/sync/suspension_period_dto.dart';
+import 'package:school_app_flutter/core/offline/outbox_permission_guard.dart';
+import 'package:school_app_flutter/core/auth/module_access_registry.dart';
 
 /// Handler d'outbox de l'agrégat `ENROLLMENT_SUSPENSION` — désactiver ou
 /// réactiver un élève.
@@ -28,7 +30,8 @@ import 'package:school_app_flutter/features/enrollment_suspension/data/sync/susp
 /// attend — localement par la sonde, au serveur par le 409
 /// `ENROLLMENT_NOT_YET_SYNCED`. Un 422 est terminal : l'effet local est
 /// défait.
-class EnrollmentSuspensionOutboxHandler implements OutboxSyncHandler {
+class EnrollmentSuspensionOutboxHandler
+    implements OutboxWriteAccess, OutboxSyncHandler {
   final EnrollmentSuspensionApi _api;
   final EnrollmentSuspensionSyncDao _sync;
   final OutboxDao _outbox;
@@ -60,6 +63,9 @@ class EnrollmentSuspensionOutboxHandler implements OutboxSyncHandler {
 
   @override
   String get aggregateType => EnrollmentSuspensionWriteDao.aggregateType;
+
+  @override
+  ModuleAccess? writeAccessFor(OutboxEntry entry) => kEnrollmentSuspendAccess;
 
   @override
   Future<OutboxDispatchResult> dispatch(OutboxEntry entry) async {
@@ -109,6 +115,9 @@ class EnrollmentSuspensionOutboxHandler implements OutboxSyncHandler {
     try {
       ack = await _api.push(_extras, gesture);
     } on DioException catch (e) {
+      if (isOutboxPermissionDenial(e)) {
+        return const OutboxDispatchResult.permissionDenied();
+      }
       return _onFailure(gesture, OutboxPushFailure.of(e));
     } on FormatException catch (e) {
       return OutboxDispatchResult.retry(e.message);

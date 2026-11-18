@@ -4160,6 +4160,10 @@
       }
     }
   },
+  "syncHeldAwaitingPermission": "A permission was withdrawn from this account: the write is kept and will be sent once it is restored.",
+  "@syncHeldAwaitingPermission": {
+    "description": "Motif d une écriture retenue dans la file faute de droit (ADR-014 §13.3)."
+  },
   "syncAggregateEnrollment": "Enrollment",
   "syncAggregatePayment": "Payment",
   "syncAggregateSaleReceipt": "Sale receipt",

@@ -10,7 +10,12 @@ import 'package:school_app_flutter/core/offline/outbox_push_failure.dart';
 /// 404 élève d'une autre école, 415, 422 `PHOTO_NOT_SQUARE` /
 /// `PHOTO_TOO_LARGE`… — est déterministe.
 class StudentPhotoPushFailure extends OutboxPushFailure {
-  const StudentPhotoPushFailure._(super.status, super.detailCode, super.reason);
+  const StudentPhotoPushFailure._(
+    super.status,
+    super.detailCode,
+    super.reason, {
+    super.isPermissionDenied,
+  });
 
   static const String studentNotYetSynced = 'STUDENT_NOT_YET_SYNCED';
 
@@ -20,6 +25,7 @@ class StudentPhotoPushFailure extends OutboxPushFailure {
       failure.status,
       failure.detailCode,
       failure.reason,
+      isPermissionDenied: failure.isPermissionDenied,
     );
   }
 

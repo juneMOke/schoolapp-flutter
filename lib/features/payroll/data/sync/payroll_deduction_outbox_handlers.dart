@@ -1,3 +1,5 @@
+import 'package:school_app_flutter/core/offline/outbox_entry.dart';
+import 'package:school_app_flutter/core/auth/module_access_registry.dart';
 import 'package:school_app_flutter/core/offline/lww_outcome.dart';
 import 'package:school_app_flutter/core/offline/outbox_sync_handler.dart';
 import 'package:school_app_flutter/features/payroll/data/local/payroll_deduction_dao.dart';
@@ -31,6 +33,10 @@ class PayrollDeductionTypeOutboxHandler
 
   @override
   String get aggregateType => PayrollOutbox.deductionType;
+
+  /// `hr.pay.manage` : la route règle l'école, pas un agent.
+  @override
+  ModuleAccess? writeAccessFor(OutboxEntry entry) => kPayrollManageAccess;
 
   @override
   PayrollDeductionTypeRequestDto? parse(Object? raw) =>

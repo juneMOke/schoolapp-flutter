@@ -1,8 +1,10 @@
+import 'package:school_app_flutter/core/auth/current_permissions.dart';
 import 'package:school_app_flutter/core/offline/connectivity_service.dart';
 import 'package:school_app_flutter/core/offline/current_user_context.dart';
 import 'package:school_app_flutter/core/offline/outbox_author.dart';
 import 'package:school_app_flutter/core/offline/outbox_dao.dart';
 import 'package:school_app_flutter/core/offline/outbox_entry.dart';
+import 'package:school_app_flutter/core/offline/outbox_permission_guard.dart';
 import 'package:school_app_flutter/core/offline/outbox_sync_handler.dart';
 import 'package:school_app_flutter/core/offline/session_credentials_probe.dart';
 import 'package:school_app_flutter/core/database/tenant/tenant_scope.dart';
@@ -68,6 +70,12 @@ class SyncEngine {
   /// des écritures légitimes — le pire des deux mondes.
   final CurrentUserContext? _currentUser;
 
+  /// Droits du porteur, pour la pré-garde de permission (ADR-014 §13.3).
+  /// **Optionnel et permissif**, comme [_currentUser] : non branché, ou
+  /// ensemble inconnu, la pré-garde ne retient rien. La sonde, elle, agit
+  /// toujours — elle ne lit que la réponse du serveur.
+  final CurrentPermissions? _permissions;
+
   /// L'école à laquelle un lot se lie à son départ (MULTI_ECOLE_PLAN.md §10.1).
   final TenantScope _scope;
 
@@ -83,6 +91,13 @@ class SyncEngine {
   /// dépendance) — NON exponentiel, ne consomme aucune tentative. Le flush étant
   /// opportuniste, ce délai évite seulement un hot-loop entre deux signaux.
   static const int _blockedDelayMs = 5000;
+
+  /// Délai de re-tentative d'une entrée refusée par le serveur faute de droit.
+  /// Plus long que [_blockedDelayMs] : chaque essai coûte un appel réseau, et
+  /// le droit ne revient pas en quelques secondes. Le rafraîchissement de
+  /// session livre entre-temps les nouveaux droits, et la pré-garde prend alors
+  /// le relais sans réseau.
+  static const int _permissionDeniedDelayMs = 300000;
 
   /// Seuil poison-message : au-delà, une entrée en échec transitoire répété
   /// bascule en `SYNC_ERROR` au lieu d'être retentée indéfiniment. L'entrée
@@ -142,6 +157,7 @@ class SyncEngine {
     required ConnectivityService connectivity,
     SessionCredentialsProbe? credentialsProbe,
     CurrentUserContext? currentUser,
+    CurrentPermissions? permissions,
     Clock now = systemClock,
     int maxAttempts = _defaultMaxAttempts,
     TenantScope scope = const UnboundTenantScope(),
@@ -149,9 +165,20 @@ class SyncEngine {
        _connectivity = connectivity,
        _credentialsProbe = credentialsProbe,
        _currentUser = currentUser,
+       _permissions = permissions,
        _now = now,
        _maxAttempts = maxAttempts,
-       _scope = scope;
+       _scope = scope {
+    // Un changement de droits réveille les écritures retenues faute de droit :
+    // la pré-garde les relira au prochain lot, sans attendre leur délai.
+    permissions?.addChangeListener(_wakePermissionHolds);
+  }
+
+  void _wakePermissionHolds() {
+    _outbox.wakePermissionHolds(_now()).catchError((Object _) {
+      // Base indisponible (école détachée) : le délai les relâchera.
+    });
+  }
 
   /// Enregistre le handler d'un type d'agrégat (appelé par la DI des branches).
   void registerHandler(OutboxSyncHandler handler) {
@@ -229,7 +256,13 @@ class SyncEngine {
           await _outbox.defer(
             entry.id,
             nextAttemptAt: _now() + _blockedDelayMs,
-            reason: 'Écriture d\'un autre compte — attend sa reconnexion',
+            // Retenue faute de droit, elle le reste : le motif est ce qui la
+            // laisse passer derrière les écritures des autres comptes
+            // (`OutboxDao.hasOlderPending`), et ce qui la réveille au retour
+            // du droit.
+            reason: entry.lastError == kOutboxAwaitingPermissionReason
+                ? kOutboxAwaitingPermissionReason
+                : 'Écriture d\'un autre compte — attend sa reconnexion',
           );
           blocked++;
           continue;
@@ -243,8 +276,53 @@ class SyncEngine {
           continue;
         }
 
+        // Pré-garde de permission (ADR-014 §13.3) : un droit retiré, et connu
+        // de la tablette, ne doit pas transformer l'écriture en 403 TERMINAL.
+        // Même attente propre que l'attribution : ni tentative, ni poison, et
+        // elle repart seule quand le droit revient.
+        if (handler is OutboxWriteAccess &&
+            outboxWriteDenied(
+              (handler as OutboxWriteAccess).writeAccessFor(entry),
+              _permissions?.permissions,
+            )) {
+          // Délai long : le droit ne revient pas en quelques secondes, et un
+          // délai court ferait reprendre les mêmes entrées à chaque lot, au
+          // détriment des plus récentes. Le retour du droit les réveille.
+          await _outbox.defer(
+            entry.id,
+            nextAttemptAt: _now() + _permissionDeniedDelayMs,
+            reason: kOutboxAwaitingPermissionReason,
+          );
+          blocked++;
+          continue;
+        }
+
+        // Non attribuée (sans auteur, ou porteur sans `uid`) : un 403 sans
+        // code peut être le refus d'auteur. La sonde ne le lira pas comme un
+        // droit retiré, sans quoi l'entrée serait retenue pour toujours.
+        final author = outboxAuthorUidOf(entry.payload);
+        final probe = OutboxPermissionProbe(
+          attributed:
+              currentUid != null &&
+              currentUid.isNotEmpty &&
+              author == currentUid,
+        );
         try {
-          final result = await handler.dispatch(entry);
+          final result = await probe.watch(() => handler.dispatch(entry));
+          // Le serveur a refusé le DROIT pendant ce dispatch (403 sans
+          // `detailCode`) : la tablette ne le savait pas encore. Le handler a
+          // pu classer ce 403 en terminal ou en transitoire ; dans les deux
+          // cas l'écriture attend, sans tentative consommée.
+          // Le handler le dit lui-même (`permissionDenied`), ou la sonde l'a
+          // vu alors que le handler concluait autrement.
+          if (result.permissionDenied ||
+              (probe.denied &&
+                  (result.outcome == OutboxDispatchOutcome.failed ||
+                      result.outcome == OutboxDispatchOutcome.retry))) {
+            await _holdForPermission(entry);
+            blocked++;
+            continue;
+          }
           switch (result.outcome) {
             case OutboxDispatchOutcome.acked:
               // Garde anti-TOCTOU : n'acquitte que si l'entrée n'a pas été
@@ -286,6 +364,11 @@ class SyncEngine {
           // consommée, ni poison — elle attend son école.
           rethrow;
         } catch (error) {
+          if (probe.denied) {
+            await _holdForPermission(entry);
+            blocked++;
+            continue;
+          }
           // Un handler qui lève est traité comme une erreur transitoire.
           if (await _reschedule(entry, error.toString())) {
             poisoned++;
@@ -315,6 +398,17 @@ class SyncEngine {
       _notifyFlushComplete();
     }
   }
+
+  /// Retient une entrée que le serveur vient de refuser faute de droit.
+  ///
+  /// Gardée comme l'accusé : un geste ré-enfilé pendant le dispatch n'hérite
+  /// pas du refus de l'ancien.
+  Future<void> _holdForPermission(OutboxEntry entry) => _outbox.defer(
+    entry.id,
+    nextAttemptAt: _now() + _permissionDeniedDelayMs,
+    reason: kOutboxAwaitingPermissionReason,
+    expectedCreatedAt: entry.createdAt,
+  );
 
   /// Reprogramme une entrée après une erreur transitoire, ou la **poison**
   /// (bascule `SYNC_ERROR`) si le seuil `_maxAttempts` est franchi. Renvoie

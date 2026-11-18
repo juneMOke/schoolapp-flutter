@@ -16,6 +16,9 @@ import 'package:school_app_flutter/features/class_journal/data/sync/journal_sync
 import 'package:school_app_flutter/features/course_programme/data/local/programme_sync_dao.dart'
     show ChapitreServerState;
 import 'package:school_app_flutter/features/course_programme/data/sync/programme_push_failure.dart';
+import 'package:school_app_flutter/core/offline/outbox_permission_guard.dart';
+import 'package:school_app_flutter/core/auth/module_access_registry.dart';
+import 'package:school_app_flutter/core/auth/outbox_push_access.dart';
 
 /// Ce que le serveur sait d'un chapitre, vu de la tablette.
 typedef ChapitreStateReader = Future<ChapitreServerState> Function(String id);
@@ -41,7 +44,7 @@ const String kJournalChapitreRejectedCode = 'CHAPITRE_REJECTED';
 /// - 403 `COURS_NOT_OWNED` : le cours quitte la tablette, le geste avec lui ;
 /// - autre refus (400, 422) : « à corriger », sauf si une saisie plus récente
 ///   l'a remplacée pendant le vol.
-class JournalOutboxHandler implements OutboxSyncHandler {
+class JournalOutboxHandler implements OutboxWriteAccess, OutboxSyncHandler {
   final JournalSyncApi _api;
   final JournalSyncDao _dao;
   final ChapitreStateReader _chapitreState;
@@ -71,6 +74,9 @@ class JournalOutboxHandler implements OutboxSyncHandler {
 
   @override
   String get aggregateType => JournalOutbox.type;
+
+  @override
+  ModuleAccess? writeAccessFor(OutboxEntry entry) => kProgrammeWritePushAccess;
 
   @override
   Future<OutboxDispatchResult> dispatch(OutboxEntry entry) async {
@@ -154,6 +160,9 @@ class JournalOutboxHandler implements OutboxSyncHandler {
     if (failure.status == 404) {
       await _dao.remove(payload.entryId);
       return const OutboxDispatchResult.acked();
+    }
+    if (failure.isPermissionDenied) {
+      return const OutboxDispatchResult.permissionDenied();
     }
     if (failure.isTransient) return OutboxDispatchResult.retry(failure.reason);
     return _reject(

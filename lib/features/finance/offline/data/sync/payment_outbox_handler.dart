@@ -10,6 +10,8 @@ import 'package:school_app_flutter/features/finance/offline/data/sync/finance_sy
 import 'package:school_app_flutter/features/finance/offline/data/sync/payment_sync_models.dart';
 import 'package:school_app_flutter/core/network/api_error_parser.dart';
 import 'package:school_app_flutter/features/finance/offline/data/sync/finance_error_codes.dart';
+import 'package:school_app_flutter/core/offline/outbox_permission_guard.dart';
+import 'package:school_app_flutter/core/auth/module_access_registry.dart';
 
 /// Handler d'outbox de l'agrégat PAYMENT (FF-Lot 4).
 ///
@@ -29,7 +31,7 @@ import 'package:school_app_flutter/features/finance/offline/data/sync/finance_er
 /// autres 4xx — le POST étant idempotent, un 4xx signifie que le serveur n'a
 /// rien encaissé, donc rejouer jusqu'au poison ne ferait que retarder le même
 /// SYNC_ERROR.
-class PaymentOutboxHandler implements OutboxSyncHandler {
+class PaymentOutboxHandler implements OutboxWriteAccess, OutboxSyncHandler {
   final FinanceSyncApi _api;
   final FinanceLocalDao _dao;
   final OutboxDependencyGate _dependency;
@@ -50,6 +52,9 @@ class PaymentOutboxHandler implements OutboxSyncHandler {
 
   @override
   String get aggregateType => 'PAYMENT';
+
+  @override
+  ModuleAccess? writeAccessFor(OutboxEntry entry) => kPaymentCollectAccess;
 
   @override
   Future<OutboxDispatchResult> dispatch(OutboxEntry entry) async {
@@ -158,6 +163,9 @@ class PaymentOutboxHandler implements OutboxSyncHandler {
       return OutboxDispatchResult.retry(_reasonOf(e, status));
     }
 
+    if (isOutboxPermissionDenial(e)) {
+      return const OutboxDispatchResult.permissionDenied();
+    }
     // Le statut seul ne suffit plus : le serveur NOMME la cause d'un 422, et
     // toutes ne se traitent pas pareil. `UNKNOWN_FEE_CODE` veut le plus souvent
     // dire « l'inscription de l'élève n'est pas encore remontée » — le paiement

@@ -21,6 +21,8 @@ import 'package:school_app_flutter/features/student_photo/data/sync/student_phot
 import 'package:school_app_flutter/features/student_photo/data/sync/student_photo_push_failure.dart';
 import 'package:school_app_flutter/features/student_photo/data/sync/student_photo_push_request.dart';
 import 'package:school_app_flutter/features/student_photo/domain/entities/student_photo.dart';
+import 'package:school_app_flutter/core/offline/outbox_permission_guard.dart';
+import 'package:school_app_flutter/core/auth/module_access_registry.dart';
 
 /// Handler d'outbox de l'agrégat `STUDENT_PHOTO` — la pose ou le retrait de
 /// la photo d'un élève.
@@ -31,7 +33,8 @@ import 'package:school_app_flutter/features/student_photo/domain/entities/studen
 /// l'attend donc aussi. Si l'élève disparaît du poste puis que le serveur
 /// répond qu'il ne le connaît pas, le geste est refusé et ses octets effacés :
 /// la photo ne partira jamais.
-class StudentPhotoOutboxHandler implements OutboxSyncHandler {
+class StudentPhotoOutboxHandler
+    implements OutboxWriteAccess, OutboxSyncHandler {
   final StudentPhotoApi _api;
   final StudentPhotoSyncDao _sync;
   final StudentPhotoDao _photos;
@@ -64,6 +67,9 @@ class StudentPhotoOutboxHandler implements OutboxSyncHandler {
 
   @override
   String get aggregateType => StudentPhotoWriteDao.aggregateType;
+
+  @override
+  ModuleAccess? writeAccessFor(OutboxEntry entry) => kStudentPhotoWriteAccess;
 
   @override
   Future<OutboxDispatchResult> dispatch(OutboxEntry entry) async {
@@ -147,6 +153,9 @@ class StudentPhotoOutboxHandler implements OutboxSyncHandler {
           request,
           OutboxDispatchResult.retry(failure.reason),
         );
+      }
+      if (isOutboxPermissionDenial(e)) {
+        return const OutboxDispatchResult.permissionDenied();
       }
       return _reject(request, failure.storedCode, failure.reason);
     } catch (e) {
