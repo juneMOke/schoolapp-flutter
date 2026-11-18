@@ -260,14 +260,32 @@ void main() {
     expect(result.outcome, OutboxDispatchOutcome.retry);
   });
 
-  test('403 auteur == utilisateur courant → failed (pas 50 retries)', () async {
-    // Le refus ne vient pas de l'attribution : il ne se réparera pas seul.
+  test('403 sans detailCode, auteur == utilisateur courant → retenu, jamais '
+      'détruit (droit retiré, ADR-014 §13.3)', () async {
+    // La présence n'a pas de rejeu manuel : un appel classé terminal ici
+    // serait perdu. Le moteur le retient jusqu'au retour du droit.
     when(
       () => api.submitAttendance(any(), any()),
     ).thenThrow(dio(const UnauthorizedFailure('forbidden'), status: 403));
 
     final result = await handlerFor(uid: 'author-1').dispatch(entry());
+    expect(result.permissionDenied, isTrue);
+    expect(result.outcome, isNot(OutboxDispatchOutcome.failed));
+  });
+
+  test('403 AVEC detailCode, auteur == utilisateur courant → failed (refus '
+      'métier, pas 50 retries)', () async {
+    when(() => api.submitAttendance(any(), any())).thenThrow(
+      dio(
+        const UnauthorizedFailure('forbidden'),
+        status: 403,
+        body: <String, dynamic>{'detailCode': 'SOME_BUSINESS_REFUSAL'},
+      ),
+    );
+
+    final result = await handlerFor(uid: 'author-1').dispatch(entry());
     expect(result.outcome, OutboxDispatchOutcome.failed);
+    expect(result.permissionDenied, isFalse);
   });
 
   test('403 auteur != utilisateur courant → blocked (tablette partagée)', () async {
@@ -465,24 +483,28 @@ void main() {
       },
     );
 
-    test('403 terminal : même lecture', () async {
-      when(() => api.submitAttendance(any(), any())).thenThrow(
-        dio(
-          const UnauthorizedFailure('Access forbidden'),
-          status: 403,
-          body: <String, dynamic>{
-            'message':
-                'Corriger un appel d\'un jour révolu exige la permission '
-                'attendance.amend',
-          },
-        ),
-      );
+    test(
+      '403 d\'un droit contrôlé dans le code (sans detailCode) : retenu',
+      () async {
+        when(() => api.submitAttendance(any(), any())).thenThrow(
+          dio(
+            const UnauthorizedFailure('Access forbidden'),
+            status: 403,
+            body: <String, dynamic>{
+              'message':
+                  'Corriger un appel d\'un jour révolu exige la permission '
+                  'attendance.amend',
+            },
+          ),
+        );
 
-      final result = await handlerFor(uid: 'author-1').dispatch(entry());
+        final result = await handlerFor(uid: 'author-1').dispatch(entry());
 
-      expect(result.outcome, OutboxDispatchOutcome.failed);
-      expect(result.error, contains('attendance.amend'));
-    });
+        // Corriger un jour passé sans `attendance.amend` : un droit manque,
+        // l'appel attend qu'on le rende au compte au lieu d'être perdu.
+        expect(result.permissionDenied, isTrue);
+      },
+    );
 
     test('corps sans message : on garde le libellé du socle', () async {
       when(

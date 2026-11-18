@@ -11,6 +11,8 @@ import 'package:school_app_flutter/features/attendances/data/remote/offline/disc
 import 'package:school_app_flutter/features/attendances/data/remote/offline/disciplinary_sync_api.dart';
 import 'package:school_app_flutter/features/attendances/data/repository/offline/disciplinary_case_offline_repository_impl.dart'
     show kDisciplinaryAggregateType;
+import 'package:school_app_flutter/core/offline/outbox_permission_guard.dart';
+import 'package:school_app_flutter/core/auth/module_access_registry.dart';
 
 /// Pousse l'agrégat disciplinaire `{case, comments[]}` (DF-2) vers
 /// `POST /sync/disciplinary-cases`. **Chemin unique upsert** : le serveur pose le
@@ -30,7 +32,8 @@ import 'package:school_app_flutter/features/attendances/data/repository/offline/
 /// - rejet métier 422 (élève inconnu, date hors année, enum/transition invalide)
 ///   → failed (terminal).
 /// - réseau / 5xx / timeout → retry (backoff).
-class DisciplinaryCaseOutboxHandler implements OutboxSyncHandler {
+class DisciplinaryCaseOutboxHandler
+    implements OutboxWriteAccess, OutboxSyncHandler {
   final DisciplinarySyncApi syncApi;
   final DisciplinaryLocalDataSource localDataSource;
   final OutboxDependencyGate dependency;
@@ -47,6 +50,9 @@ class DisciplinaryCaseOutboxHandler implements OutboxSyncHandler {
 
   @override
   String get aggregateType => kDisciplinaryAggregateType;
+
+  @override
+  ModuleAccess? writeAccessFor(OutboxEntry entry) => kDisciplineInstructAccess;
 
   @override
   Future<OutboxDispatchResult> dispatch(OutboxEntry entry) async {
@@ -103,10 +109,14 @@ class DisciplinaryCaseOutboxHandler implements OutboxSyncHandler {
       return const OutboxDispatchResult.acked();
     } on DioException catch (e) {
       final failure = e.error;
-      // Rejets terminaux : validation (400/422), ressource absente (404),
-      // accès interdit (403 → UnauthorizedFailure, permanent pour ce rôle/jeton).
+      // Un droit retiré (403 sans `detailCode`) retient le dossier jusqu'à son
+      // retour (ADR-014 §13.3). Rejets terminaux : validation (400/422),
+      // ressource absente (404), autre 403 (→ UnauthorizedFailure).
       // 401 (InvalidCredentialsFailure) reste transitoire : réussira après
       // ré-auth. Ne pas gaspiller 50 tentatives sur un 403 permanent.
+      if (isOutboxPermissionDenial(e)) {
+        return const OutboxDispatchResult.permissionDenied();
+      }
       if (failure is ValidationFailure ||
           failure is NotFoundFailure ||
           failure is UnauthorizedFailure) {

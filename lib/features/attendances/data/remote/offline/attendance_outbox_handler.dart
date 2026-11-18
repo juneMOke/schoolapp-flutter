@@ -15,6 +15,8 @@ import 'package:school_app_flutter/features/attendances/data/remote/offline/atte
 import 'package:school_app_flutter/features/attendances/data/remote/offline/attendance_sync_api.dart';
 import 'package:school_app_flutter/features/attendances/data/repository/offline/attendance_day_writer.dart'
     show kAttendanceAggregateType;
+import 'package:school_app_flutter/core/offline/outbox_permission_guard.dart';
+import 'package:school_app_flutter/core/auth/module_access_registry.dart';
 
 /// Le refus d'un appel dans un mois clôturé (contrat v2).
 const String kAttendanceMonthClosedCode = 'MONTH_CLOSED';
@@ -50,7 +52,7 @@ typedef ClassroomTransferGate =
 /// - rejet métier (validation / hors roster / date hors année) → failed, avec
 ///   la raison **du serveur** et non le libellé plat de l'intercepteur.
 /// - réseau / 5xx / timeout → retry (backoff).
-class AttendanceOutboxHandler implements OutboxSyncHandler {
+class AttendanceOutboxHandler implements OutboxWriteAccess, OutboxSyncHandler {
   final AttendanceSyncApi syncApi;
   final AttendanceLocalDataSource localDataSource;
   final Map<String, dynamic> requiredAuth;
@@ -74,6 +76,9 @@ class AttendanceOutboxHandler implements OutboxSyncHandler {
 
   @override
   String get aggregateType => kAttendanceAggregateType;
+
+  @override
+  ModuleAccess? writeAccessFor(OutboxEntry entry) => kAttendanceRecordAccess;
 
   @override
   Future<OutboxDispatchResult> dispatch(OutboxEntry entry) async {
@@ -227,9 +232,11 @@ class AttendanceOutboxHandler implements OutboxSyncHandler {
       //    `blocked` : attente PROPRE, sans consommer de tentative ni de poison,
       //    auto-cicatrisante à la reconnexion de l'auteur. Même traitement que
       //    les handlers notes et évaluation.
-      //  - auteur == utilisateur courant → le refus ne vient pas de
-      //    l'attribution (rôle, école) et ne se réparera pas tout seul :
-      //    terminal, plutôt que 50 appels réseau pour le même refus.
+      //  - auteur == utilisateur courant, sans `detailCode` → un droit a été
+      //    retiré au compte : l'appel est retenu jusqu'à son retour, jamais
+      //    détruit — la présence n'a pas de rejeu manuel (ADR-014 §13.3) ;
+      //  - sinon → refus du serveur, terminal, plutôt que 50 appels réseau
+      //    pour le même refus.
       // NB : l'intercepteur mappe 401 ET 403 sur `UnauthorizedFailure`, on
       // discrimine donc sur le code HTTP.
       if (e.response?.statusCode == 403) {
@@ -237,6 +244,9 @@ class AttendanceOutboxHandler implements OutboxSyncHandler {
         final authorId = aggregate.authorId;
         if (authorId != null && uid != null && authorId != uid) {
           return OutboxDispatchResult.foreignAuthor;
+        }
+        if (isOutboxPermissionDenial(e)) {
+          return const OutboxDispatchResult.permissionDenied();
         }
         return OutboxDispatchResult.failed(
           serverMessage ?? (failure is Failure ? failure.message : 'Forbidden'),

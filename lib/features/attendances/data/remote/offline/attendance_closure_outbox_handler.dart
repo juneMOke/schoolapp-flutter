@@ -10,6 +10,9 @@ import 'package:school_app_flutter/features/attendances/data/remote/offline/atte
 import 'package:school_app_flutter/features/attendances/data/remote/offline/attendance_closure_local_data_source.dart';
 import 'package:school_app_flutter/features/attendances/data/repository/offline/attendance_day_writer.dart'
     show kAttendanceAggregateType;
+import 'package:school_app_flutter/core/offline/outbox_permission_guard.dart';
+import 'package:school_app_flutter/core/auth/module_access_registry.dart';
+import 'package:school_app_flutter/core/auth/outbox_push_access.dart';
 
 /// Type d'agrégat d'outbox d'une clôture de mois de l'appel.
 const String kAttendanceClosureAggregateType = 'ATTENDANCE_CLOSURE';
@@ -25,9 +28,12 @@ const String kAttendanceClosureAggregateType = 'ATTENDANCE_CLOSURE';
 /// - 200 (rejeu, mois déjà clos ailleurs compris) → la clôture du serveur ;
 /// - 422 (`MONTH_NOT_CLOSABLE`, `CLOSURE_GESTURE_ID_CONFLICT`…) → refus définitif,
 ///   le mois n'est plus figé et la raison s'affiche ;
-/// - 403 → attente propre si le geste est d'un autre compte, refus sinon ;
+/// - 403 → attente propre si le geste est d'un autre compte ; retenue jusqu'au
+///   retour du droit s'il manque une permission (sans `detailCode`) ; refus
+///   sinon ;
 /// - réseau, 5xx, 401 → nouvel essai.
-class AttendanceClosureOutboxHandler implements OutboxSyncHandler {
+class AttendanceClosureOutboxHandler
+    implements OutboxWriteAccess, OutboxSyncHandler {
   final AttendanceClosureApi api;
   final AttendanceClosureLocalDataSource closures;
   final OutboxDao outbox;
@@ -44,6 +50,9 @@ class AttendanceClosureOutboxHandler implements OutboxSyncHandler {
 
   @override
   String get aggregateType => kAttendanceClosureAggregateType;
+
+  @override
+  ModuleAccess? writeAccessFor(OutboxEntry entry) => kAttendanceAmendPushAccess;
 
   @override
   Future<OutboxDispatchResult> dispatch(OutboxEntry entry) async {
@@ -79,6 +88,9 @@ class AttendanceClosureOutboxHandler implements OutboxSyncHandler {
         final uid = currentUser?.uid;
         if (uid != null && closure.authorId != uid) {
           return OutboxDispatchResult.foreignAuthor;
+        }
+        if (isOutboxPermissionDenial(e)) {
+          return const OutboxDispatchResult.permissionDenied();
         }
         return _refuse(closure, _reason(e) ?? 'Clôture non autorisée.');
       }

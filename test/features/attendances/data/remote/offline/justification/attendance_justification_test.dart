@@ -302,10 +302,28 @@ void main() {
     });
 
     test(
-      '403 du compte connecté : refus montré, la demande se retranche',
+      '403 sans code du compte connecté : droit retiré, la décision reste en '
+      'route (ADR-014 §13.3)',
       () async {
         await decide(JustificationDecision.accept);
         when(() => api.decide(any(), 'j1', any())).thenThrow(refused(403));
+
+        final result = await handler.dispatch(await entry());
+
+        expect(result.permissionDenied, isTrue);
+        // Aucun effet local : la décision n'est pas défaite.
+        expect((await only()).isSending, isTrue);
+        expect((await only()).refusal, isNull);
+      },
+    );
+
+    test(
+      '403 avec code du compte connecté : refus montré, la demande se retranche',
+      () async {
+        await decide(JustificationDecision.accept);
+        when(
+          () => api.decide(any(), 'j1', any()),
+        ).thenThrow(refused(403, detailCode: 'SOME_BUSINESS_REFUSAL'));
 
         final result = await handler.dispatch(await entry());
 
