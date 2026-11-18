@@ -22035,6 +22035,18 @@ class AppLocalizationsFr extends AppLocalizations {
       'Correction refusée : l\'élève a déjà un versement cette année. Adressez-vous à l\'administration.';
 
   @override
+  String get levelCorrectionRefusedOverpaid =>
+      'Correction refusée : pour un des frais, l\'élève a déjà payé plus que ce que le nouveau niveau demande. Adressez-vous à l\'administration.';
+
+  @override
+  String get levelCorrectionRefusedFeeCodeAbsent =>
+      'Correction refusée : un frais déjà payé n\'existe pas au nouveau niveau. Adressez-vous à l\'administration.';
+
+  @override
+  String get levelCorrectionRefusedCurrencyChanged =>
+      'Correction refusée : un frais déjà payé change de devise au nouveau niveau. Adressez-vous à l\'administration.';
+
+  @override
   String get levelCorrectionRefusedHasGrades =>
       'Correction refusée : l\'élève a déjà des notes cette année.';
 
