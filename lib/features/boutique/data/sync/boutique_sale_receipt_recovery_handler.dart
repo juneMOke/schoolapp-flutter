@@ -7,6 +7,8 @@ import 'package:school_app_flutter/core/offline/outbox_school_guard.dart';
 import 'package:school_app_flutter/core/offline/outbox_sync_handler.dart';
 import 'package:school_app_flutter/features/boutique/data/local/boutique_receipt_recovery_dao.dart';
 import 'package:school_app_flutter/features/boutique/domain/repositories/boutique_receipt_repository.dart';
+import 'package:school_app_flutter/core/offline/outbox_permission_guard.dart';
+import 'package:school_app_flutter/core/auth/module_access_registry.dart';
 
 /// Réclame le reçu de vente qu'un accusé n'a pas rapporté.
 ///
@@ -15,7 +17,8 @@ import 'package:school_app_flutter/features/boutique/domain/repositories/boutiqu
 /// reprise est sans danger. La réclamation elle-même consigne numéro, jour
 /// d'émission et QR sur la vente (`BoutiqueReceiptRepository`) ; le ticket
 /// devient alors imprimable.
-class BoutiqueSaleReceiptRecoveryHandler implements OutboxSyncHandler {
+class BoutiqueSaleReceiptRecoveryHandler
+    implements OutboxWriteAccess, OutboxSyncHandler {
   final BoutiqueReceiptRepository Function() _receipts;
   final BoutiqueReceiptRecoveryDao _dao;
   final CurrentUserContext _currentUser;
@@ -30,6 +33,9 @@ class BoutiqueSaleReceiptRecoveryHandler implements OutboxSyncHandler {
 
   @override
   String get aggregateType => BoutiqueReceiptRecoveryDao.aggregateType;
+
+  @override
+  ModuleAccess? writeAccessFor(OutboxEntry entry) => kBoutiqueCollectAccess;
 
   @override
   Future<OutboxDispatchResult> dispatch(OutboxEntry entry) async {

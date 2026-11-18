@@ -440,8 +440,22 @@ void main() {
       // Le montant reste lisible : l'argent reçu n'est jamais « reperdu ».
     });
 
-    test('un 403 est TERMINAL', () async {
+    test('un 403 sans code retient la vente sans la marquer en échec '
+        '(droit retiré, ADR-014 §13.3)', () async {
       when(() => api.commitSale(any(), any())).thenThrow(_http(403));
+
+      final result = await handlerWith(
+        OutboxDependencyState.ready,
+      ).dispatch(_entry(_request()));
+
+      expect(result.permissionDenied, isTrue);
+      expect((await saleRow())['sync_status'], isNot('SYNC_ERROR'));
+    });
+
+    test('un 403 avec code est TERMINAL', () async {
+      when(() => api.commitSale(any(), any())).thenThrow(
+        _http(403, body: const {'detailCode': 'SOME_BUSINESS_REFUSAL'}),
+      );
 
       final result = await handlerWith(
         OutboxDependencyState.ready,

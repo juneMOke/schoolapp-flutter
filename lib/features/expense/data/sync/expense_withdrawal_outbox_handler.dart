@@ -15,6 +15,8 @@ import 'package:school_app_flutter/core/offline/outbox_school_guard.dart';
 import 'package:school_app_flutter/features/expense/data/sync/expense_sync_api.dart';
 import 'package:school_app_flutter/features/expense/data/sync/expense_sync_models.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_enums.dart';
+import 'package:school_app_flutter/core/offline/outbox_permission_guard.dart';
+import 'package:school_app_flutter/core/auth/module_access_registry.dart';
 
 /// Handler d'outbox de l'agrégat `EXPENSE_WITHDRAWAL` — retirer ou restaurer.
 ///
@@ -37,7 +39,8 @@ import 'package:school_app_flutter/features/expense/domain/entities/expense_enum
 /// Sauf si le dernier envoi du contenu a été **refusé** : le numéro ne viendra
 /// pas, et le retrait attendrait pour toujours. Il se règle alors sur le poste
 /// seul ([ExpenseWriteDao.setLocalOnlyWithdrawal]).
-class ExpenseWithdrawalOutboxHandler implements OutboxSyncHandler {
+class ExpenseWithdrawalOutboxHandler
+    implements OutboxWriteAccess, OutboxSyncHandler {
   final ExpenseSyncApi _api;
   final ExpenseReadDao _reader;
   final ExpenseWriteDao _writer;
@@ -64,6 +67,9 @@ class ExpenseWithdrawalOutboxHandler implements OutboxSyncHandler {
 
   @override
   String get aggregateType => ExpenseWriteDao.withdrawalAggregateType;
+
+  @override
+  ModuleAccess? writeAccessFor(OutboxEntry entry) => kExpenseWithdrawAccess;
 
   @override
   Future<OutboxDispatchResult> dispatch(OutboxEntry entry) async {
@@ -117,6 +123,9 @@ class ExpenseWithdrawalOutboxHandler implements OutboxSyncHandler {
           nowMs: _now(),
         );
         return const OutboxDispatchResult.acked();
+      }
+      if (isOutboxPermissionDenial(e)) {
+        return const OutboxDispatchResult.permissionDenied();
       }
       if (failure.isTransient) {
         return OutboxDispatchResult.retry(failure.reason);

@@ -9,6 +9,8 @@ import 'package:school_app_flutter/features/documents/domain/entities/editique_d
 import 'package:school_app_flutter/features/documents/domain/repositories/editique_repository.dart';
 import 'package:school_app_flutter/features/finance/offline/data/local/dao/receipt_recovery_dao.dart';
 import 'package:school_app_flutter/features/finance/offline/data/sync/finance_error_codes.dart';
+import 'package:school_app_flutter/core/offline/outbox_permission_guard.dart';
+import 'package:school_app_flutter/core/auth/module_access_registry.dart';
 
 /// Va chercher le reçu qu'un accusé n'a pas rapporté (continuité RC).
 ///
@@ -20,7 +22,8 @@ import 'package:school_app_flutter/features/finance/offline/data/sync/finance_er
 /// Avant la release back qui verrouille le versement, une relance arrivée
 /// pendant le premier scellement répond 409 : c'est un « réessayer plus
 /// tard » comme un autre.
-class PaymentReceiptRecoveryOutboxHandler implements OutboxSyncHandler {
+class PaymentReceiptRecoveryOutboxHandler
+    implements OutboxWriteAccess, OutboxSyncHandler {
   /// Résolu à l'appel : le dépôt d'éditique vit hors des modules offline, et
   /// le handler s'enregistre avec eux.
   final EditiqueRepository Function() _editique;
@@ -37,6 +40,9 @@ class PaymentReceiptRecoveryOutboxHandler implements OutboxSyncHandler {
 
   @override
   String get aggregateType => ReceiptRecoveryDao.aggregateType;
+
+  @override
+  ModuleAccess? writeAccessFor(OutboxEntry entry) => kTicketReceiptRetryAccess;
 
   @override
   Future<OutboxDispatchResult> dispatch(OutboxEntry entry) async {

@@ -15,6 +15,8 @@ import 'package:school_app_flutter/features/expense/data/sync/expense_sync_api.d
 import 'package:school_app_flutter/features/expense/data/sync/expense_sync_models.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_enums.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_gesture.dart';
+import 'package:school_app_flutter/core/offline/outbox_permission_guard.dart';
+import 'package:school_app_flutter/core/auth/module_access_registry.dart';
 
 /// Handler d'outbox de l'agrégat `EXPENSE_GESTURE` — **un geste du circuit**.
 ///
@@ -41,7 +43,8 @@ import 'package:school_app_flutter/features/expense/domain/entities/expense_gest
 /// Seul le `detailCode` les sépare, et s'y tromper réécrit la décision d'un
 /// collègue : `DECISION_ALREADY_TAKEN` réaligne et **ne rejoue jamais** ;
 /// `TRANSITION_OUT_OF_ORDER` rejoue et **ne réaligne jamais**.
-class ExpenseGestureOutboxHandler implements OutboxSyncHandler {
+class ExpenseGestureOutboxHandler
+    implements OutboxWriteAccess, OutboxSyncHandler {
   final ExpenseSyncApi _api;
   final ExpenseSyncDao _dao;
   final ExpenseMessageDao _messages;
@@ -65,6 +68,30 @@ class ExpenseGestureOutboxHandler implements OutboxSyncHandler {
 
   @override
   String get aggregateType => ExpenseWriteDao.gestureAggregateType;
+
+  /// Le droit dépend du geste : chacun part sur sa route, et chaque route a
+  /// le sien (`ExpenseSyncController`).
+  @override
+  ModuleAccess? writeAccessFor(OutboxEntry entry) {
+    final ExpenseGesture gesture;
+    try {
+      gesture = ExpenseGesturePayload.fromJson(
+        jsonDecode(entry.payload) as Map<String, dynamic>,
+      ).gesture;
+    } catch (_) {
+      // Illisible : le dispatch le dira lui-même.
+      return null;
+    }
+    return switch (gesture) {
+      ExpenseGesture.approve || ExpenseGesture.refuse => kExpenseDecideAccess,
+      ExpenseGesture.pay => kExpensePayAccess,
+      ExpenseGesture.reopen => kExpenseReopenAccess,
+      ExpenseGesture.retract ||
+      ExpenseGesture.resubmit ||
+      ExpenseGesture.remind ||
+      ExpenseGesture.comment => kExpenseWriteAccess,
+    };
+  }
 
   @override
   Future<OutboxDispatchResult> dispatch(OutboxEntry entry) async {
@@ -167,10 +194,14 @@ class ExpenseGestureOutboxHandler implements OutboxSyncHandler {
     }
     // `TRANSITION_OUT_OF_ORDER` et les transitoires se rejouent — et surtout
     // le premier ne réaligne RIEN : la ligne locale est juste.
+    if (isOutboxPermissionDenial(e)) {
+      return const OutboxDispatchResult.permissionDenied();
+    }
     if (failure.isRetriableConflict || failure.isTransient) {
       return OutboxDispatchResult.retry(failure.reason);
     }
-    // 403, 422 : terminal. Le geste est défait côté serveur — il n'a jamais
+    // 403 avec code, 422 : terminal (un 403 sans code, droit retiré, est
+    // retenu plus haut). Le geste est défait côté serveur — il n'a jamais
     // eu lieu — et la ligne passe « à corriger » (A4, F22).
     //
     // Et la suite meurt avec lui : une séquence dont la première marche a

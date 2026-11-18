@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:school_app_flutter/core/auth/module_access_registry.dart';
 import 'package:school_app_flutter/core/offline/current_user_context.dart';
 import 'package:school_app_flutter/core/offline/outbox_entry.dart';
 import 'package:school_app_flutter/core/offline/outbox_sync_handler.dart';
@@ -395,9 +396,9 @@ void main() {
       () async {
         // Il n'y a rien à corriger dans une demande parce qu'un mot n'a pas pu
         // s'écrire — la ligne n'a même pas bougé.
-        when(
-          () => api.commentExpense(any(), any(), any()),
-        ).thenThrow(http(403));
+        when(() => api.commentExpense(any(), any(), any())).thenThrow(
+          http(403, body: const {'detailCode': 'SOME_BUSINESS_REFUSAL'}),
+        );
 
         final result = await handler().dispatch(
           entry('m-1', gesture: ExpenseGesture.comment),
@@ -411,6 +412,39 @@ void main() {
         );
       },
     );
+
+    test('403 sans code sur une décision : droit retiré, rien n est défait, '
+        'la suite reste en file (ADR-014 §13.3)', () async {
+      when(() => api.decideExpense(any(), any(), any())).thenThrow(http(403));
+
+      final result = await handler().dispatch(
+        entry('m-1', gesture: ExpenseGesture.approve),
+      );
+
+      expect(result.permissionDenied, isTrue);
+      expect(await messageState('m-1'), isNot(ExpenseSyncState.rejected));
+      expect(
+        (await reader.find('e-1'))!.syncStatus,
+        isNot(ExpenseSyncState.rejected.dbValue),
+      );
+    });
+
+    test('chaque geste exige le droit de SA route', () {
+      ModuleAccess? accessOf(ExpenseGesture g) =>
+          handler().writeAccessFor(entry('m-1', gesture: g));
+      expect(accessOf(ExpenseGesture.approve), kExpenseDecideAccess);
+      expect(accessOf(ExpenseGesture.refuse), kExpenseDecideAccess);
+      expect(accessOf(ExpenseGesture.pay), kExpensePayAccess);
+      expect(accessOf(ExpenseGesture.reopen), kExpenseReopenAccess);
+      for (final g in [
+        ExpenseGesture.retract,
+        ExpenseGesture.resubmit,
+        ExpenseGesture.remind,
+        ExpenseGesture.comment,
+      ]) {
+        expect(accessOf(g), kExpenseWriteAccess, reason: g.name);
+      }
+    });
 
     test('un geste qui PASSE lève le « à corriger » posé par un geste '
         'précédent', () async {

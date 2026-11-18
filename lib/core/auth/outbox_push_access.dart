@@ -24,3 +24,39 @@ import 'package:school_app_flutter/core/auth/permissions.dart';
 const ModuleAccess kAttendanceAmendPushAccess = ModuleAccess([
   Perm.attendanceAmend,
 ]);
+
+/// `POST /sync/payment-corrections` — `finance.payment.cancel` ET
+/// `editique.cancel`. Un remplacement exige en plus `finance.payment.write` et
+/// `editique.write`, mais ce contrôle vit dans le code du contrôleur : la sonde
+/// rattrape son 403.
+const ModuleAccess kPaymentCorrectionPushAccess = ModuleAccess([
+  Perm.financePaymentCancel,
+  Perm.editiqueCancel,
+], requiresAll: true);
+
+/// `POST /sync/staff-members/{id}/documents` — `hr.document.write`.
+const ModuleAccess kStaffDocumentPushAccess = ModuleAccess([
+  Perm.hrDocumentWrite,
+]);
+
+/// `POST /sync/academics/evaluations`, `/notes`, `PUT …/sujet`,
+/// `POST …/copie-log` — `academics.grade.write`.
+const ModuleAccess kGradeWritePushAccess = ModuleAccess([
+  Perm.academicsGradeWrite,
+]);
+
+/// `POST /sync/academics/cotes` — `academics.grade.enter`.
+const ModuleAccess kGradeEnterPushAccess = ModuleAccess([
+  Perm.academicsGradeEnter,
+]);
+
+/// `POST|PUT|DELETE /sync/academics/chapitres…`, `/chapitre-notes`,
+/// `/cours/{id}/chapitres-ordre`, `/journal` — `academics.programme.write`.
+const ModuleAccess kProgrammeWritePushAccess = ModuleAccess([
+  Perm.academicsProgrammeWrite,
+]);
+
+/// `POST /sync/classroom-transfers` — `classroom.write`.
+const ModuleAccess kClassroomWritePushAccess = ModuleAccess([
+  Perm.classroomWrite,
+]);

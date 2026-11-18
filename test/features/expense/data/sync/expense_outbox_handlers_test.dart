@@ -55,6 +55,10 @@ ExpenseSyncResponseDto _ack({String? deletedAt}) => ExpenseSyncResponseDto(
   lwwOutcome: 'APPLIED',
 );
 
+const Map<String, dynamic> _business403 = {
+  'detailCode': 'SOME_BUSINESS_REFUSAL',
+};
+
 DioException _http(int? status, {Map<String, dynamic>? body}) => DioException(
   requestOptions: RequestOptions(path: '/'),
   response: status == null
@@ -349,15 +353,33 @@ void main() {
       },
     );
 
-    test('403 → échec terminal, et la ligne revient au registre', () async {
+    test('403 sans code : droit retiré, le retrait reste en attente '
+        '(ADR-014 §13.3)', () async {
       await withdrawnLocally();
       when(() => api.setWithdrawn(any(), any(), any())).thenThrow(_http(403));
 
       final result = await handler().dispatch(entry());
 
-      expect(result.outcome, OutboxDispatchOutcome.failed);
-      expect((await row())!.deletedAt, isNull);
+      expect(result.permissionDenied, isTrue);
+      final r = (await row())!;
+      expect(r.deletedAt, isNotNull, reason: 'rien n est défait');
+      expect(r.withdrawalPendingAt, isNotNull);
     });
+
+    test(
+      '403 avec code → échec terminal, et la ligne revient au registre',
+      () async {
+        await withdrawnLocally();
+        when(
+          () => api.setWithdrawn(any(), any(), any()),
+        ).thenThrow(_http(403, body: _business403));
+
+        final result = await handler().dispatch(entry());
+
+        expect(result.outcome, OutboxDispatchOutcome.failed);
+        expect((await row())!.deletedAt, isNull);
+      },
+    );
 
     test('restauration refusée : la ligne revient à ce que le SERVEUR sait, '
         'pas à un état deviné', () async {
@@ -368,7 +390,9 @@ void main() {
         'withdrawal_pending_at': _sent,
         'server_deleted_at': _serverWithdrawal,
       });
-      when(() => api.setWithdrawn(any(), any(), any())).thenThrow(_http(403));
+      when(
+        () => api.setWithdrawn(any(), any(), any()),
+      ).thenThrow(_http(403, body: _business403));
 
       final result = await handler().dispatch(entry(deleted: false));
 

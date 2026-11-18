@@ -15,6 +15,9 @@ import 'package:school_app_flutter/features/finance/offline/data/sync/finance_sy
 import 'package:school_app_flutter/features/finance/offline/data/receipt/cancelled_receipt_recorder.dart';
 import 'package:school_app_flutter/features/finance/offline/data/sync/payment_correction_request.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/entities/payment_correction_status.dart';
+import 'package:school_app_flutter/core/offline/outbox_permission_guard.dart';
+import 'package:school_app_flutter/core/auth/module_access_registry.dart';
+import 'package:school_app_flutter/core/auth/outbox_push_access.dart';
 
 /// Handler d'outbox de l'agrégat `PAYMENT_CORRECTION` (lot T3).
 ///
@@ -34,11 +37,14 @@ import 'package:school_app_flutter/features/finance/offline/domain/entities/paym
 /// ## Refus
 ///
 /// `PAYMENT_ALREADY_CORRECTED`, `TARGET_NOT_ENROLLED`, les codes d'encaissement
-/// définitifs et le 403 sont terminaux, et le serveur n'a rien changé :
+/// définitifs et un 403 porteur d'un code sont terminaux, et le serveur n'a
+/// rien changé (un 403 sans code — droit retiré — retient la correction sans
+/// rien rétablir, ADR-014 §13.3) :
 /// l'origine reprend cours, le remplaçant local est retiré, la ligne garde le
 /// motif. L'entrée est alors acquittée — la remettre en file depuis la feuille
 /// des erreurs n'obtiendrait que le même refus.
-class PaymentCorrectionOutboxHandler implements OutboxSyncHandler {
+class PaymentCorrectionOutboxHandler
+    implements OutboxWriteAccess, OutboxSyncHandler {
   final FinanceSyncApi _api;
   final PaymentCorrectionSyncDao _dao;
   final OutboxDependencyGate _dependency;
@@ -72,6 +78,10 @@ class PaymentCorrectionOutboxHandler implements OutboxSyncHandler {
 
   @override
   String get aggregateType => kPaymentCorrectionAggregate;
+
+  @override
+  ModuleAccess? writeAccessFor(OutboxEntry entry) =>
+      kPaymentCorrectionPushAccess;
 
   @override
   Future<OutboxDispatchResult> dispatch(OutboxEntry entry) async {
@@ -183,6 +193,9 @@ class PaymentCorrectionOutboxHandler implements OutboxSyncHandler {
       return OutboxDispatchResult.retry(reason);
     }
 
+    if (isOutboxPermissionDenial(e)) {
+      return const OutboxDispatchResult.permissionDenied();
+    }
     final details = ApiErrorParser.detailsOf(e.response);
     await _dao.reject(
       request.id,

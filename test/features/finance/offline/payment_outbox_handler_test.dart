@@ -273,7 +273,16 @@ void main() {
     );
   }
 
-  for (final status in [400, 403, 413, 415, 422]) {
+  test('403 sans code → retenu : l argent encaissé attend le retour du droit '
+      '(ADR-014 §13.3)', () async {
+    when(() => api.commitPayment(any(), any())).thenThrow(dioWithStatus(403));
+    final result = await handlerWithGate(
+      OutboxDependencyState.ready,
+    ).dispatch(await pendingEntry());
+    expect(result.permissionDenied, isTrue);
+  });
+
+  for (final status in [400, 413, 415, 422]) {
     test(
       '$status → failed (4xx déterministe surfacé, pas de retry-jusqu\'au-poison)',
       () async {
