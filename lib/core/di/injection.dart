@@ -110,6 +110,7 @@ import 'package:school_app_flutter/features/auth/data/datasources/forgot_passwor
 import 'package:school_app_flutter/features/auth/data/repositories/auth_repository_impl.dart';
 import 'package:school_app_flutter/features/auth/data/repositories/forgot_password_repository_impl.dart';
 import 'package:school_app_flutter/features/auth/data/services/token_storage_service.dart';
+import 'package:school_app_flutter/core/offline/outbox_permission_guard.dart';
 import 'package:school_app_flutter/core/offline/connectivity_service.dart';
 import 'package:school_app_flutter/core/auth/current_permissions.dart';
 import 'package:school_app_flutter/core/offline/current_user_context.dart';
@@ -348,6 +349,13 @@ Future<void> configureDependencies({
     dio.interceptors.add(
       AuthRefreshInterceptor(refresher: refresher, retryDio: bareDio),
     );
+
+    // Sonde de permission de la file d'écritures (ADR-014 §13.3), APRÈS le
+    // refresh : elle voit le 403 direct comme celui d'un rejeu après 401 (le
+    // refresh transmet l'échec du rejeu par `next`), et AVANT le mapping
+    // d'erreurs, qui remplace la réponse d'origine. Hors d'un dispatch
+    // d'outbox, elle ne fait rien.
+    dio.interceptors.add(OutboxPermissionProbeInterceptor());
 
     dio.interceptors.add(
       InterceptorsWrapper(
