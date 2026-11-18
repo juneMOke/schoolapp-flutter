@@ -79,9 +79,22 @@ class PaymentCorrectionOutboxHandler
   @override
   String get aggregateType => kPaymentCorrectionAggregate;
 
+  /// Un remplaçant exige en plus le droit d'encaisser, vérifié dans le code du
+  /// contrôleur (`FinanceSyncController.correctPayment`).
   @override
-  ModuleAccess? writeAccessFor(OutboxEntry entry) =>
-      kPaymentCorrectionPushAccess;
+  ModuleAccess? writeAccessFor(OutboxEntry entry) {
+    final PaymentCorrectionRequest request;
+    try {
+      request = PaymentCorrectionRequest.fromJson(
+        jsonDecode(entry.payload) as Map<String, dynamic>,
+      );
+    } catch (_) {
+      return null;
+    }
+    return request.replacement == null
+        ? kPaymentCorrectionPushAccess
+        : kPaymentReplacementPushAccess;
+  }
 
   @override
   Future<OutboxDispatchResult> dispatch(OutboxEntry entry) async {

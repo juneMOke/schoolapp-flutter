@@ -1,3 +1,7 @@
+import 'package:school_app_flutter/features/staff/data/sync/staff_outbox_dispatch.dart';
+import 'package:school_app_flutter/core/offline/outbox_entry.dart';
+import 'package:school_app_flutter/core/auth/module_access_registry.dart';
+import 'package:school_app_flutter/core/auth/outbox_push_access.dart';
 import 'package:school_app_flutter/features/payroll/data/local/payroll_dao.dart';
 import 'package:school_app_flutter/features/payroll/data/local/payroll_gesture_dao.dart';
 import 'package:school_app_flutter/features/expense/data/local/expense_write_dao.dart';
@@ -42,6 +46,20 @@ class PayrollGestureOutboxHandler
 
   @override
   String get aggregateType => PayrollOutbox.gesture;
+
+  /// L'économe soumet sous `hr.pay.write` ; renvoyer, valider et rouvrir
+  /// exigent en plus `hr.pay.manage`, vérifié dans le code du serveur
+  /// (`PayrollGestureService.requirePermission`).
+  @override
+  ModuleAccess? writeAccessFor(OutboxEntry entry) {
+    final request = StaffOutboxDispatch.decode(entry.payload, parse);
+    if (request == null) return null;
+    return switch (PayrollGestureKind.fromWire(request.kind)) {
+      PayrollGestureKind.submit => kPayrollWriteAccess,
+      null => null,
+      _ => kPayrollDirectionGesturePushAccess,
+    };
+  }
 
   @override
   Set<String> get waitsFor => const {

@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:dio/dio.dart';
+import 'package:school_app_flutter/core/auth/outbox_push_access.dart';
 import 'package:school_app_flutter/core/offline/current_user_context.dart';
 import 'package:school_app_flutter/core/offline/outbox_entry.dart';
 import 'package:school_app_flutter/core/offline/outbox_sync_handler.dart';
@@ -48,8 +49,23 @@ class ExpenseOutboxHandler implements OutboxWriteAccess, OutboxSyncHandler {
   @override
   String get aggregateType => ExpenseWriteDao.aggregateType;
 
+  /// Une avance au personnel exige en plus `hr.pay.read`, vérifié dans le code
+  /// du serveur (`StaffAdvanceContent`). La tablette ne pose le bloc
+  /// `staffAdvance` que sur ce type de dépense.
   @override
-  ModuleAccess? writeAccessFor(OutboxEntry entry) => kExpenseWriteAccess;
+  ModuleAccess? writeAccessFor(OutboxEntry entry) {
+    final ExpenseSyncRequestDto request;
+    try {
+      request = ExpenseSyncRequestDto.fromJson(
+        jsonDecode(entry.payload) as Map<String, dynamic>,
+      );
+    } catch (_) {
+      return null;
+    }
+    return request.expense.staffAdvance == null
+        ? kExpenseWriteAccess
+        : kStaffAdvancePushAccess;
+  }
 
   @override
   Future<OutboxDispatchResult> dispatch(OutboxEntry entry) async {

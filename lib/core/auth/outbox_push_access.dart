@@ -14,9 +14,11 @@ import 'package:school_app_flutter/core/auth/permissions.dart';
 /// directement la constante du registre (`kAttendanceRecordAccess`,
 /// `kPaymentCollectAccess`…). Ce fichier ne nomme que les autres.
 ///
-/// Les contrôles faits dans le code du serveur, et non sur la route (corriger
-/// l'appel d'un jour passé, remplacer un versement), n'y figurent pas : la
-/// sonde du moteur rattrape leur 403.
+/// Les contrôles de droit faits dans le **code** du serveur s'y ajoutent quand
+/// la tablette sait les reconnaître sur l'entrée (clore ou rouvrir le mois du
+/// pointage, gestes de direction de la paie, avance au personnel, remplacement
+/// d'un versement). Celui qu'elle ne peut pas lire — corriger l'appel d'un jour
+/// passé, que seul le serveur sait déjà saisi — reste à la sonde du moteur.
 
 /// `POST /sync/attendance-closures`, `POST /sync/attendance-justifications/
 /// {id}/decision` — `attendance.amend` seul. L'écran exige en plus
@@ -60,3 +62,43 @@ const ModuleAccess kProgrammeWritePushAccess = ModuleAccess([
 const ModuleAccess kClassroomWritePushAccess = ModuleAccess([
   Perm.classroomWrite,
 ]);
+
+/// `POST /sync/payment-corrections` avec un remplaçant : le contrôleur exige en
+/// plus `finance.payment.write` ET `editique.write`.
+const ModuleAccess kPaymentReplacementPushAccess = ModuleAccess([
+  Perm.financePaymentCancel,
+  Perm.editiqueCancel,
+  Perm.financePaymentWrite,
+  Perm.editiqueWrite,
+], requiresAll: true);
+
+/// `POST /sync/expenses` d'une avance au personnel : `expense.write` sur la
+/// route, `hr.pay.read` dans le code (`STAFF_ADVANCE_FORBIDDEN`).
+const ModuleAccess kStaffAdvancePushAccess = ModuleAccess([
+  Perm.expenseWrite,
+  Perm.hrPayRead,
+], requiresAll: true);
+
+/// `POST /sync/staff-attendance-locks`, `CLOSE_MONTH` : `hr.attendance.write`
+/// sur la route, `hr.attendance.manage` dans le code
+/// (`MONTH_CLOSURE_FORBIDDEN`).
+const ModuleAccess kStaffMonthClosePushAccess = ModuleAccess([
+  Perm.hrAttendanceWrite,
+  Perm.hrAttendanceManage,
+], requiresAll: true);
+
+/// `POST /sync/staff-attendance-locks`, `REOPEN_MONTH` : `hr.attendance.write`
+/// sur la route, `hr.attendance.reopen` dans le code
+/// (`MONTH_REOPEN_FORBIDDEN`).
+const ModuleAccess kStaffMonthReopenPushAccess = ModuleAccess([
+  Perm.hrAttendanceWrite,
+  Perm.hrAttendanceReopen,
+], requiresAll: true);
+
+/// `POST /sync/payroll-gestures` hors `SUBMIT` (renvoyer, valider, rouvrir) :
+/// `hr.pay.write` sur la route, `hr.pay.manage` dans le code
+/// (`PAYROLL_GESTURE_FORBIDDEN`).
+const ModuleAccess kPayrollDirectionGesturePushAccess = ModuleAccess([
+  Perm.hrPayWrite,
+  Perm.hrPayManage,
+], requiresAll: true);

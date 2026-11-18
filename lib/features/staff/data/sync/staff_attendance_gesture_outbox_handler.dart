@@ -1,3 +1,4 @@
+import 'package:school_app_flutter/core/auth/outbox_push_access.dart';
 import 'package:school_app_flutter/core/offline/current_user_context.dart';
 import 'package:school_app_flutter/core/offline/outbox_entry.dart';
 import 'package:school_app_flutter/core/offline/outbox_school_guard.dart';
@@ -60,9 +61,21 @@ class StaffAttendanceGestureOutboxHandler
   @override
   String get aggregateType => StaffAttendanceGestureDao.aggregateType;
 
+  /// Le mois se clôt et se rouvre sous un droit de plus, vérifié dans le code
+  /// du serveur (`StaffAttendanceLockService`).
   @override
-  ModuleAccess? writeAccessFor(OutboxEntry entry) =>
-      kStaffAttendanceWriteAccess;
+  ModuleAccess? writeAccessFor(OutboxEntry entry) {
+    final request = StaffOutboxDispatch.decode(
+      entry.payload,
+      StaffAttendanceGestureRequestDto.tryParse,
+    );
+    return switch (StaffAttendanceGesture.fromWire(request?.gesture)) {
+      StaffAttendanceGesture.closeMonth => kStaffMonthClosePushAccess,
+      StaffAttendanceGesture.reopenMonth => kStaffMonthReopenPushAccess,
+      null => null,
+      _ => kStaffAttendanceWriteAccess,
+    };
+  }
 
   @override
   Future<OutboxDispatchResult> dispatch(OutboxEntry entry) async {
