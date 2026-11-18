@@ -61,6 +61,30 @@ void main() {
     expect(await db.query('payment_allocations'), hasLength(1));
   });
 
+  test(
+    'le curseur des versements repart de zéro, les autres restent',
+    () async {
+      await createPreV82Allocations();
+      await db.execute(
+        'CREATE TABLE sync_meta (resource TEXT PRIMARY KEY, cursor TEXT, '
+        'synced_at INTEGER)',
+      );
+      for (final r in [
+        'finance_payments',
+        'finance_payments@u-1',
+        'finance_charges',
+      ]) {
+        await db.insert('sync_meta', {'resource': r, 'cursor': 'W'});
+      }
+
+      await migrateTenantDatabase(db, 81, newVersion: 82);
+
+      expect((await db.query('sync_meta')).map((r) => r['resource']), [
+        'finance_charges',
+      ]);
+    },
+  );
+
   test('sans table, le palier passe sans rien créer', () async {
     await migrateTenantDatabase(db, 81, newVersion: 82);
     expect(await columns(), isEmpty);
