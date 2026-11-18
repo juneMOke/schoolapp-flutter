@@ -5,8 +5,18 @@ import 'package:school_app_flutter/core/offline/outbox_dao.dart';
 import 'package:school_app_flutter/core/offline/outbox_entry.dart';
 import 'package:school_app_flutter/core/offline/record_sync_state.dart';
 import 'package:school_app_flutter/core/offline/sync_state.dart';
+import 'package:school_app_flutter/features/enrollment_level_correction/data/local/level_correction_paid_check.dart';
 import 'package:school_app_flutter/features/enrollment_level_correction/data/sync/level_correction_gesture.dart';
+import 'package:school_app_flutter/features/enrollment_level_correction/domain/entities/level_correction_refusal.dart';
 import 'package:sqflite_common/sqlite_api.dart';
+
+/// Le serveur corrige-t-il le niveau d'un élève qui a déjà payé ?
+///
+/// **`false` tant que le lot F3 du back n'est pas en prod** : il refuse encore
+/// en `LEVEL_CORRECTION_HAS_PAYMENTS`, et la tablette le devance. Le back
+/// prévient au déploiement ; passer alors à `true` remplace ce refus par le
+/// contrôle du payé ([levelCorrectionPaidRefusal]).
+const bool kLevelCorrectionAcceptsPaidStudents = false;
 
 /// Issue d'une demande de correction, vue de la tablette.
 enum LevelCorrectionRecordOutcome {
@@ -19,7 +29,24 @@ enum LevelCorrectionRecordOutcome {
 
   /// L'élève a un versement sur l'année, même annulé : le serveur refuserait
   /// en `LEVEL_CORRECTION_HAS_PAYMENTS` (premier temps). Rien n'est écrit.
-  hasPayments,
+  hasPayments(LevelCorrectionRefusal.hasPayments),
+
+  /// Une nature payée dépasse ce que le niveau cible demande. Rien n'est écrit.
+  overpaid(LevelCorrectionRefusal.overpaid),
+
+  /// Une nature payée manque au niveau cible. Rien n'est écrit.
+  feeCodeAbsent(LevelCorrectionRefusal.feeCodeAbsent),
+
+  /// Une nature payée change de devise au niveau cible. Rien n'est écrit.
+  currencyChanged(LevelCorrectionRefusal.currencyChanged);
+
+  const LevelCorrectionRecordOutcome([this.refusal]);
+
+  /// Le refus que la tablette devance, `null` si le geste est posé ou attend.
+  final LevelCorrectionRefusal? refusal;
+
+  static LevelCorrectionRecordOutcome _of(LevelCorrectionRefusal refusal) =>
+      values.firstWhere((o) => o.refusal == refusal);
 }
 
 /// Écriture d'une correction de niveau — **la ligne et son entrée d'outbox dans
@@ -31,7 +58,13 @@ enum LevelCorrectionRecordOutcome {
 class LevelCorrectionWriteDao {
   final Database _db;
 
-  const LevelCorrectionWriteDao(this._db);
+  /// Voir [kLevelCorrectionAcceptsPaidStudents] ; les tests l'ouvrent.
+  final bool _acceptsPaidStudents;
+
+  const LevelCorrectionWriteDao(
+    this._db, {
+    bool acceptsPaidStudents = kLevelCorrectionAcceptsPaidStudents,
+  }) : _acceptsPaidStudents = acceptsPaidStudents;
 
   static const String table = EnrollmentLevelCorrectionSql.table;
   static const String aggregateType =
@@ -46,11 +79,16 @@ class LevelCorrectionWriteDao {
 
   /// Pose [gesture], sauf si une correction de la même inscription attend déjà
   /// (la seconde partirait sur un niveau de départ périmé et tomberait en
-  /// `STALE_LEVEL`) ou si l'élève a déjà un versement sur l'année.
+  /// `STALE_LEVEL`) ou si le serveur refuserait à coup sûr à cause de ce que
+  /// l'élève a déjà payé.
   ///
-  /// Un versement **annulé** compte aussi : le serveur le compte (décision du
-  /// lot C1 du back), car l'annulation laisse sa trace dans les pièces. Ne pas
-  /// le compter laisserait passer un geste que le serveur refuse à coup sûr.
+  /// Ce dernier contrôle dépend du serveur ([kLevelCorrectionAcceptsPaidStudents]) :
+  /// - **premier temps** : tout versement sur l'année refuse
+  ///   ([LevelCorrectionRecordOutcome.hasPayments]). Un versement **annulé**
+  ///   compte aussi : le serveur le compte (décision du lot C1 du back), car
+  ///   l'annulation laisse sa trace dans les pièces ;
+  /// - **après F3** : seul le payé de chaque nature est jugé contre la grille
+  ///   cible ([levelCorrectionPaidRefusal]).
   ///
   /// « Attend » : en file, ou accusée sans que la descente ait ramené le
   /// nouveau niveau. Une correction en attente dont l'envoi a été **abandonné**
@@ -88,13 +126,8 @@ class LevelCorrectionWriteDao {
       if (!stalled) return LevelCorrectionRecordOutcome.alreadyPending;
       abandoned.add(row['id']! as String);
     }
-    final payments = await txn.rawQuery(
-      'SELECT 1 FROM payments p '
-      'WHERE p.student_id = ? AND p.academic_year_id = ? '
-      'LIMIT 1',
-      [gesture.studentId, gesture.academicYearId],
-    );
-    if (payments.isNotEmpty) return LevelCorrectionRecordOutcome.hasPayments;
+    final refusal = await _paidRefusal(txn, gesture);
+    if (refusal != null) return LevelCorrectionRecordOutcome._of(refusal);
     for (final id in abandoned) {
       await txn.update(
         table,
@@ -136,4 +169,26 @@ class LevelCorrectionWriteDao {
     );
     return LevelCorrectionRecordOutcome.recorded;
   });
+
+  Future<LevelCorrectionRefusal?> _paidRefusal(
+    Transaction txn,
+    LevelCorrectionGesture gesture,
+  ) async {
+    if (_acceptsPaidStudents) {
+      return levelCorrectionPaidRefusal(
+        txn,
+        studentId: gesture.studentId,
+        academicYearId: gesture.academicYearId,
+        toSchoolLevelId: gesture.toSchoolLevelId,
+        toSchoolLevelGroupId: gesture.toSchoolLevelGroupId,
+      );
+    }
+    final payments = await txn.rawQuery(
+      'SELECT 1 FROM payments p '
+      'WHERE p.student_id = ? AND p.academic_year_id = ? '
+      'LIMIT 1',
+      [gesture.studentId, gesture.academicYearId],
+    );
+    return payments.isEmpty ? null : LevelCorrectionRefusal.hasPayments;
+  }
 }

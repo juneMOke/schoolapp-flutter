@@ -10,7 +10,6 @@ import 'package:school_app_flutter/features/enrollment_level_correction/data/loc
 import 'package:school_app_flutter/features/enrollment_level_correction/data/local/level_correction_write_dao.dart';
 import 'package:school_app_flutter/features/enrollment_level_correction/data/sync/level_correction_gesture.dart';
 import 'package:school_app_flutter/features/enrollment_level_correction/domain/entities/level_correction.dart';
-import 'package:school_app_flutter/features/enrollment_level_correction/domain/entities/level_correction_refusal.dart';
 import 'package:school_app_flutter/features/enrollment_level_correction/domain/entities/level_correction_refused_locally.dart';
 import 'package:school_app_flutter/features/enrollment_level_correction/domain/entities/level_correction_request.dart';
 import 'package:school_app_flutter/features/enrollment_level_correction/domain/repositories/level_correction_repository.dart';
@@ -77,19 +76,16 @@ class LevelCorrectionRepositoryImpl implements LevelCorrectionRepository {
     } catch (e) {
       return Left(StorageFailure('Écriture de la correction : $e'));
     }
-    switch (outcome) {
-      case LevelCorrectionRecordOutcome.alreadyPending:
-        return const Right(false);
-      case LevelCorrectionRecordOutcome.hasPayments:
-        return const Left(
-          LevelCorrectionRefusedLocally(LevelCorrectionRefusal.hasPayments),
-        );
-      case LevelCorrectionRecordOutcome.recorded:
-        _bus.emit({request.enrollmentId});
-        final engine = _syncEngine;
-        if (engine != null) unawaited(engine.flush());
-        return const Right(true);
+    if (outcome.refusal case final refusal?) {
+      return Left(LevelCorrectionRefusedLocally(refusal));
     }
+    if (outcome == LevelCorrectionRecordOutcome.alreadyPending) {
+      return const Right(false);
+    }
+    _bus.emit({request.enrollmentId});
+    final engine = _syncEngine;
+    if (engine != null) unawaited(engine.flush());
+    return const Right(true);
   }
 
   @override
