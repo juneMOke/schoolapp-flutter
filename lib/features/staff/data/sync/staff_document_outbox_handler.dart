@@ -15,6 +15,9 @@ import 'package:school_app_flutter/features/staff/data/local/staff_member_dao.da
 import 'package:school_app_flutter/features/staff/data/sync/staff_document_push_dto.dart';
 import 'package:school_app_flutter/features/staff/data/sync/staff_document_transfer_api.dart';
 import 'package:school_app_flutter/features/staff/data/sync/staff_push_failure.dart';
+import 'package:school_app_flutter/core/offline/outbox_permission_guard.dart';
+import 'package:school_app_flutter/core/auth/module_access_registry.dart';
+import 'package:school_app_flutter/core/auth/outbox_push_access.dart';
 
 /// Handler d'outbox de l'agrégat `STAFF_DOCUMENT` — le versement d'une pièce.
 ///
@@ -22,7 +25,8 @@ import 'package:school_app_flutter/features/staff/data/sync/staff_push_failure.d
 /// accusée, la pièce attend (`blocked`, « bloquée par la fiche »). Les octets
 /// sont relus dans le magasin chiffré au moment de l'envoi ; une pièce dont les
 /// octets ont disparu (clé perdue) ne peut plus partir et le dit.
-class StaffDocumentOutboxHandler implements OutboxSyncHandler {
+class StaffDocumentOutboxHandler
+    implements OutboxWriteAccess, OutboxSyncHandler {
   final StaffDocumentTransferApi _api;
   final StaffDocumentSyncDao _dao;
   final StaffMemberDao _members;
@@ -55,6 +59,9 @@ class StaffDocumentOutboxHandler implements OutboxSyncHandler {
 
   @override
   String get aggregateType => StaffDocumentWriteDao.aggregateType;
+
+  @override
+  ModuleAccess? writeAccessFor(OutboxEntry entry) => kStaffDocumentPushAccess;
 
   @override
   Future<OutboxDispatchResult> dispatch(OutboxEntry entry) async {
@@ -130,6 +137,9 @@ class StaffDocumentOutboxHandler implements OutboxSyncHandler {
         await _dao.delete(request.id);
         await _store.delete(request.id);
         return const OutboxDispatchResult.acked();
+      }
+      if (isOutboxPermissionDenial(e)) {
+        return const OutboxDispatchResult.permissionDenied();
       }
       if (failure.isTransient) {
         return OutboxDispatchResult.retry(failure.reason);

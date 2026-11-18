@@ -1,3 +1,5 @@
+import 'package:school_app_flutter/core/offline/outbox_entry.dart';
+import 'package:school_app_flutter/core/auth/module_access_registry.dart';
 import 'package:school_app_flutter/core/staff/local/payroll_settings_seed.dart';
 import 'package:school_app_flutter/features/payroll/data/local/payroll_outbox.dart';
 import 'package:school_app_flutter/features/payroll/data/local/payroll_payout_policy_dao.dart';
@@ -31,6 +33,10 @@ class PayrollSettingsOutboxHandler
 
   @override
   String get aggregateType => PayrollOutbox.settings;
+
+  /// `hr.pay.manage` : la route règle l'école, pas un agent.
+  @override
+  ModuleAccess? writeAccessFor(OutboxEntry entry) => kPayrollManageAccess;
 
   @override
   PayrollSettingsRequestDto? parse(Object? raw) =>

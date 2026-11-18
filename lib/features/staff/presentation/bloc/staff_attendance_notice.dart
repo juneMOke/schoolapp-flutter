@@ -34,8 +34,8 @@ enum StaffAttendanceNoticeKind {
   /// L'écriture locale a échoué (base, session).
   writeFailed,
 
-  /// Un geste d'écriture sans `hr.attendance.write` : jamais mis en file (un
-  /// 403 y serait terminal).
+  /// Un geste d'écriture sans `hr.attendance.write` : jamais mis en file (il
+  /// y attendrait un droit que le compte n'a pas).
   forbidden,
 }
 

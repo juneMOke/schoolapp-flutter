@@ -7,10 +7,13 @@ import 'package:school_app_flutter/features/staff/data/local/staff_attendance_se
 import 'package:school_app_flutter/features/staff/data/sync/staff_attendance_settings_dto.dart';
 import 'package:school_app_flutter/features/staff/data/sync/staff_attendance_sync_api.dart';
 import 'package:school_app_flutter/features/staff/data/sync/staff_outbox_dispatch.dart';
+import 'package:school_app_flutter/core/offline/outbox_permission_guard.dart';
+import 'package:school_app_flutter/core/auth/module_access_registry.dart';
 
 /// Handler d'outbox de l'agrégat `STAFF_ATTENDANCE_SETTINGS` — le début des
 /// cours et la tolérance d'une école, dernier écrit gagne.
-class StaffAttendanceSettingsOutboxHandler implements OutboxSyncHandler {
+class StaffAttendanceSettingsOutboxHandler
+    implements OutboxWriteAccess, OutboxSyncHandler {
   final StaffAttendanceSyncApi _api;
   final StaffAttendanceSettingsDao _dao;
   final CurrentUserContext _currentUser;
@@ -28,6 +31,10 @@ class StaffAttendanceSettingsOutboxHandler implements OutboxSyncHandler {
 
   @override
   String get aggregateType => StaffAttendanceSettingsDao.aggregateType;
+
+  @override
+  ModuleAccess? writeAccessFor(OutboxEntry entry) =>
+      kStaffAttendanceManageAccess;
 
   @override
   Future<OutboxDispatchResult> dispatch(OutboxEntry entry) async {

@@ -24,7 +24,7 @@ import 'package:school_app_flutter/core/presence/domain/presence_status.dart';
 ///
 /// Un compte sans `hr.attendance.write`, ou un jour figé, intercepte tout,
 /// avant même d'ouvrir une modale : l'écran dit pourquoi au lieu d'offrir une
-/// saisie vouée au refus (un 403 en file d'envoi est terminal).
+/// saisie vouée au refus (en file d'envoi, elle attendrait un droit absent).
 ///
 /// Chaque geste relit la ligne **au moment où il part** ([_row]) : la ligne
 /// affichée a pu changer entre-temps (double toucher, pull pendant une

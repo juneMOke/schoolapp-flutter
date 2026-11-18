@@ -11,6 +11,8 @@ import 'package:school_app_flutter/features/staff/data/local/staff_member_dao.da
 import 'package:school_app_flutter/features/staff/data/sync/staff_attendance_dto.dart';
 import 'package:school_app_flutter/features/staff/data/sync/staff_attendance_sync_api.dart';
 import 'package:school_app_flutter/features/staff/data/sync/staff_outbox_dispatch.dart';
+import 'package:school_app_flutter/core/offline/outbox_permission_guard.dart';
+import 'package:school_app_flutter/core/auth/module_access_registry.dart';
 
 /// Handler d'outbox de l'agrégat `STAFF_ATTENDANCE` — un pointage.
 ///
@@ -21,7 +23,8 @@ import 'package:school_app_flutter/features/staff/data/sync/staff_outbox_dispatc
 ///    après avoir rouvert.
 ///
 /// Une fiche absente du poste (purgée) rend le pointage sans objet.
-class StaffAttendanceOutboxHandler implements OutboxSyncHandler {
+class StaffAttendanceOutboxHandler
+    implements OutboxWriteAccess, OutboxSyncHandler {
   final StaffAttendanceSyncApi _api;
   final StaffAttendanceSyncDao _dao;
   final StaffAttendanceGestureDao _gestures;
@@ -51,6 +54,10 @@ class StaffAttendanceOutboxHandler implements OutboxSyncHandler {
 
   @override
   String get aggregateType => StaffAttendanceWriteDao.aggregateType;
+
+  @override
+  ModuleAccess? writeAccessFor(OutboxEntry entry) =>
+      kStaffAttendanceWriteAccess;
 
   @override
   Future<OutboxDispatchResult> dispatch(OutboxEntry entry) async {

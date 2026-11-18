@@ -14,6 +14,8 @@ import 'package:school_app_flutter/features/staff/data/sync/staff_outbox_dispatc
 import 'package:school_app_flutter/features/staff/domain/entities/staff_attendance_enums.dart';
 import 'package:school_app_flutter/core/presence/domain/school_day_calendar.dart';
 import 'package:school_app_flutter/core/offline/record_sync_state.dart';
+import 'package:school_app_flutter/core/offline/outbox_permission_guard.dart';
+import 'package:school_app_flutter/core/auth/module_access_registry.dart';
 
 /// Handler d'outbox de l'agrégat `STAFF_ATTENDANCE_GESTURE` — valider ou
 /// rouvrir un jour, clore un mois.
@@ -26,7 +28,8 @@ import 'package:school_app_flutter/core/offline/record_sync_state.dart';
 /// **Sortie de secours** : un pointage qui ne partira jamais ne retient pas
 /// la validation — refusé (il n'est plus en file), ou attendant une fiche
 /// d'agent elle-même refusée ou disparue.
-class StaffAttendanceGestureOutboxHandler implements OutboxSyncHandler {
+class StaffAttendanceGestureOutboxHandler
+    implements OutboxWriteAccess, OutboxSyncHandler {
   final StaffAttendanceSyncApi _api;
   final StaffAttendanceLockDao _locks;
   final StaffAttendanceGestureDao _gestures;
@@ -56,6 +59,10 @@ class StaffAttendanceGestureOutboxHandler implements OutboxSyncHandler {
 
   @override
   String get aggregateType => StaffAttendanceGestureDao.aggregateType;
+
+  @override
+  ModuleAccess? writeAccessFor(OutboxEntry entry) =>
+      kStaffAttendanceWriteAccess;
 
   @override
   Future<OutboxDispatchResult> dispatch(OutboxEntry entry) async {

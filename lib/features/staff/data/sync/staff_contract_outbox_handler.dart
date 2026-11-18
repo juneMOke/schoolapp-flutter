@@ -13,6 +13,8 @@ import 'package:school_app_flutter/features/staff/data/local/staff_member_dao.da
 import 'package:school_app_flutter/features/staff/data/sync/staff_contract_push_dto.dart';
 import 'package:school_app_flutter/features/staff/data/sync/staff_push_failure.dart';
 import 'package:school_app_flutter/features/staff/data/sync/staff_sync_api.dart';
+import 'package:school_app_flutter/core/offline/outbox_permission_guard.dart';
+import 'package:school_app_flutter/core/auth/module_access_registry.dart';
 
 /// Handler d'outbox de l'agrégat `STAFF_CONTRACT` — la pose d'une période.
 ///
@@ -20,7 +22,8 @@ import 'package:school_app_flutter/features/staff/data/sync/staff_sync_api.dart'
 /// serveur (aucune version accusée), la pose attend (`blocked` : ni tentative,
 /// ni poison) ; le 409 `STAFF_MEMBER_NOT_YET_SYNCED` n'est qu'un filet. Une
 /// fiche absente du poste (purgée) rend la pose sans objet.
-class StaffContractOutboxHandler implements OutboxSyncHandler {
+class StaffContractOutboxHandler
+    implements OutboxWriteAccess, OutboxSyncHandler {
   final StaffSyncApi _api;
   final StaffContractSyncDao _dao;
   final StaffMemberDao _members;
@@ -47,6 +50,9 @@ class StaffContractOutboxHandler implements OutboxSyncHandler {
 
   @override
   String get aggregateType => StaffContractWriteDao.contractAggregateType;
+
+  @override
+  ModuleAccess? writeAccessFor(OutboxEntry entry) => kPayrollWriteAccess;
 
   @override
   Future<OutboxDispatchResult> dispatch(OutboxEntry entry) async {
@@ -100,6 +106,9 @@ class StaffContractOutboxHandler implements OutboxSyncHandler {
       if (failure.isTombstoned) {
         await _dao.delete(contractId);
         return const OutboxDispatchResult.acked();
+      }
+      if (isOutboxPermissionDenial(e)) {
+        return const OutboxDispatchResult.permissionDenied();
       }
       if (failure.isTransient) {
         return OutboxDispatchResult.retry(failure.reason);

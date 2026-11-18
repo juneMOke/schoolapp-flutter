@@ -1,3 +1,5 @@
+import 'package:school_app_flutter/core/auth/module_access_registry.dart';
+import 'package:school_app_flutter/core/offline/outbox_permission_guard.dart';
 import 'package:school_app_flutter/core/offline/current_user_context.dart';
 import 'package:school_app_flutter/core/offline/outbox_dao.dart';
 import 'package:school_app_flutter/core/offline/outbox_entry.dart';
@@ -10,7 +12,14 @@ import 'package:school_app_flutter/features/staff/data/sync/staff_push_failure.d
 /// Le squelette des envois de la paie : relire la requête figée, attendre ce
 /// qui doit partir avant elle, pousser, et ranger l'issue. Chaque handler
 /// n'écrit que sa requête, sa garde, son accusé et son refus.
-abstract class PayrollOutboxHandler<R> implements OutboxSyncHandler {
+abstract class PayrollOutboxHandler<R>
+    implements OutboxWriteAccess, OutboxSyncHandler {
+  /// Toutes les routes `/sync` de la paie exigent `hr.pay.write`, sauf les
+  /// réglages de l'école et le catalogue des retenues (`hr.pay.manage`), qui
+  /// surchargent cette valeur.
+  @override
+  ModuleAccess? writeAccessFor(OutboxEntry entry) => kPayrollWriteAccess;
+
   final OutboxDao _outbox;
   final CurrentUserContext _currentUser;
 
