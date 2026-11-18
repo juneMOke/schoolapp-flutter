@@ -12,11 +12,14 @@ import 'package:sqflite_common/sqlite_api.dart';
 
 /// Le serveur corrige-t-il le niveau d'un élève qui a déjà payé ?
 ///
-/// **`false` tant que le lot F3 du back n'est pas en prod** : il refuse encore
-/// en `LEVEL_CORRECTION_HAS_PAYMENTS`, et la tablette le devance. Le back
-/// prévient au déploiement ; passer alors à `true` remplace ce refus par le
-/// contrôle du payé ([levelCorrectionPaidRefusal]).
-const bool kLevelCorrectionAcceptsPaidStudents = false;
+/// **`true` depuis le lot F3 du back** (PR #244) : le payé est jugé nature par
+/// nature ([levelCorrectionPaidRefusal]). Cette tablette ne doit donc partir en
+/// prod qu'avec un serveur qui a F3 — sinon il refuserait encore en
+/// `LEVEL_CORRECTION_HAS_PAYMENTS`, refus que l'écran sait toujours dire.
+///
+/// `false` rétablit le premier temps (tout versement sur l'année refuse) : le
+/// repli reste, le temps que F3 ait fait ses preuves en prod.
+const bool kLevelCorrectionAcceptsPaidStudents = true;
 
 /// Issue d'une demande de correction, vue de la tablette.
 enum LevelCorrectionRecordOutcome {

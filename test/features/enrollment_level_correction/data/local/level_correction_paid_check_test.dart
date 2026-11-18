@@ -161,17 +161,21 @@ void main() {
     expect(await record(), LevelCorrectionRecordOutcome.overpaid);
   });
 
-  test('premier temps (par défaut) : tout versement retient encore', () async {
-    await insertPayment(db, id: 'pay-1', cancelledAt: 5);
-    await charge('MINERVAL', paid: 0);
-    await tariff('MINERVAL', 30000);
-    expect(
-      await LevelCorrectionWriteDao(
-        db,
-      ).record(correctionGesture('g-1'), schoolId: kSchool, nowMs: 10),
-      LevelCorrectionRecordOutcome.hasPayments,
-    );
-  });
+  test(
+    'interrupteur fermé : le repli du premier temps retient tout versement',
+    () async {
+      await insertPayment(db, id: 'pay-1', cancelledAt: 5);
+      await charge('MINERVAL', paid: 0);
+      await tariff('MINERVAL', 30000);
+      expect(
+        await LevelCorrectionWriteDao(
+          db,
+          acceptsPaidStudents: false,
+        ).record(correctionGesture('g-1'), schoolId: kSchool, nowMs: 10),
+        LevelCorrectionRecordOutcome.hasPayments,
+      );
+    },
+  );
 
   test('chaque refus porte le code que le serveur renverrait', () {
     expect(
