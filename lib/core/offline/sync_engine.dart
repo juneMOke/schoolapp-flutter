@@ -285,9 +285,12 @@ class SyncEngine {
           // `detailCode`) : la tablette ne le savait pas encore. Le handler a
           // pu classer ce 403 en terminal ou en transitoire ; dans les deux
           // cas l'écriture attend, sans tentative consommée.
-          if (probe.denied &&
-              (result.outcome == OutboxDispatchOutcome.failed ||
-                  result.outcome == OutboxDispatchOutcome.retry)) {
+          // Le handler le dit lui-même (`permissionDenied`), ou la sonde l'a
+          // vu alors que le handler concluait autrement.
+          if (result.permissionDenied ||
+              (probe.denied &&
+                  (result.outcome == OutboxDispatchOutcome.failed ||
+                      result.outcome == OutboxDispatchOutcome.retry))) {
             await _holdForPermission(entry);
             blocked++;
             continue;

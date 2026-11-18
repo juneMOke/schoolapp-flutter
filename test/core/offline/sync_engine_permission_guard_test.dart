@@ -265,6 +265,36 @@ void main() {
     });
   });
 
+  test('permissionDenied rendu par le handler : retenue 5 min, même sans '
+      'sonde', () async {
+    permissions.set(null);
+    await dao.enqueue(entry('e1'));
+    final handler = _DeclaringHandler(_dio(200));
+
+    final report = await engine(handler).flush();
+
+    expect(report.blocked, 1);
+    expect(report.retried, 0);
+    final row = (await dao.byId('e1'))!;
+    expect(row.attempts, 0);
+    expect(row.lastError, kOutboxAwaitingPermissionReason);
+    expect(row.nextAttemptAt, fixedNow + 300000);
+  });
+
+  test('isOutboxPermissionDenial : 403 sans code oui, avec code non', () {
+    DioException denial(int status, Map<String, dynamic> body) => DioException(
+      requestOptions: RequestOptions(),
+      response: Response<dynamic>(
+        requestOptions: RequestOptions(),
+        statusCode: status,
+        data: body,
+      ),
+    );
+    expect(isOutboxPermissionDenial(denial(403, _permissionDenial)), isTrue);
+    expect(isOutboxPermissionDenial(denial(403, _businessDenial)), isFalse);
+    expect(isOutboxPermissionDenial(denial(401, _permissionDenial)), isFalse);
+  });
+
   group('OutboxPermissionProbe', () {
     test('hors d\'un dispatch, un 403 ne marque rien et ne lève pas', () async {
       final probe = OutboxPermissionProbe();
@@ -301,4 +331,14 @@ class _OtherHandler extends _HttpHandler {
 
   @override
   String get aggregateType => 'OTHER';
+}
+
+class _DeclaringHandler extends _HttpHandler {
+  _DeclaringHandler(super.dio);
+
+  @override
+  Future<OutboxDispatchResult> dispatch(OutboxEntry entry) async {
+    calls++;
+    return const OutboxDispatchResult.permissionDenied();
+  }
 }

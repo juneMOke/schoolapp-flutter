@@ -62,6 +62,15 @@ bool outboxWriteDenied(ModuleAccess? access, Iterable<String>? held) {
   );
 }
 
+/// [e] est-il un refus de **droit** — 403 sans `detailCode` ?
+///
+/// À tester par un handler **avant** d'appliquer un effet local de refus, pour
+/// renvoyer `OutboxDispatchResult.permissionDenied()` à la place : la sonde du
+/// moteur retient l'entrée, mais elle ne peut pas défaire ce que le handler a
+/// déjà écrit en base.
+bool isOutboxPermissionDenial(DioException e) =>
+    OutboxPermissionProbe.isPermissionDenial(e.response);
+
 /// Ce que la sonde a vu pendant le dispatch d'une entrée.
 class OutboxPermissionProbe {
   static final Object _zoneKey = Object();
