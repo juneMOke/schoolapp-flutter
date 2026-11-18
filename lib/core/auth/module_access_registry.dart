@@ -211,11 +211,12 @@ const ModuleAccess kExpenseWithdrawAccess = ModuleAccess([Perm.expenseDelete]);
 /// Accorder ou refuser une demande (`POST /sync/expenses/{id}/decision`).
 ///
 /// **Ni conjonction avec [kExpenseWriteAccess], ni repli sur elle** : décider
-/// n'est pas saisir. Les fondre rendrait toute demande auto-approuvable par son
-/// auteur, et le circuit ne garderait plus rien — c'est exactement ce que le
-/// `422 SELF_APPROVAL_FORBIDDEN` du serveur refuse. L'écran masque d'ailleurs
-/// Approuver / Refuser sur ses PROPRES demandes (F29), droit ou pas : un geste
-/// qu'on sait condamné ne s'offre pas.
+/// n'est pas saisir. Les fondre donnerait le droit de trancher à quiconque peut
+/// déposer une demande, et le circuit ne garderait plus rien. La propriété, en
+/// revanche, n'entre pas en compte : seule la direction décide, y compris sur
+/// ses PROPRES demandes — refuser l'auto-approbation les aurait gelées pour
+/// toujours (A11 abandonnée, `DEPENSES_PLAN.md` §13 ; le serveur n'émet pas
+/// `SELF_APPROVAL_FORBIDDEN`, le code n'est plus reconnu qu'en lecture).
 const ModuleAccess kExpenseDecideAccess = ModuleAccess([Perm.expenseDecide]);
 
 /// Constater le décaissement d'une demande accordée

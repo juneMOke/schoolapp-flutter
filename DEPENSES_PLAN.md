@@ -313,7 +313,7 @@ La numérotation continue celle de la V1. Détail et justification dans l'artifa
 | F26 | « Année » reste l'année scolaire — amendement A13 refusé (D2 tient) |
 | F27 | La recherche reste insensible aux accents (A12 déjà acquis, F11) |
 | F28 | Les compteurs du registre disparaissent : les montants vivent au tableau de bord, l'attente dans la file |
-| F29 | Aucun geste n'est offert pour échouer : `PermissionGate.access` croisé avec le statut et la propriété ; Approuver/Refuser **masqués** sur ses propres demandes |
+| F29 | Aucun geste n'est offert pour échouer : `PermissionGate.access` croisé avec le statut et la propriété ; Approuver/Refuser restent offerts sur ses propres demandes : seule la direction décide, et A11 est abandonnée (§13) |
 | F30 | Le fil recopie le patron Discipline **sans ses défauts** : auteur = identifiant résolu, fraîcheur du fil dans sa propre colonne, et il remonte geste par geste au lieu d'être imbriqué dans la poussée du parent |
 | F31 | **Le fil est le registre d'ordre** : un geste n'est dispatchable que s'il porte le plus ancien message non synchronisé de sa dépense, sinon `blocked` |
 | F32 | « Corriger et renvoyer » = deux entrées dans l'ordre ; le renvoi attend l'accusé du contenu |
