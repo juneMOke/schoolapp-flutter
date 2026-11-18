@@ -1127,6 +1127,41 @@ void main() {
       expect(lines.single.amountInCents, 30000);
     });
 
+    /// Une correction de niveau déplace l'argent après coup, par une paire de
+    /// lignes de transfert sur le même versement. Le ticket imprime ce que le
+    /// guichet a reçu : la paire n'y paraît pas, la réimpression ressort le
+    /// même papier.
+    test('les lignes de transfert d\'une correction de niveau ne s\'impriment '
+        'pas', () async {
+      await seedPayment();
+      await db.delete('payment_allocations');
+      await addAllocation(
+        id: 'a-1',
+        feeCode: 'OM',
+        label: 'Organisation',
+        amount: 15000,
+      );
+      for (final (id, fee, cents) in [
+        ('t-out', 'OM', -5000),
+        ('t-in', 'MINERVAL', 5000),
+      ]) {
+        await db.insert('payment_allocations', {
+          'id': id,
+          'client_uuid': id,
+          'payment_id': 'p-1',
+          'fee_code': fee,
+          'student_charge_label': fee,
+          'amount_in_cents': cents,
+          'currency': 'CDF',
+          'level_correction_id': 'lc-1',
+        });
+      }
+
+      final lines = await dao.findAllocations('p-1');
+
+      expect(lines.map((l) => (l.feeCode, l.amountInCents)), [('OM', 15000)]);
+    });
+
     /// ⚠️ **Jamais sur le seul code.** Grouper francs et dollars ensemble
     /// produirait « le chiffre qui n'est l'argent de personne » que ce gabarit
     /// refuse partout ailleurs.

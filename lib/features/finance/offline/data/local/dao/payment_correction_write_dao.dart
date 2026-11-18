@@ -129,6 +129,11 @@ class PaymentCorrectionWriteDao {
 
   /// Le versement à corriger, avec ses imputations et la devise de son
   /// tiroir, `null` s'il est absent.
+  ///
+  /// Les imputations sont celles **du guichet** : les lignes de transfert
+  /// d'une correction de niveau en sont écartées. Elles s'annulent sur le
+  /// versement, et le préremplissage d'un remplaçant (`centsByCharge`) suppose
+  /// une seule imputation positive par créance.
   Future<PaymentCorrectionOrigin?> loadOrigin(String paymentId) async {
     final payments = await _db.query(
       'payments',
@@ -146,7 +151,7 @@ class PaymentCorrectionWriteDao {
         'amount_in_cents',
         'currency',
       ],
-      where: 'payment_id = ?',
+      where: 'payment_id = ? AND level_correction_id IS NULL',
       whereArgs: [paymentId],
       orderBy: 'id',
     );

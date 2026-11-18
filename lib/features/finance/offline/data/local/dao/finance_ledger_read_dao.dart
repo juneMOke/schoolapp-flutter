@@ -222,6 +222,12 @@ class FinanceLedgerReadDao {
   /// `pa.id` pour rester stable. L'échéance ne s'y invite pas — elle appartient
   /// à la créance, et cette répartition-ci est la **photo d'un versement**, dont
   /// les lignes n'ont d'ordre que celui qu'on leur donne.
+  ///
+  /// **Sans les lignes de transfert** d'une correction de niveau
+  /// (`level_correction_id`) : elles déplacent après coup l'argent d'une
+  /// créance à l'autre, s'annulent sur le versement, et n'ont rien à faire
+  /// dans la photo de ce que le guichet a reçu. Le détail d'un frais
+  /// ([getAllocationsByCharge]) les garde, lui : elles y font le payé.
   Future<List<LocalPaymentAllocation>> getAllocationsByPayment(
     String paymentId,
   ) async {
@@ -238,6 +244,7 @@ class FinanceLedgerReadDao {
       JOIN payments p ON p.id = pa.payment_id
       LEFT JOIN ref_fee_tariffs t ON t.id = pa.fee_tariff_id
       WHERE pa.payment_id = ?
+        AND pa.level_correction_id IS NULL
       ORDER BY pa.fee_code ASC,
                (t.code IS NULL) ASC, t.code ASC,
                pa.id ASC

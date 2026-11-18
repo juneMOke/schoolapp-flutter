@@ -159,6 +159,10 @@ class ProvisionalTicketDao {
   ///
   /// L'école est résolue par sous-requête sur `ref_school` — cache mono-ligne,
   /// même lecture que partout ailleurs dans ce DAO.
+  ///
+  /// **Sans les lignes de transfert** d'une correction de niveau : le ticket
+  /// imprime ce que le guichet a reçu, et une réimpression après la correction
+  /// doit ressortir le même papier.
   Future<List<TicketAllocationRow>> findAllocations(String paymentId) async {
     final rows = await _db.rawQuery(
       '''
@@ -175,6 +179,7 @@ class ProvisionalTicketDao {
         ON UPPER(s.code) = UPPER(pa.fee_code)
        AND s.school_id = (SELECT id FROM ref_school LIMIT 1)
       WHERE pa.payment_id = ?
+        AND pa.level_correction_id IS NULL
       ORDER BY pa.rowid, pa.id
       ''',
       [paymentId],
