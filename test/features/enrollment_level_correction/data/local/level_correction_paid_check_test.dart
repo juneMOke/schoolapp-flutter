@@ -31,10 +31,13 @@ void main() {
     required int paid,
     String currency = 'USD',
     String id = '',
+    String? tariffId = 't-source',
+    String? academicYearId = kYear,
   }) => db.insert('student_charges', {
     'id': id.isEmpty ? 'c-${seq++}' : id,
     'student_id': kStudent,
-    'academic_year_id': kYear,
+    'academic_year_id': academicYearId,
+    'fee_tariff_id': tariffId,
     'school_level_id': 'lvl-m2',
     'fee_code': feeCode,
     'label': feeCode,
@@ -92,11 +95,27 @@ void main() {
       await charge('MINERVAL', paid: 40000, id: 'c-b');
       await tariff('MINERVAL', 50000);
       await tariff('MINERVAL', 20000, cycle: true);
-      // Un tarif d'un autre niveau n'entre pas dans le total.
-      await tariff('MINERVAL', 90000, level: 'lvl-p3');
       expect(await record(), LevelCorrectionRecordOutcome.recorded);
     },
   );
+
+  test(
+    'un tarif d\'un autre niveau n\'entre pas dans le total cible',
+    () async {
+      await charge('MINERVAL', paid: 60000);
+      await tariff('MINERVAL', 50000);
+      await tariff('MINERVAL', 90000, level: 'lvl-p3');
+      expect(await record(), LevelCorrectionRecordOutcome.overpaid);
+    },
+  );
+
+  test('une créance ad hoc ou sans année ne juge rien : jamais plus strict que '
+      'le serveur', () async {
+    await charge('UNIFORME', paid: 1000, tariffId: null);
+    await charge('TRANSPORT', paid: 1000, academicYearId: null);
+    await tariff('MINERVAL', 50000);
+    expect(await record(), LevelCorrectionRecordOutcome.recorded);
+  });
 
   test('une nature payée absente de la grille cible : refus', () async {
     await charge('UNIFORME', paid: 1000);

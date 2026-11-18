@@ -22,6 +22,12 @@ import 'package:sqflite_common/sqlite_api.dart';
 /// Les natures sont jugées dans l'ordre de leur code, pour que deux essais
 /// rendent la même phrase.
 ///
+/// **Jamais plus strict que le serveur** : un refus local de trop bloquerait
+/// un geste valable, un refus manqué n'est qu'un 422 de plus. Seules comptent
+/// donc les créances **de la grille** (`fee_tariff_id` renseigné) de l'année
+/// même — celles que la correction transforme. Une créance *ad hoc* ou sans
+/// année n'entre pas dans le jugement.
+///
 /// Ce contrôle ne remplace pas la garde du serveur : un versement pris sur une
 /// autre tablette n'est pas encore ici. Il épargne seulement au guichet un
 /// geste dont le refus est certain.
@@ -39,7 +45,8 @@ Future<LevelCorrectionRefusal?> levelCorrectionPaidRefusal(
                + ${PaymentInForceSql.pendingPaidForCharge('sc')}) AS paid
     FROM student_charges sc
     WHERE sc.student_id = ?
-      AND (sc.academic_year_id = ? OR sc.academic_year_id IS NULL)
+      AND sc.academic_year_id = ?
+      AND sc.fee_tariff_id IS NOT NULL
     GROUP BY sc.fee_code, sc.currency
     ORDER BY sc.fee_code, sc.currency
     ''',
