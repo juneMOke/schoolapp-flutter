@@ -100,6 +100,84 @@ void main() {
     verifyNever(() => api.push(any(), any()));
   });
 
+  group('un versement de l\'élève encore en file', () {
+    Future<void> queuePayment(
+      String id, {
+      String studentId = kStudent,
+      String academicYearId = kYear,
+      String type = 'PAYMENT',
+      String? aggregateId,
+    }) async {
+      await insertPayment(
+        db,
+        id: id,
+        studentId: studentId,
+        academicYearId: academicYearId,
+      );
+      await OutboxDao(db).enqueue(
+        OutboxEntry(
+          id: '$type:$id',
+          aggregateType: type,
+          aggregateId: aggregateId ?? id,
+          operation: OutboxOperation.create,
+          payload: '{}',
+          schoolId: kSchool,
+          createdAt: 5,
+        ),
+      );
+    }
+
+    test('le geste attend le versement, sans partir', () async {
+      // La correction d'abord, le versement ensuite : sans refus local en
+      // file, seule la garde du handler les ordonne.
+      await record('g-1');
+      await queuePayment('pay-1');
+
+      expect((await dispatch('g-1')).outcome, OutboxDispatchOutcome.blocked);
+      verifyNever(() => api.push(any(), any()));
+    });
+
+    test('la correction d\'un versement de l\'élève retient aussi', () async {
+      await record('g-1');
+      await insertPayment(db, id: 'pay-1');
+      await db.insert('payment_corrections', {
+        'id': 'pc-1',
+        'payment_id': 'pay-1',
+        'student_id': kStudent,
+        'reason_code': 'DUPLICATE',
+        'client_cancelled_at': '2026-11-06T10:00:00.000Z',
+        'created_at': 5,
+      });
+      await OutboxDao(db).enqueue(
+        const OutboxEntry(
+          id: 'PAYMENT_CORRECTION:pc-1',
+          aggregateType: 'PAYMENT_CORRECTION',
+          aggregateId: 'pc-1',
+          operation: OutboxOperation.create,
+          payload: '{}',
+          schoolId: kSchool,
+          createdAt: 5,
+        ),
+      );
+
+      expect((await dispatch('g-1')).outcome, OutboxDispatchOutcome.blocked);
+    });
+
+    test('accusé, abandonné, d\'un autre élève ou d\'une autre année : le '
+        'geste part', () async {
+      await record('g-1');
+      await queuePayment('pay-other', studentId: 'stu-2');
+      await queuePayment('pay-old', academicYearId: 'year-0');
+      await queuePayment('pay-acked');
+      await OutboxDao(db).markAcked('PAYMENT:pay-acked');
+      await queuePayment('pay-dead');
+      await OutboxDao(db).markSyncError('PAYMENT:pay-dead', 'poison');
+      when(() => api.push(any(), any())).thenAnswer((_) async {});
+
+      expect((await dispatch('g-1')).outcome, OutboxDispatchOutcome.acked);
+    });
+  });
+
   test(
     '409 ENROLLMENT_NOT_YET_SYNCED : attente, la ligne reste en file',
     () async {
