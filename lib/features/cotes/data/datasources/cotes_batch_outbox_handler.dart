@@ -12,6 +12,9 @@ import 'package:school_app_flutter/core/offline/sync_state.dart';
 import 'package:school_app_flutter/features/cotes/data/datasources/cotes_sync_api.dart';
 import 'package:school_app_flutter/features/cotes/data/datasources/cotes_write_local_data_source.dart';
 import 'package:school_app_flutter/features/cotes/data/models/cote_push_models.dart';
+import 'package:school_app_flutter/core/offline/outbox_permission_guard.dart';
+import 'package:school_app_flutter/core/auth/module_access_registry.dart';
+import 'package:school_app_flutter/core/auth/outbox_push_access.dart';
 
 /// Type d'agrégat d'outbox de la saisie des notes.
 const String kCotesBatchAggregateType = 'ACADEMICS_COTES_BATCH';
@@ -45,7 +48,7 @@ OutboxEntry cotesOutboxEntry({
 /// résultat reste en attente et fait rejouer le lot. S'il reste des lignes, la
 /// tranche suivante est ré-enfilée : l'accusé de l'entrée d'origine, gardé sur
 /// son `created_at`, ne la retire alors pas.
-class CotesBatchOutboxHandler implements OutboxSyncHandler {
+class CotesBatchOutboxHandler implements OutboxWriteAccess, OutboxSyncHandler {
   final CotesSyncApi _api;
   final CotesWriteLocalDataSource _local;
   final OutboxDao _outbox;
@@ -66,6 +69,9 @@ class CotesBatchOutboxHandler implements OutboxSyncHandler {
 
   @override
   String get aggregateType => kCotesBatchAggregateType;
+
+  @override
+  ModuleAccess? writeAccessFor(OutboxEntry entry) => kGradeEnterPushAccess;
 
   @override
   Future<OutboxDispatchResult> dispatch(OutboxEntry entry) async {

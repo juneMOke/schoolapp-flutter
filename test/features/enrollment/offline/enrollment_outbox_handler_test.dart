@@ -230,7 +230,21 @@ void main() {
 
   // 4xx client-terminal (hors 401/408/409/429) : rejeu inutile → SYNC_ERROR
   // immédiat au lieu de gaspiller maxAttempts avant un dead-letter générique.
-  for (final status in [400, 403, 404]) {
+  test('403 sans code (droit retiré) → retenu, le dossier reste PENDING_SYNC '
+      '(ADR-014 §13.3)', () async {
+    when(
+      () => api.submit(any(), any()),
+    ).thenThrow(_httpError(403, data: {'message': 'Accès refusé.'}));
+
+    final result = await handler.dispatch(await pendingEntry());
+    expect(result.permissionDenied, isTrue);
+    expect(
+      (await db.query('enrollments')).first['sync_status'],
+      SyncState.pendingSync.dbValue,
+    );
+  });
+
+  for (final status in [400, 404]) {
     test('$status (client-terminal) → failed + SYNC_ERROR immédiat', () async {
       when(
         () => api.submit(any(), any()),

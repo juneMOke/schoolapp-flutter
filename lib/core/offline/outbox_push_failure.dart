@@ -28,6 +28,10 @@ class OutboxPushFailure {
   /// Un 409 qui dit d'attendre [code] : rejouer sans consommer de tentative.
   bool awaits(String code) => status == 409 && detailCode == code;
 
+  /// Droit retiré (403 sans `detailCode`) : l'écriture attend le retour du
+  /// droit au lieu d'être refusée (ADR-014 §13.3).
+  bool get isPermissionDenied => status == 403 && detailCode == null;
+
   /// L'agrégat a été purgé côté serveur : le geste n'a plus d'objet.
   bool get isGone => status == 410;
 

@@ -48,6 +48,10 @@ class ProgrammePushFailure {
   ///
   /// Un 404 nu n'en dit pas autant pour un enregistrement (route absente,
   /// proxy) : effacer sur lui perdrait du travail jamais envoyé.
+  /// Droit retiré (403 sans `detailCode`) : l'écriture attend le retour du
+  /// droit au lieu d'être refusée (ADR-014 §13.3).
+  bool get isPermissionDenied => status == 403 && detailCode == null;
+
   bool get isGone => status == 410;
 
   /// Pour un retrait, l'objet absent suffit : le geste est acquis.

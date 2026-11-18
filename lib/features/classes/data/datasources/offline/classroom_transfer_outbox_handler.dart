@@ -8,6 +8,9 @@ import 'package:school_app_flutter/features/classes/data/datasources/offline/cla
 import 'package:school_app_flutter/features/classes/data/datasources/offline/classroom_transfer_sync_api.dart';
 import 'package:school_app_flutter/features/classes/data/repositories/offline/classroom_offline_repository_impl.dart'
     show kClassroomTransferAggregateType;
+import 'package:school_app_flutter/core/offline/outbox_permission_guard.dart';
+import 'package:school_app_flutter/core/auth/module_access_registry.dart';
+import 'package:school_app_flutter/core/auth/outbox_push_access.dart';
 
 /// Handler d'outbox de l'agrégat CLASSROOM_TRANSFER (CF4).
 ///
@@ -22,7 +25,8 @@ import 'package:school_app_flutter/features/classes/data/repositories/offline/cl
 /// déterministe (`failed`, basculé SYNC_ERROR) pour les autres 4xx — dont le
 /// `422 LEVEL_MISMATCH`. Le POST étant idempotent, un 4xx signifie que le serveur
 /// n'a rien enregistré : rejouer jusqu'au poison ne ferait que retarder le rejet.
-class ClassroomTransferOutboxHandler implements OutboxSyncHandler {
+class ClassroomTransferOutboxHandler
+    implements OutboxWriteAccess, OutboxSyncHandler {
   final ClassroomTransferSyncApi _api;
   final ClassroomLocalDataSource _localDataSource;
   final Map<String, dynamic> _extras;
@@ -42,6 +46,9 @@ class ClassroomTransferOutboxHandler implements OutboxSyncHandler {
   String get aggregateType => kClassroomTransferAggregateType;
 
   @override
+  ModuleAccess? writeAccessFor(OutboxEntry entry) => kClassroomWritePushAccess;
+
+  @override
   Future<OutboxDispatchResult> dispatch(OutboxEntry entry) async {
     final Map<String, dynamic> body;
     try {
@@ -55,6 +62,9 @@ class ClassroomTransferOutboxHandler implements OutboxSyncHandler {
       await _localDataSource.applyTransferAck(ack, nowMs: _now());
       return const OutboxDispatchResult.acked();
     } on DioException catch (e) {
+      if (isOutboxPermissionDenial(e)) {
+        return const OutboxDispatchResult.permissionDenied();
+      }
       return _classifyDioError(e);
     } catch (e) {
       // Échec LOCAL (ex. `applyTransferAck`) après un POST possiblement acquitté :

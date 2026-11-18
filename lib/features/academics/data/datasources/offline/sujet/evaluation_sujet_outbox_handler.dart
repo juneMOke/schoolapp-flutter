@@ -10,6 +10,9 @@ import 'package:school_app_flutter/features/academics/data/datasources/offline/s
 import 'package:school_app_flutter/features/academics/data/datasources/offline/sujet/evaluation_view_applier.dart';
 import 'package:school_app_flutter/features/academics/domain/entities/sujet/evaluation_sujet_codes.dart';
 import 'package:school_app_flutter/features/academics/data/models/offline/sujet/sujet_wire_models.dart';
+import 'package:school_app_flutter/core/offline/outbox_permission_guard.dart';
+import 'package:school_app_flutter/core/auth/module_access_registry.dart';
+import 'package:school_app_flutter/core/auth/outbox_push_access.dart';
 
 /// Type d'agrégat d'outbox du sujet (une entrée par évaluation, remplacée à
 /// chaque enregistrement : seule la dernière version part).
@@ -33,8 +36,10 @@ const String kSujetRejectedCode = 'REJECTED';
 ///   code (`MAX_LOCKED`, `QUESTION_MISMATCH`, `SUJET_EMPTY`, sinon `REJECTED`) ; un
 ///   `MAX_LOCKED` abandonne le maximum ajusté.
 /// - 404 (évaluation pas encore acquittée), réseau, 5xx, 401 → nouvel essai ;
-///   400, 403 → terminal.
-class EvaluationSujetOutboxHandler implements OutboxSyncHandler {
+///   400, 403 porteur d'un code → terminal ; 403 sans code (droit retiré) →
+///   retenu jusqu'au retour du droit.
+class EvaluationSujetOutboxHandler
+    implements OutboxWriteAccess, OutboxSyncHandler {
   final AcademicsEvaluationSujetApi api;
   final EvaluationSujetLocalDataSource sujets;
   final EvaluationViewApplier views;
@@ -61,6 +66,9 @@ class EvaluationSujetOutboxHandler implements OutboxSyncHandler {
 
   @override
   String get aggregateType => kEvaluationSujetAggregateType;
+
+  @override
+  ModuleAccess? writeAccessFor(OutboxEntry entry) => kGradeWritePushAccess;
 
   @override
   Future<OutboxDispatchResult> dispatch(OutboxEntry entry) async {

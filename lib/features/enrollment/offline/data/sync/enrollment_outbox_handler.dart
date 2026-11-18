@@ -7,6 +7,8 @@ import 'package:school_app_flutter/core/offline/sync_engine.dart';
 import 'package:school_app_flutter/features/enrollment/offline/data/local/dao/enrollment_ack_dao.dart';
 import 'package:school_app_flutter/features/enrollment/offline/data/sync/enrollment_sync_api.dart';
 import 'package:school_app_flutter/features/enrollment/offline/data/sync/enrollment_sync_models.dart';
+import 'package:school_app_flutter/core/offline/outbox_permission_guard.dart';
+import 'package:school_app_flutter/core/auth/module_access_registry.dart';
 
 /// Handler d'outbox de l'agrégat ENROLLMENT (contrat `openapi_enrollment_sync`).
 ///
@@ -14,13 +16,15 @@ import 'package:school_app_flutter/features/enrollment/offline/data/sync/enrollm
 /// `/api/v1/sync/enrollments` (agrégat) → route la réponse par statut HTTP :
 ///  - 201/200 : applique le remap transactionnel (matricule/email, parent
 ///    provisoire→canonique, doc PROV→DEFINITIVE, SYNCED) → `acked` ;
-///  - 4xx client-terminal (400/403/404/422…) : rejet définitif que rejouer
-///    ne corrigerait pas → marque SYNC_ERROR local → `failed` (non rejoué) ;
+///  - 403 sans `detailCode` (droit retiré) : retenu jusqu'au retour du droit,
+///    sans rien marquer (ADR-014 §13.3) ;
+///  - 4xx client-terminal (400/403 avec code/404/422…) : rejet définitif que
+///    rejouer ne corrigerait pas → marque SYNC_ERROR local → `failed` ;
 ///  - réseau / timeout / 5xx / 401 / 408 / 429 **et 409** : transitoire →
 ///    `retry` (backoff, idempotent sur enrollment.id). Le 409 est une course
 ///    d'insertion perdue, pas un rejet du dossier — cf. le commentaire du
 ///    routage plus bas.
-class EnrollmentOutboxHandler implements OutboxSyncHandler {
+class EnrollmentOutboxHandler implements OutboxWriteAccess, OutboxSyncHandler {
   final EnrollmentSyncApi _api;
   final EnrollmentAckDao _dao;
   final Map<String, dynamic> _extras;
@@ -38,6 +42,9 @@ class EnrollmentOutboxHandler implements OutboxSyncHandler {
 
   @override
   String get aggregateType => 'ENROLLMENT';
+
+  @override
+  ModuleAccess? writeAccessFor(OutboxEntry entry) => kEnrollmentSubmitAccess;
 
   @override
   Future<OutboxDispatchResult> dispatch(OutboxEntry entry) async {
@@ -64,7 +71,7 @@ class EnrollmentOutboxHandler implements OutboxSyncHandler {
       return const OutboxDispatchResult.acked();
     } on DioException catch (e) {
       final status = e.response?.statusCode;
-      // 4xx client-terminal (validation 422, payload 400, permission 403,
+      // 4xx client-terminal (validation 422, payload 400, 403 avec code,
       // introuvable 404…) : rejouer ne corrigerait rien et gaspillerait le
       // backoff jusqu'au dead-letter générique → SYNC_ERROR immédiat (non
       // rejoué), avec le motif serveur s'il est présent. Restent TRANSITOIRES
@@ -80,6 +87,9 @@ class EnrollmentOutboxHandler implements OutboxSyncHandler {
       // indéfiniment. Le socle documentait déjà la bonne règle
       // (`outbox_sync_handler.dart` : « 409 à rejouer »), que finance et classe
       // appliquent.
+      if (isOutboxPermissionDenial(e)) {
+        return const OutboxDispatchResult.permissionDenied();
+      }
       if (status != null &&
           status >= 400 &&
           status < 500 &&

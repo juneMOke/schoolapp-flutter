@@ -14,6 +14,9 @@ import 'package:school_app_flutter/features/course_programme/data/local/programm
 import 'package:school_app_flutter/features/course_programme/data/sync/programme_push_failure.dart';
 import 'package:school_app_flutter/features/course_programme/data/sync/programme_push_models.dart';
 import 'package:school_app_flutter/features/course_programme/data/sync/programme_sync_api.dart';
+import 'package:school_app_flutter/core/offline/outbox_permission_guard.dart';
+import 'package:school_app_flutter/core/auth/module_access_registry.dart';
+import 'package:school_app_flutter/core/auth/outbox_push_access.dart';
 
 /// Handler de l'agrégat `CHAPITRE` : la fiche d'un chapitre, ou sa
 /// suppression.
@@ -26,7 +29,7 @@ import 'package:school_app_flutter/features/course_programme/data/sync/programme
 /// - **suppression** : rejouable ; accusée (ou déjà absente), le chapitre
 ///   quitte la tablette avec ses enfants.
 /// - 403 `COURS_NOT_OWNED` : le cours quitte la tablette, le geste avec lui.
-class ChapitreOutboxHandler implements OutboxSyncHandler {
+class ChapitreOutboxHandler implements OutboxWriteAccess, OutboxSyncHandler {
   final ProgrammeSyncApi _api;
   final ProgrammeSyncDao _dao;
   final CoursEvictor _evictCours;
@@ -50,6 +53,9 @@ class ChapitreOutboxHandler implements OutboxSyncHandler {
 
   @override
   String get aggregateType => ProgrammeOutbox.chapitreType;
+
+  @override
+  ModuleAccess? writeAccessFor(OutboxEntry entry) => kProgrammeWritePushAccess;
 
   @override
   Future<OutboxDispatchResult> dispatch(OutboxEntry entry) async {
@@ -107,6 +113,9 @@ class ChapitreOutboxHandler implements OutboxSyncHandler {
     if (deleting ? failure.isGoneForDelete : failure.isGone) {
       await _dao.removeChapitre(payload.chapitreId);
       return const OutboxDispatchResult.acked();
+    }
+    if (failure.isPermissionDenied) {
+      return const OutboxDispatchResult.permissionDenied();
     }
     if (failure.isTransient) return OutboxDispatchResult.retry(failure.reason);
     if (deleting) {

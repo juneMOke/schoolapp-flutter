@@ -1,6 +1,9 @@
 import 'dart:convert';
 
 import 'package:dio/dio.dart';
+import 'package:school_app_flutter/core/offline/outbox_permission_guard.dart';
+import 'package:school_app_flutter/core/auth/outbox_push_access.dart';
+import 'package:school_app_flutter/core/auth/module_access_registry.dart';
 import 'package:school_app_flutter/core/offline/outbox_gesture.dart';
 import 'package:school_app_flutter/core/offline/current_user_context.dart';
 import 'package:school_app_flutter/core/offline/outbox_entry.dart';
@@ -36,7 +39,12 @@ class ChildGesture {
 /// 3. accusé : ajout synchronisé, retrait effacé ;
 /// 4. 403 `COURS_NOT_OWNED` : le cours quitte la tablette ; objet disparu
 ///    côté serveur : la ligne part ; refus d'un ajout : « à corriger ».
-abstract class ChapitreChildOutboxHandler<P> implements OutboxSyncHandler {
+abstract class ChapitreChildOutboxHandler<P>
+    implements OutboxWriteAccess, OutboxSyncHandler {
+  /// Ressources et notes de chapitre : `academics.programme.write`.
+  @override
+  ModuleAccess? writeAccessFor(OutboxEntry entry) => kProgrammeWritePushAccess;
+
   final ProgrammeSyncDao dao;
   final CoursEvictor _evictCours;
   final CurrentUserContext _currentUser;
@@ -126,6 +134,9 @@ abstract class ChapitreChildOutboxHandler<P> implements OutboxSyncHandler {
       // Retrait : déjà fait. Ajout : son chapitre a été supprimé ailleurs.
       await dao.removeChild(table, gesture.id);
       return const OutboxDispatchResult.acked();
+    }
+    if (failure.isPermissionDenied) {
+      return const OutboxDispatchResult.permissionDenied();
     }
     if (failure.isTransient) return OutboxDispatchResult.retry(failure.reason);
     if (saving) {

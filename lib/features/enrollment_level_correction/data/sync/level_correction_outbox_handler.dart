@@ -15,6 +15,8 @@ import 'package:school_app_flutter/features/enrollment_level_correction/data/loc
 import 'package:school_app_flutter/features/enrollment_level_correction/data/local/level_correction_write_dao.dart';
 import 'package:school_app_flutter/features/enrollment_level_correction/data/sync/level_correction_api.dart';
 import 'package:school_app_flutter/features/enrollment_level_correction/data/sync/level_correction_gesture.dart';
+import 'package:school_app_flutter/core/offline/outbox_permission_guard.dart';
+import 'package:school_app_flutter/core/auth/module_access_registry.dart';
 
 /// Handler d'outbox de l'agrégat `ENROLLMENT_LEVEL_CORRECTION`.
 ///
@@ -30,7 +32,8 @@ import 'package:school_app_flutter/features/enrollment_level_correction/data/syn
 /// **Après l'accusé**, la tablette n'a pas encore les nouvelles créances : la
 /// descente revient à `LevelCorrectionSettler`, une fois par fin de flush.
 /// D'ici là, la garde du guichet (E3) continue de bloquer l'encaissement.
-class LevelCorrectionOutboxHandler implements OutboxSyncHandler {
+class LevelCorrectionOutboxHandler
+    implements OutboxWriteAccess, OutboxSyncHandler {
   final LevelCorrectionApi _api;
   final LevelCorrectionSyncDao _sync;
   final OutboxDao _outbox;
@@ -62,6 +65,10 @@ class LevelCorrectionOutboxHandler implements OutboxSyncHandler {
 
   @override
   String get aggregateType => LevelCorrectionWriteDao.aggregateType;
+
+  @override
+  ModuleAccess? writeAccessFor(OutboxEntry entry) =>
+      kEnrollmentLevelCorrectAccess;
 
   @override
   Future<OutboxDispatchResult> dispatch(OutboxEntry entry) async {
@@ -111,6 +118,9 @@ class LevelCorrectionOutboxHandler implements OutboxSyncHandler {
     try {
       await _api.push(_extras, gesture);
     } on DioException catch (e) {
+      if (isOutboxPermissionDenial(e)) {
+        return const OutboxDispatchResult.permissionDenied();
+      }
       return _onFailure(gesture, OutboxPushFailure.of(e));
     } catch (e) {
       return OutboxDispatchResult.retry(e.toString());

@@ -14,6 +14,9 @@ import 'package:school_app_flutter/features/course_programme/data/local/programm
 import 'package:school_app_flutter/features/course_programme/data/sync/programme_push_failure.dart';
 import 'package:school_app_flutter/features/course_programme/data/sync/programme_push_models.dart';
 import 'package:school_app_flutter/features/course_programme/data/sync/programme_sync_api.dart';
+import 'package:school_app_flutter/core/offline/outbox_permission_guard.dart';
+import 'package:school_app_flutter/core/auth/module_access_registry.dart';
+import 'package:school_app_flutter/core/auth/outbox_push_access.dart';
 
 /// Handler de l'agrégat `CHAPITRE_ORDRE` : l'ordre des chapitres d'un cours,
 /// liste complète.
@@ -22,7 +25,8 @@ import 'package:school_app_flutter/features/course_programme/data/sync/programme
 /// répondrait 409 `CHAPITRE_NOT_YET_SYNCED`, jamais un id ignoré en silence.
 /// L'accusé porte l'ordre retenu (chapitres créés ailleurs compris), appliqué
 /// sauf si un nouvel ordre attend déjà.
-class ChapitreOrdreOutboxHandler implements OutboxSyncHandler {
+class ChapitreOrdreOutboxHandler
+    implements OutboxWriteAccess, OutboxSyncHandler {
   final ProgrammeSyncApi _api;
   final ProgrammeSyncDao _dao;
   final CoursEvictor _evictCours;
@@ -46,6 +50,9 @@ class ChapitreOrdreOutboxHandler implements OutboxSyncHandler {
 
   @override
   String get aggregateType => ProgrammeOutbox.ordreType;
+
+  @override
+  ModuleAccess? writeAccessFor(OutboxEntry entry) => kProgrammeWritePushAccess;
 
   @override
   Future<OutboxDispatchResult> dispatch(OutboxEntry entry) async {
@@ -85,6 +92,9 @@ class ChapitreOrdreOutboxHandler implements OutboxSyncHandler {
       }
       if (failure.awaitsChapitre) {
         return OutboxDispatchResult.blocked(failure.reason);
+      }
+      if (failure.isPermissionDenied) {
+        return const OutboxDispatchResult.permissionDenied();
       }
       if (failure.isTransient) {
         return OutboxDispatchResult.retry(failure.reason);

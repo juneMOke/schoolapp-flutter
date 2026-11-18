@@ -10,6 +10,9 @@ import 'package:school_app_flutter/features/academics/data/datasources/offline/s
 import 'package:school_app_flutter/features/academics/data/datasources/offline/sujet/evaluation_view_applier.dart';
 import 'package:school_app_flutter/features/academics/data/models/offline/sujet/sujet_wire_models.dart';
 import 'package:school_app_flutter/features/academics/domain/entities/sujet/evaluation_sujet_codes.dart';
+import 'package:school_app_flutter/core/offline/outbox_permission_guard.dart';
+import 'package:school_app_flutter/core/auth/module_access_registry.dart';
+import 'package:school_app_flutter/core/auth/outbox_push_access.dart';
 
 /// Type d'agrégat d'outbox d'une diffusion de copie (une entrée par ligne).
 const String kEvaluationCopieLogAggregateType =
@@ -19,7 +22,8 @@ const String kEvaluationCopieLogAggregateType =
 /// un rejeu rend 200. L'évaluation doit être accusée. La réponse — l'évaluation
 /// entière — rafraîchit le journal, qui accuse la ligne au passage.
 /// `COPIE_LOG_MISMATCH` (identifiant déjà pris ailleurs) est terminal.
-class EvaluationCopieLogOutboxHandler implements OutboxSyncHandler {
+class EvaluationCopieLogOutboxHandler
+    implements OutboxWriteAccess, OutboxSyncHandler {
   final AcademicsEvaluationSujetApi api;
   final EvaluationCopieLogLocalDataSource copieLog;
   final EvaluationViewApplier views;
@@ -38,6 +42,9 @@ class EvaluationCopieLogOutboxHandler implements OutboxSyncHandler {
 
   @override
   String get aggregateType => kEvaluationCopieLogAggregateType;
+
+  @override
+  ModuleAccess? writeAccessFor(OutboxEntry entry) => kGradeWritePushAccess;
 
   @override
   Future<OutboxDispatchResult> dispatch(OutboxEntry entry) async {

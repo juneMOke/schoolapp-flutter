@@ -12,6 +12,9 @@ import 'package:school_app_flutter/features/academics/data/datasources/offline/a
 import 'package:school_app_flutter/features/academics/data/models/offline/notes_batch_push_models.dart';
 import 'package:school_app_flutter/features/academics/data/repositories/offline/notes_offline_repository_impl.dart'
     show kNotesBatchAggregateType;
+import 'package:school_app_flutter/core/offline/outbox_permission_guard.dart';
+import 'package:school_app_flutter/core/auth/module_access_registry.dart';
+import 'package:school_app_flutter/core/auth/outbox_push_access.dart';
 
 /// Pousse un lot de notes (régime C) vers `POST /sync/academics/notes` et
 /// **réconcilie ligne par ligne** l'outcome serveur.
@@ -29,7 +32,7 @@ import 'package:school_app_flutter/features/academics/data/repositories/offline/
 /// invalide) → note SYNC_ERROR (surfacée à l'UI, **jamais perdue en silence**).
 /// L'entrée n'est **acquittée que si TOUTES les notes poussées ont un outcome
 /// terminal** : sinon `retry` (re-push idempotent — aucune note orpheline).
-class NotesBatchOutboxHandler implements OutboxSyncHandler {
+class NotesBatchOutboxHandler implements OutboxWriteAccess, OutboxSyncHandler {
   final AcademicsNotesSyncApi syncApi;
   final AcademicsLocalDataSource localDataSource;
   final Map<String, dynamic> requiredAuth;
@@ -46,6 +49,9 @@ class NotesBatchOutboxHandler implements OutboxSyncHandler {
 
   @override
   String get aggregateType => kNotesBatchAggregateType;
+
+  @override
+  ModuleAccess? writeAccessFor(OutboxEntry entry) => kGradeWritePushAccess;
 
   @override
   Future<OutboxDispatchResult> dispatch(OutboxEntry entry) async {
@@ -93,8 +99,12 @@ class NotesBatchOutboxHandler implements OutboxSyncHandler {
         response = await syncApi.submitNotes(requiredAuth, request);
       } on DioException catch (e) {
         final failure = e.error;
-        // 403 (authorId ≠ JWT) / validation d'enveloppe → terminal ; 401/5xx/
-        // réseau → transitoire.
+        // 403 sans code (droit retiré) → retenu jusqu'au retour du droit ;
+        // autre 403 / validation d'enveloppe → terminal ; 401/5xx/réseau →
+        // transitoire.
+        if (isOutboxPermissionDenial(e)) {
+          return const OutboxDispatchResult.permissionDenied();
+        }
         if (failure is ValidationFailure ||
             failure is NotFoundFailure ||
             failure is UnauthorizedFailure) {

@@ -138,14 +138,18 @@ void main() {
       expect(evicted, ['c-1']);
     });
 
-    test('403 sans code : refus, la ligne est à corriger', () async {
+    test('403 sans code : droit retiré, la fiche attend sans être à corriger '
+        '(ADR-014 §13.3)', () async {
       when(() => api.saveChapitre(extras, any())).thenThrow(_dio(403));
       final result = await handler.dispatch(
         entryOf(ProgrammeOutbox.chapitreType, save.toJson()),
       );
-      expect(result.outcome, OutboxDispatchOutcome.failed);
+      expect(result.permissionDenied, isTrue);
       expect(evicted, isEmpty);
-      expect((await db.query('chapitre')).single['sync_status'], 'SYNC_ERROR');
+      expect(
+        (await db.query('chapitre')).single['sync_status'],
+        isNot('SYNC_ERROR'),
+      );
     });
 
     test('le corps suit le contrat : {authorId, chapitre: fiche}', () async {
