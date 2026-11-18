@@ -82,15 +82,40 @@ void main() {
     );
   });
 
-  test("un versement en vigueur : refus local, avec le code qu'aurait rendu "
-      'le serveur', () async {
+  test('un versement seul ne retient plus : le serveur corrige un élève qui '
+      'a payé (F3)', () async {
     await insertPayment(db, id: 'pay-1');
+    expect(await repository.correct(request), const Right<Failure, bool>(true));
+  });
+
+  test("trop payé pour le niveau cible : refus local, avec le code qu'aurait "
+      'rendu le serveur', () async {
+    await db.insert('student_charges', {
+      'id': 'c-1',
+      'student_id': kStudent,
+      'academic_year_id': kYear,
+      'fee_tariff_id': 't-m2',
+      'fee_code': 'MINERVAL',
+      'label': 'Minerval',
+      'expected_amount_in_cents': 80000,
+      'amount_paid_in_cents': 60000,
+      'currency': 'USD',
+    });
+    await db.insert('ref_fee_tariffs', {
+      'id': 't-p2',
+      'academic_year_id': kYear,
+      'school_level_id': 'lvl-p2',
+      'fee_code': 'MINERVAL',
+      'label': 'Minerval',
+      'amount_in_cents': 50000,
+      'currency': 'USD',
+    });
     final result = await repository.correct(request);
     final failure = result.fold((f) => f, (_) => null);
     expect(failure, isA<LevelCorrectionRefusedLocally>());
     expect(
       (failure! as LevelCorrectionRefusedLocally).refusal,
-      LevelCorrectionRefusal.hasPayments,
+      LevelCorrectionRefusal.overpaid,
     );
   });
 

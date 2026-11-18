@@ -22,8 +22,23 @@ enum LevelCorrectionRefusal {
   /// La grille du niveau cible est vide : l'élève ne devrait plus rien.
   noTariffForLevel('NO_TARIFF_FOR_LEVEL'),
 
-  /// Un versement vivant existe sur l'année (premier temps).
+  /// Un versement vivant existe sur l'année (premier temps). Disparaît quand
+  /// le serveur sait corriger un élève qui a payé (lot F3 du back) ; la valeur
+  /// reste, pour lire un refus déjà rangé.
   hasPayments('LEVEL_CORRECTION_HAS_PAYMENTS'),
+
+  /// Pour une nature de frais, l'élève a déjà payé **plus** que ce que le
+  /// niveau cible lui demande (strictement : l'égalité passe). Le serveur ne
+  /// fabrique pas de trop-perçu par une correction.
+  overpaid('LEVEL_CORRECTION_OVERPAID'),
+
+  /// Une nature de frais déjà payée n'existe pas dans la grille du niveau
+  /// cible : l'argent n'aurait plus de créance où se poser.
+  feeCodeAbsent('LEVEL_CORRECTION_FEE_CODE_ABSENT'),
+
+  /// Une nature de frais déjà payée change de devise au niveau cible : les
+  /// centimes ne se convertissent pas.
+  currencyChanged('LEVEL_CORRECTION_CURRENCY_CHANGED'),
 
   /// Notes, cotes saisies ou bulletin sur l'année.
   hasGrades('LEVEL_CORRECTION_HAS_GRADES'),

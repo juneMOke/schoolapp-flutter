@@ -20,6 +20,11 @@ class PaymentAllocationLocalModel {
   final int amountInCents;
   final String currency;
 
+  /// Correction de niveau qui a posé cette **ligne de transfert** (v82), `null`
+  /// pour une imputation du guichet. Une ligne de transfert va par paire qui
+  /// s'annule sur le même versement ; seul le serveur en écrit.
+  final String? levelCorrectionId;
+
   const PaymentAllocationLocalModel({
     required this.id,
     required this.clientUuid,
@@ -30,7 +35,10 @@ class PaymentAllocationLocalModel {
     required this.studentChargeLabel,
     required this.amountInCents,
     required this.currency,
+    this.levelCorrectionId,
   });
+
+  bool get isLevelCorrectionTransfer => levelCorrectionId != null;
 
   Map<String, Object?> toMap() => {
     'id': id,
@@ -42,6 +50,7 @@ class PaymentAllocationLocalModel {
     'student_charge_label': studentChargeLabel,
     'amount_in_cents': amountInCents,
     'currency': currency,
+    'level_correction_id': levelCorrectionId,
   };
 
   /// Même imputation, rattachée à une autre créance (re-résolution d'un uuid
@@ -58,6 +67,7 @@ class PaymentAllocationLocalModel {
         studentChargeLabel: studentChargeLabel,
         amountInCents: amountInCents,
         currency: currency,
+        levelCorrectionId: levelCorrectionId,
       );
 
   /// Colonnes dont le PULL est autoritaire (`openapi_billing_sync`
@@ -80,12 +90,17 @@ class PaymentAllocationLocalModel {
   /// porte pas, le DTO le laisse donc à `null`. L'écrire effacerait, au premier
   /// pull qui repasse sur la ligne, le tarif figé à l'encaissement — celui-là
   /// même qui dit sur quelle tranche l'argent a été reçu.
+  ///
+  /// **`level_correction_id` n'est écrit que présent** : une ligne de transfert
+  /// ne redevient jamais une imputation du guichet, et un delta scellé avant
+  /// le lot F du back ne la porte pas.
   Map<String, Object?> toPullPatch() => {
     'payment_id': paymentId,
     if (studentChargeId != null) 'student_charge_id': studentChargeId,
     'fee_code': feeCode,
     'amount_in_cents': amountInCents,
     'currency': currency,
+    if (levelCorrectionId != null) 'level_correction_id': levelCorrectionId,
   };
 
   factory PaymentAllocationLocalModel.fromMap(Map<String, Object?> m) =>
@@ -99,6 +114,7 @@ class PaymentAllocationLocalModel {
         studentChargeLabel: m['student_charge_label'] as String,
         amountInCents: (m['amount_in_cents'] as int?) ?? 0,
         currency: m['currency'] as String,
+        levelCorrectionId: m['level_correction_id'] as String?,
       );
 
   /// Le payeur et la date sont repliés depuis le paiement JOINT par l'appelant

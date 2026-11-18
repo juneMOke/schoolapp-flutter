@@ -1,4 +1,8 @@
+import 'package:school_app_flutter/core/offline/outbox_dao.dart';
+import 'package:school_app_flutter/core/offline/sync_state.dart';
 import 'package:school_app_flutter/core/offline/record_sync_state.dart';
+import 'package:school_app_flutter/features/finance/offline/data/local/dao/payment_correction_write_dao.dart'
+    show kPaymentCorrectionAggregate;
 import 'package:school_app_flutter/features/enrollment_level_correction/data/local/level_correction_write_dao.dart';
 import 'package:sqflite_common/sqlite_api.dart';
 
@@ -23,6 +27,47 @@ class LevelCorrectionSyncDao {
     where: 'id = ? AND sync_status = ?',
     whereArgs: [gestureId, RecordSyncState.pending.dbValue],
     limit: 1,
+  )).isNotEmpty;
+
+  /// Un versement de l'élève sur l'année — ou la correction d'un de ses
+  /// versements — attend-il encore dans la file ?
+  ///
+  /// La correction de niveau doit partir **après** : le serveur juge le payé
+  /// de l'élève, et un versement encore sur la tablette n'y est pas. Partie
+  /// avant, elle serait jugée sur un payé incomplet, et le versement arrivé
+  /// ensuite pourrait faire un trop-perçu (contrat du lot F, Q3). Le gel du
+  /// guichet (D7) ne couvre que ce qui suit la correction, pas ce qui la
+  /// précède.
+  ///
+  /// Une entrée sortie de la file (`SYNC_ERROR`) ne retient pas : son envoi est
+  /// abandonné, et attendre la retiendrait sans fin.
+  Future<bool> hasQueuedPayment({
+    required String studentId,
+    required String academicYearId,
+  }) async => (await _db.rawQuery(
+    '''
+    SELECT 1 FROM ${OutboxDao.table} o
+    JOIN payments p ON p.id = o.aggregate_id
+    WHERE o.aggregate_type = 'PAYMENT' AND o.status = ?
+      AND p.student_id = ?
+      AND (p.academic_year_id = ? OR p.academic_year_id IS NULL)
+    UNION ALL
+    SELECT 1 FROM ${OutboxDao.table} o
+    JOIN payment_corrections pc ON pc.id = o.aggregate_id
+    JOIN payments p ON p.id = pc.payment_id
+    WHERE o.aggregate_type = '$kPaymentCorrectionAggregate' AND o.status = ?
+      AND p.student_id = ?
+      AND (p.academic_year_id = ? OR p.academic_year_id IS NULL)
+    LIMIT 1
+    ''',
+    [
+      OutboxStatus.pending.dbValue,
+      studentId,
+      academicYearId,
+      OutboxStatus.pending.dbValue,
+      studentId,
+      academicYearId,
+    ],
   )).isNotEmpty;
 
   /// Le serveur a appliqué le geste (201), ou l'avait déjà appliqué (200).

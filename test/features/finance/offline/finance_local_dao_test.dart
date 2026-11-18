@@ -2548,6 +2548,67 @@ void main() {
       }
     });
 
+    test('lignes de transfert d\'une correction de niveau : hors du détail '
+        'du versement, dans celui de chaque créance', () async {
+      await insertCharge('c1', 's1', 'TUITION', expected: 100000, paid: 0);
+      await insertCharge('c2', 's1', 'TUITION', expected: 100000, paid: 0);
+      await dao.recordPayment(
+        payment: const PaymentLocalModel(
+          id: 'pay1',
+          clientUuid: 'pay1',
+          studentId: 's1',
+          paidAt: '2026-07-06T10:00:00Z',
+          payerFirstName: 'Ada',
+          payerLastName: 'Lovelace',
+        ),
+        allocations: const [
+          PaymentAllocationLocalModel(
+            id: 'a1',
+            clientUuid: 'a1',
+            paymentId: 'pay1',
+            studentChargeId: 'c1',
+            feeCode: 'TUITION',
+            studentChargeLabel: 'Scolarité',
+            amountInCents: 30000,
+            currency: 'USD',
+          ),
+        ],
+        outboxEntryId: 'ob-pay',
+        nowMs: 1000,
+      );
+      for (final (id, charge, cents) in [
+        ('t-out', 'c1', -10000),
+        ('t-in', 'c2', 10000),
+      ]) {
+        await db.insert(
+          'payment_allocations',
+          PaymentAllocationLocalModel(
+            id: id,
+            clientUuid: id,
+            paymentId: 'pay1',
+            studentChargeId: charge,
+            feeCode: 'TUITION',
+            studentChargeLabel: 'Scolarité',
+            amountInCents: cents,
+            currency: 'USD',
+            levelCorrectionId: 'lc-1',
+          ).toMap(),
+        );
+      }
+
+      expect((await dao.getAllocationsByPayment('pay1')).map((a) => a.id), [
+        'a1',
+      ]);
+      expect(
+        (await dao.getAllocationsByCharge('c1')).map((a) => a.id),
+        unorderedEquals(['a1', 't-out']),
+      );
+      expect(
+        (await dao.getAllocationsByCharge('c2')).single.amountInCents,
+        10000,
+      );
+    });
+
     /// Une imputation d'un versement antérieur au palier v28 : le repli rend
     /// `null`, jamais une chaîne vide — l'UI doit pouvoir distinguer « pas de
     /// numéro » d'un numéro effacé.

@@ -481,6 +481,68 @@ void main() {
     );
 
     test(
+      'une paire de transfert (correction de niveau) descend avec sa marque et '
+      'son montant négatif ; un delta qui ne la porte plus ne l\'efface pas',
+      () async {
+        PaymentPullAllocationDto transfer(
+          String id,
+          String charge,
+          int cents, {
+          String? correction,
+        }) => PaymentPullAllocationDto(
+          id: id,
+          studentChargeId: charge,
+          feeCode: 'SCOLARITE',
+          studentChargeLabel: 'Minerval',
+          amountInCents: cents,
+          currency: 'USD',
+          levelCorrectionId: correction,
+        );
+        var deltas = [
+          transfer('t-out', 'ch-1', -3000, correction: 'lc-1'),
+          transfer('t-in', 'ch-2', 3000, correction: 'lc-1'),
+        ];
+        when(() => api.pullPayments(any(), any(), any(), any())).thenAnswer(
+          (_) async => httpOk(
+            PaymentPageDto(
+              items: [paymentDelta('pay-1', allocations: deltas)],
+              page: env(nextWatermark: 'WMP1'),
+            ),
+          ),
+        );
+
+        await repo.syncPayments();
+        deltas = [transfer('t-out', 'ch-1', -3000)];
+        await repo.syncPayments();
+
+        final allocs = {
+          for (final a in await db.query('payment_allocations')) a['id']: a,
+        };
+        expect(allocs['t-out']!['amount_in_cents'], -3000);
+        expect(allocs['t-out']!['level_correction_id'], 'lc-1');
+        expect(allocs['t-in']!['level_correction_id'], 'lc-1');
+      },
+    );
+
+    test('levelCorrectionId se lit sur le fil, absent ⇒ null', () {
+      final json = {
+        'id': 'a',
+        'feeCode': 'SCOLARITE',
+        'studentChargeLabel': 'Minerval',
+        'amountInCents': -1500,
+        'currency': 'USD',
+      };
+      expect(PaymentPullAllocationDto.fromJson(json).levelCorrectionId, isNull);
+      final marked = PaymentPullAllocationDto.fromJson({
+        ...json,
+        'levelCorrectionId': 'lc-9',
+      });
+      expect(marked.levelCorrectionId, 'lc-9');
+      expect(marked.amountInCents, -1500);
+      expect(marked.toLocalModel(paymentId: 'p').levelCorrectionId, 'lc-9');
+    });
+
+    test(
       'cycles sérialisés par CHAÎNAGE : un appelant arrivé pendant un cycle en '
       'vol obtient un cycle qui démarre APRÈS lui (jamais un delta antérieur à '
       'son besoin de fraîcheur), et jamais deux cycles en parallèle',

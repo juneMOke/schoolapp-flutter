@@ -369,6 +369,40 @@ void main() {
     });
   });
 
+  group('origine', () {
+    test('lignes de transfert d\'une correction de niveau : le remplaçant se '
+        'préremplit en NET par créance, au même total', () async {
+      final origin = await collect(15000);
+      await syncOrigin(origin, 15000);
+      Future<void> transfer(String id, String charge, int cents) =>
+          db.insert('payment_allocations', {
+            'id': id,
+            'client_uuid': id,
+            'payment_id': origin,
+            'student_charge_id': charge,
+            'fee_code': 'MINERVAL',
+            'student_charge_label': 'Minerval',
+            'amount_in_cents': cents,
+            'currency': 'USD',
+            'level_correction_id': 'lc-1',
+          });
+      // 50 partent de c-1 vers c-2. Sur c-3, une paire qui s'annule : une
+      // créance à 0 net n'est pas préremplie.
+      await transfer('t-out', 'c-1', -5000);
+      await transfer('t-in', 'c-2', 5000);
+      await transfer('t-zero-in', 'c-3', 1000);
+      await transfer('t-zero-out', 'c-3', -1000);
+
+      final loaded = await PaymentCorrectionWriteDao(
+        db,
+        FinancePaymentWriteDao(db),
+      ).loadOrigin(origin);
+
+      expect(loaded!.centsByCharge, {'c-1': 10000, 'c-2': 5000});
+      expect(loaded.allocations.first.studentChargeId, 'c-1');
+    });
+  });
+
   group('refus', () {
     test('un motif sans rapport avec le geste', () async {
       final origin = await collect(15000);

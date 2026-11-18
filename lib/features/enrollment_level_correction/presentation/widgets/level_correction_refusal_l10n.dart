@@ -17,6 +17,10 @@ extension LevelCorrectionRefusalL10n on AppLocalizations {
       levelCorrectionRefusedInvalidTargetLevel,
     LevelCorrectionRefusal.noTariffForLevel => levelCorrectionRefusedNoTariff,
     LevelCorrectionRefusal.hasPayments => levelCorrectionRefusedHasPayments,
+    LevelCorrectionRefusal.overpaid => levelCorrectionRefusedOverpaid,
+    LevelCorrectionRefusal.feeCodeAbsent => levelCorrectionRefusedFeeCodeAbsent,
+    LevelCorrectionRefusal.currencyChanged =>
+      levelCorrectionRefusedCurrencyChanged,
     LevelCorrectionRefusal.hasGrades => levelCorrectionRefusedHasGrades,
     LevelCorrectionRefusal.targetClassroomRequired =>
       levelCorrectionRefusedTargetClassroomRequired,

@@ -171,6 +171,31 @@ Future<void> migrateTenantDatabase(
   if (upTo(81)) {
     await _addSaleReceiptTicketFields(db);
   }
+  if (upTo(82)) {
+    await _addColumnIfTable(db, 'payment_allocations', 'level_correction_id');
+    await _repullPayments(db);
+  }
+}
+
+/// v82 — `payment_allocations.level_correction_id` : la marque d'une ligne de
+/// transfert posée par une correction de niveau (lot F du back). Additif,
+/// nullable.
+///
+/// **Le curseur des versements repart de zéro.** Un poste resté en v81 quand
+/// le serveur passe à F3 range une ligne de transfert comme une imputation
+/// ordinaire — son DTO ignore la marque — et son curseur la dépasse. Sans
+/// re-tirage, le ticket et le détail du versement garderaient une ligne
+/// négative. Le re-tirage patche ligne à ligne (`toPullPatch`) : rien de ce
+/// que le poste sait n'est perdu.
+Future<void> _repullPayments(DatabaseExecutor db) async {
+  final hasMeta = await db.rawQuery(
+    "SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'sync_meta'",
+  );
+  if (hasMeta.isEmpty) return;
+  await db.execute(
+    "DELETE FROM sync_meta WHERE resource = 'finance_payments' "
+    "OR substr(resource, 1, 17) = 'finance_payments@'",
+  );
 }
 
 /// v81 — le jour d'émission et l'URL de vérification du reçu de vente (`RV`),

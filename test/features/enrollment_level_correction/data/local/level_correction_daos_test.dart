@@ -162,26 +162,39 @@ void main() {
       },
     );
 
-    test(
-      'un versement sur l\'année : refus local, rien n\'est écrit',
-      () async {
-        await insertPayment(db, id: 'pay-1');
-        expect(await record('g-1'), LevelCorrectionRecordOutcome.hasPayments);
-        expect(await reader.latestFor(kEnrollment), isNull);
-        expect(
-          await OutboxDao(db).byId(LevelCorrectionWriteDao.entryId('g-1')),
-          isNull,
-        );
-      },
-    );
+    group('repli du premier temps (interrupteur F3 fermé)', () {
+      setUp(
+        () => writer = LevelCorrectionWriteDao(db, acceptsPaidStudents: false),
+      );
 
-    test('un versement annulé retient aussi : le serveur le compte', () async {
-      await insertPayment(db, id: 'pay-1', cancelledAt: 5);
-      expect(await record('g-1'), LevelCorrectionRecordOutcome.hasPayments);
+      test(
+        'un versement sur l\'année : refus local, rien n\'est écrit',
+        () async {
+          await insertPayment(db, id: 'pay-1');
+          expect(await record('g-1'), LevelCorrectionRecordOutcome.hasPayments);
+          expect(await reader.latestFor(kEnrollment), isNull);
+          expect(
+            await OutboxDao(db).byId(LevelCorrectionWriteDao.entryId('g-1')),
+            isNull,
+          );
+        },
+      );
+
+      test('un versement annulé retient aussi', () async {
+        await insertPayment(db, id: 'pay-1', cancelledAt: 5);
+        expect(await record('g-1'), LevelCorrectionRecordOutcome.hasPayments);
+      });
+
+      test('un versement d\'une autre année ne retient pas', () async {
+        await insertPayment(db, id: 'pay-2', academicYearId: 'year-0');
+        expect(await record('g-1'), LevelCorrectionRecordOutcome.recorded);
+      });
     });
 
-    test('un versement d\'une autre année ne retient pas', () async {
-      await insertPayment(db, id: 'pay-2', academicYearId: 'year-0');
+    test('interrupteur F3 ouvert par défaut : un versement seul ne retient '
+        'plus', () async {
+      expect(kLevelCorrectionAcceptsPaidStudents, isTrue);
+      await insertPayment(db, id: 'pay-1');
       expect(await record('g-1'), LevelCorrectionRecordOutcome.recorded);
     });
   });

@@ -29,6 +29,10 @@ import 'package:school_app_flutter/core/auth/module_access_registry.dart';
 /// ligne garde son code, et rien n'est à défaire, le geste n'ayant rien changé
 /// localement.
 ///
+/// **Après les versements de l'élève** : tant qu'un versement de l'année, ou la
+/// correction d'un versement, attend dans la file, le geste attend aussi — le
+/// serveur juge le payé, et doit le voir en entier.
+///
 /// **Après l'accusé**, la tablette n'a pas encore les nouvelles créances : la
 /// descente revient à `LevelCorrectionSettler`, une fois par fin de flush.
 /// D'ici là, la garde du guichet (E3) continue de bloquer l'encaissement.
@@ -103,6 +107,14 @@ class LevelCorrectionOutboxHandler
     )) {
       return const OutboxDispatchResult.blocked(
         'Un geste plus ancien de cet élève attend',
+      );
+    }
+    if (await _sync.hasQueuedPayment(
+      studentId: gesture.studentId,
+      academicYearId: gesture.academicYearId,
+    )) {
+      return const OutboxDispatchResult.blocked(
+        'Un versement de cet élève attend',
       );
     }
     final dependency = await _dependency(
