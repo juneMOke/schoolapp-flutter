@@ -4130,6 +4130,10 @@
       }
     }
   },
+  "syncHeldAwaitingPermission": "Un droit a été retiré à ce compte : l'écriture est conservée et repartira quand il sera rétabli.",
+  "@syncHeldAwaitingPermission": {
+    "description": "Motif d une écriture retenue dans la file faute de droit (ADR-014 §13.3)."
+  },
   "syncAggregateEnrollment": "Inscription",
   "syncAggregatePayment": "Paiement",
   "syncAggregateSaleReceipt": "Reçu de vente",

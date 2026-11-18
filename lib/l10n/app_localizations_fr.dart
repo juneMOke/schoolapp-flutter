@@ -6390,6 +6390,10 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
+  String get syncHeldAwaitingPermission =>
+      'Un droit a été retiré à ce compte : l\'écriture est conservée et repartira quand il sera rétabli.';
+
+  @override
   String get syncAggregateEnrollment => 'Inscription';
 
   @override
