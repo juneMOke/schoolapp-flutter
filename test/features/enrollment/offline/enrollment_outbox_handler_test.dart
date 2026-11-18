@@ -232,9 +232,9 @@ void main() {
   // immédiat au lieu de gaspiller maxAttempts avant un dead-letter générique.
   test('403 sans code (droit retiré) → retenu, le dossier reste PENDING_SYNC '
       '(ADR-014 §13.3)', () async {
-    when(
-      () => api.submit(any(), any()),
-    ).thenThrow(_httpError(403, data: {'message': 'Accès refusé.'}));
+    when(() => api.submit(any(), any())).thenThrow(
+      _httpError(403, data: {'code': 'FORBIDDEN', 'message': 'Accès refusé.'}),
+    );
 
     final result = await handler.dispatch(await pendingEntry());
     expect(result.permissionDenied, isTrue);

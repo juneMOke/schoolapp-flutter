@@ -19,6 +19,7 @@ import 'package:school_app_flutter/features/attendances/domain/entities/justific
 import 'package:sqflite_common/sqlite_api.dart';
 
 import '../../../../../../core/offline/offline_full_test_db.dart';
+import '../../../../../../helpers/permission_denial.dart';
 
 class _Api extends Mock implements AttendanceJustificationApi {}
 
@@ -306,7 +307,9 @@ void main() {
       'route (ADR-014 §13.3)',
       () async {
         await decide(JustificationDecision.accept);
-        when(() => api.decide(any(), 'j1', any())).thenThrow(refused(403));
+        when(
+          () => api.decide(any(), 'j1', any()),
+        ).thenThrow(permissionDenial403());
 
         final result = await handler.dispatch(await entry());
 

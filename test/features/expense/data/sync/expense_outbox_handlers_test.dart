@@ -19,6 +19,7 @@ import 'package:school_app_flutter/features/expense/data/sync/expense_withdrawal
 import 'package:sqflite_common/sqlite_api.dart';
 
 import '../../../offline_full_db.dart';
+import '../../../../helpers/permission_denial.dart';
 
 class _MockApi extends Mock implements ExpenseSyncApi {}
 
@@ -356,7 +357,9 @@ void main() {
     test('403 sans code : droit retiré, le retrait reste en attente '
         '(ADR-014 §13.3)', () async {
       await withdrawnLocally();
-      when(() => api.setWithdrawn(any(), any(), any())).thenThrow(_http(403));
+      when(
+        () => api.setWithdrawn(any(), any(), any()),
+      ).thenThrow(permissionDenial403());
 
       final result = await handler().dispatch(entry());
 

@@ -14,6 +14,7 @@ import 'package:school_app_flutter/features/attendances/data/models/offline/atte
 import 'package:school_app_flutter/features/attendances/data/remote/offline/attendance_local_data_source.dart';
 import 'package:school_app_flutter/features/attendances/data/remote/offline/attendance_outbox_handler.dart';
 import 'package:school_app_flutter/features/attendances/data/remote/offline/attendance_sync_api.dart';
+import '../../../../../helpers/permission_denial.dart';
 
 class MockAttendanceSyncApi extends Mock implements AttendanceSyncApi {}
 
@@ -264,9 +265,9 @@ void main() {
       'détruit (droit retiré, ADR-014 §13.3)', () async {
     // La présence n'a pas de rejeu manuel : un appel classé terminal ici
     // serait perdu. Le moteur le retient jusqu'au retour du droit.
-    when(
-      () => api.submitAttendance(any(), any()),
-    ).thenThrow(dio(const UnauthorizedFailure('forbidden'), status: 403));
+    when(() => api.submitAttendance(any(), any())).thenThrow(
+      permissionDenial403(error: const UnauthorizedFailure('forbidden')),
+    );
 
     final result = await handlerFor(uid: 'author-1').dispatch(entry());
     expect(result.permissionDenied, isTrue);
@@ -491,6 +492,7 @@ void main() {
             const UnauthorizedFailure('Access forbidden'),
             status: 403,
             body: <String, dynamic>{
+              'code': 'FORBIDDEN',
               'message':
                   'Corriger un appel d\'un jour révolu exige la permission '
                   'attendance.amend',

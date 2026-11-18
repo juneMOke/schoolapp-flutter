@@ -13,12 +13,24 @@
 ///    dispatch d'une entrée, et le moteur retient l'entrée au lieu de la
 ///    laisser passer en `SYNC_ERROR`.
 ///
-/// Un refus de permission (`@PreAuthorize`) arrive **sans** `detailCode` ; un
-/// refus métier (`MONTH_CLOSURE_FORBIDDEN`, `PAYROLL_GESTURE_FORBIDDEN`…) en
-/// porte un, et reste terminal. Le refus d'auteur (`SyncAttributionGuard`) n'en
-/// porte pas non plus, mais le moteur l'écarte avant tout envoi : s'il passait
-/// quand même, l'entrée attendrait au lieu d'être perdue — l'erreur va du côté
-/// où rien ne se détruit.
+/// **Ce qui est un refus de droit.** Un 403 au corps `code: FORBIDDEN`, et :
+/// - sans `detailCode` : `@RequiresPermission` sur la route, ou un contrôle de
+///   droit écrit dans le code (corriger un appel passé, remplacer un
+///   versement) ;
+/// - ou avec l'un des codes de [kOutboxPermissionRefusalCodes] : des contrôles
+///   de droit que le serveur nomme (clore le mois du pointage, valider la paie,
+///   déposer une avance).
+///
+/// Tout autre 403 porteur d'un code est un refus métier, et reste terminal.
+/// Un 403 sans corps `FORBIDDEN` (page d'un proxy) n'est pas un refus de droit.
+///
+/// **Le refus d'auteur.** `SyncAttributionGuard` répond lui aussi 403 sans
+/// `detailCode`. Le moteur écarte l'écriture d'un autre compte avant l'envoi,
+/// mais une entrée **sans auteur**, ou un porteur sans `uid`, partent quand même
+/// pour obtenir un refus visible (`outbox_author.dart`). Pour elles, le refus
+/// n'est jamais lu comme un droit retiré : la sonde du dispatch est montée
+/// « non attribuée », et [isOutboxPermissionDenial] rend `false` — sans quoi
+/// l'entrée serait retenue pour toujours, sans personne pour la réclamer.
 library;
 
 import 'dart:async';
@@ -26,14 +38,29 @@ import 'dart:async';
 import 'package:dio/dio.dart';
 import 'package:school_app_flutter/core/auth/module_access_registry.dart';
 import 'package:school_app_flutter/core/auth/permission_policy.dart';
+import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/core/network/api_error_parser.dart';
 import 'package:school_app_flutter/core/offline/outbox_entry.dart';
 
-/// Motif posé sur une entrée retenue faute de droit. Il s'affiche tel quel dans
-/// la feuille de synchronisation (`SyncHeldTile`), comme les autres retenues.
-const String kOutboxAwaitingPermissionReason =
-    'Droit retiré pour ce compte — l\'écriture est conservée et repartira '
-    'quand le droit sera rétabli';
+/// Motif posé sur une entrée retenue faute de droit. C'est un **code** : la
+/// feuille de synchronisation (`SyncHeldTile`) l'affiche traduit, et la file le
+/// reconnaît (`OutboxDao.wakePermissionHolds`, `hasOlderPending`).
+const String kOutboxAwaitingPermissionReason = 'AWAITING_PERMISSION';
+
+/// Codes de refus que le serveur pose sur un contrôle de **droit** fait dans
+/// son code, et non sur la route. Recopiés du back (`HrErrorCodes`,
+/// `PayrollErrorCodes`, `ExpenseErrorCodes`) : un code ajouté là-bas sans être
+/// recopié ici redevient terminal.
+const Set<String> kOutboxPermissionRefusalCodes = {
+  // hr.attendance.manage pour clore le mois du pointage.
+  'MONTH_CLOSURE_FORBIDDEN',
+  // hr.attendance.reopen pour le rouvrir.
+  'MONTH_REOPEN_FORBIDDEN',
+  // hr.pay.manage pour valider, renvoyer ou rouvrir la paie.
+  'PAYROLL_GESTURE_FORBIDDEN',
+  // hr.pay.read pour déposer ou corriger une avance au personnel.
+  'STAFF_ADVANCE_FORBIDDEN',
+};
 
 /// Un handler d'outbox qui déclare le droit qu'exige l'envoi d'une entrée.
 ///
@@ -62,18 +89,30 @@ bool outboxWriteDenied(ModuleAccess? access, Iterable<String>? held) {
   );
 }
 
-/// [e] est-il un refus de **droit** — 403 sans `detailCode` ?
+/// [e] est-il un refus de **droit** (voir l'en-tête du fichier) ?
 ///
 /// À tester par un handler **avant** d'appliquer un effet local de refus, pour
 /// renvoyer `OutboxDispatchResult.permissionDenied()` à la place : la sonde du
 /// moteur retient l'entrée, mais elle ne peut pas défaire ce que le handler a
 /// déjà écrit en base.
-bool isOutboxPermissionDenial(DioException e) =>
-    OutboxPermissionProbe.isPermissionDenial(e.response);
+///
+/// Dans le dispatch d'une entrée non attribuée, rend toujours `false` : le
+/// refus peut être celui de l'auteur, et le handler garde son ancien sort.
+bool isOutboxPermissionDenial(DioException e) {
+  final probe = Zone.current[OutboxPermissionProbe._zoneKey];
+  if (probe is OutboxPermissionProbe && !probe.attributed) return false;
+  return OutboxPermissionProbe.isPermissionDenial(e.response);
+}
 
 /// Ce que la sonde a vu pendant le dispatch d'une entrée.
 class OutboxPermissionProbe {
   static final Object _zoneKey = Object();
+
+  /// L'entrée appartient au porteur courant. Faux : sans auteur, ou porteur
+  /// sans `uid` — un 403 peut alors venir de `SyncAttributionGuard`.
+  final bool attributed;
+
+  OutboxPermissionProbe({this.attributed = true});
 
   bool _denied = false;
 
@@ -89,22 +128,28 @@ class OutboxPermissionProbe {
   /// d'un dispatch d'outbox (pull, écran en ligne), ne fait rien.
   static void observe(Response<dynamic>? response) {
     final probe = Zone.current[_zoneKey];
-    if (probe is OutboxPermissionProbe && isPermissionDenial(response)) {
+    if (probe is OutboxPermissionProbe &&
+        probe.attributed &&
+        isPermissionDenial(response)) {
       probe._denied = true;
     }
   }
 
-  /// Un 403 sans `detailCode` : le serveur refuse le droit, pas le geste.
-  static bool isPermissionDenial(Response<dynamic>? response) =>
-      response?.statusCode == 403 &&
-      ApiErrorParser.detailCodeOf(response) == null;
+  /// Le serveur refuse le droit, pas le geste (voir l'en-tête du fichier).
+  static bool isPermissionDenial(Response<dynamic>? response) {
+    if (response?.statusCode != 403) return false;
+    if (ApiErrorParser.codeOf(response) != ApiErrorCode.forbidden) return false;
+    final detailCode = ApiErrorParser.detailCodeOf(response);
+    return detailCode == null ||
+        kOutboxPermissionRefusalCodes.contains(detailCode);
+  }
 }
 
 /// Branche [OutboxPermissionProbe] sur la chaîne Dio.
 ///
-/// À poser **en tête** de la chaîne : les intercepteurs suivants peuvent
-/// rejeter avec une autre erreur, et la sonde doit lire la réponse d'origine.
-/// Ne modifie jamais la requête ni la réponse.
+/// À poser **après** `AuthRefreshInterceptor` (il transmet par `next` l'échec
+/// d'un rejeu après 401) et **avant** le mapping d'erreurs, qui remplace la
+/// réponse d'origine. Ne modifie jamais la requête ni la réponse.
 class OutboxPermissionProbeInterceptor extends Interceptor {
   @override
   void onResponse(Response response, ResponseInterceptorHandler handler) {

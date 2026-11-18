@@ -31,6 +31,7 @@ import 'package:sqflite_common/sqlite_api.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../../../offline_full_db.dart';
+import '../../../../../helpers/permission_denial.dart';
 
 class _MockApi extends Mock implements FinanceSyncApi {}
 
@@ -436,7 +437,9 @@ void main() {
       final origin = await syncedOrigin();
       final outcome = await correct(origin);
       expect(await remaining(), 15000);
-      when(() => api.correctPayment(any(), any())).thenThrow(_refusal(403));
+      when(
+        () => api.correctPayment(any(), any()),
+      ).thenThrow(permissionDenial403());
 
       final result = await handler().dispatch(await correctionEntry());
 

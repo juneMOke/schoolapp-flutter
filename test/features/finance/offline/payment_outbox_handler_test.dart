@@ -20,6 +20,7 @@ import 'package:school_app_flutter/features/finance/offline/data/sync/payment_ou
 import '../../offline_full_db.dart';
 import 'package:school_app_flutter/core/money/money.dart';
 import 'package:school_app_flutter/core/money/money_bag.dart';
+import '../../../helpers/permission_denial.dart';
 
 class MockFinanceSyncApi extends Mock implements FinanceSyncApi {}
 
@@ -275,7 +276,9 @@ void main() {
 
   test('403 sans code → retenu : l argent encaissé attend le retour du droit '
       '(ADR-014 §13.3)', () async {
-    when(() => api.commitPayment(any(), any())).thenThrow(dioWithStatus(403));
+    when(
+      () => api.commitPayment(any(), any()),
+    ).thenThrow(permissionDenial403());
     final result = await handlerWithGate(
       OutboxDependencyState.ready,
     ).dispatch(await pendingEntry());

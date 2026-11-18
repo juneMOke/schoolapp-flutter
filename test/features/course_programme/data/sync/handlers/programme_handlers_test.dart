@@ -23,6 +23,7 @@ import 'package:sqflite_common/sqlite_api.dart';
 
 import '../../../../offline_full_db.dart';
 import '../../../programme_test_fakes.dart';
+import '../../../../../helpers/permission_denial.dart';
 
 class _MockApi extends Mock implements ProgrammeSyncApi {}
 
@@ -140,7 +141,9 @@ void main() {
 
     test('403 sans code : droit retiré, la fiche attend sans être à corriger '
         '(ADR-014 §13.3)', () async {
-      when(() => api.saveChapitre(extras, any())).thenThrow(_dio(403));
+      when(
+        () => api.saveChapitre(extras, any()),
+      ).thenThrow(permissionDenial403());
       final result = await handler.dispatch(
         entryOf(ProgrammeOutbox.chapitreType, save.toJson()),
       );

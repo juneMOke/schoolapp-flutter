@@ -168,7 +168,17 @@ class SyncEngine {
        _permissions = permissions,
        _now = now,
        _maxAttempts = maxAttempts,
-       _scope = scope;
+       _scope = scope {
+    // Un changement de droits réveille les écritures retenues faute de droit :
+    // la pré-garde les relira au prochain lot, sans attendre leur délai.
+    permissions?.addChangeListener(_wakePermissionHolds);
+  }
+
+  void _wakePermissionHolds() {
+    _outbox.wakePermissionHolds(_now()).catchError((Object _) {
+      // Base indisponible (école détachée) : le délai les relâchera.
+    });
+  }
 
   /// Enregistre le handler d'un type d'agrégat (appelé par la DI des branches).
   void registerHandler(OutboxSyncHandler handler) {
@@ -246,7 +256,13 @@ class SyncEngine {
           await _outbox.defer(
             entry.id,
             nextAttemptAt: _now() + _blockedDelayMs,
-            reason: 'Écriture d\'un autre compte — attend sa reconnexion',
+            // Retenue faute de droit, elle le reste : le motif est ce qui la
+            // laisse passer derrière les écritures des autres comptes
+            // (`OutboxDao.hasOlderPending`), et ce qui la réveille au retour
+            // du droit.
+            reason: entry.lastError == kOutboxAwaitingPermissionReason
+                ? kOutboxAwaitingPermissionReason
+                : 'Écriture d\'un autre compte — attend sa reconnexion',
           );
           blocked++;
           continue;
@@ -269,16 +285,28 @@ class SyncEngine {
               (handler as OutboxWriteAccess).writeAccessFor(entry),
               _permissions?.permissions,
             )) {
+          // Délai long : le droit ne revient pas en quelques secondes, et un
+          // délai court ferait reprendre les mêmes entrées à chaque lot, au
+          // détriment des plus récentes. Le retour du droit les réveille.
           await _outbox.defer(
             entry.id,
-            nextAttemptAt: _now() + _blockedDelayMs,
+            nextAttemptAt: _now() + _permissionDeniedDelayMs,
             reason: kOutboxAwaitingPermissionReason,
           );
           blocked++;
           continue;
         }
 
-        final probe = OutboxPermissionProbe();
+        // Non attribuée (sans auteur, ou porteur sans `uid`) : un 403 sans
+        // code peut être le refus d'auteur. La sonde ne le lira pas comme un
+        // droit retiré, sans quoi l'entrée serait retenue pour toujours.
+        final author = outboxAuthorUidOf(entry.payload);
+        final probe = OutboxPermissionProbe(
+          attributed:
+              currentUid != null &&
+              currentUid.isNotEmpty &&
+              author == currentUid,
+        );
         try {
           final result = await probe.watch(() => handler.dispatch(entry));
           // Le serveur a refusé le DROIT pendant ce dispatch (403 sans

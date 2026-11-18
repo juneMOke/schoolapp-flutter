@@ -25,6 +25,7 @@ import 'package:sqflite_common/sqlite_api.dart';
 
 import '../../../offline_full_db.dart';
 import '../../staff_fixtures.dart';
+import '../../../../helpers/permission_denial.dart';
 
 class _MockApi extends Mock implements StaffSyncApi {}
 
@@ -404,7 +405,9 @@ void main() {
         'refuser (ADR-014 §13.3)', () async {
       await seedSyncedContract('c-1');
       await correct();
-      when(() => api.correctStaffContract(any(), any())).thenThrow(_http(403));
+      when(
+        () => api.correctStaffContract(any(), any()),
+      ).thenThrow(permissionDenial403());
 
       final result = await dispatch();
 

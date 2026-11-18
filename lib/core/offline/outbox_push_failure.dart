@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:school_app_flutter/core/offline/outbox_permission_guard.dart';
 import 'package:school_app_flutter/core/network/api_error_parser.dart';
 
 /// Lecture d'un échec d'envoi d'une entrée d'outbox.
@@ -15,22 +16,29 @@ class OutboxPushFailure {
   /// Cause lisible : le code machine d'abord, la phrase du serveur ensuite.
   final String reason;
 
-  const OutboxPushFailure(this.status, this.detailCode, this.reason);
+  /// Droit retiré : l'écriture attend le retour du droit au lieu d'être
+  /// refusée (ADR-014 §13.3). Lu par `isOutboxPermissionDenial` à la
+  /// construction, donc dans la zone du dispatch.
+  final bool isPermissionDenied;
+
+  const OutboxPushFailure(
+    this.status,
+    this.detailCode,
+    this.reason, {
+    this.isPermissionDenied = false,
+  });
 
   factory OutboxPushFailure.of(DioException e) => OutboxPushFailure(
     e.response?.statusCode,
     ApiErrorParser.detailCodeOf(e.response),
     ApiErrorParser.pushFailureReason(e),
+    isPermissionDenied: isOutboxPermissionDenial(e),
   );
 
   static const Set<int> _transientStatuses = {401, 408, 409, 429};
 
   /// Un 409 qui dit d'attendre [code] : rejouer sans consommer de tentative.
   bool awaits(String code) => status == 409 && detailCode == code;
-
-  /// Droit retiré (403 sans `detailCode`) : l'écriture attend le retour du
-  /// droit au lieu d'être refusée (ADR-014 §13.3).
-  bool get isPermissionDenied => status == 403 && detailCode == null;
 
   /// L'agrégat a été purgé côté serveur : le geste n'a plus d'objet.
   bool get isGone => status == 410;

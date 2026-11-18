@@ -24,6 +24,7 @@ import 'package:school_app_flutter/features/expense/domain/entities/expense_gest
 import 'package:sqflite_common/sqlite_api.dart';
 
 import '../../../offline_full_db.dart';
+import '../../../../helpers/permission_denial.dart';
 
 class _MockApi extends Mock implements ExpenseSyncApi {}
 
@@ -415,7 +416,9 @@ void main() {
 
     test('403 sans code sur une décision : droit retiré, rien n est défait, '
         'la suite reste en file (ADR-014 §13.3)', () async {
-      when(() => api.decideExpense(any(), any(), any())).thenThrow(http(403));
+      when(
+        () => api.decideExpense(any(), any(), any()),
+      ).thenThrow(permissionDenial403());
 
       final result = await handler().dispatch(
         entry('m-1', gesture: ExpenseGesture.approve),

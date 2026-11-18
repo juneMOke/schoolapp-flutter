@@ -1,5 +1,8 @@
 import 'package:sqflite_common/sqlite_api.dart';
+import 'package:school_app_flutter/core/offline/outbox_author.dart';
 import 'package:school_app_flutter/core/offline/outbox_entry.dart';
+import 'package:school_app_flutter/core/offline/outbox_permission_guard.dart'
+    show kOutboxAwaitingPermissionReason;
 import 'package:school_app_flutter/core/offline/sync_state.dart';
 
 /// Accès à la table `outbox`. Écrit/relit les entrées de la file de push.
@@ -48,6 +51,13 @@ class OutboxDao {
   /// (`SYNC_ERROR`) ne retient plus personne. L'ordre est strict
   /// `(created_at, rowid)`, sinon deux entrées d'une même milliseconde
   /// s'attendraient à jamais.
+  ///
+  /// **Une entrée retenue faute de droit ne retient pas les autres comptes.**
+  /// Elle peut attendre des jours, ou toujours : la laisser bloquer l'écriture
+  /// d'un collègue qui détient le droit figerait son travail sans recours
+  /// (ADR-014 §13.3). Elle continue de retenir les entrées de son propre
+  /// auteur, dont l'ordre reste le sien. Si l'écriture du collègue dépendait
+  /// réellement d'elle, le serveur le dira (409 d'attente).
   Future<bool> hasOlderPending({
     required String entryId,
     required String? aggregateId,
@@ -56,15 +66,40 @@ class OutboxDao {
     if (types.isEmpty) return false;
     final marks = List.filled(types.length, '?').join(', ');
     final rows = await _db.rawQuery(
-      'SELECT 1 FROM $table o JOIN $table me ON me.id = ? '
+      'SELECT o.payload AS older, o.last_error AS reason, me.payload AS mine '
+      'FROM $table o JOIN $table me ON me.id = ? '
       'WHERE o.id != me.id AND o.status = ? '
       '${aggregateId == null ? '' : 'AND o.aggregate_id = ? '}'
       'AND o.aggregate_type IN ($marks) '
       'AND (o.created_at < me.created_at '
-      'OR (o.created_at = me.created_at AND o.rowid < me.rowid)) LIMIT 1',
+      'OR (o.created_at = me.created_at AND o.rowid < me.rowid))',
       [entryId, OutboxStatus.pending.dbValue, ?aggregateId, ...types],
     );
-    return rows.isNotEmpty;
+    for (final row in rows) {
+      final heldForPermission =
+          row['reason'] == kOutboxAwaitingPermissionReason;
+      if (!heldForPermission) return true;
+      final mine = outboxAuthorUidOf(row['mine'] as String? ?? '');
+      final older = outboxAuthorUidOf(row['older'] as String? ?? '');
+      if (mine == older) return true;
+    }
+    return false;
+  }
+
+  /// Réveille les entrées retenues faute de droit : elles repassent au
+  /// prochain lot, où la pré-garde les relira avec les droits du moment.
+  /// Appelé quand l'ensemble de droits change (ADR-014 §13.3).
+  Future<void> wakePermissionHolds(int nowMs) async {
+    await _db.update(
+      table,
+      {'next_attempt_at': nowMs},
+      where: 'status = ? AND last_error = ? AND next_attempt_at > ?',
+      whereArgs: [
+        OutboxStatus.pending.dbValue,
+        kOutboxAwaitingPermissionReason,
+        nowMs,
+      ],
+    );
   }
 
   /// Marque une entrée comme acquittée (ACK serveur reçu).

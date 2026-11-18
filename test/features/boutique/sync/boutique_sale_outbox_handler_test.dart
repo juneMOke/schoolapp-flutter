@@ -19,6 +19,7 @@ import 'package:sqflite_common/sqlite_api.dart';
 import '../../offline_full_db.dart';
 import 'package:school_app_flutter/core/money/money.dart';
 import 'package:school_app_flutter/core/money/money_bag.dart';
+import '../../../helpers/permission_denial.dart';
 
 class _MockApi extends Mock implements BoutiqueSyncApi {}
 
@@ -442,7 +443,7 @@ void main() {
 
     test('un 403 sans code retient la vente sans la marquer en échec '
         '(droit retiré, ADR-014 §13.3)', () async {
-      when(() => api.commitSale(any(), any())).thenThrow(_http(403));
+      when(() => api.commitSale(any(), any())).thenThrow(permissionDenial403());
 
       final result = await handlerWith(
         OutboxDependencyState.ready,
