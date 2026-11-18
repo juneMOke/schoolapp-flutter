@@ -58,7 +58,8 @@ class PaymentCorrectionOrigin extends Equatable {
     this.tenderCurrencyByChargeCurrency = const {},
   });
 
-  /// Ce que l'origine imputait, par créance.
+  /// Ce que l'origine imputait, par créance — **net** des lignes de transfert
+  /// d'une correction de niveau (`loadOrigin`).
   Map<String, int> get centsByCharge => {
     for (final a in allocations)
       if (a.studentChargeId != null) a.studentChargeId!: a.amountInCents,

@@ -876,7 +876,8 @@ const TableSchema paymentsTable = TableSchema(
 /// même versement (l'une peut être négative). Jamais supprimées ni réécrites,
 /// sauf avec leur versement. Comptées dans le payé d'une créance ; ignorées là
 /// où l'on montre ce que le guichet a reçu (détail d'un versement, ticket,
-/// réimpression, préremplissage d'une correction de versement).
+/// réimpression). Le préremplissage d'une correction de versement les
+/// additionne à la ligne du guichet : net par créance.
 const TableSchema paymentAllocationsTable = TableSchema(
   name: 'payment_allocations',
   createTableSql: '''

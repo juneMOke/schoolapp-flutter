@@ -130,10 +130,15 @@ class PaymentCorrectionWriteDao {
   /// Le versement à corriger, avec ses imputations et la devise de son
   /// tiroir, `null` s'il est absent.
   ///
-  /// Les imputations sont celles **du guichet** : les lignes de transfert
-  /// d'une correction de niveau en sont écartées. Elles s'annulent sur le
-  /// versement, et le préremplissage d'un remplaçant (`centsByCharge`) suppose
-  /// une seule imputation positive par créance.
+  /// Les imputations sont rendues **nettes par créance** : ligne du guichet
+  /// plus lignes de transfert d'une correction de niveau (contrat back du
+  /// 2026-11-18). Annuler le versement retire aussi ses transferts ; un
+  /// remplaçant prérempli en brut referait 100 sur A quand A n'en attend plus
+  /// que 70, et B retomberait à 0 payé. En net, le remplaçant reproduit l'état
+  /// d'après correction (70 A + 30 B), pour le même total. Une créance à 0 net
+  /// est écartée ; le net n'est jamais négatif (une correction ne retire que
+  /// ce qui était là). Pas de plafond au reste dû : un trop-perçu d'origine
+  /// doit rester visible.
   Future<PaymentCorrectionOrigin?> loadOrigin(String paymentId) async {
     final payments = await _db.query(
       'payments',
@@ -150,10 +155,12 @@ class PaymentCorrectionWriteDao {
         'fee_code',
         'amount_in_cents',
         'currency',
+        'level_correction_id',
       ],
-      where: 'payment_id = ? AND level_correction_id IS NULL',
+      where: 'payment_id = ?',
       whereArgs: [paymentId],
-      orderBy: 'id',
+      // Les lignes du guichet d'abord : elles fixent l'ordre des créances.
+      orderBy: '(level_correction_id IS NOT NULL), id',
     );
     final tenders = await _db.query(
       'payment_tenders',
@@ -170,21 +177,38 @@ class PaymentCorrectionWriteDao {
       payerLastName: p['payer_last_name'] as String?,
       payerMiddleName: p['payer_middle_name'] as String?,
       payerPhoneNumber: p['payer_phone_number'] as String?,
-      allocations: [
-        for (final a in allocations)
-          PaymentCorrectionOriginAllocation(
-            studentChargeId: a['student_charge_id'] as String?,
-            feeCode: a['fee_code'] as String,
-            amountInCents: a['amount_in_cents'] as int,
-            currency: a['currency'] as String,
-          ),
-      ],
+      allocations: _netByCharge(allocations),
       tenderCurrencyByChargeCurrency: {
         for (final t in tenders)
           if (t['currency'] != t['pivot_currency'])
             t['pivot_currency'] as String: t['currency'] as String,
       },
     );
+  }
+
+  /// Additionne les lignes d'une même créance ; une ligne sans créance reste
+  /// telle quelle (une ligne de transfert en porte toujours une).
+  static List<PaymentCorrectionOriginAllocation> _netByCharge(
+    List<Map<String, Object?>> rows,
+  ) {
+    final net = <Object, PaymentCorrectionOriginAllocation>{};
+    var loose = 0;
+    for (final a in rows) {
+      final chargeId = a['student_charge_id'] as String?;
+      final key = chargeId ?? loose++;
+      final previous = net[key];
+      net[key] = PaymentCorrectionOriginAllocation(
+        studentChargeId: chargeId,
+        feeCode: previous?.feeCode ?? a['fee_code'] as String,
+        amountInCents:
+            (previous?.amountInCents ?? 0) + (a['amount_in_cents'] as int),
+        currency: previous?.currency ?? a['currency'] as String,
+      );
+    }
+    return [
+      for (final a in net.values)
+        if (a.amountInCents != 0) a,
+    ];
   }
 
   /// Le geste, en UNE transaction : correction inscrite, remplaçant écrit avec
