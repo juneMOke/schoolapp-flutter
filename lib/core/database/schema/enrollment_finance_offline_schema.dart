@@ -869,6 +869,14 @@ const TableSchema paymentsTable = TableSchema(
 /// fait, et il est de meilleure autorité que `student_charge_id` — un tarif vient
 /// toujours du référentiel servi par le serveur, il ne peut jamais être
 /// provisoire. Nullable : une créance *ad hoc*, hors grille, n'en a pas.
+///
+/// `level_correction_id` (v82) marque une **ligne de transfert** : quand le
+/// niveau d'un élève qui a déjà payé est corrigé, le serveur déplace l'excédent
+/// d'une créance vers une autre par une paire de lignes qui s'annule sur le
+/// même versement (l'une peut être négative). Jamais supprimées ni réécrites,
+/// sauf avec leur versement. Comptées dans le payé d'une créance ; ignorées là
+/// où l'on montre ce que le guichet a reçu (détail d'un versement, ticket,
+/// réimpression, préremplissage d'une correction de versement).
 const TableSchema paymentAllocationsTable = TableSchema(
   name: 'payment_allocations',
   createTableSql: '''
@@ -881,7 +889,8 @@ const TableSchema paymentAllocationsTable = TableSchema(
       fee_code TEXT NOT NULL,
       student_charge_label TEXT NOT NULL,
       amount_in_cents INTEGER NOT NULL,
-      currency TEXT NOT NULL
+      currency TEXT NOT NULL,
+      level_correction_id TEXT
     )
   ''',
   createIndexSql: [

@@ -278,6 +278,10 @@ class PaymentPullAllocationDto {
   final int amountInCents;
   final String currency;
 
+  /// Présent sur une ligne de transfert d'une correction de niveau (lot F du
+  /// back) ; son montant peut alors être négatif.
+  final String? levelCorrectionId;
+
   const PaymentPullAllocationDto({
     required this.id,
     this.studentChargeId,
@@ -285,6 +289,7 @@ class PaymentPullAllocationDto {
     required this.studentChargeLabel,
     required this.amountInCents,
     required this.currency,
+    this.levelCorrectionId,
   });
 
   factory PaymentPullAllocationDto.fromJson(Map<String, dynamic> j) =>
@@ -298,6 +303,7 @@ class PaymentPullAllocationDto {
             (j['studentChargeLabel'] as String?) ?? j['feeCode'] as String,
         amountInCents: (j['amountInCents'] as num).toInt(),
         currency: (j['currency'] as String?) ?? '',
+        levelCorrectionId: j['levelCorrectionId'] as String?,
       );
 
   PaymentAllocationLocalModel toLocalModel({required String paymentId}) =>
@@ -310,6 +316,7 @@ class PaymentPullAllocationDto {
         studentChargeLabel: studentChargeLabel,
         amountInCents: amountInCents,
         currency: currency,
+        levelCorrectionId: levelCorrectionId,
       );
 }
 

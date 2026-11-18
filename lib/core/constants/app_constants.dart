@@ -893,7 +893,10 @@ class AppConstants {
   // `receipt_verification_url` — la date d'émission et le QR du reçu de vente,
   // imprimés sur le ticket boutique. Deux colonnes nullables, aucun backfill.
   // Palier d'école.
-  static const int offlineDbSchemaVersion = 81;
+  // v82 (2026-11-18) : `payment_allocations.level_correction_id` — la marque
+  // d'une ligne de transfert posée par une correction de niveau. Colonne
+  // nullable, aucun backfill. Palier d'école.
+  static const int offlineDbSchemaVersion = 82;
 
   /// Dernière version de la base unique HÉRITÉE : là où l'escalier
   /// `migrateOfflineDatabase` s'arrête pour toujours.

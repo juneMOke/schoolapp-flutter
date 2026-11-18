@@ -171,7 +171,15 @@ Future<void> migrateTenantDatabase(
   if (upTo(81)) {
     await _addSaleReceiptTicketFields(db);
   }
+  if (upTo(82)) {
+    await _addColumnIfTable(db, 'payment_allocations', 'level_correction_id');
+  }
 }
+
+// v82 — `payment_allocations.level_correction_id` : la marque d'une ligne de
+// transfert posée par une correction de niveau (lot F du back). Additif,
+// nullable, **aucune reprise** : une ligne de transfert ne peut pas encore être
+// descendue, le serveur n'en écrit qu'à partir de son lot F3.
 
 /// v81 — le jour d'émission et l'URL de vérification du reçu de vente (`RV`),
 /// que le ticket boutique imprime comme celui de perception : « Date : » le
