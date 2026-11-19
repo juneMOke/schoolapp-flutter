@@ -43,6 +43,7 @@ class AccueilModulesFactory {
       _hrPayroll(l10n),
       _classes(l10n),
       _cours(l10n),
+      _agenda(l10n),
       _resultats(l10n),
       _disciplines(l10n),
       _communication(l10n),
@@ -239,6 +240,25 @@ class AccueilModulesFactory {
           menuId: menuId,
           subMenuId: MenuConstants.expenseQueueId,
           title: l10n.subMenuExpenseQueue,
+        ),
+      ],
+    );
+  }
+
+  /// Agenda & Horaires — le calendrier scolaire (puis l'emploi du temps).
+  static AccueilModule _agenda(AppLocalizations l10n) {
+    const menuId = MenuConstants.agendaMenuId;
+    return AccueilModule(
+      id: menuId,
+      title: l10n.menuAgenda,
+      description: l10n.accueilModuleAgendaDescription,
+      icon: Icons.event_note_outlined,
+      tone: AccueilModuleTones.of(menuId),
+      subModules: [
+        _page(
+          menuId: menuId,
+          subMenuId: MenuConstants.schoolCalendarId,
+          title: l10n.subMenuSchoolCalendar,
         ),
       ],
     );

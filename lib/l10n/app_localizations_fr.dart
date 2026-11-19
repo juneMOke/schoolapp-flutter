@@ -23686,4 +23686,649 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get syncAggregateCalendarEvents => 'Événements du calendrier scolaire';
+
+  @override
+  String get menuAgenda => 'Agenda & Horaires';
+
+  @override
+  String get subMenuSchoolCalendar => 'Calendrier scolaire';
+
+  @override
+  String get schoolCalendarEyebrow => 'Agenda & Horaires · Calendrier scolaire';
+
+  @override
+  String get schoolCalendarTitle => 'Calendriers scolaires';
+
+  @override
+  String schoolCalendarTitleYear(String year) {
+    return 'Calendrier $year';
+  }
+
+  @override
+  String get schoolCalendarSubtitle =>
+      'Cadre national + événements de l\'école, une année scolaire par calendrier.';
+
+  @override
+  String get schoolCalendarNew => 'Nouveau calendrier';
+
+  @override
+  String get schoolCalendarAll => 'Tous les calendriers';
+
+  @override
+  String schoolCalendarPhase(String phase) {
+    String _temp0 = intl.Intl.selectLogic(phase, {
+      'DRAFT': 'Brouillon',
+      'UPCOMING': 'À venir',
+      'IN_FORCE': 'En vigueur',
+      'ENDED': 'Terminé',
+      'ARCHIVED': 'Archivé',
+      'other': 'Brouillon',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String get schoolCalendarFrameworkIntegrated => 'Cadre national intégré';
+
+  @override
+  String get schoolCalendarFrameworkAwaited => 'Cadre national attendu';
+
+  @override
+  String schoolCalendarToVerifyCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count à vérifier',
+      one: '1 à vérifier',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String schoolCalendarCounts(int national, int school) {
+    return '$national nationaux · $school internes';
+  }
+
+  @override
+  String get schoolCalendarCurrentYear => 'Année en cours';
+
+  @override
+  String schoolCalendarWeek(int week, int count) {
+    return 'Semaine $week / $count';
+  }
+
+  @override
+  String get schoolCalendarPeriod => 'Période';
+
+  @override
+  String get schoolCalendarNow => 'En ce moment';
+
+  @override
+  String get schoolCalendarNextDeadline => 'Prochaine échéance';
+
+  @override
+  String get schoolCalendarOutOfPeriod => 'Hors période';
+
+  @override
+  String get schoolCalendarNormalClasses => 'Cours normaux';
+
+  @override
+  String schoolCalendarInDays(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'dans $count jours',
+      one: 'demain',
+      zero: 'aujourd\'hui',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String schoolCalendarPeriodLabel(int rank, String order, String rhythm) {
+    String _temp0 = intl.Intl.selectLogic(order, {
+      '1': '1er',
+      'other': '${order}e',
+    });
+    String _temp1 = intl.Intl.selectLogic(rhythm, {
+      'SEMESTER': 'semestre',
+      'other': 'trimestre',
+    });
+    return 'P$rank · $_temp0 $_temp1';
+  }
+
+  @override
+  String get schoolCalendarOpen => 'Ouvrir le calendrier';
+
+  @override
+  String get schoolCalendarUpcomingSection => 'Prochains rendez-vous';
+
+  @override
+  String get schoolCalendarFutureSection => 'À venir';
+
+  @override
+  String get schoolCalendarArchiveSection => 'Archives';
+
+  @override
+  String schoolCalendarPublishedOn(String date) {
+    return 'Publié le $date';
+  }
+
+  @override
+  String schoolCalendarDuplicateFor(String year) {
+    return 'Dupliquer pour $year';
+  }
+
+  @override
+  String get schoolCalendarViewYear => 'Année';
+
+  @override
+  String get schoolCalendarViewMonth => 'Mois';
+
+  @override
+  String get schoolCalendarViewList => 'Liste';
+
+  @override
+  String get schoolCalendarCurrentMonth => 'Mois en cours';
+
+  @override
+  String get schoolCalendarPreviousMonth => 'Mois précédent';
+
+  @override
+  String get schoolCalendarNextMonth => 'Mois suivant';
+
+  @override
+  String get schoolCalendarSourceAll => 'Tout';
+
+  @override
+  String get schoolCalendarSourceNational => 'National';
+
+  @override
+  String get schoolCalendarSourceSchool => 'Interne';
+
+  @override
+  String get schoolCalendarRhythmSemesters => 'Semestres';
+
+  @override
+  String get schoolCalendarRhythmTrimesters => 'Trimestres';
+
+  @override
+  String schoolCalendarNature(String nature) {
+    String _temp0 = intl.Intl.selectLogic(nature, {
+      'PERIOD': 'Période scolaire',
+      'ASSESSMENT': 'Interrogations',
+      'EXAM': 'Examens',
+      'BREAK': 'Congés & vacances',
+      'PUBLIC_HOLIDAY': 'Jour férié',
+      'other': 'Vie de l\'école',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String schoolCalendarNatureShort(String nature) {
+    String _temp0 = intl.Intl.selectLogic(nature, {
+      'PERIOD': 'Périodes',
+      'ASSESSMENT': 'Interrogations',
+      'EXAM': 'Examens',
+      'BREAK': 'Congés',
+      'PUBLIC_HOLIDAY': 'Fériés',
+      'other': 'Vie de l\'école',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String get schoolCalendarHelpDesktop =>
+      'Cliquez un jour libre pour y ajouter un événement, ou un élément pour son détail.';
+
+  @override
+  String get schoolCalendarHelpTouch =>
+      'Touchez un jour pour voir ce qu\'il contient et y ajouter un événement.';
+
+  @override
+  String get schoolCalendarHelpRead =>
+      'Cliquez un élément pour voir son détail.';
+
+  @override
+  String get schoolCalendarHelpArchived =>
+      'Calendrier archivé : consultation seule.';
+
+  @override
+  String schoolCalendarVerifyNotice(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          '$count éléments repris de l\'année précédente à vérifier : leurs dates ont été décalées de 52 semaines.',
+      one:
+          '1 élément repris de l\'année précédente à vérifier : sa date a été décalée de 52 semaines.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get schoolCalendarReview => 'Les passer en revue';
+
+  @override
+  String get schoolCalendarShowAll => 'Tout afficher';
+
+  @override
+  String get schoolCalendarWholeMonth => 'Tout le mois';
+
+  @override
+  String get schoolCalendarNothingThisMonth => 'Rien ce mois-ci.';
+
+  @override
+  String get schoolCalendarNothingThisDay => 'Rien ce jour-là : cours normaux.';
+
+  @override
+  String get schoolCalendarAddEvent => 'Ajouter un événement';
+
+  @override
+  String schoolCalendarAddOn(String date) {
+    return 'Ajouter le $date';
+  }
+
+  @override
+  String get schoolCalendarAdd => 'Ajouter';
+
+  @override
+  String get schoolCalendarPublish => 'Publier';
+
+  @override
+  String get schoolCalendarPrint => 'Imprimer';
+
+  @override
+  String get schoolCalendarDuplicate => 'Dupliquer';
+
+  @override
+  String get schoolCalendarEmptyFiltered => 'Aucun élément ne correspond';
+
+  @override
+  String get schoolCalendarEmptyFilteredHint =>
+      'Réactivez des natures dans la légende.';
+
+  @override
+  String get schoolCalendarDates => 'Dates';
+
+  @override
+  String get schoolCalendarConcerns => 'Concerne';
+
+  @override
+  String get schoolCalendarSource => 'Source';
+
+  @override
+  String get schoolCalendarAddedBy => 'Ajouté par';
+
+  @override
+  String get schoolCalendarNationalFramework => 'Cadre national';
+
+  @override
+  String get schoolCalendarInternal => 'Interne';
+
+  @override
+  String schoolCalendarWhen(String state) {
+    String _temp0 = intl.Intl.selectLogic(state, {
+      'now': 'En cours',
+      'past': 'Terminé',
+      'other': '',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String get schoolCalendarToVerify => 'À vérifier';
+
+  @override
+  String get schoolCalendarNationalLocked =>
+      'Élément du cadre national : il s\'impose à toutes les écoles et ne peut pas être modifié ici.';
+
+  @override
+  String get schoolCalendarCarriedOver =>
+      'Repris de l\'année précédente et décalé de 52 semaines. Vérifiez la date avant de publier.';
+
+  @override
+  String get schoolCalendarDelete => 'Supprimer';
+
+  @override
+  String get schoolCalendarEdit => 'Modifier';
+
+  @override
+  String get schoolCalendarDateVerified => 'Date vérifiée';
+
+  @override
+  String get schoolCalendarClose => 'Fermer';
+
+  @override
+  String schoolCalendarDurationDays(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count jours',
+      one: '1 jour',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get schoolCalendarScopeSchool => 'Toute l\'école';
+
+  @override
+  String schoolCalendarScopeCycle(String name) {
+    return 'Cycle · $name';
+  }
+
+  @override
+  String schoolCalendarScopeLevel(String name) {
+    return 'Niveau · $name';
+  }
+
+  @override
+  String schoolCalendarScopeRhythm(String rhythm) {
+    String _temp0 = intl.Intl.selectLogic(rhythm, {
+      'SEMESTER': 'Écoles en semestres',
+      'other': 'Écoles en trimestres',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String schoolCalendarScopeCatalog(String codes) {
+    return 'Niveaux $codes';
+  }
+
+  @override
+  String get schoolCalendarPending => 'En attente d\'envoi';
+
+  @override
+  String schoolCalendarRejected(String reason) {
+    return 'Refusé : $reason';
+  }
+
+  @override
+  String schoolCalendarSupersededNotice(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          '$count événements ont été modifiés sur un autre appareil : leur version la plus récente est gardée.',
+      one:
+          'Un événement a été modifié sur un autre appareil : sa version la plus récente est gardée.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get schoolCalendarFormAddTitle => 'Ajouter un événement';
+
+  @override
+  String get schoolCalendarFormEditTitle => 'Modifier l\'événement';
+
+  @override
+  String get schoolCalendarFormNature => 'Nature';
+
+  @override
+  String get schoolCalendarFormTitle => 'Intitulé';
+
+  @override
+  String get schoolCalendarFormFrom => 'Du';
+
+  @override
+  String get schoolCalendarFormTo => 'Au (inclus)';
+
+  @override
+  String get schoolCalendarFormNote => 'Note (facultatif)';
+
+  @override
+  String get schoolCalendarFormCancel => 'Annuler';
+
+  @override
+  String get schoolCalendarFormSave => 'Enregistrer';
+
+  @override
+  String get schoolCalendarErrorEndBeforeStart =>
+      'La date de fin est avant la date de début.';
+
+  @override
+  String schoolCalendarErrorOutOfYear(String start, String end) {
+    return 'Hors de l\'année scolaire ($start → $end).';
+  }
+
+  @override
+  String get schoolCalendarErrorTitleTooLong =>
+      'L\'intitulé dépasse 80 caractères.';
+
+  @override
+  String schoolCalendarWarnOverlap(String title, String dates) {
+    return 'Chevauche « $title » ($dates).';
+  }
+
+  @override
+  String schoolCalendarWarnExam(String title) {
+    return 'Pendant « $title » : vérifiez que les élèves visés sont disponibles.';
+  }
+
+  @override
+  String get schoolCalendarAbandonTitle => 'Abandonner la saisie ?';
+
+  @override
+  String get schoolCalendarAbandonBody => 'Ce que vous avez saisi sera perdu.';
+
+  @override
+  String get schoolCalendarAbandonKeep => 'Continuer la saisie';
+
+  @override
+  String get schoolCalendarAbandonConfirm => 'Abandonner';
+
+  @override
+  String get schoolCalendarDeleteTitle => 'Supprimer cet événement ?';
+
+  @override
+  String schoolCalendarDeleteBody(String title, String dates, String year) {
+    return '« $title » ($dates) disparaît du calendrier $year. Les enseignants, les élèves et les parents ne le verront plus.';
+  }
+
+  @override
+  String schoolCalendarSnackAdded(String dates) {
+    return 'Événement ajouté · $dates';
+  }
+
+  @override
+  String get schoolCalendarSnackEdited => 'Événement modifié';
+
+  @override
+  String get schoolCalendarSnackDeleted => 'Événement supprimé';
+
+  @override
+  String get schoolCalendarSnackVerified => 'Date vérifiée';
+
+  @override
+  String schoolCalendarSnackCreated(String year) {
+    return 'Brouillon $year créé';
+  }
+
+  @override
+  String schoolCalendarSnackPublished(String year) {
+    return 'Calendrier $year publié';
+  }
+
+  @override
+  String get schoolCalendarOffline =>
+      'Hors ligne. Vous voyez la version enregistrée sur cet appareil ; vos ajouts et modifications y restent et partiront au retour du réseau. La publication attend le réseau.';
+
+  @override
+  String get schoolCalendarEmptyTitle => 'Aucun calendrier scolaire';
+
+  @override
+  String get schoolCalendarEmptyBody =>
+      'Créez le calendrier de l\'année : le cadre national publié par ETEELO y est intégré automatiquement, vous y ajoutez ensuite les événements de l\'école.';
+
+  @override
+  String schoolCalendarEmptyCreate(String year) {
+    return 'Créer le calendrier $year';
+  }
+
+  @override
+  String get schoolCalendarLoading => 'Chargement du calendrier scolaire';
+
+  @override
+  String get schoolCalendarError401 =>
+      'Votre session a expiré pour votre sécurité. Reconnectez-vous pour consulter le calendrier scolaire.';
+
+  @override
+  String get schoolCalendarError403 =>
+      'Votre compte n\'a pas le droit de consulter le calendrier scolaire. Demandez l\'accès à l\'administrateur de votre école.';
+
+  @override
+  String schoolCalendarRefusal(String code) {
+    String _temp0 = intl.Intl.selectLogic(code, {
+      'CALENDAR_NATURE_FORBIDDEN':
+          'Votre compte ne peut pas ajouter cette nature d\'événement.',
+      'CALENDAR_DATES_INVALID': 'La date de fin est avant la date de début.',
+      'CALENDAR_OUT_OF_YEAR': 'La date sort de l\'année scolaire.',
+      'CALENDAR_ARCHIVED': 'Ce calendrier est archivé : il ne se modifie plus.',
+      'CALENDAR_ELEMENT_LOCKED':
+          'Un élément du cadre national ne se modifie pas.',
+      'CALENDAR_NOT_FOUND': 'Ce calendrier n\'existe plus.',
+      'CALENDAR_SCOPE_INVALID':
+          'Ce que l\'événement concerne n\'est pas reconnu.',
+      'CALENDAR_EVENT_INVALID': 'L\'intitulé ou la note ne sont pas valides.',
+      'CALENDAR_FRAMEWORK_MISSING':
+          'Le cadre national de cette année n\'est pas encore publié.',
+      'CALENDAR_CHANGED':
+          'Le calendrier a changé depuis votre lecture : il a été rechargé.',
+      'CALENDAR_YEAR_TAKEN': 'Cette année a déjà un calendrier.',
+      'CALENDAR_YEAR_NOT_CREATABLE':
+          'Cette année ne peut pas encore être préparée.',
+      'other': 'Le serveur a refusé ce geste.',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String get schoolCalendarErrorNetworkTitle => 'Connexion impossible';
+
+  @override
+  String get schoolCalendarErrorNetwork =>
+      'Le calendrier n\'a pas pu être relu. Vérifiez la connexion, puis réessayez.';
+
+  @override
+  String get schoolCalendarErrorUnauthorizedTitle => 'Session expirée';
+
+  @override
+  String get schoolCalendarErrorForbiddenTitle => 'Accès refusé';
+
+  @override
+  String get schoolCalendarErrorServerTitle =>
+      'Le calendrier n\'a pas pu s\'ouvrir';
+
+  @override
+  String get schoolCalendarErrorServer =>
+      'Une erreur est survenue. Réessayez dans un instant.';
+
+  @override
+  String schoolCalendarDuplicateEyebrow(String year) {
+    return 'Depuis $year';
+  }
+
+  @override
+  String get schoolCalendarDuplicateEvents => 'Événements de l\'école';
+
+  @override
+  String schoolCalendarDuplicateEventsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count éléments (réunions, fêtes, examens internes…)',
+      one: '1 élément (réunions, fêtes, examens internes…)',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get schoolCalendarDuplicateWindows => 'Fenêtres d\'interrogations';
+
+  @override
+  String schoolCalendarDuplicateWindowsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count fenêtres définies par le conseiller pédagogique',
+      one: '1 fenêtre définie par le conseiller pédagogique',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String schoolCalendarDuplicateRule(String year) {
+    return 'Les dates sont décalées de 52 semaines : un événement du vendredi reste un vendredi. Chaque élément repris est marqué à vérifier. Le cadre national de la nouvelle année n\'est pas recopié : la version officielle est intégrée dès sa publication. Le résultat est un brouillon : $year reste en vigueur.';
+  }
+
+  @override
+  String get schoolCalendarNewYear => 'Année scolaire';
+
+  @override
+  String schoolCalendarNewFrameworkReady(String year) {
+    return 'Le cadre national $year est publié : périodes, examens nationaux, congés et jours fériés seront intégrés.';
+  }
+
+  @override
+  String schoolCalendarNewFrameworkAwaited(String year) {
+    return 'Le cadre national $year n\'est pas encore publié. Le calendrier démarre vide et le recevra dès sa publication.';
+  }
+
+  @override
+  String get schoolCalendarNewTip =>
+      'Pour reprendre les événements de l\'école, utilisez plutôt « Dupliquer » sur le calendrier de l\'année précédente.';
+
+  @override
+  String get schoolCalendarNewCreate => 'Créer le brouillon';
+
+  @override
+  String get schoolCalendarNewNoYear =>
+      'Aucune année ne peut être préparée pour l\'instant.';
+
+  @override
+  String schoolCalendarPublishTitle(String year) {
+    return 'Publier le calendrier $year ?';
+  }
+
+  @override
+  String schoolCalendarPublishSummary(int total, int school) {
+    return '$total éléments · $school internes';
+  }
+
+  @override
+  String schoolCalendarPublishNoFramework(String year) {
+    return 'Le cadre national $year n\'est pas encore publié : la publication attend sa sortie.';
+  }
+
+  @override
+  String get schoolCalendarPublishOffline =>
+      'Hors ligne : la publication attend le retour du réseau.';
+
+  @override
+  String get schoolCalendarPublishPending =>
+      'Des modifications attendent d\'être envoyées : la publication attend qu\'elles soient parties.';
+
+  @override
+  String schoolCalendarPublishToVerify(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          '$count éléments encore à vérifier. Ils seront publiés tels quels.',
+      one: '1 élément encore à vérifier. Il sera publié tel quel.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get schoolCalendarPublishConsequence =>
+      'Toute l\'école verra ce calendrier. Les périodes, interrogations et examens deviennent la référence des évaluations, des bulletins et de l\'emploi du temps.';
+
+  @override
+  String get accueilModuleAgendaDescription =>
+      'Le calendrier de l\'année : périodes, examens, congés et événements de l\'école.';
 }

@@ -138,6 +138,8 @@ class AppRoutesNames {
       '/${MenuConstants.treasuryMenuId}/${MenuConstants.treasuryClosingId}';
   static const String treasuryConfig =
       '/${MenuConstants.treasuryMenuId}/${MenuConstants.treasuryConfigId}';
+  static const String schoolCalendar =
+      '/${MenuConstants.agendaMenuId}/${MenuConstants.schoolCalendarId}';
   static const String hrPersonnelDashboard =
       '/${MenuConstants.hrPersonnelMenuId}/${MenuConstants.hrPersonnelDashboardId}';
   static const String hrPersonnelFile =

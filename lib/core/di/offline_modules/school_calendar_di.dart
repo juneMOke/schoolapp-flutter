@@ -1,5 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
+import 'package:school_app_flutter/core/helpers/school_time.dart';
+import 'package:school_app_flutter/features/school_calendar/presentation/bloc/school_calendar_cubit.dart';
 import 'package:school_app_flutter/core/offline/current_user_context.dart';
 import 'package:school_app_flutter/core/offline/id_generator.dart';
 import 'package:school_app_flutter/core/offline/keyset_pull_runner.dart';
@@ -54,6 +56,13 @@ void registerSchoolCalendar(GetIt getIt) {
       ids: getIt<IdGenerator>(),
       coordinator: getIt<PullCoordinator>(),
       engine: getIt<SyncEngine>(),
+    ),
+  );
+  // ── Écran : cubit en fabrique, jamais singleton ──
+  getIt.registerFactory(
+    () => SchoolCalendarCubit(
+      getIt<SchoolCalendarRepository>(),
+      schoolToday: () => SchoolTime.today(DateTime.now()),
     ),
   );
 }

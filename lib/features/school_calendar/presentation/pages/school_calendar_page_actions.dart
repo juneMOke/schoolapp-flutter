@@ -1,0 +1,216 @@
+import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/components/dialogs/eteelo_adaptive_sheet.dart';
+import 'package:school_app_flutter/core/components/dialogs/eteelo_form_dialog.dart';
+import 'package:school_app_flutter/core/widgets/app_confirmation_dialog.dart';
+import 'package:school_app_flutter/core/widgets/app_snack_bar.dart';
+import 'package:school_app_flutter/features/school_calendar/domain/entities/calendar_element.dart';
+import 'package:school_app_flutter/features/school_calendar/domain/entities/calendar_enums.dart';
+import 'package:school_app_flutter/features/school_calendar/presentation/bloc/school_calendar_cubit.dart';
+import 'package:school_app_flutter/features/school_calendar/presentation/helpers/calendar_labels.dart';
+import 'package:school_app_flutter/features/school_calendar/presentation/helpers/calendar_rights.dart';
+import 'package:school_app_flutter/features/school_calendar/presentation/widgets/overlays/calendar_online_dialogs.dart';
+import 'package:school_app_flutter/features/school_calendar/presentation/widgets/overlays/element_detail_sheet.dart';
+import 'package:school_app_flutter/features/school_calendar/presentation/widgets/overlays/event_form_dialog.dart';
+import 'package:school_app_flutter/l10n/app_localizations.dart';
+
+/// Les gestes de l'écran, de la sur-couche à l'accusé (CAL-I11 à I17).
+class SchoolCalendarPageActions {
+  final BuildContext context;
+  final SchoolCalendarCubit cubit;
+  final CalendarRights rights;
+
+  const SchoolCalendarPageActions(this.context, this.cubit, this.rights);
+
+  AppLocalizations get _l10n => AppLocalizations.of(context)!;
+
+  /// O1, puis ce que l'utilisateur y choisit.
+  Future<void> openElement(CalendarElement element) async {
+    final choice = await showEteeloAdaptiveSheet<ElementDetailChoice>(
+      context: context,
+      builder: (_) => ElementDetailSheet(
+        element: element,
+        scopes: cubit.state.scopes,
+        canEdit: rights.canEdit(element.nature),
+      ),
+    );
+    if (!context.mounted || choice == null) return;
+    switch (choice) {
+      case ElementDetailChoice.edit:
+        await edit(element: element);
+      case ElementDetailChoice.delete:
+        await delete(element);
+      case ElementDetailChoice.verify:
+        final result = await cubit.verify(element);
+        if (!context.mounted) return;
+        result.fold(
+          (f) =>
+              AppSnackBar.showError(context, CalendarLabels.failure(_l10n, f)),
+          (_) => AppSnackBar.showSuccess(
+            context,
+            _l10n.schoolCalendarSnackVerified,
+          ),
+        );
+    }
+  }
+
+  /// O2, vide (à la date du jour touché) ou pré-rempli.
+  Future<void> edit({CalendarElement? element, DateTime? day}) async {
+    final state = cubit.state;
+    final calendar = state.calendar;
+    if (calendar == null) return;
+    final saved = await EventFormDialog.show(
+      context,
+      EventFormDialog(
+        newId: cubit.newEventId(),
+        initial: element,
+        initialDay: day,
+        natures: rights.writableNatures,
+        scopes: state.scopes,
+        yearStart: calendar.startDate,
+        yearEnd: calendar.endDate,
+        nationalElements: [
+          for (final e in state.allElements)
+            if (e.isNational) e,
+        ],
+      ),
+    );
+    if (!context.mounted || saved == null) return;
+    final result = await cubit.saveEvent(saved);
+    if (!context.mounted) return;
+    result.fold(
+      (f) => AppSnackBar.showError(context, CalendarLabels.failure(_l10n, f)),
+      (_) => AppSnackBar.showSuccess(
+        context,
+        element == null
+            ? _l10n.schoolCalendarSnackAdded(
+                CalendarLabels.dates(context, saved),
+              )
+            : _l10n.schoolCalendarSnackEdited,
+      ),
+    );
+  }
+
+  /// O6, puis la suppression (CAL-R12).
+  Future<void> delete(CalendarElement element) async {
+    final year = cubit.state.calendar?.yearLabel ?? '';
+    final confirmed = await showAppConfirmationDialog(
+      context: context,
+      title: _l10n.schoolCalendarDeleteTitle,
+      message: _l10n.schoolCalendarDeleteBody(
+        element.title,
+        CalendarLabels.dates(context, element),
+        year,
+      ),
+      confirmLabel: _l10n.schoolCalendarDelete,
+      cancelLabel: _l10n.schoolCalendarFormCancel,
+      isDestructive: true,
+    );
+    if (!context.mounted || !confirmed) return;
+    final result = await cubit.deleteEvent(element);
+    if (!context.mounted) return;
+    result.fold(
+      (f) => AppSnackBar.showError(context, CalendarLabels.failure(_l10n, f)),
+      (_) => AppSnackBar.showSuccess(context, _l10n.schoolCalendarSnackDeleted),
+    );
+  }
+
+  /// O4 : les années libres viennent du serveur (A5).
+  Future<void> create() async {
+    final years = await cubit.creatableYears();
+    if (!context.mounted) return;
+    final list = years.fold((f) {
+      AppSnackBar.showError(context, CalendarLabels.failure(_l10n, f));
+      return null;
+    }, (y) => y);
+    if (list == null) return;
+    final year = await EteeloFormDialog.show<String>(
+      context,
+      NewCalendarDialog(years: list),
+    );
+    if (!context.mounted || year == null) return;
+    final result = await cubit.create(year);
+    if (!context.mounted) return;
+    result.fold(
+      (f) => AppSnackBar.showError(context, CalendarLabels.failure(_l10n, f)),
+      (c) => AppSnackBar.showSuccess(
+        context,
+        _l10n.schoolCalendarSnackCreated(c.yearLabel),
+      ),
+    );
+  }
+
+  /// O3 : vers l'année suivante.
+  Future<void> duplicate() async {
+    final state = cubit.state;
+    final calendar = state.calendar;
+    final target = calendar?.nextYearLabel;
+    if (calendar == null || target == null) return;
+    final natures = await EteeloFormDialog.show<List<CalendarNature>>(
+      context,
+      DuplicateCalendarDialog(
+        sourceYear: calendar.yearLabel,
+        targetYear: target,
+        eventCount: state.events
+            .where(
+              (r) => DuplicateCalendarDialog.eventNatures.contains(
+                r.element.nature,
+              ),
+            )
+            .length,
+        windowCount: state.events
+            .where((r) => r.element.nature == CalendarNature.assessment)
+            .length,
+      ),
+    );
+    if (!context.mounted || natures == null || natures.isEmpty) return;
+    final result = await cubit.duplicate(natures);
+    if (!context.mounted) return;
+    result.fold(
+      (f) => AppSnackBar.showError(context, CalendarLabels.failure(_l10n, f)),
+      (c) => AppSnackBar.showSuccess(
+        context,
+        _l10n.schoolCalendarSnackCreated(c.yearLabel),
+      ),
+    );
+  }
+
+  /// O5 : un seul envoi, même sur un double appui (le dialogue se ferme).
+  Future<void> publish({required bool online}) async {
+    final state = cubit.state;
+    final calendar = state.calendar;
+    if (calendar == null) return;
+    final all = state.allElements;
+    final ok = await EteeloFormDialog.show<bool>(
+      context,
+      PublishCalendarDialog(
+        year: calendar.yearLabel,
+        total: all.length,
+        schoolCount: all.where((e) => !e.isNational).length,
+        toVerify: state.toVerifyCount,
+        hasFramework: calendar.hasFramework,
+        online: online,
+        pending: state.pendingCount > 0,
+      ),
+    );
+    if (!context.mounted || ok != true) return;
+    final result = await cubit.publish();
+    if (!context.mounted) return;
+    result.fold(
+      (f) => AppSnackBar.showError(context, CalendarLabels.failure(_l10n, f)),
+      (c) => AppSnackBar.showSuccess(
+        context,
+        _l10n.schoolCalendarSnackPublished(c.yearLabel),
+      ),
+    );
+  }
+
+  /// Un autre appareil a gagné : prévenir une fois (CAL-R16).
+  Future<void> warnSuperseded() async {
+    final superseded = await cubit.takeSuperseded();
+    if (!context.mounted || superseded.isEmpty) return;
+    AppSnackBar.showInfo(
+      context,
+      _l10n.schoolCalendarSupersededNotice(superseded.length),
+    );
+  }
+}

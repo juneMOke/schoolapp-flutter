@@ -1492,6 +1492,12 @@ class AppDimensions {
   static const calendarYearMonthMinWidth = 230.0;
   static const calendarYearDayCell = 26.0;
 
+  /// La liste du mois à côté du mois, dès `sideBySideMin` reçus (§4.1).
+  static const calendarSideListWidth = 280.0;
+
+  /// Un élément passé, estompé dans les listes (§4.3).
+  static const calendarPastOpacity = 0.6;
+
   /// Les tailles de la pastille de date (CalendarDateChip).
   static const calendarDateChipSmall = 34.0;
   static const calendarDateChipMedium = 40.0;

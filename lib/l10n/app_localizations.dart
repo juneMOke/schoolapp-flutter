@@ -36159,6 +36159,858 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'School calendar events'**
   String get syncAggregateCalendarEvents;
+
+  /// No description provided for @menuAgenda.
+  ///
+  /// In en, this message translates to:
+  /// **'Calendar & Timetables'**
+  String get menuAgenda;
+
+  /// No description provided for @subMenuSchoolCalendar.
+  ///
+  /// In en, this message translates to:
+  /// **'School calendar'**
+  String get subMenuSchoolCalendar;
+
+  /// No description provided for @schoolCalendarEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Calendar & Timetables · School calendar'**
+  String get schoolCalendarEyebrow;
+
+  /// No description provided for @schoolCalendarTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'School calendars'**
+  String get schoolCalendarTitle;
+
+  /// No description provided for @schoolCalendarTitleYear.
+  ///
+  /// In en, this message translates to:
+  /// **'Calendar {year}'**
+  String schoolCalendarTitleYear(String year);
+
+  /// No description provided for @schoolCalendarSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'National framework + school events, one school year per calendar.'**
+  String get schoolCalendarSubtitle;
+
+  /// No description provided for @schoolCalendarNew.
+  ///
+  /// In en, this message translates to:
+  /// **'New calendar'**
+  String get schoolCalendarNew;
+
+  /// No description provided for @schoolCalendarAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All calendars'**
+  String get schoolCalendarAll;
+
+  /// No description provided for @schoolCalendarPhase.
+  ///
+  /// In en, this message translates to:
+  /// **'{phase, select, DRAFT{Draft} UPCOMING{Upcoming} IN_FORCE{In force} ENDED{Ended} ARCHIVED{Archived} other{Draft}}'**
+  String schoolCalendarPhase(String phase);
+
+  /// No description provided for @schoolCalendarFrameworkIntegrated.
+  ///
+  /// In en, this message translates to:
+  /// **'National framework included'**
+  String get schoolCalendarFrameworkIntegrated;
+
+  /// No description provided for @schoolCalendarFrameworkAwaited.
+  ///
+  /// In en, this message translates to:
+  /// **'National framework pending'**
+  String get schoolCalendarFrameworkAwaited;
+
+  /// No description provided for @schoolCalendarToVerifyCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 to check} other{{count} to check}}'**
+  String schoolCalendarToVerifyCount(int count);
+
+  /// No description provided for @schoolCalendarCounts.
+  ///
+  /// In en, this message translates to:
+  /// **'{national} national · {school} school'**
+  String schoolCalendarCounts(int national, int school);
+
+  /// No description provided for @schoolCalendarCurrentYear.
+  ///
+  /// In en, this message translates to:
+  /// **'Current year'**
+  String get schoolCalendarCurrentYear;
+
+  /// No description provided for @schoolCalendarWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'Week {week} / {count}'**
+  String schoolCalendarWeek(int week, int count);
+
+  /// No description provided for @schoolCalendarPeriod.
+  ///
+  /// In en, this message translates to:
+  /// **'Period'**
+  String get schoolCalendarPeriod;
+
+  /// No description provided for @schoolCalendarNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Right now'**
+  String get schoolCalendarNow;
+
+  /// No description provided for @schoolCalendarNextDeadline.
+  ///
+  /// In en, this message translates to:
+  /// **'Next deadline'**
+  String get schoolCalendarNextDeadline;
+
+  /// No description provided for @schoolCalendarOutOfPeriod.
+  ///
+  /// In en, this message translates to:
+  /// **'Outside a period'**
+  String get schoolCalendarOutOfPeriod;
+
+  /// No description provided for @schoolCalendarNormalClasses.
+  ///
+  /// In en, this message translates to:
+  /// **'Regular classes'**
+  String get schoolCalendarNormalClasses;
+
+  /// No description provided for @schoolCalendarInDays.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{today} =1{tomorrow} other{in {count} days}}'**
+  String schoolCalendarInDays(int count);
+
+  /// No description provided for @schoolCalendarPeriodLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'P{rank} · {rhythm, select, SEMESTER{semester} other{term}} {order}'**
+  String schoolCalendarPeriodLabel(int rank, String order, String rhythm);
+
+  /// No description provided for @schoolCalendarOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Open the calendar'**
+  String get schoolCalendarOpen;
+
+  /// No description provided for @schoolCalendarUpcomingSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Coming up'**
+  String get schoolCalendarUpcomingSection;
+
+  /// No description provided for @schoolCalendarFutureSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Upcoming'**
+  String get schoolCalendarFutureSection;
+
+  /// No description provided for @schoolCalendarArchiveSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Archives'**
+  String get schoolCalendarArchiveSection;
+
+  /// No description provided for @schoolCalendarPublishedOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Published on {date}'**
+  String schoolCalendarPublishedOn(String date);
+
+  /// No description provided for @schoolCalendarDuplicateFor.
+  ///
+  /// In en, this message translates to:
+  /// **'Duplicate for {year}'**
+  String schoolCalendarDuplicateFor(String year);
+
+  /// No description provided for @schoolCalendarViewYear.
+  ///
+  /// In en, this message translates to:
+  /// **'Year'**
+  String get schoolCalendarViewYear;
+
+  /// No description provided for @schoolCalendarViewMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Month'**
+  String get schoolCalendarViewMonth;
+
+  /// No description provided for @schoolCalendarViewList.
+  ///
+  /// In en, this message translates to:
+  /// **'List'**
+  String get schoolCalendarViewList;
+
+  /// No description provided for @schoolCalendarCurrentMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Current month'**
+  String get schoolCalendarCurrentMonth;
+
+  /// No description provided for @schoolCalendarPreviousMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous month'**
+  String get schoolCalendarPreviousMonth;
+
+  /// No description provided for @schoolCalendarNextMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Next month'**
+  String get schoolCalendarNextMonth;
+
+  /// No description provided for @schoolCalendarSourceAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get schoolCalendarSourceAll;
+
+  /// No description provided for @schoolCalendarSourceNational.
+  ///
+  /// In en, this message translates to:
+  /// **'National'**
+  String get schoolCalendarSourceNational;
+
+  /// No description provided for @schoolCalendarSourceSchool.
+  ///
+  /// In en, this message translates to:
+  /// **'School'**
+  String get schoolCalendarSourceSchool;
+
+  /// No description provided for @schoolCalendarRhythmSemesters.
+  ///
+  /// In en, this message translates to:
+  /// **'Semesters'**
+  String get schoolCalendarRhythmSemesters;
+
+  /// No description provided for @schoolCalendarRhythmTrimesters.
+  ///
+  /// In en, this message translates to:
+  /// **'Terms'**
+  String get schoolCalendarRhythmTrimesters;
+
+  /// No description provided for @schoolCalendarNature.
+  ///
+  /// In en, this message translates to:
+  /// **'{nature, select, PERIOD{School period} ASSESSMENT{Tests} EXAM{Exams} BREAK{Holidays} PUBLIC_HOLIDAY{Public holiday} other{School life}}'**
+  String schoolCalendarNature(String nature);
+
+  /// No description provided for @schoolCalendarNatureShort.
+  ///
+  /// In en, this message translates to:
+  /// **'{nature, select, PERIOD{Periods} ASSESSMENT{Tests} EXAM{Exams} BREAK{Holidays} PUBLIC_HOLIDAY{Holidays} other{School life}}'**
+  String schoolCalendarNatureShort(String nature);
+
+  /// No description provided for @schoolCalendarHelpDesktop.
+  ///
+  /// In en, this message translates to:
+  /// **'Click a free day to add an event there, or an element for its details.'**
+  String get schoolCalendarHelpDesktop;
+
+  /// No description provided for @schoolCalendarHelpTouch.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap a day to see what it holds and add an event.'**
+  String get schoolCalendarHelpTouch;
+
+  /// No description provided for @schoolCalendarHelpRead.
+  ///
+  /// In en, this message translates to:
+  /// **'Click an element to see its details.'**
+  String get schoolCalendarHelpRead;
+
+  /// No description provided for @schoolCalendarHelpArchived.
+  ///
+  /// In en, this message translates to:
+  /// **'Archived calendar: read only.'**
+  String get schoolCalendarHelpArchived;
+
+  /// No description provided for @schoolCalendarVerifyNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 element carried over from last year to check: its date moved 52 weeks.} other{{count} elements carried over from last year to check: their dates moved 52 weeks.}}'**
+  String schoolCalendarVerifyNotice(int count);
+
+  /// No description provided for @schoolCalendarReview.
+  ///
+  /// In en, this message translates to:
+  /// **'Review them'**
+  String get schoolCalendarReview;
+
+  /// No description provided for @schoolCalendarShowAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Show all'**
+  String get schoolCalendarShowAll;
+
+  /// No description provided for @schoolCalendarWholeMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Whole month'**
+  String get schoolCalendarWholeMonth;
+
+  /// No description provided for @schoolCalendarNothingThisMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing this month.'**
+  String get schoolCalendarNothingThisMonth;
+
+  /// No description provided for @schoolCalendarNothingThisDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing that day: regular classes.'**
+  String get schoolCalendarNothingThisDay;
+
+  /// No description provided for @schoolCalendarAddEvent.
+  ///
+  /// In en, this message translates to:
+  /// **'Add an event'**
+  String get schoolCalendarAddEvent;
+
+  /// No description provided for @schoolCalendarAddOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Add on {date}'**
+  String schoolCalendarAddOn(String date);
+
+  /// No description provided for @schoolCalendarAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Add'**
+  String get schoolCalendarAdd;
+
+  /// No description provided for @schoolCalendarPublish.
+  ///
+  /// In en, this message translates to:
+  /// **'Publish'**
+  String get schoolCalendarPublish;
+
+  /// No description provided for @schoolCalendarPrint.
+  ///
+  /// In en, this message translates to:
+  /// **'Print'**
+  String get schoolCalendarPrint;
+
+  /// No description provided for @schoolCalendarDuplicate.
+  ///
+  /// In en, this message translates to:
+  /// **'Duplicate'**
+  String get schoolCalendarDuplicate;
+
+  /// No description provided for @schoolCalendarEmptyFiltered.
+  ///
+  /// In en, this message translates to:
+  /// **'No element matches'**
+  String get schoolCalendarEmptyFiltered;
+
+  /// No description provided for @schoolCalendarEmptyFilteredHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn natures back on in the legend.'**
+  String get schoolCalendarEmptyFilteredHint;
+
+  /// No description provided for @schoolCalendarDates.
+  ///
+  /// In en, this message translates to:
+  /// **'Dates'**
+  String get schoolCalendarDates;
+
+  /// No description provided for @schoolCalendarConcerns.
+  ///
+  /// In en, this message translates to:
+  /// **'Concerns'**
+  String get schoolCalendarConcerns;
+
+  /// No description provided for @schoolCalendarSource.
+  ///
+  /// In en, this message translates to:
+  /// **'Source'**
+  String get schoolCalendarSource;
+
+  /// No description provided for @schoolCalendarAddedBy.
+  ///
+  /// In en, this message translates to:
+  /// **'Added by'**
+  String get schoolCalendarAddedBy;
+
+  /// No description provided for @schoolCalendarNationalFramework.
+  ///
+  /// In en, this message translates to:
+  /// **'National framework'**
+  String get schoolCalendarNationalFramework;
+
+  /// No description provided for @schoolCalendarInternal.
+  ///
+  /// In en, this message translates to:
+  /// **'School'**
+  String get schoolCalendarInternal;
+
+  /// No description provided for @schoolCalendarWhen.
+  ///
+  /// In en, this message translates to:
+  /// **'{state, select, now{In progress} past{Ended} other{}}'**
+  String schoolCalendarWhen(String state);
+
+  /// No description provided for @schoolCalendarToVerify.
+  ///
+  /// In en, this message translates to:
+  /// **'To check'**
+  String get schoolCalendarToVerify;
+
+  /// No description provided for @schoolCalendarNationalLocked.
+  ///
+  /// In en, this message translates to:
+  /// **'National framework element: it applies to every school and cannot be changed here.'**
+  String get schoolCalendarNationalLocked;
+
+  /// No description provided for @schoolCalendarCarriedOver.
+  ///
+  /// In en, this message translates to:
+  /// **'Carried over from last year and moved 52 weeks. Check the date before publishing.'**
+  String get schoolCalendarCarriedOver;
+
+  /// No description provided for @schoolCalendarDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get schoolCalendarDelete;
+
+  /// No description provided for @schoolCalendarEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get schoolCalendarEdit;
+
+  /// No description provided for @schoolCalendarDateVerified.
+  ///
+  /// In en, this message translates to:
+  /// **'Date checked'**
+  String get schoolCalendarDateVerified;
+
+  /// No description provided for @schoolCalendarClose.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get schoolCalendarClose;
+
+  /// No description provided for @schoolCalendarDurationDays.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 day} other{{count} days}}'**
+  String schoolCalendarDurationDays(int count);
+
+  /// No description provided for @schoolCalendarScopeSchool.
+  ///
+  /// In en, this message translates to:
+  /// **'Whole school'**
+  String get schoolCalendarScopeSchool;
+
+  /// No description provided for @schoolCalendarScopeCycle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cycle · {name}'**
+  String schoolCalendarScopeCycle(String name);
+
+  /// No description provided for @schoolCalendarScopeLevel.
+  ///
+  /// In en, this message translates to:
+  /// **'Level · {name}'**
+  String schoolCalendarScopeLevel(String name);
+
+  /// No description provided for @schoolCalendarScopeRhythm.
+  ///
+  /// In en, this message translates to:
+  /// **'{rhythm, select, SEMESTER{Semester schools} other{Term schools}}'**
+  String schoolCalendarScopeRhythm(String rhythm);
+
+  /// No description provided for @schoolCalendarScopeCatalog.
+  ///
+  /// In en, this message translates to:
+  /// **'Levels {codes}'**
+  String schoolCalendarScopeCatalog(String codes);
+
+  /// No description provided for @schoolCalendarPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting to be sent'**
+  String get schoolCalendarPending;
+
+  /// No description provided for @schoolCalendarRejected.
+  ///
+  /// In en, this message translates to:
+  /// **'Refused: {reason}'**
+  String schoolCalendarRejected(String reason);
+
+  /// No description provided for @schoolCalendarSupersededNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{An event was changed on another device: its latest version is kept.} other{{count} events were changed on another device: their latest version is kept.}}'**
+  String schoolCalendarSupersededNotice(int count);
+
+  /// No description provided for @schoolCalendarFormAddTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add an event'**
+  String get schoolCalendarFormAddTitle;
+
+  /// No description provided for @schoolCalendarFormEditTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit the event'**
+  String get schoolCalendarFormEditTitle;
+
+  /// No description provided for @schoolCalendarFormNature.
+  ///
+  /// In en, this message translates to:
+  /// **'Nature'**
+  String get schoolCalendarFormNature;
+
+  /// No description provided for @schoolCalendarFormTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Title'**
+  String get schoolCalendarFormTitle;
+
+  /// No description provided for @schoolCalendarFormFrom.
+  ///
+  /// In en, this message translates to:
+  /// **'From'**
+  String get schoolCalendarFormFrom;
+
+  /// No description provided for @schoolCalendarFormTo.
+  ///
+  /// In en, this message translates to:
+  /// **'To (inclusive)'**
+  String get schoolCalendarFormTo;
+
+  /// No description provided for @schoolCalendarFormNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Note (optional)'**
+  String get schoolCalendarFormNote;
+
+  /// No description provided for @schoolCalendarFormCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get schoolCalendarFormCancel;
+
+  /// No description provided for @schoolCalendarFormSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get schoolCalendarFormSave;
+
+  /// No description provided for @schoolCalendarErrorEndBeforeStart.
+  ///
+  /// In en, this message translates to:
+  /// **'The end date is before the start date.'**
+  String get schoolCalendarErrorEndBeforeStart;
+
+  /// No description provided for @schoolCalendarErrorOutOfYear.
+  ///
+  /// In en, this message translates to:
+  /// **'Outside the school year ({start} → {end}).'**
+  String schoolCalendarErrorOutOfYear(String start, String end);
+
+  /// No description provided for @schoolCalendarErrorTitleTooLong.
+  ///
+  /// In en, this message translates to:
+  /// **'The title is longer than 80 characters.'**
+  String get schoolCalendarErrorTitleTooLong;
+
+  /// No description provided for @schoolCalendarWarnOverlap.
+  ///
+  /// In en, this message translates to:
+  /// **'Overlaps “{title}” ({dates}).'**
+  String schoolCalendarWarnOverlap(String title, String dates);
+
+  /// No description provided for @schoolCalendarWarnExam.
+  ///
+  /// In en, this message translates to:
+  /// **'During “{title}”: check the pupils concerned are available.'**
+  String schoolCalendarWarnExam(String title);
+
+  /// No description provided for @schoolCalendarAbandonTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Discard your entry?'**
+  String get schoolCalendarAbandonTitle;
+
+  /// No description provided for @schoolCalendarAbandonBody.
+  ///
+  /// In en, this message translates to:
+  /// **'What you entered will be lost.'**
+  String get schoolCalendarAbandonBody;
+
+  /// No description provided for @schoolCalendarAbandonKeep.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep editing'**
+  String get schoolCalendarAbandonKeep;
+
+  /// No description provided for @schoolCalendarAbandonConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Discard'**
+  String get schoolCalendarAbandonConfirm;
+
+  /// No description provided for @schoolCalendarDeleteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this event?'**
+  String get schoolCalendarDeleteTitle;
+
+  /// No description provided for @schoolCalendarDeleteBody.
+  ///
+  /// In en, this message translates to:
+  /// **'“{title}” ({dates}) leaves the {year} calendar. Teachers, pupils and parents will no longer see it.'**
+  String schoolCalendarDeleteBody(String title, String dates, String year);
+
+  /// No description provided for @schoolCalendarSnackAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'Event added · {dates}'**
+  String schoolCalendarSnackAdded(String dates);
+
+  /// No description provided for @schoolCalendarSnackEdited.
+  ///
+  /// In en, this message translates to:
+  /// **'Event updated'**
+  String get schoolCalendarSnackEdited;
+
+  /// No description provided for @schoolCalendarSnackDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Event deleted'**
+  String get schoolCalendarSnackDeleted;
+
+  /// No description provided for @schoolCalendarSnackVerified.
+  ///
+  /// In en, this message translates to:
+  /// **'Date checked'**
+  String get schoolCalendarSnackVerified;
+
+  /// No description provided for @schoolCalendarSnackCreated.
+  ///
+  /// In en, this message translates to:
+  /// **'Draft {year} created'**
+  String schoolCalendarSnackCreated(String year);
+
+  /// No description provided for @schoolCalendarSnackPublished.
+  ///
+  /// In en, this message translates to:
+  /// **'Calendar {year} published'**
+  String schoolCalendarSnackPublished(String year);
+
+  /// No description provided for @schoolCalendarOffline.
+  ///
+  /// In en, this message translates to:
+  /// **'Offline. You see the version saved on this device; your additions and changes stay here and will be sent when the network returns. Publishing waits for the network.'**
+  String get schoolCalendarOffline;
+
+  /// No description provided for @schoolCalendarEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No school calendar'**
+  String get schoolCalendarEmptyTitle;
+
+  /// No description provided for @schoolCalendarEmptyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Create this year\'s calendar: the national framework published by ETEELO is included automatically, then you add the school\'s events.'**
+  String get schoolCalendarEmptyBody;
+
+  /// No description provided for @schoolCalendarEmptyCreate.
+  ///
+  /// In en, this message translates to:
+  /// **'Create the {year} calendar'**
+  String schoolCalendarEmptyCreate(String year);
+
+  /// No description provided for @schoolCalendarLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading the school calendar'**
+  String get schoolCalendarLoading;
+
+  /// No description provided for @schoolCalendarError401.
+  ///
+  /// In en, this message translates to:
+  /// **'Your session expired for your security. Sign in again to see the school calendar.'**
+  String get schoolCalendarError401;
+
+  /// No description provided for @schoolCalendarError403.
+  ///
+  /// In en, this message translates to:
+  /// **'Your account may not view the school calendar. Ask your school administrator for access.'**
+  String get schoolCalendarError403;
+
+  /// No description provided for @schoolCalendarRefusal.
+  ///
+  /// In en, this message translates to:
+  /// **'{code, select, CALENDAR_NATURE_FORBIDDEN{Your account cannot add this kind of event.} CALENDAR_DATES_INVALID{The end date is before the start date.} CALENDAR_OUT_OF_YEAR{The date is outside the school year.} CALENDAR_ARCHIVED{This calendar is archived and can no longer change.} CALENDAR_ELEMENT_LOCKED{A national framework element cannot change.} CALENDAR_NOT_FOUND{This calendar no longer exists.} CALENDAR_SCOPE_INVALID{What the event concerns is not recognised.} CALENDAR_EVENT_INVALID{The title or note is not valid.} CALENDAR_FRAMEWORK_MISSING{This year\'s national framework is not published yet.} CALENDAR_CHANGED{The calendar changed since you read it: it was reloaded.} CALENDAR_YEAR_TAKEN{This year already has a calendar.} CALENDAR_YEAR_NOT_CREATABLE{This year cannot be prepared yet.} other{The server refused this action.}}'**
+  String schoolCalendarRefusal(String code);
+
+  /// No description provided for @schoolCalendarErrorNetworkTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cannot connect'**
+  String get schoolCalendarErrorNetworkTitle;
+
+  /// No description provided for @schoolCalendarErrorNetwork.
+  ///
+  /// In en, this message translates to:
+  /// **'The calendar could not be read again. Check the connection, then try again.'**
+  String get schoolCalendarErrorNetwork;
+
+  /// No description provided for @schoolCalendarErrorUnauthorizedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Session expired'**
+  String get schoolCalendarErrorUnauthorizedTitle;
+
+  /// No description provided for @schoolCalendarErrorForbiddenTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Access denied'**
+  String get schoolCalendarErrorForbiddenTitle;
+
+  /// No description provided for @schoolCalendarErrorServerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'The calendar could not open'**
+  String get schoolCalendarErrorServerTitle;
+
+  /// No description provided for @schoolCalendarErrorServer.
+  ///
+  /// In en, this message translates to:
+  /// **'Something went wrong. Try again in a moment.'**
+  String get schoolCalendarErrorServer;
+
+  /// No description provided for @schoolCalendarDuplicateEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'From {year}'**
+  String schoolCalendarDuplicateEyebrow(String year);
+
+  /// No description provided for @schoolCalendarDuplicateEvents.
+  ///
+  /// In en, this message translates to:
+  /// **'School events'**
+  String get schoolCalendarDuplicateEvents;
+
+  /// No description provided for @schoolCalendarDuplicateEventsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 element (meetings, celebrations, internal exams…)} other{{count} elements (meetings, celebrations, internal exams…)}}'**
+  String schoolCalendarDuplicateEventsCount(int count);
+
+  /// No description provided for @schoolCalendarDuplicateWindows.
+  ///
+  /// In en, this message translates to:
+  /// **'Test windows'**
+  String get schoolCalendarDuplicateWindows;
+
+  /// No description provided for @schoolCalendarDuplicateWindowsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 window set by the academic adviser} other{{count} windows set by the academic adviser}}'**
+  String schoolCalendarDuplicateWindowsCount(int count);
+
+  /// No description provided for @schoolCalendarDuplicateRule.
+  ///
+  /// In en, this message translates to:
+  /// **'Dates move 52 weeks: a Friday event stays on a Friday. Each carried-over element is marked to check. The new year\'s national framework is not copied: the official version is included once published. The result is a draft: {year} stays in force.'**
+  String schoolCalendarDuplicateRule(String year);
+
+  /// No description provided for @schoolCalendarNewYear.
+  ///
+  /// In en, this message translates to:
+  /// **'School year'**
+  String get schoolCalendarNewYear;
+
+  /// No description provided for @schoolCalendarNewFrameworkReady.
+  ///
+  /// In en, this message translates to:
+  /// **'The {year} national framework is published: periods, national exams, holidays and public holidays will be included.'**
+  String schoolCalendarNewFrameworkReady(String year);
+
+  /// No description provided for @schoolCalendarNewFrameworkAwaited.
+  ///
+  /// In en, this message translates to:
+  /// **'The {year} national framework is not published yet. The calendar starts empty and receives it as soon as it is published.'**
+  String schoolCalendarNewFrameworkAwaited(String year);
+
+  /// No description provided for @schoolCalendarNewTip.
+  ///
+  /// In en, this message translates to:
+  /// **'To carry over the school\'s events, use “Duplicate” on last year\'s calendar instead.'**
+  String get schoolCalendarNewTip;
+
+  /// No description provided for @schoolCalendarNewCreate.
+  ///
+  /// In en, this message translates to:
+  /// **'Create the draft'**
+  String get schoolCalendarNewCreate;
+
+  /// No description provided for @schoolCalendarNewNoYear.
+  ///
+  /// In en, this message translates to:
+  /// **'No year can be prepared for now.'**
+  String get schoolCalendarNewNoYear;
+
+  /// No description provided for @schoolCalendarPublishTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Publish the {year} calendar?'**
+  String schoolCalendarPublishTitle(String year);
+
+  /// No description provided for @schoolCalendarPublishSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'{total} elements · {school} school'**
+  String schoolCalendarPublishSummary(int total, int school);
+
+  /// No description provided for @schoolCalendarPublishNoFramework.
+  ///
+  /// In en, this message translates to:
+  /// **'The {year} national framework is not published yet: publishing waits for it.'**
+  String schoolCalendarPublishNoFramework(String year);
+
+  /// No description provided for @schoolCalendarPublishOffline.
+  ///
+  /// In en, this message translates to:
+  /// **'Offline: publishing waits for the network.'**
+  String get schoolCalendarPublishOffline;
+
+  /// No description provided for @schoolCalendarPublishPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Changes are waiting to be sent: publishing waits until they are gone.'**
+  String get schoolCalendarPublishPending;
+
+  /// No description provided for @schoolCalendarPublishToVerify.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 element still to check. It will be published as is.} other{{count} elements still to check. They will be published as is.}}'**
+  String schoolCalendarPublishToVerify(int count);
+
+  /// No description provided for @schoolCalendarPublishConsequence.
+  ///
+  /// In en, this message translates to:
+  /// **'The whole school will see this calendar. Its periods, tests and exams become the reference for assessments, report cards and the timetable.'**
+  String get schoolCalendarPublishConsequence;
+
+  /// No description provided for @accueilModuleAgendaDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'The year\'s calendar: periods, exams, holidays and school events.'**
+  String get accueilModuleAgendaDescription;
 }
 
 class _AppLocalizationsDelegate

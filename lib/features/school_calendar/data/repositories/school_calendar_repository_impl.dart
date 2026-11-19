@@ -10,6 +10,8 @@ import 'package:school_app_flutter/core/offline/pull_coordinator.dart';
 import 'package:school_app_flutter/core/offline/sync_engine.dart';
 import 'package:school_app_flutter/features/school_calendar/data/local/calendar_event_dao.dart';
 import 'package:school_app_flutter/features/school_calendar/data/local/calendar_reference_dao.dart';
+import 'package:school_app_flutter/features/school_calendar/data/local/calendar_scope_options_dao.dart';
+import 'package:school_app_flutter/features/school_calendar/domain/entities/calendar_scope_options.dart';
 import 'package:school_app_flutter/features/school_calendar/data/online/calendar_online_api.dart';
 import 'package:school_app_flutter/features/school_calendar/data/sync/calendar_events_outbox_handler.dart';
 import 'package:school_app_flutter/features/school_calendar/data/sync/calendar_pullers.dart';
@@ -66,6 +68,10 @@ class SchoolCalendarRepositoryImpl implements SchoolCalendarRepository {
   @override
   Future<List<SchoolEventRecord>> events(String calendarId) =>
       _events.eventsOf(calendarId);
+
+  @override
+  Future<CalendarScopeOptions> scopeOptions() =>
+      CalendarScopeOptionsDao(_db).current(_schoolId);
 
   @override
   String newEventId() => _ids.newId();

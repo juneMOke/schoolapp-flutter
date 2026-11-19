@@ -3,6 +3,7 @@ import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/features/school_calendar/domain/entities/calendar_element.dart';
 import 'package:school_app_flutter/features/school_calendar/domain/entities/calendar_enums.dart';
 import 'package:school_app_flutter/features/school_calendar/domain/entities/calendar_records.dart';
+import 'package:school_app_flutter/features/school_calendar/domain/entities/calendar_scope_options.dart';
 import 'package:school_app_flutter/features/school_calendar/domain/entities/school_calendar.dart';
 
 /// Ce que l'appareil connaît du calendrier de l'école, lu en local.
@@ -33,6 +34,9 @@ abstract class SchoolCalendarRepository {
   Future<CalendarLibrary> library();
 
   Future<List<SchoolEventRecord>> events(String calendarId);
+
+  /// Les cycles et niveaux de l'année en cours (« Concerne », rythmes).
+  Future<CalendarScopeOptions> scopeOptions();
 
   /// Ajoute ou modifie un événement de l'école ; « date vérifiée » est une
   /// modification qui pose `toVerify:false`.
