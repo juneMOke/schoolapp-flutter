@@ -24770,4 +24770,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String classTimetableDayHours(int hours) {
     return '$hours h';
   }
+
+  @override
+  String journalClosedDay(String kind, String period) {
+    return 'No classes · $kind · $period. A make-up session can still be recorded.';
+  }
 }

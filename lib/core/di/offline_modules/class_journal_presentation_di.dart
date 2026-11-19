@@ -1,3 +1,6 @@
+import 'package:school_app_flutter/core/offline/current_user_context.dart';
+import 'package:sqflite_common/sqlite_api.dart';
+import 'package:school_app_flutter/features/school_calendar/data/local/school_closed_day_reader.dart';
 import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
 import 'package:school_app_flutter/core/offline/pull_completion_bus.dart';
@@ -46,6 +49,10 @@ void registerClassJournalPresentation(GetIt getIt) {
       () => JournalDayCubit(
         load: getIt<LoadJournalDayUseCase>(),
         source: getIt<JournalChangeSource>(),
+        closedDayOf: SchoolClosedDayReader(
+          getIt<Database>(),
+          schoolId: () => getIt<CurrentUserContext>().schoolId,
+        ).closingOf,
       ),
     )
     ..registerFactory(

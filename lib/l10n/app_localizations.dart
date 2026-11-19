@@ -37863,6 +37863,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{hours} h'**
   String classTimetableDayHours(int hours);
+
+  /// No description provided for @journalClosedDay.
+  ///
+  /// In en, this message translates to:
+  /// **'No classes · {kind} · {period}. A make-up session can still be recorded.'**
+  String journalClosedDay(String kind, String period);
 }
 
 class _AppLocalizationsDelegate

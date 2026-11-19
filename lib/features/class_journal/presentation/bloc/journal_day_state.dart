@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/features/class_journal/domain/entities/journal_day.dart';
+import 'package:school_app_flutter/features/school_calendar/domain/entities/calendar_element.dart';
 
 /// L'état de la page du journal. Le jour affiché ([date]) est connu dans tous
 /// les états : l'en-tête reste visible, on peut toujours changer de jour.
@@ -30,14 +31,19 @@ final class JournalDayLoading extends JournalDayState {
 final class JournalDayReady extends JournalDayState {
   final JournalDay day;
 
+  /// Le jour est fermé pour toute l'école (férié, vacances) : « Pas de
+  /// cours » (E13). Les séances restent saisissables (rattrapage).
+  final CalendarElement? closedBy;
+
   const JournalDayReady({
     required this.day,
     required super.date,
     required super.today,
+    this.closedBy,
   });
 
   @override
-  List<Object?> get props => [...super.props, day];
+  List<Object?> get props => [...super.props, day, closedBy];
 }
 
 final class JournalDayFailure extends JournalDayState {

@@ -24945,4 +24945,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String classTimetableDayHours(int hours) {
     return '$hours h';
   }
+
+  @override
+  String journalClosedDay(String kind, String period) {
+    return 'Pas de cours · $kind · $period. Une séance de rattrapage peut quand même être notée.';
+  }
 }

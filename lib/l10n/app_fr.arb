@@ -13431,5 +13431,7 @@
   "classTimetableSessionLength": "{minutes} min",
   "@classTimetableSessionLength": {"placeholders": {"minutes": {"type": "int"}}},
   "classTimetableDayHours": "{hours} h",
-  "@classTimetableDayHours": {"placeholders": {"hours": {"type": "int"}}}
+  "@classTimetableDayHours": {"placeholders": {"hours": {"type": "int"}}},
+  "journalClosedDay": "Pas de cours · {kind} · {period}. Une séance de rattrapage peut quand même être notée.",
+  "@journalClosedDay": {"placeholders": {"kind": {"type": "String"}, "period": {"type": "String"}}}
 }

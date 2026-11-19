@@ -1,3 +1,5 @@
+import 'package:school_app_flutter/features/school_calendar/domain/entities/calendar_element.dart';
+import 'package:school_app_flutter/features/school_calendar/domain/entities/calendar_enums.dart';
 import 'dart:async';
 
 import 'package:dartz/dartz.dart';
@@ -124,6 +126,42 @@ void main() {
     // Le 13 s'affichait déjà en chargement : « suivant » mène au 14.
     expect(cubit.state.date, today);
     expect(cubit.state, isA<JournalDayReady>());
+    await cubit.close();
+  });
+
+  test(
+    'E13 : un jour férié de l’école est signalé, la page reste ouverte',
+    () async {
+      final holiday = CalendarElement(
+        id: 'ind',
+        source: CalendarSource.national,
+        nature: CalendarNature.publicHoliday,
+        title: 'Indépendance',
+        startDate: DateTime.utc(2026, 10, 14),
+        endDate: DateTime.utc(2026, 10, 14),
+      );
+      final cubit = JournalDayCubit(
+        load: load,
+        source: source,
+        closedDayOf: (day) async => day == today ? holiday : null,
+      );
+      await cubit.start(year);
+      expect((cubit.state as JournalDayReady).closedBy, holiday);
+      await cubit.previous();
+      expect((cubit.state as JournalDayReady).closedBy, isNull);
+      await cubit.close();
+    },
+  );
+
+  test('un calendrier illisible ne coûte pas la page', () async {
+    final cubit = JournalDayCubit(
+      load: load,
+      source: source,
+      closedDayOf: (_) async => throw StateError('base'),
+    );
+    await cubit.start(year);
+    expect(cubit.state, isA<JournalDayReady>());
+    expect((cubit.state as JournalDayReady).closedBy, isNull);
     await cubit.close();
   });
 }
