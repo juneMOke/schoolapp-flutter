@@ -13076,5 +13076,15 @@
   "schoolCalendarPublishToVerify": "{count, plural, =1{1 element still to check. It will be published as is.} other{{count} elements still to check. They will be published as is.}}",
   "@schoolCalendarPublishToVerify": {"placeholders": {"count": {"type": "int"}}},
   "schoolCalendarPublishConsequence": "The whole school will see this calendar. Its periods, tests and exams become the reference for assessments, report cards and the timetable.",
-  "accueilModuleAgendaDescription": "The year's calendar: periods, exams, holidays and school events."
+  "accueilModuleAgendaDescription": "The year's calendar: periods, exams, holidays and school events.",
+  "schoolCalendarPrintTitle": "Print the calendar",
+  "schoolCalendarPdfTitle": "School calendar — School year {year}",
+  "@schoolCalendarPdfTitle": {"placeholders": {"year": {"type": "String"}}},
+  "schoolCalendarPdfPublished": "Published version of {date}",
+  "@schoolCalendarPdfPublished": {"placeholders": {"date": {"type": "String"}}},
+  "schoolCalendarPdfKeyDates": "Key dates",
+  "schoolCalendarPdfNationalNote": "National framework public holidays and breaks apply to every school.",
+  "schoolCalendarPdfPrinted": "Printed on {date}",
+  "@schoolCalendarPdfPrinted": {"placeholders": {"date": {"type": "String"}}},
+  "schoolCalendarPrintFailed": "The print could not be prepared."
 }

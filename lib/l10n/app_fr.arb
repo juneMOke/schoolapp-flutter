@@ -13246,5 +13246,15 @@
   "schoolCalendarPublishToVerify": "{count, plural, =1{1 élément encore à vérifier. Il sera publié tel quel.} other{{count} éléments encore à vérifier. Ils seront publiés tels quels.}}",
   "@schoolCalendarPublishToVerify": {"placeholders": {"count": {"type": "int"}}},
   "schoolCalendarPublishConsequence": "Toute l'école verra ce calendrier. Les périodes, interrogations et examens deviennent la référence des évaluations, des bulletins et de l'emploi du temps.",
-  "accueilModuleAgendaDescription": "Le calendrier de l'année : périodes, examens, congés et événements de l'école."
+  "accueilModuleAgendaDescription": "Le calendrier de l'année : périodes, examens, congés et événements de l'école.",
+  "schoolCalendarPrintTitle": "Imprimer le calendrier",
+  "schoolCalendarPdfTitle": "Calendrier scolaire — Année scolaire {year}",
+  "@schoolCalendarPdfTitle": {"placeholders": {"year": {"type": "String"}}},
+  "schoolCalendarPdfPublished": "Version publiée le {date}",
+  "@schoolCalendarPdfPublished": {"placeholders": {"date": {"type": "String"}}},
+  "schoolCalendarPdfKeyDates": "Dates clés",
+  "schoolCalendarPdfNationalNote": "Les jours fériés et congés du cadre national s'imposent à toutes les écoles.",
+  "schoolCalendarPdfPrinted": "Imprimé le {date}",
+  "@schoolCalendarPdfPrinted": {"placeholders": {"date": {"type": "String"}}},
+  "schoolCalendarPrintFailed": "L'impression n'a pas pu être préparée."
 }

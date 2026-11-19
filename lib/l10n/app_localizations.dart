@@ -37011,6 +37011,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'The year\'s calendar: periods, exams, holidays and school events.'**
   String get accueilModuleAgendaDescription;
+
+  /// No description provided for @schoolCalendarPrintTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Print the calendar'**
+  String get schoolCalendarPrintTitle;
+
+  /// No description provided for @schoolCalendarPdfTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'School calendar — School year {year}'**
+  String schoolCalendarPdfTitle(String year);
+
+  /// No description provided for @schoolCalendarPdfPublished.
+  ///
+  /// In en, this message translates to:
+  /// **'Published version of {date}'**
+  String schoolCalendarPdfPublished(String date);
+
+  /// No description provided for @schoolCalendarPdfKeyDates.
+  ///
+  /// In en, this message translates to:
+  /// **'Key dates'**
+  String get schoolCalendarPdfKeyDates;
+
+  /// No description provided for @schoolCalendarPdfNationalNote.
+  ///
+  /// In en, this message translates to:
+  /// **'National framework public holidays and breaks apply to every school.'**
+  String get schoolCalendarPdfNationalNote;
+
+  /// No description provided for @schoolCalendarPdfPrinted.
+  ///
+  /// In en, this message translates to:
+  /// **'Printed on {date}'**
+  String schoolCalendarPdfPrinted(String date);
+
+  /// No description provided for @schoolCalendarPrintFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The print could not be prepared.'**
+  String get schoolCalendarPrintFailed;
 }
 
 class _AppLocalizationsDelegate

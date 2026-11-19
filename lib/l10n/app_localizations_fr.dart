@@ -24331,4 +24331,33 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get accueilModuleAgendaDescription =>
       'Le calendrier de l\'année : périodes, examens, congés et événements de l\'école.';
+
+  @override
+  String get schoolCalendarPrintTitle => 'Imprimer le calendrier';
+
+  @override
+  String schoolCalendarPdfTitle(String year) {
+    return 'Calendrier scolaire — Année scolaire $year';
+  }
+
+  @override
+  String schoolCalendarPdfPublished(String date) {
+    return 'Version publiée le $date';
+  }
+
+  @override
+  String get schoolCalendarPdfKeyDates => 'Dates clés';
+
+  @override
+  String get schoolCalendarPdfNationalNote =>
+      'Les jours fériés et congés du cadre national s\'imposent à toutes les écoles.';
+
+  @override
+  String schoolCalendarPdfPrinted(String date) {
+    return 'Imprimé le $date';
+  }
+
+  @override
+  String get schoolCalendarPrintFailed =>
+      'L\'impression n\'a pas pu être préparée.';
 }

@@ -15,6 +15,7 @@ import 'package:school_app_flutter/features/school_calendar/presentation/bloc/sc
 import 'package:school_app_flutter/features/school_calendar/presentation/bloc/school_calendar_state.dart';
 import 'package:school_app_flutter/features/school_calendar/presentation/helpers/calendar_rights.dart';
 import 'package:school_app_flutter/features/school_calendar/presentation/pages/school_calendar_page_actions.dart';
+import 'package:school_app_flutter/features/school_calendar/presentation/pages/school_calendar_print.dart';
 import 'package:school_app_flutter/features/school_calendar/presentation/widgets/calendar/calendar_detail_view.dart';
 import 'package:school_app_flutter/features/school_calendar/presentation/widgets/list/calendars_list_view.dart';
 import 'package:school_app_flutter/features/school_calendar/presentation/widgets/states/school_calendar_error_state.dart';
@@ -111,6 +112,9 @@ class _Screen extends StatelessWidget {
             addOn: (day) => unawaited(actions.edit(day: day)),
             duplicate: rights.canPublish && online && nextFree
                 ? () => unawaited(actions.duplicate())
+                : null,
+            print: calendar.isPublished
+                ? () => unawaited(printSchoolCalendar(context, state))
                 : null,
             publish: rights.canPublish && phase == CalendarPhase.draft
                 ? () => unawaited(actions.publish(online: online))

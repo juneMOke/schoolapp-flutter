@@ -24161,4 +24161,32 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get accueilModuleAgendaDescription =>
       'The year\'s calendar: periods, exams, holidays and school events.';
+
+  @override
+  String get schoolCalendarPrintTitle => 'Print the calendar';
+
+  @override
+  String schoolCalendarPdfTitle(String year) {
+    return 'School calendar — School year $year';
+  }
+
+  @override
+  String schoolCalendarPdfPublished(String date) {
+    return 'Published version of $date';
+  }
+
+  @override
+  String get schoolCalendarPdfKeyDates => 'Key dates';
+
+  @override
+  String get schoolCalendarPdfNationalNote =>
+      'National framework public holidays and breaks apply to every school.';
+
+  @override
+  String schoolCalendarPdfPrinted(String date) {
+    return 'Printed on $date';
+  }
+
+  @override
+  String get schoolCalendarPrintFailed => 'The print could not be prepared.';
 }
