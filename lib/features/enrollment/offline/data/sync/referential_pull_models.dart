@@ -604,6 +604,10 @@ class RefSchoolLevelDto {
   final int displayOrder;
   final bool splitIntoClassrooms;
 
+  /// Code du niveau dans le catalogue national (`P6`, `CTEB7`…), `null` hors
+  /// catalogue : un élément national du calendrier vise ce code (A2).
+  final String? catalogLevelCode;
+
   const RefSchoolLevelDto({
     required this.id,
     required this.name,
@@ -611,6 +615,7 @@ class RefSchoolLevelDto {
     required this.levelGroupId,
     required this.displayOrder,
     required this.splitIntoClassrooms,
+    this.catalogLevelCode,
   });
 
   factory RefSchoolLevelDto.fromJson(Map<String, dynamic> j) =>
@@ -621,6 +626,7 @@ class RefSchoolLevelDto {
         levelGroupId: j['levelGroupId'] as String,
         displayOrder: (j['displayOrder'] as num?)?.toInt() ?? 0,
         splitIntoClassrooms: (j['splitIntoClassrooms'] as bool?) ?? false,
+        catalogLevelCode: j['catalogLevelCode'] as String?,
       );
 }
 

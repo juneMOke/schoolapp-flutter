@@ -367,6 +367,10 @@ const TableSchema refSchoolLevelGroupsTable = TableSchema(
 
 /// `ref_school_levels` — NIVEAUX (D9 : l'élève s'inscrit dans un niveau, pas une
 /// classe). `split_into_classrooms` pilote la répartition (module Classe).
+///
+/// v83 — `catalog_level_code` : le niveau dans le catalogue national, que vise
+/// un élément du cadre national du calendrier (`CATALOG_LEVEL:P6`, A2). Écrit
+/// par le même pull que le reste de la ligne (`INSERT OR REPLACE`).
 const TableSchema refSchoolLevelsTable = TableSchema(
   name: 'ref_school_levels',
   createTableSql: '''
@@ -377,6 +381,7 @@ const TableSchema refSchoolLevelsTable = TableSchema(
       display_order INTEGER NOT NULL DEFAULT 0,
       level_group_id TEXT NOT NULL,
       split_into_classrooms INTEGER NOT NULL DEFAULT 0,
+      catalog_level_code TEXT,
       synced_at INTEGER NOT NULL DEFAULT 0
     )
   ''',

@@ -13063,5 +13063,6 @@
   "calendarWeekdayShort": "{weekday, select, 1{lun.} 2{mar.} 3{mer.} 4{jeu.} 5{ven.} 6{sam.} other{dim.}}",
   "@calendarWeekdayShort": {"placeholders": {"weekday": {"type": "String"}}},
   "calendarMonthMore": "{count, plural, =1{+1 autre} other{+{count} autres}}",
-  "@calendarMonthMore": {"placeholders": {"count": {"type": "int"}}}
+  "@calendarMonthMore": {"placeholders": {"count": {"type": "int"}}},
+  "syncAggregateCalendarEvents": "Événements du calendrier scolaire"
 }

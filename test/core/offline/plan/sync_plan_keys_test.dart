@@ -100,6 +100,9 @@ const List<String> _kDeclaredPlanKeys = [
   SyncPlanKeys.studentPhotos,
   SyncPlanKeys.enrollmentSuspensions,
   SyncPlanKeys.treasuryClosures,
+  SyncPlanKeys.calendarFramework,
+  SyncPlanKeys.calendarCalendars,
+  SyncPlanKeys.calendarEvents,
 ];
 
 /// Les douze ressources dont la clé de curseur réelle porte un suffixe.
@@ -146,6 +149,9 @@ const Set<String> _kSuffixedCursorResources = {
   'student_photos',
   'enrollment_suspensions',
   'treasury_closures',
+  'calendar_framework',
+  'calendar_calendars',
+  'calendar_events',
 };
 
 void main() {
@@ -272,7 +278,7 @@ void main() {
 
   // ── Le compte : vingt et une clés, vingt-deux ressources ──────────────────
 
-  test('quarante et une clés de plan pour quarante-deux ressources de handler', () {
+  test('quarante-quatre clés de plan pour quarante-cinq ressources de handler', () {
     // Vingt et une depuis le registre des disparitions (V121), second flux de
     // socle : sans lui, une base locale garde indéfiniment ce que le serveur a
     // retiré. Vingt-deux avec le registre des dépenses (`expense.expenses`).
@@ -283,14 +289,15 @@ void main() {
     // trente-six avec la désactivation des élèves, trente-sept avec le journal
     // de classe, trente-huit avec les justifications des parents, trente-neuf
     // avec la priorité des arriérés (Paie v2), quarante avec les cotes saisies,
-    // quarante et une avec les clôtures de caisse (Trésorerie).
-    expect(kSyncPlanAliases.length, 41);
-    expect(registeredResources.length, 42);
+    // quarante et une avec les clôtures de caisse (Trésorerie), quarante-quatre
+    // avec les trois flux du calendrier scolaire.
+    expect(kSyncPlanAliases.length, 44);
+    expect(registeredResources.length, 45);
 
     final aliased = [
       for (final resources in kSyncPlanAliases.values) ...resources,
     ];
-    expect(aliased.length, 42);
+    expect(aliased.length, 45);
     // Vingt et une ressources aliasées ET autant de handlers : les deux
     // ensembles coïncident donc exactement (F-I1a + F-I1b + ce compte).
     expect(aliased.toSet(), registeredResources.toSet());
@@ -308,12 +315,12 @@ void main() {
   });
 
   test(
-    'les quarante et une constantes déclarées sont exactement les clés de la table',
+    'les quarante-quatre constantes déclarées sont exactement les clés de la table',
     () {
-      expect(_kDeclaredPlanKeys.length, 41);
+      expect(_kDeclaredPlanKeys.length, 44);
       expect(
         _kDeclaredPlanKeys.toSet().length,
-        41,
+        44,
         reason: 'deux constantes de SyncPlanKeys portent la même chaîne',
       );
       expect(_kDeclaredPlanKeys.toSet(), kSyncPlanAliases.keys.toSet());

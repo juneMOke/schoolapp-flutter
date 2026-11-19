@@ -36153,6 +36153,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count, plural, =1{+1 more} other{+{count} more}}'**
   String calendarMonthMore(int count);
+
+  /// No description provided for @syncAggregateCalendarEvents.
+  ///
+  /// In en, this message translates to:
+  /// **'School calendar events'**
+  String get syncAggregateCalendarEvents;
 }
 
 class _AppLocalizationsDelegate

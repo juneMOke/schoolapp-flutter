@@ -19,6 +19,7 @@ import 'package:school_app_flutter/core/database/schema/staff_offline_schema.dar
 import 'package:school_app_flutter/core/database/schema/student_attendance_v2_schema.dart';
 import 'package:school_app_flutter/core/database/schema/student_photo_schema.dart';
 import 'package:school_app_flutter/core/database/schema/ticket_print_jobs_schema.dart';
+import 'package:school_app_flutter/core/database/schema/school_calendar_schema.dart';
 import 'package:school_app_flutter/core/database/schema/treasury_schema.dart';
 import 'package:school_app_flutter/core/database/table_schema.dart';
 
@@ -174,6 +175,13 @@ Future<void> migrateTenantDatabase(
   if (upTo(82)) {
     await _addColumnIfTable(db, 'payment_allocations', 'level_correction_id');
     await _repullPayments(db);
+  }
+  if (upTo(83)) {
+    await _createTables(db, schoolCalendarTables);
+    // `catalog_level_code` arrive par le référentiel Inscription, un bundle
+    // relu en entier à chaque tirage (toujours 200) : la colonne se remplit au
+    // tirage suivant, sans re-tirage forcé.
+    await _addColumnIfTable(db, 'ref_school_levels', 'catalog_level_code');
   }
 }
 

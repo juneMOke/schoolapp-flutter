@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:school_app_flutter/features/school_calendar/domain/entities/calendar_actor.dart';
 import 'package:school_app_flutter/features/school_calendar/domain/entities/calendar_enums.dart';
 import 'package:school_app_flutter/features/school_calendar/domain/entities/calendar_scope.dart';
 import 'package:school_app_flutter/features/school_calendar/domain/services/calendar_days.dart';
@@ -21,7 +22,7 @@ class CalendarElement extends Equatable {
   final CalendarScope scope;
   final String? note;
   final bool toVerify;
-  final String? createdByLabel;
+  final CalendarActor? createdBy;
   final PeriodRhythm? rhythm;
   final int? periodOrder;
   final int? subPeriodOrder;
@@ -36,7 +37,7 @@ class CalendarElement extends Equatable {
     this.scope = const SchoolScope(),
     this.note,
     this.toVerify = false,
-    this.createdByLabel,
+    this.createdBy,
     this.rhythm,
     this.periodOrder,
     this.subPeriodOrder,
@@ -85,7 +86,7 @@ class CalendarElement extends Equatable {
     scope: scope ?? this.scope,
     note: clearNote ? null : (note ?? this.note),
     toVerify: toVerify ?? this.toVerify,
-    createdByLabel: createdByLabel,
+    createdBy: createdBy,
     rhythm: rhythm,
     periodOrder: periodOrder,
     subPeriodOrder: subPeriodOrder,
@@ -102,7 +103,7 @@ class CalendarElement extends Equatable {
     scope,
     note,
     toVerify,
-    createdByLabel,
+    createdBy,
     rhythm,
     periodOrder,
     subPeriodOrder,

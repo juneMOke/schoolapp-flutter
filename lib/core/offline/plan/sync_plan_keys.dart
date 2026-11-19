@@ -206,6 +206,17 @@ abstract final class SyncPlanKeys {
   /// Les clôtures de caisse de l'école, réouvertures comprises, accordées par
   /// `treasury.read` : une devise close aujourd'hui n'encaisse plus en espèces.
   static const String treasuryClosures = 'treasury.closures';
+
+  /// Les cadres nationaux publiés des années de l'école, une ligne par cadre,
+  /// accordés par `calendar.read`.
+  static const String calendarFramework = 'calendar.framework';
+
+  /// Les en-têtes des calendriers de l'école ; un brouillon seulement pour un
+  /// droit d'écriture.
+  static const String calendarCalendars = 'calendar.calendars';
+
+  /// Les événements de l'école, suppressions en `deleted:true`.
+  static const String calendarEvents = 'calendar.events';
 }
 
 /// `planKey` → les `PullHandler.resource` qu'elle couvre.
@@ -257,6 +268,9 @@ const Map<String, List<String>> kSyncPlanAliases = {
   SyncPlanKeys.studentPhotos: ['student_photos'],
   SyncPlanKeys.enrollmentSuspensions: ['enrollment_suspensions'],
   SyncPlanKeys.treasuryClosures: ['treasury_closures'],
+  SyncPlanKeys.calendarFramework: ['calendar_framework'],
+  SyncPlanKeys.calendarCalendars: ['calendar_calendars'],
+  SyncPlanKeys.calendarEvents: ['calendar_events'],
 };
 
 /// L'index inverse, construit une fois : `PullHandler.resource` → `planKey`.
@@ -378,4 +392,8 @@ const Set<String> _kCursorKeyPrefixes = {
   'enrollment_suspensions',
   // Les clôtures de caisse, cadrées par l'école du jeton.
   'treasury_closures',
+  // Le calendrier scolaire, cadré par l'école du jeton.
+  'calendar_framework',
+  'calendar_calendars',
+  'calendar_events',
 };

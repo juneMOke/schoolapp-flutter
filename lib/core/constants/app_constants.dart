@@ -896,7 +896,11 @@ class AppConstants {
   // v82 (2026-11-18) : `payment_allocations.level_correction_id` — la marque
   // d'une ligne de transfert posée par une correction de niveau. Colonne
   // nullable, aucun backfill. Palier d'école.
-  static const int offlineDbSchemaVersion = 82;
+  // v83 (2026-11-19) : le calendrier scolaire — `cal_frameworks`,
+  // `cal_framework_items`, `school_calendars`, `school_calendar_events` — et
+  // `ref_school_levels.catalog_level_code` (re-tirage du référentiel).
+  // Palier d'école.
+  static const int offlineDbSchemaVersion = 83;
 
   /// Dernière version de la base unique HÉRITÉE : là où l'escalier
   /// `migrateOfflineDatabase` s'arrête pour toujours.
@@ -1776,6 +1780,39 @@ class AppConstants {
   /// arrête l'encaissement en espèces d'une devise close aujourd'hui (R11).
   static const String syncTreasuryClosuresEndpoint =
       '/api/v1/sync/treasury/closures';
+
+  // ── Calendrier scolaire (contrat figé avec le back le 2026-11-19) ──
+  /// **GET** (keyset) = les cadres nationaux publiés des années de l'école,
+  /// une ligne par cadre (flux `calendar.framework`, `calendar.read`).
+  static const String syncCalendarFrameworkEndpoint =
+      '/api/v1/sync/calendar/framework';
+
+  /// **GET** (keyset) = les en-têtes des calendriers de l'école ; un brouillon
+  /// seulement pour un droit d'écriture (flux `calendar.calendars`).
+  static const String syncCalendarCalendarsEndpoint =
+      '/api/v1/sync/calendar/calendars';
+
+  /// **GET** (keyset) = les événements de l'école, suppressions en
+  /// `deleted:true` (flux `calendar.events`).
+  static const String syncCalendarEventsEndpoint =
+      '/api/v1/sync/calendar/events';
+
+  /// **POST** = le lot des gestes sur les événements, un résultat par ligne
+  /// (APPLIED / SUPERSEDED / REJECTED). Même chemin que le flux descendant.
+  static const String syncCalendarEventsPushEndpoint =
+      '/api/v1/sync/calendar/events';
+
+  /// **GET** = les calendriers et `creatableYears` ; **POST** `{id, yearLabel}`
+  /// = créer un brouillon (`calendar.publish`).
+  static const String calendarCalendarsEndpoint = '/api/v1/calendar/calendars';
+
+  /// **POST** `{targetId, natures}` = dupliquer vers l'année suivante.
+  static String calendarDuplicateEndpoint(String id) =>
+      '$calendarCalendarsEndpoint/$id/duplicate';
+
+  /// **POST** `{revision}` = publier.
+  static String calendarPublishEndpoint(String id) =>
+      '$calendarCalendarsEndpoint/$id/publish';
 
   /// **GET** (web, même hôte que l'application) = la version déployée,
   /// écrite par `flutter build web` : `{version, build_number, …}`.
