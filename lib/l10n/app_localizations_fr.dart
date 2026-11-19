@@ -23658,4 +23658,29 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get treasuryConfigureRegisters => 'Configurer les caisses';
+
+  @override
+  String calendarWeekdayShort(String weekday) {
+    String _temp0 = intl.Intl.selectLogic(weekday, {
+      '1': 'lun.',
+      '2': 'mar.',
+      '3': 'mer.',
+      '4': 'jeu.',
+      '5': 'ven.',
+      '6': 'sam.',
+      'other': 'dim.',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String calendarMonthMore(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '+$count autres',
+      one: '+1 autre',
+    );
+    return '$_temp0';
+  }
 }

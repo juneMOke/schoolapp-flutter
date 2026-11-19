@@ -36141,6 +36141,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Configure the registers'**
   String get treasuryConfigureRegisters;
+
+  /// No description provided for @calendarWeekdayShort.
+  ///
+  /// In en, this message translates to:
+  /// **'{weekday, select, 1{Mon} 2{Tue} 3{Wed} 4{Thu} 5{Fri} 6{Sat} other{Sun}}'**
+  String calendarWeekdayShort(String weekday);
+
+  /// No description provided for @calendarMonthMore.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{+1 more} other{+{count} more}}'**
+  String calendarMonthMore(int count);
 }
 
 class _AppLocalizationsDelegate

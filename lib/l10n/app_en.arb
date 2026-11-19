@@ -12889,5 +12889,9 @@
   "treasuryChartSemantics": "{register} over time: opening {opening}, balance {balance}",
   "@treasuryChartSemantics": {"placeholders": {"register": {"type": "String"}, "opening": {"type": "String"}, "balance": {"type": "String"}}},
   "treasuryEmptyClosing": "Create a register in Treasury ▸ Settings to get started.",
-  "treasuryConfigureRegisters": "Configure the registers"
+  "treasuryConfigureRegisters": "Configure the registers",
+  "calendarWeekdayShort": "{weekday, select, 1{Mon} 2{Tue} 3{Wed} 4{Thu} 5{Fri} 6{Sat} other{Sun}}",
+  "@calendarWeekdayShort": {"placeholders": {"weekday": {"type": "String"}}},
+  "calendarMonthMore": "{count, plural, =1{+1 more} other{+{count} more}}",
+  "@calendarMonthMore": {"placeholders": {"count": {"type": "int"}}}
 }

@@ -1461,4 +1461,39 @@ class AppDimensions {
   static const treasuryXlsxGutter = 36.0;
   static const treasuryXlsxHeaderHeight = 24.0;
   static const treasuryXlsxRowHeight = 32.0;
+
+  // ── Calendrier scolaire (spec Calendrier v1, §4.6) ──
+  /// Une case du mois avec libellés : le numéro, puis quatre couloirs.
+  static const calendarMonthCellMinHeight = 104.0;
+
+  /// Une case du mois compact (sous 600) : la cible tient au doigt.
+  static const calendarMonthCompactCellMinHeight =
+      presenceMarkCalendarCellHeight;
+
+  /// La ligne du numéro du jour.
+  static const calendarMonthDayHeader = 24.0;
+
+  /// Une bande d'élément : avec son intitulé, ou en trait sans texte (compact).
+  static const calendarBandHeight = 18.0;
+  static const calendarBandCompactHeight = 6.0;
+  static const calendarBandGap = 2.0;
+
+  /// Le contour en tirets d'un élément de l'école (CAL-R4).
+  static const calendarBandDashStroke = 1.0;
+  static const calendarBandDash = 5.0;
+  static const calendarBandDashGap = 3.0;
+  static const calendarBandCompactDash = 3.0;
+  static const calendarBandCompactDashGap = 2.0;
+
+  /// Le rond du jour du jour.
+  static const calendarTodayRing = 1.5;
+
+  /// Une carte de mini-mois (vue Année) et ses cases.
+  static const calendarYearMonthMinWidth = 230.0;
+  static const calendarYearDayCell = 26.0;
+
+  /// Les tailles de la pastille de date (CalendarDateChip).
+  static const calendarDateChipSmall = 34.0;
+  static const calendarDateChipMedium = 40.0;
+  static const calendarDateChipLarge = 44.0;
 }
