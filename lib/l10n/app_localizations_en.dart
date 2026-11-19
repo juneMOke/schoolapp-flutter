@@ -24471,4 +24471,65 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get syncAggregateTimetableDraft => 'Timetable drafts';
+
+  @override
+  String get classTimetableCopy => 'Copy…';
+
+  @override
+  String get classTimetableCopyFrom => 'Copy from another class';
+
+  @override
+  String classTimetableCopyEyebrow(String name) {
+    return 'To $name';
+  }
+
+  @override
+  String get classTimetableCopyTitle => 'Copy a timetable';
+
+  @override
+  String classTimetableCopySource(int sessions, String status) {
+    return '$sessions sessions · $status';
+  }
+
+  @override
+  String classTimetableCopyTaken(int count) {
+    return '$count sessions taken';
+  }
+
+  @override
+  String classTimetableCopyConflicts(int count) {
+    return '$count teacher conflicts';
+  }
+
+  @override
+  String classTimetableCopyNoEquivalent(int count) {
+    return '$count without an equivalent course';
+  }
+
+  @override
+  String get classTimetableCopyNotice =>
+      'The result is a draft: nothing is published until you publish.';
+
+  @override
+  String get classTimetableCopySubmit => 'Copy as draft';
+
+  @override
+  String get classTimetableCopyNone =>
+      'No other class has a timetable to copy.';
+
+  @override
+  String get classTimetableCopyReplaceTitle => 'Replace the draft?';
+
+  @override
+  String classTimetableCopyReplaceBody(String name, int count) {
+    return 'The draft of $name ($count sessions) will be replaced by the copy.';
+  }
+
+  @override
+  String get classTimetableCopyReplace => 'Replace';
+
+  @override
+  String classTimetableSnackCopied(int count) {
+    return 'Copied as draft · $count sessions';
+  }
 }

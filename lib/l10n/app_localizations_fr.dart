@@ -24645,4 +24645,65 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get syncAggregateTimetableDraft => 'Brouillons d\'emploi du temps';
+
+  @override
+  String get classTimetableCopy => 'Copier…';
+
+  @override
+  String get classTimetableCopyFrom => 'Copier d\'une autre classe';
+
+  @override
+  String classTimetableCopyEyebrow(String name) {
+    return 'Vers $name';
+  }
+
+  @override
+  String get classTimetableCopyTitle => 'Copier un emploi du temps';
+
+  @override
+  String classTimetableCopySource(int sessions, String status) {
+    return '$sessions séances · $status';
+  }
+
+  @override
+  String classTimetableCopyTaken(int count) {
+    return '$count séances reprises';
+  }
+
+  @override
+  String classTimetableCopyConflicts(int count) {
+    return '$count conflits professeur';
+  }
+
+  @override
+  String classTimetableCopyNoEquivalent(int count) {
+    return '$count sans cours équivalent';
+  }
+
+  @override
+  String get classTimetableCopyNotice =>
+      'Le résultat est un brouillon : rien n\'est publié tant que vous ne publiez pas.';
+
+  @override
+  String get classTimetableCopySubmit => 'Copier en brouillon';
+
+  @override
+  String get classTimetableCopyNone =>
+      'Aucune autre classe n\'a d\'emploi du temps à copier.';
+
+  @override
+  String get classTimetableCopyReplaceTitle => 'Remplacer le brouillon ?';
+
+  @override
+  String classTimetableCopyReplaceBody(String name, int count) {
+    return 'Le brouillon de $name ($count séances) sera remplacé par la copie.';
+  }
+
+  @override
+  String get classTimetableCopyReplace => 'Remplacer';
+
+  @override
+  String classTimetableSnackCopied(int count) {
+    return 'Copié en brouillon · $count séances';
+  }
 }

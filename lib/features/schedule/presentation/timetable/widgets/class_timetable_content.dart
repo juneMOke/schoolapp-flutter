@@ -1,5 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/components/buttons/secondary_button.dart';
+import 'package:school_app_flutter/features/schedule/presentation/timetable/copy_action.dart';
 import 'package:school_app_flutter/features/schedule/presentation/timetable/widgets/timetable_draft_section.dart';
 import 'package:school_app_flutter/core/widgets/app_snack_bar.dart';
 import 'package:school_app_flutter/core/components/buttons/primary_button.dart';
@@ -89,6 +91,14 @@ class ClassTimetableContent extends StatelessWidget {
                 icon: Icons.add_rounded,
                 fullWidth: false,
                 onPressed: start,
+              ),
+        secondaryAction: start == null || !view.othersKnown
+            ? null
+            : SecondaryButton(
+                label: l10n.classTimetableCopyFrom,
+                icon: Icons.copy_all_outlined,
+                fullWidth: false,
+                onPressed: () => unawaited(copyTimetable(context, cubit)),
               ),
       );
     }

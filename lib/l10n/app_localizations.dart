@@ -37449,6 +37449,96 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Timetable drafts'**
   String get syncAggregateTimetableDraft;
+
+  /// No description provided for @classTimetableCopy.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy…'**
+  String get classTimetableCopy;
+
+  /// No description provided for @classTimetableCopyFrom.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy from another class'**
+  String get classTimetableCopyFrom;
+
+  /// No description provided for @classTimetableCopyEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'To {name}'**
+  String classTimetableCopyEyebrow(String name);
+
+  /// No description provided for @classTimetableCopyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy a timetable'**
+  String get classTimetableCopyTitle;
+
+  /// No description provided for @classTimetableCopySource.
+  ///
+  /// In en, this message translates to:
+  /// **'{sessions} sessions · {status}'**
+  String classTimetableCopySource(int sessions, String status);
+
+  /// No description provided for @classTimetableCopyTaken.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} sessions taken'**
+  String classTimetableCopyTaken(int count);
+
+  /// No description provided for @classTimetableCopyConflicts.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} teacher conflicts'**
+  String classTimetableCopyConflicts(int count);
+
+  /// No description provided for @classTimetableCopyNoEquivalent.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} without an equivalent course'**
+  String classTimetableCopyNoEquivalent(int count);
+
+  /// No description provided for @classTimetableCopyNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'The result is a draft: nothing is published until you publish.'**
+  String get classTimetableCopyNotice;
+
+  /// No description provided for @classTimetableCopySubmit.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy as draft'**
+  String get classTimetableCopySubmit;
+
+  /// No description provided for @classTimetableCopyNone.
+  ///
+  /// In en, this message translates to:
+  /// **'No other class has a timetable to copy.'**
+  String get classTimetableCopyNone;
+
+  /// No description provided for @classTimetableCopyReplaceTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Replace the draft?'**
+  String get classTimetableCopyReplaceTitle;
+
+  /// No description provided for @classTimetableCopyReplaceBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The draft of {name} ({count} sessions) will be replaced by the copy.'**
+  String classTimetableCopyReplaceBody(String name, int count);
+
+  /// No description provided for @classTimetableCopyReplace.
+  ///
+  /// In en, this message translates to:
+  /// **'Replace'**
+  String get classTimetableCopyReplace;
+
+  /// No description provided for @classTimetableSnackCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Copied as draft · {count} sessions'**
+  String classTimetableSnackCopied(int count);
 }
 
 class _AppLocalizationsDelegate

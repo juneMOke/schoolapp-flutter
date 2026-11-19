@@ -8,6 +8,8 @@ import 'package:school_app_flutter/features/schedule/data/timetable/class_timeta
 import 'package:school_app_flutter/features/schedule/data/timetable/timetable_editor.dart';
 import 'package:school_app_flutter/features/schedule/data/timetable/timetable_pull_handlers.dart';
 import 'package:school_app_flutter/features/schedule/domain/entities/timetable/class_timetable_view.dart';
+import 'package:school_app_flutter/features/schedule/domain/entities/timetable/copy_source.dart';
+import 'package:school_app_flutter/features/schedule/presentation/timetable/timetable_copy_plan.dart';
 import 'package:school_app_flutter/features/schedule/domain/entities/weekday.dart';
 
 enum ClassTimetableStatus { loading, ready, failure }
@@ -149,6 +151,24 @@ class ClassTimetableCubit extends Cubit<ClassTimetableState> {
 
   Future<Either<Failure, Unit>> setCells(List<CellChange> changes) =>
       _edit((editor, view) => editor.setCells(view, changes));
+
+  /// Les classes de même grille dont on peut copier l'emploi du temps.
+  Future<List<CopySource>> copySources() async {
+    final view = state.view;
+    return view == null ? const [] : _reader.copySources(view);
+  }
+
+  /// Copier (I15) : le brouillon est remplacé par la copie, case par case ;
+  /// sans brouillon, il commence d'abord.
+  Future<Either<Failure, Unit>> copyFrom(CopySource source) async {
+    if (!(state.view?.hasDraft ?? false)) {
+      final started = await startDraft();
+      if (started.isLeft()) return started;
+    }
+    final view = state.view;
+    if (view == null) return const Left(StorageFailure());
+    return setCells(TimetableCopyPlan.of(view, source).changes);
+  }
 
   Future<Either<Failure, Unit>> abandonDraft() =>
       _edit((editor, view) => editor.abandon(view));

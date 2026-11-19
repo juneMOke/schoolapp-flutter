@@ -7,6 +7,7 @@ import 'package:school_app_flutter/features/schedule/domain/entities/time_grid.d
 import 'package:school_app_flutter/features/schedule/domain/entities/time_slot.dart';
 import 'package:school_app_flutter/features/schedule/domain/entities/timetable/class_timetable.dart';
 import 'package:school_app_flutter/features/schedule/domain/entities/timetable/class_timetable_view.dart';
+import 'package:school_app_flutter/features/schedule/domain/entities/timetable/copy_source.dart';
 import 'package:sqflite_common/sqlite_api.dart';
 
 /// La lecture locale de l'emploi du temps d'une classe : ses options de
@@ -98,5 +99,41 @@ class ClassTimetableReader {
         _db,
       ).hasPending(classroom.classroomId),
     );
+  }
+
+  /// Les sources de copie de [view] (R8) : les autres classes de la **même
+  /// grille** qui ont un emploi du temps — le brouillon s'il y en a un, sinon
+  /// la version publiée. Aucune : une liste vide (« aucune source »).
+  Future<List<CopySource>> copySources(ClassTimetableView view) async {
+    final grids = await _grids.all();
+    final gridId = view.grid?.id;
+    final sources = <CopySource>[];
+    for (final option in await classOptions()) {
+      if (option.classroomId == view.classroom.classroomId) continue;
+      final grid = TimeGrid.forCycle(option.cycleCode, grids.values);
+      if (grid?.id != gridId) continue;
+      final header = await _dao.headerOf(option.classroomId);
+      final draftId = header?.draftId;
+      final cells = await _dao.cellsOf(
+        option.classroomId,
+        status: draftId == null
+            ? TimetableCellStatus.published
+            : TimetableCellStatus.draft,
+        draftId: draftId,
+      );
+      if (cells.every((c) => c.isEmpty)) continue;
+      sources.add(
+        CopySource(
+          classroom: option,
+          isDraft: draftId != null,
+          cells: cells,
+          branchByCours: {
+            for (final c in await _dao.programmeOf(option.classroomId))
+              c.coursId: c.branchId,
+          },
+        ),
+      );
+    }
+    return sources;
   }
 }

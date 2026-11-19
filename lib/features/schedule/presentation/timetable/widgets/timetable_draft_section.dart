@@ -21,6 +21,7 @@ import 'package:school_app_flutter/features/schedule/domain/services/timetable_m
 import 'package:school_app_flutter/features/schedule/presentation/helpers/schedule_class_palette.dart';
 import 'package:school_app_flutter/features/schedule/presentation/timetable/bloc/class_timetable_cubit.dart';
 import 'package:school_app_flutter/features/schedule/presentation/timetable/class_week_builder.dart';
+import 'package:school_app_flutter/features/schedule/presentation/timetable/copy_action.dart';
 import 'package:school_app_flutter/features/schedule/presentation/timetable/draft_conflicts.dart';
 import 'package:school_app_flutter/features/schedule/presentation/timetable/widgets/publish_timetable_dialog.dart';
 import 'package:school_app_flutter/features/schedule/presentation/timetable/widgets/slot_options_sheet.dart';
@@ -67,6 +68,14 @@ class TimetableDraftSection extends StatelessWidget {
           crossAxisAlignment: WrapCrossAlignment.center,
           children: [
             Text(l10n.classTimetableHelpDraft, style: AppTypography.bodySmall),
+            SecondaryButton(
+              label: l10n.classTimetableCopy,
+              icon: Icons.copy_all_outlined,
+              fullWidth: false,
+              onPressed: view.othersKnown
+                  ? () => unawaited(copyTimetable(context, cubit))
+                  : null,
+            ),
             SecondaryButton(
               label: l10n.classTimetableAbandon,
               icon: Icons.delete_outline,
