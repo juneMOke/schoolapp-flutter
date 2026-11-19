@@ -13193,5 +13193,11 @@
   "@classTimetableCopyReplaceBody": {"placeholders": {"name": {"type": "String"}, "count": {"type": "int"}}},
   "classTimetableCopyReplace": "Replace",
   "classTimetableSnackCopied": "Copied as draft · {count} sessions",
-  "@classTimetableSnackCopied": {"placeholders": {"count": {"type": "int"}}}
+  "@classTimetableSnackCopied": {"placeholders": {"count": {"type": "int"}}},
+  "classTimetableEndedNotice": "{count, plural, =1{1 change made offline was not kept: the draft was published or discarded meanwhile.} other{{count} changes made offline were not kept: the draft was published or discarded meanwhile.}}",
+  "@classTimetableEndedNotice": {"placeholders": {"count": {"type": "int"}}},
+  "classTimetableEndedResume": "Resume in a new draft",
+  "classTimetableEndedDiscard": "Ignore",
+  "classTimetableSuperseded": "{count, plural, =1{A slot was changed from another device: the latest version is kept.} other{{count} slots were changed from another device: the latest version is kept.}}",
+  "@classTimetableSuperseded": {"placeholders": {"count": {"type": "int"}}}
 }

@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/components/buttons/secondary_button.dart';
 import 'package:school_app_flutter/features/schedule/presentation/timetable/copy_action.dart';
+import 'package:school_app_flutter/features/schedule/presentation/timetable/widgets/ended_gestures_notice.dart';
 import 'package:school_app_flutter/features/schedule/presentation/timetable/widgets/timetable_draft_section.dart';
 import 'package:school_app_flutter/core/widgets/app_snack_bar.dart';
 import 'package:school_app_flutter/core/components/buttons/primary_button.dart';
@@ -65,10 +66,14 @@ class ClassTimetableContent extends StatelessWidget {
     }
     // Sans le droit d'agir, rien à construire : la page reste en lecture.
     final canWrite = PermissionGate.allows(context, const [Perm.scheduleWrite]);
+    final ended = canWrite && view.ended.isNotEmpty
+        ? EndedGesturesNotice(count: view.ended.length, cubit: cubit)
+        : null;
     if (canWrite && view.hasDraft) {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          ?ended,
           ClassTimetableSummary(view: view, cells: view.draft),
           const SizedBox(height: AppSpacing.md),
           TimetableDraftSection(view: view, cubit: cubit, online: online),
@@ -120,6 +125,7 @@ class ClassTimetableContent extends StatelessWidget {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            ?ended,
             ClassTimetableSummary(view: view, cells: view.published),
             const SizedBox(height: AppSpacing.md),
             Wrap(

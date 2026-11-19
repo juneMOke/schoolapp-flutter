@@ -309,6 +309,37 @@ class TimetableDraftDao {
     whereArgs: [g.cell.id, g.clock, _pending],
   );
 
+  // ── Plusieurs appareils (R18, Q13 élargie) ──
+
+  /// Les gestes refusés parce que leur brouillon a été publié ou abandonné
+  /// entre-temps (TIMETABLE_DRAFT_ENDED) : gardés, jamais rattachés d'office.
+  Future<List<ClassTimetableCell>> endedCells(String classroomId) async => [
+    for (final r in await _db.query(
+      _cells,
+      where: 'classroom_id = ? AND sync_status = ? AND sync_error_code = ?',
+      whereArgs: [
+        classroomId,
+        RecordSyncState.failed.dbValue,
+        'TIMETABLE_DRAFT_ENDED',
+      ],
+    ))
+      TimetableDao.cellOf(r),
+  ];
+
+  Future<void> discard(List<ClassTimetableCell> cells) async {
+    for (final c in cells) {
+      await _db.delete(_cells, where: 'id = ?', whereArgs: [c.id]);
+    }
+  }
+
+  /// Les cases qu'un autre appareil a écrasées (SUPERSEDED), rendues une fois.
+  Future<int> takeSuperseded(String classroomId) async => _db.update(
+    _cells,
+    {'superseded_at': null},
+    where: 'classroom_id = ? AND superseded_at IS NOT NULL',
+    whereArgs: [classroomId],
+  );
+
   static ClassTimetableCell _asDraft(ClassTimetableCell c, String draftId) =>
       ClassTimetableCell(
         id: ClassTimetableCell.keyOf(

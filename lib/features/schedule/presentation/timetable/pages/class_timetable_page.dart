@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/widgets/app_snack_bar.dart';
 import 'package:school_app_flutter/core/offline/online_only.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
@@ -32,7 +33,15 @@ class ClassTimetablePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) => BlocProvider(
     create: (_) => GetIt.instance<ClassTimetableCubit>()..load(pull: true),
-    child: BlocBuilder<ClassTimetableCubit, ClassTimetableState>(
+    // Une case écrasée par un autre appareil : prévenir une fois (R18).
+    child: BlocConsumer<ClassTimetableCubit, ClassTimetableState>(
+      listenWhen: (a, b) => (b.view?.superseded ?? 0) > 0 && a.view != b.view,
+      listener: (context, state) => AppSnackBar.showInfo(
+        context,
+        AppLocalizations.of(
+          context,
+        )!.classTimetableSuperseded(state.view!.superseded),
+      ),
       builder: (context, state) {
         final cubit = context.read<ClassTimetableCubit>();
         return LocationParamsSync(

@@ -13363,5 +13363,11 @@
   "@classTimetableCopyReplaceBody": {"placeholders": {"name": {"type": "String"}, "count": {"type": "int"}}},
   "classTimetableCopyReplace": "Remplacer",
   "classTimetableSnackCopied": "Copié en brouillon · {count} séances",
-  "@classTimetableSnackCopied": {"placeholders": {"count": {"type": "int"}}}
+  "@classTimetableSnackCopied": {"placeholders": {"count": {"type": "int"}}},
+  "classTimetableEndedNotice": "{count, plural, =1{1 modification faite hors ligne n'a pas été reprise : le brouillon a été publié ou abandonné entre-temps.} other{{count} modifications faites hors ligne n'ont pas été reprises : le brouillon a été publié ou abandonné entre-temps.}}",
+  "@classTimetableEndedNotice": {"placeholders": {"count": {"type": "int"}}},
+  "classTimetableEndedResume": "Reprendre dans un nouveau brouillon",
+  "classTimetableEndedDiscard": "Ignorer",
+  "classTimetableSuperseded": "{count, plural, =1{Une case a été modifiée depuis un autre appareil : la version la plus récente est gardée.} other{{count} cases ont été modifiées depuis un autre appareil : la version la plus récente est gardée.}}",
+  "@classTimetableSuperseded": {"placeholders": {"count": {"type": "int"}}}
 }

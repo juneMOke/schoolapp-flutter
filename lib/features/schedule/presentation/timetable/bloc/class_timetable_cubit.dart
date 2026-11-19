@@ -170,6 +170,38 @@ class ClassTimetableCubit extends Cubit<ClassTimetableState> {
     return setCells(TimetableCopyPlan.of(view, source).changes);
   }
 
+  /// « Reprendre ces modifications dans un nouveau brouillon » : un brouillon
+  /// commence (ou le brouillon ouvert les reçoit), les gestes refusés y sont
+  /// rejoués, puis effacés.
+  Future<Either<Failure, Unit>> resumeEnded() async {
+    final view = state.view;
+    if (view == null || view.ended.isEmpty) return const Right(unit);
+    if (!view.hasDraft) {
+      final started = await startDraft();
+      if (started.isLeft()) return started;
+    }
+    final current = state.view!;
+    final slots = {for (final s in current.slots) s.id: s};
+    final courses = {for (final c in current.programme) c.coursId: c};
+    final result = await setCells([
+      for (final c in view.ended)
+        if (slots[c.slotId] case final slot?)
+          CellChange(c.day, slot, courses[c.coursId]),
+    ]);
+    if (result.isRight()) {
+      await _reader.discard(view.ended);
+      await _reloadView();
+    }
+    return result;
+  }
+
+  Future<void> discardEnded() async {
+    final view = state.view;
+    if (view == null) return;
+    await _reader.discard(view.ended);
+    await _reloadView();
+  }
+
   Future<Either<Failure, Unit>> abandonDraft() =>
       _edit((editor, view) => editor.abandon(view));
 

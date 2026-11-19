@@ -24532,4 +24532,36 @@ class AppLocalizationsEn extends AppLocalizations {
   String classTimetableSnackCopied(int count) {
     return 'Copied as draft · $count sessions';
   }
+
+  @override
+  String classTimetableEndedNotice(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          '$count changes made offline were not kept: the draft was published or discarded meanwhile.',
+      one:
+          '1 change made offline was not kept: the draft was published or discarded meanwhile.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get classTimetableEndedResume => 'Resume in a new draft';
+
+  @override
+  String get classTimetableEndedDiscard => 'Ignore';
+
+  @override
+  String classTimetableSuperseded(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          '$count slots were changed from another device: the latest version is kept.',
+      one:
+          'A slot was changed from another device: the latest version is kept.',
+    );
+    return '$_temp0';
+  }
 }

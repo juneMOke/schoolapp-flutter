@@ -24706,4 +24706,36 @@ class AppLocalizationsFr extends AppLocalizations {
   String classTimetableSnackCopied(int count) {
     return 'Copié en brouillon · $count séances';
   }
+
+  @override
+  String classTimetableEndedNotice(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          '$count modifications faites hors ligne n\'ont pas été reprises : le brouillon a été publié ou abandonné entre-temps.',
+      one:
+          '1 modification faite hors ligne n\'a pas été reprise : le brouillon a été publié ou abandonné entre-temps.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get classTimetableEndedResume => 'Reprendre dans un nouveau brouillon';
+
+  @override
+  String get classTimetableEndedDiscard => 'Ignorer';
+
+  @override
+  String classTimetableSuperseded(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          '$count cases ont été modifiées depuis un autre appareil : la version la plus récente est gardée.',
+      one:
+          'Une case a été modifiée depuis un autre appareil : la version la plus récente est gardée.',
+    );
+    return '$_temp0';
+  }
 }

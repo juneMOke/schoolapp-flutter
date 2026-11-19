@@ -51,6 +51,12 @@ class ClassTimetableView extends Equatable {
   /// Des gestes de cette classe attendent leur envoi : « Publier » attend.
   final bool hasPending;
 
+  /// Des gestes refusés parce que leur brouillon a été clos entre-temps.
+  final List<ClassTimetableCell> ended;
+
+  /// Des cases écrasées par un autre appareil, pas encore annoncées.
+  final int superseded;
+
   const ClassTimetableView({
     required this.classroom,
     required this.grid,
@@ -62,6 +68,8 @@ class ClassTimetableView extends Equatable {
     required this.othersKnown,
     this.bookings = const [],
     this.hasPending = false,
+    this.ended = const [],
+    this.superseded = 0,
   });
 
   bool get hasDraft => header?.draftId != null;
@@ -93,5 +101,7 @@ class ClassTimetableView extends Equatable {
     othersKnown,
     bookings,
     hasPending,
+    ended,
+    superseded,
   ];
 }

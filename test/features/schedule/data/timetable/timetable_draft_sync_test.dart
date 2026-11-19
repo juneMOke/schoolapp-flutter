@@ -284,4 +284,21 @@ void main() {
     expect(v.header!.draftId, draft);
     expect(v.draft.single.coursId, 'math');
   });
+
+  test(
+    'brouillon clos entre-temps : les gestes restent, à reprendre ou ignorer',
+    () async {
+      await editor.start(await view());
+      await editor.setCells(await view(), [
+        const CellChange(Weekday.tue, _slot, _math),
+      ]);
+      final dao = TimetableDraftDao(db);
+      final cell = (await dao.pending()).whereType<CellGesture>().single;
+      await dao.gestureRejected(cell, 'TIMETABLE_DRAFT_ENDED');
+      final ended = await dao.endedCells('c7a');
+      expect(ended.single.day, Weekday.tue);
+      await dao.discard(ended);
+      expect(await dao.endedCells('c7a'), isEmpty);
+    },
+  );
 }

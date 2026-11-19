@@ -37539,6 +37539,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Copied as draft · {count} sessions'**
   String classTimetableSnackCopied(int count);
+
+  /// No description provided for @classTimetableEndedNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 change made offline was not kept: the draft was published or discarded meanwhile.} other{{count} changes made offline were not kept: the draft was published or discarded meanwhile.}}'**
+  String classTimetableEndedNotice(int count);
+
+  /// No description provided for @classTimetableEndedResume.
+  ///
+  /// In en, this message translates to:
+  /// **'Resume in a new draft'**
+  String get classTimetableEndedResume;
+
+  /// No description provided for @classTimetableEndedDiscard.
+  ///
+  /// In en, this message translates to:
+  /// **'Ignore'**
+  String get classTimetableEndedDiscard;
+
+  /// No description provided for @classTimetableSuperseded.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{A slot was changed from another device: the latest version is kept.} other{{count} slots were changed from another device: the latest version is kept.}}'**
+  String classTimetableSuperseded(int count);
 }
 
 class _AppLocalizationsDelegate

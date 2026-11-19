@@ -98,6 +98,10 @@ class ClassTimetableReader {
       hasPending: await TimetableDraftDao(
         _db,
       ).hasPending(classroom.classroomId),
+      ended: await TimetableDraftDao(_db).endedCells(classroom.classroomId),
+      superseded: await TimetableDraftDao(
+        _db,
+      ).takeSuperseded(classroom.classroomId),
     );
   }
 
@@ -136,4 +140,7 @@ class ClassTimetableReader {
     }
     return sources;
   }
+
+  Future<void> discard(List<ClassTimetableCell> cells) =>
+      TimetableDraftDao(_db).discard(cells);
 }
