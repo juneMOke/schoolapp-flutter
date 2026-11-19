@@ -37053,6 +37053,186 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'The print could not be prepared.'**
   String get schoolCalendarPrintFailed;
+
+  /// No description provided for @subMenuClassTimetable.
+  ///
+  /// In en, this message translates to:
+  /// **'Timetable'**
+  String get subMenuClassTimetable;
+
+  /// No description provided for @classTimetableEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Calendar & Timetables · Timetable'**
+  String get classTimetableEyebrow;
+
+  /// No description provided for @classTimetableTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Timetables by class'**
+  String get classTimetableTitle;
+
+  /// No description provided for @classTimetableCycle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cycle'**
+  String get classTimetableCycle;
+
+  /// No description provided for @classTimetableLevel.
+  ///
+  /// In en, this message translates to:
+  /// **'Level'**
+  String get classTimetableLevel;
+
+  /// No description provided for @classTimetableClass.
+  ///
+  /// In en, this message translates to:
+  /// **'Class'**
+  String get classTimetableClass;
+
+  /// No description provided for @classTimetablePickHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a class to see its timetable.'**
+  String get classTimetablePickHint;
+
+  /// No description provided for @classTimetablePublished.
+  ///
+  /// In en, this message translates to:
+  /// **'Published'**
+  String get classTimetablePublished;
+
+  /// No description provided for @classTimetableDraft.
+  ///
+  /// In en, this message translates to:
+  /// **'Draft'**
+  String get classTimetableDraft;
+
+  /// No description provided for @classTimetablePublishedOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Published on {date} by {name}'**
+  String classTimetablePublishedOn(String date, String name);
+
+  /// No description provided for @classTimetableNeverPublished.
+  ///
+  /// In en, this message translates to:
+  /// **'Never published'**
+  String get classTimetableNeverPublished;
+
+  /// No description provided for @classTimetableDraftOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'The published version stays in force until the draft is published.'**
+  String get classTimetableDraftOpen;
+
+  /// No description provided for @classTimetableKpiHours.
+  ///
+  /// In en, this message translates to:
+  /// **'Hours placed'**
+  String get classTimetableKpiHours;
+
+  /// No description provided for @classTimetableKpiSessions.
+  ///
+  /// In en, this message translates to:
+  /// **'Sessions / week'**
+  String get classTimetableKpiSessions;
+
+  /// No description provided for @classTimetableKpiTeachers.
+  ///
+  /// In en, this message translates to:
+  /// **'Teachers'**
+  String get classTimetableKpiTeachers;
+
+  /// No description provided for @classTimetableKpiRemaining.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} h left to place'**
+  String classTimetableKpiRemaining(int count);
+
+  /// No description provided for @classTimetableKpiComplete.
+  ///
+  /// In en, this message translates to:
+  /// **'full volume'**
+  String get classTimetableKpiComplete;
+
+  /// No description provided for @classTimetableTextCounts.
+  ///
+  /// In en, this message translates to:
+  /// **'{sessions} sessions / week · {teachers} teachers'**
+  String classTimetableTextCounts(int sessions, int teachers);
+
+  /// No description provided for @classTimetableWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'Week'**
+  String get classTimetableWeek;
+
+  /// No description provided for @classTimetableDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Day'**
+  String get classTimetableDay;
+
+  /// No description provided for @classTimetableDistribution.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekly distribution'**
+  String get classTimetableDistribution;
+
+  /// No description provided for @classTimetableHoursOf.
+  ///
+  /// In en, this message translates to:
+  /// **'{placed}/{planned} h'**
+  String classTimetableHoursOf(int placed, int planned);
+
+  /// No description provided for @classTimetableHoursPlaced.
+  ///
+  /// In en, this message translates to:
+  /// **'{placed} h'**
+  String classTimetableHoursPlaced(int placed);
+
+  /// No description provided for @classTimetableEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No timetable yet for {name}'**
+  String classTimetableEmptyTitle(String name);
+
+  /// No description provided for @classTimetableEmptyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'It has not been published yet.'**
+  String get classTimetableEmptyBody;
+
+  /// No description provided for @classTimetableNoProgrammeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No course in the programme'**
+  String get classTimetableNoProgrammeTitle;
+
+  /// No description provided for @classTimetableNoProgrammeBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Add courses to {name} before building its timetable.'**
+  String classTimetableNoProgrammeBody(String name);
+
+  /// No description provided for @classTimetableNoClassTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No open class'**
+  String get classTimetableNoClassTitle;
+
+  /// No description provided for @classTimetableNoClassBody.
+  ///
+  /// In en, this message translates to:
+  /// **'No class is open for the current year.'**
+  String get classTimetableNoClassBody;
+
+  /// No description provided for @classTimetableLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading timetables'**
+  String get classTimetableLoading;
 }
 
 class _AppLocalizationsDelegate

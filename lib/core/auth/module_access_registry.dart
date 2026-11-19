@@ -387,6 +387,9 @@ const Map<String, Map<String, ModuleAccess>> kModuleAccessRegistry = {
   // publier sont gardés geste par geste (K10).
   MenuConstants.agendaMenuId: {
     MenuConstants.schoolCalendarId: ModuleAccess([Perm.calendarRead]),
+    // Les versions publiées de toutes les classes descendent sous
+    // `schedule.read` (A17) ; construire et publier sous `schedule.write`.
+    MenuConstants.classTimetableId: ModuleAccess([Perm.scheduleRead]),
   },
   // RH · Personnel : les deux écrans lisent le fichier local du personnel
   // sous `hr.staff.read`. Tant que le serveur ne sème pas ce droit, le module

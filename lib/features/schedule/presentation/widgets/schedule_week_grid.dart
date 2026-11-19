@@ -33,12 +33,17 @@ class ScheduleWeekGrid extends StatelessWidget {
   final Weekday? today;
   final void Function(TimetableCell cell)? onOpenCell;
 
+  /// Garde le samedi à toutes les largeurs : une classe a cours le samedi
+  /// (EDT-R1), là où la vue enseignant le masque sous 760.
+  final bool keepSaturday;
+
   const ScheduleWeekGrid({
     super.key,
     required this.timetable,
     required this.palette,
     required this.today,
     this.onOpenCell,
+    this.keepSaturday = false,
   });
 
   @override
@@ -108,7 +113,7 @@ class ScheduleWeekGrid extends StatelessWidget {
   }
 
   List<Weekday> _visibleDays(double available) {
-    if (available >= _narrowBreakpoint) {
+    if (keepSaturday || available >= _narrowBreakpoint) {
       return timetable.days;
     }
     final withoutSat = timetable.days

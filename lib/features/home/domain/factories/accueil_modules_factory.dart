@@ -260,6 +260,11 @@ class AccueilModulesFactory {
           subMenuId: MenuConstants.schoolCalendarId,
           title: l10n.subMenuSchoolCalendar,
         ),
+        _page(
+          menuId: menuId,
+          subMenuId: MenuConstants.classTimetableId,
+          title: l10n.subMenuClassTimetable,
+        ),
       ],
     );
   }

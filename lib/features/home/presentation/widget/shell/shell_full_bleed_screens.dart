@@ -26,6 +26,7 @@ const Set<String> shellFullBleedSubMenuIds = {
   MenuConstants.treasuryClosingId,
   MenuConstants.treasuryConfigId,
   MenuConstants.schoolCalendarId,
+  MenuConstants.classTimetableId,
   MenuConstants.communicationAnnouncementsId,
   MenuConstants.communicationTemplatesId,
   MenuConstants.organisationId,

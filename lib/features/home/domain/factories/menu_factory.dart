@@ -485,8 +485,8 @@ class MenuFactory {
     );
   }
 
-  /// Menu Agenda & Horaires : le calendrier scolaire (puis, au lot F-EDT-2,
-  /// l'emploi du temps par classe).
+  /// Menu Agenda & Horaires : le calendrier scolaire, puis l'emploi du temps
+  /// par classe.
   static MenuItem _createAgendaMenu(AppLocalizations l10n) {
     return MenuItem(
       id: MenuConstants.agendaMenuId,
@@ -497,6 +497,11 @@ class MenuFactory {
           id: MenuConstants.schoolCalendarId,
           title: l10n.subMenuSchoolCalendar,
           route: AppRoutesNames.schoolCalendar,
+        ),
+        SubMenuItem(
+          id: MenuConstants.classTimetableId,
+          title: l10n.subMenuClassTimetable,
+          route: AppRoutesNames.classTimetable,
         ),
       ],
     );

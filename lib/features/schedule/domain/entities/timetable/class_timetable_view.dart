@@ -1,0 +1,85 @@
+import 'package:equatable/equatable.dart';
+import 'package:school_app_flutter/features/schedule/domain/entities/time_grid.dart';
+import 'package:school_app_flutter/features/schedule/domain/entities/time_slot.dart';
+import 'package:school_app_flutter/features/schedule/domain/entities/timetable/class_timetable.dart';
+
+/// Une classe proposée par le choix Cycle → Niveau → Classe (EDT §4.6 A).
+class TimetableClassOption extends Equatable {
+  final String classroomId;
+  final String name;
+  final String cycleCode;
+  final String cycleName;
+  final String levelCode;
+  final String levelName;
+  final String? room;
+
+  const TimetableClassOption({
+    required this.classroomId,
+    required this.name,
+    required this.cycleCode,
+    required this.cycleName,
+    required this.levelCode,
+    required this.levelName,
+    this.room,
+  });
+
+  @override
+  List<Object?> get props => [classroomId, name, cycleCode, levelCode, room];
+}
+
+/// Tout ce que l'écran montre d'une classe, lu en local.
+class ClassTimetableView extends Equatable {
+  final TimetableClassOption classroom;
+  final TimeGrid? grid;
+
+  /// Les créneaux de la grille de la classe, rangés par heure.
+  final List<TimeSlot> slots;
+  final ClassTimetableHeader? header;
+  final List<ClassTimetableCell> published;
+  final List<ClassTimetableCell> draft;
+  final List<TimetableCourse> programme;
+
+  /// `schedule.timetable-cells` n'a jamais été tiré sur l'appareil : le
+  /// contrôle des conflits est indisponible (EDT §5, « partiel »).
+  final bool othersKnown;
+
+  const ClassTimetableView({
+    required this.classroom,
+    required this.grid,
+    required this.slots,
+    required this.header,
+    required this.published,
+    required this.draft,
+    required this.programme,
+    required this.othersKnown,
+  });
+
+  bool get hasDraft => header?.draftId != null;
+
+  /// Les domaines de la classe, dans l'ordre de la grille de notes (bulletin).
+  List<String> get domainOrder {
+    final sorted = [...programme]
+      ..sort(
+        (a, b) =>
+            (a.domainOrder ?? 1 << 30).compareTo(b.domainOrder ?? 1 << 30),
+      );
+    final ids = <String>[];
+    for (final c in sorted) {
+      final id = c.domainId;
+      if (id != null && !ids.contains(id)) ids.add(id);
+    }
+    return ids;
+  }
+
+  @override
+  List<Object?> get props => [
+    classroom,
+    grid,
+    slots,
+    header,
+    published,
+    draft,
+    programme,
+    othersKnown,
+  ];
+}

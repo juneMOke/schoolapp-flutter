@@ -19,6 +19,7 @@ import 'package:school_app_flutter/core/database/schema/staff_offline_schema.dar
 import 'package:school_app_flutter/core/database/schema/student_attendance_v2_schema.dart';
 import 'package:school_app_flutter/core/database/schema/student_photo_schema.dart';
 import 'package:school_app_flutter/core/database/schema/ticket_print_jobs_schema.dart';
+import 'package:school_app_flutter/core/database/schema/class_timetable_schema.dart';
 import 'package:school_app_flutter/core/database/schema/school_calendar_schema.dart';
 import 'package:school_app_flutter/core/database/schema/treasury_schema.dart';
 import 'package:school_app_flutter/core/database/table_schema.dart';
@@ -200,6 +201,11 @@ Future<void> migrateTenantDatabase(
       type: 'INTEGER',
     );
     await _repullScheduleReference(db);
+  }
+  if (upTo(85)) {
+    // L'emploi du temps par classe (EDT-2, EDT-6) et la salle de la classe.
+    await _createTables(db, classTimetableTables);
+    await _addColumnIfTable(db, 'ref_classrooms', 'room');
   }
 }
 

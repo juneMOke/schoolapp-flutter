@@ -24360,4 +24360,111 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get schoolCalendarPrintFailed =>
       'L\'impression n\'a pas pu être préparée.';
+
+  @override
+  String get subMenuClassTimetable => 'Emploi du temps';
+
+  @override
+  String get classTimetableEyebrow => 'Agenda & Horaires · Emploi du temps';
+
+  @override
+  String get classTimetableTitle => 'Emplois du temps par classe';
+
+  @override
+  String get classTimetableCycle => 'Cycle';
+
+  @override
+  String get classTimetableLevel => 'Niveau';
+
+  @override
+  String get classTimetableClass => 'Classe';
+
+  @override
+  String get classTimetablePickHint =>
+      'Choisissez une classe pour voir son emploi du temps.';
+
+  @override
+  String get classTimetablePublished => 'Publié';
+
+  @override
+  String get classTimetableDraft => 'Brouillon';
+
+  @override
+  String classTimetablePublishedOn(String date, String name) {
+    return 'Publié le $date par $name';
+  }
+
+  @override
+  String get classTimetableNeverPublished => 'Jamais publié';
+
+  @override
+  String get classTimetableDraftOpen =>
+      'La version publiée reste en vigueur jusqu\'à la publication du brouillon.';
+
+  @override
+  String get classTimetableKpiHours => 'Heures placées';
+
+  @override
+  String get classTimetableKpiSessions => 'Séances / semaine';
+
+  @override
+  String get classTimetableKpiTeachers => 'Enseignants';
+
+  @override
+  String classTimetableKpiRemaining(int count) {
+    return 'reste $count h à placer';
+  }
+
+  @override
+  String get classTimetableKpiComplete => 'volume complet';
+
+  @override
+  String classTimetableTextCounts(int sessions, int teachers) {
+    return '$sessions séances / semaine · $teachers enseignants';
+  }
+
+  @override
+  String get classTimetableWeek => 'Semaine';
+
+  @override
+  String get classTimetableDay => 'Jour';
+
+  @override
+  String get classTimetableDistribution => 'Répartition hebdomadaire';
+
+  @override
+  String classTimetableHoursOf(int placed, int planned) {
+    return '$placed/$planned h';
+  }
+
+  @override
+  String classTimetableHoursPlaced(int placed) {
+    return '$placed h';
+  }
+
+  @override
+  String classTimetableEmptyTitle(String name) {
+    return 'Pas encore d\'emploi du temps pour $name';
+  }
+
+  @override
+  String get classTimetableEmptyBody => 'Il n\'a pas encore été publié.';
+
+  @override
+  String get classTimetableNoProgrammeTitle => 'Aucun cours au programme';
+
+  @override
+  String classTimetableNoProgrammeBody(String name) {
+    return 'Ajoutez des cours à $name avant de construire son emploi du temps.';
+  }
+
+  @override
+  String get classTimetableNoClassTitle => 'Aucune classe ouverte';
+
+  @override
+  String get classTimetableNoClassBody =>
+      'Aucune classe n\'est ouverte pour l\'année en cours.';
+
+  @override
+  String get classTimetableLoading => 'Chargement des emplois du temps';
 }

@@ -37,6 +37,7 @@ const TableSchema refClassroomsTable = TableSchema(
       name TEXT NOT NULL,
       capacity INTEGER,
       grille_id TEXT,
+      room TEXT,
       teacher_id TEXT,
       teacher_first_name TEXT,
       teacher_last_name TEXT,

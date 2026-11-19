@@ -141,6 +141,10 @@ class MenuConstants {
   /// année scolaire par calendrier.
   static const String schoolCalendarId = 'agenda-calendrier';
 
+  /// L'emploi du temps par classe : consulter la version publiée, construire
+  /// le brouillon, publier.
+  static const String classTimetableId = 'agenda-emploi-du-temps';
+
   /// Clôture de caisse : ce qui est entré et sorti de chaque caisse, ce qu'il
   /// reste, et la clôture du soir.
   static const String treasuryClosingId = 'tr-cloture';

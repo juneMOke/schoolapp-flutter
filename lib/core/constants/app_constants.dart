@@ -904,7 +904,10 @@ class AppConstants {
   // cycles par leurs codes), `ref_time_slots.time_grid_id` — et
   // `ref_recurring_sessions.start_minute` / `end_minute`. Re-tirage des
   // créneaux et des séances. Palier d'école.
-  static const int offlineDbSchemaVersion = 84;
+  // v85 (2026-11-19) : l'emploi du temps par classe — `tt_programmes`,
+  // `tt_class_timetables`, `tt_cells` — et `ref_classrooms.room`. Palier
+  // d'école.
+  static const int offlineDbSchemaVersion = 85;
 
   /// Dernière version de la base unique HÉRITÉE : là où l'escalier
   /// `migrateOfflineDatabase` s'arrête pour toujours.
@@ -1789,6 +1792,29 @@ class AppConstants {
   /// (flux `schedule.time-grids`, `schedule.read`, EDT-1).
   static const String syncScheduleTimeGridsEndpoint =
       '/api/v1/sync/schedule/time-grids';
+
+  /// **GET** (bundle, ETag) = le programme de chaque classe de l'année
+  /// (flux `schedule.programmes`, `schedule.write`, EDT-2).
+  static const String syncScheduleProgrammesEndpoint =
+      '/api/v1/sync/schedule/programmes';
+
+  /// **GET** (keyset) = les en-têtes d'emploi du temps des classes
+  /// (flux `schedule.timetables`, EDT-6).
+  static const String syncScheduleTimetablesEndpoint =
+      '/api/v1/sync/schedule/timetables';
+
+  /// **GET** (keyset) = les cases publiées (et en brouillon sous
+  /// `schedule.write`) de toutes les classes (flux `schedule.timetable-cells`).
+  static const String syncScheduleTimetableCellsEndpoint =
+      '/api/v1/sync/schedule/timetable-cells';
+
+  /// **POST** = le lot des gestes de brouillon (START, CELL, ABANDON).
+  static const String syncScheduleDraftCellsEndpoint =
+      '/api/v1/sync/schedule/draft-cells';
+
+  /// **POST** `{revision}` = publier le brouillon d'une classe.
+  static String timetablePublishEndpoint(String classroomId, String draftId) =>
+      '/api/v1/schedule/classrooms/$classroomId/timetable/draft/$draftId/publish';
 
   // ── Calendrier scolaire (contrat figé avec le back le 2026-11-19) ──
   /// **GET** (keyset) = les cadres nationaux publiés des années de l'école,

@@ -129,6 +129,15 @@ abstract final class SyncPlanKeys {
   /// Les grilles horaires de l'école (une par cycle au plus), récréation
   /// comprise, accordées par `schedule.read` (EDT-1).
   static const String scheduleTimeGrids = 'schedule.time-grids';
+
+  /// Le programme de chaque classe (bundle ETag), accordé par `schedule.write`.
+  static const String scheduleProgrammes = 'schedule.programmes';
+
+  /// Les en-têtes d'emploi du temps des classes.
+  static const String scheduleTimetables = 'schedule.timetables';
+
+  /// Les cases des emplois du temps (publiées ; brouillons sous `schedule.write`).
+  static const String scheduleTimetableCells = 'schedule.timetable-cells';
   static const String academicsGradesReferential =
       'academics.grades-referential';
   static const String academicsCours = 'academics.cours';
@@ -249,6 +258,9 @@ const Map<String, List<String>> kSyncPlanAliases = {
   SyncPlanKeys.scheduleTimeSlots: ['schedule_time_slots'],
   SyncPlanKeys.scheduleSessions: ['schedule_sessions'],
   SyncPlanKeys.scheduleTimeGrids: ['schedule_time_grids'],
+  SyncPlanKeys.scheduleProgrammes: ['schedule_programmes'],
+  SyncPlanKeys.scheduleTimetables: ['schedule_timetables'],
+  SyncPlanKeys.scheduleTimetableCells: ['schedule_timetable_cells'],
   SyncPlanKeys.academicsGradesReferential: ['academics_grades_referential'],
   SyncPlanKeys.academicsCours: ['academics_cours'],
   SyncPlanKeys.academicsEvaluations: ['academics_evaluations'],
@@ -399,6 +411,9 @@ const Set<String> _kCursorKeyPrefixes = {
   'treasury_closures',
   // Les grilles horaires, cadrées par l'école du jeton.
   'schedule_time_grids',
+  'schedule_programmes',
+  'schedule_timetables',
+  'schedule_timetable_cells',
   // Le calendrier scolaire, cadré par l'école du jeton.
   'calendar_framework',
   'calendar_calendars',
