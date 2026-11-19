@@ -1,17 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:school_app_flutter/core/components/cards/eteelo_panel_card.dart';
 import 'package:school_app_flutter/core/components/charts/eteelo_kpi_band.dart';
 import 'package:school_app_flutter/core/components/charts/eteelo_kpi_card_data.dart';
 import 'package:school_app_flutter/core/components/status/status_badge.dart';
 import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
-import 'package:school_app_flutter/core/theme/course_domain_tones.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
-import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/features/schedule/domain/entities/timetable/class_timetable.dart';
 import 'package:school_app_flutter/features/schedule/domain/entities/timetable/class_timetable_view.dart';
 import 'package:school_app_flutter/features/schedule/domain/services/timetable_metrics.dart';
+import 'package:school_app_flutter/features/schedule/presentation/timetable/timetable_marks.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// L'identité et la synthèse d'une classe (EDT §4.6 B) : le nom et la salle,
@@ -22,11 +20,58 @@ class ClassTimetableSummary extends StatelessWidget {
   final ClassTimetableView view;
   final List<ClassTimetableCell> cells;
 
+  /// Consultation, cette semaine, un jour de semaine : le pavé « En cours »
+  /// (R11, D9).
+  final TimetableNow? now;
+
+  /// Brouillon : les conflits professeur (R4, D8).
+  final int? conflicts;
+
   const ClassTimetableSummary({
     super.key,
     required this.view,
     required this.cells,
+    this.now,
+    this.conflicts,
   });
+
+  static String _clock(int minutes) =>
+      '${(minutes ~/ 60).toString().padLeft(2, '0')}:'
+      '${(minutes % 60).toString().padLeft(2, '0')}';
+
+  EteeloKpiCardData _nowCard(AppLocalizations l10n, TimetableNow now) {
+    final current = now.current;
+    final next = now.next;
+    final closedBy = now.closedBy;
+    final String value;
+    String? subline;
+    if (closedBy != null) {
+      value = l10n.classTimetableNoClassToday;
+      subline = closedBy.title;
+    } else if (current != null) {
+      value = current.subjectLabel ?? '';
+    } else {
+      value = next == null
+          ? l10n.classTimetableNoMoreToday
+          : l10n.classTimetableNoClassNow;
+    }
+    if (closedBy == null && next != null) {
+      subline = l10n.classTimetableNext(
+        next.subjectLabel ?? '',
+        _clock(next.range.startMinute),
+      );
+    }
+    return EteeloKpiCardData(
+      label: current == null
+          ? l10n.classTimetableNow
+          : l10n.classTimetableNowAt(_clock(current.range.startMinute)),
+      valueText: value,
+      subline: subline,
+      accent: AppColors.terreCuite,
+      accentSoft: AppColors.terreCuiteSoft,
+      icon: Icons.play_circle_outline,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -107,6 +152,20 @@ class ClassTimetableSummary extends StatelessWidget {
                   accentSoft: AppColors.bleuArdoiseSoft,
                   icon: Icons.schedule_outlined,
                 ),
+                if (conflicts case final count?)
+                  EteeloKpiCardData(
+                    label: l10n.classTimetableConflictsKpi,
+                    value: count,
+                    subline: count > 0
+                        ? l10n.classTimetableKpiConflictsOpen
+                        : l10n.classTimetableKpiConflictsNone,
+                    accent: count > 0 ? AppColors.error : AppColors.vertSavane,
+                    accentSoft: count > 0
+                        ? AppColors.feeStatusDueSoft
+                        : AppColors.hrTeachersSoft,
+                    icon: Icons.warning_amber_rounded,
+                  ),
+                if (now case final now?) _nowCard(l10n, now),
                 if (!narrow) ...[
                   EteeloKpiCardData(
                     label: l10n.classTimetableKpiSessions,
@@ -128,86 +187,6 @@ class ClassTimetableSummary extends StatelessWidget {
           ],
         );
       },
-    );
-  }
-}
-
-/// La répartition hebdomadaire (EDT §4.6 F) : une ligne par cours, à la
-/// teinte de son domaine, avec ses heures placées (et prévues, si connues).
-class ClassTimetableDistribution extends StatelessWidget {
-  final ClassTimetableView view;
-  final List<ClassTimetableCell> cells;
-
-  const ClassTimetableDistribution({
-    super.key,
-    required this.view,
-    required this.cells,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    final order = view.domainOrder;
-    final counts = <String, int>{};
-    for (final c in cells) {
-      final id = c.coursId;
-      if (id != null) counts[id] = (counts[id] ?? 0) + 1;
-    }
-    return EteeloPanelCard(
-      title: l10n.classTimetableDistribution,
-      child: Column(
-        children: [
-          for (final course in view.programme)
-            Padding(
-              padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-              child: Row(
-                children: [
-                  Container(
-                    width: AppSpacing.xs,
-                    height: AppSpacing.xl,
-                    decoration: BoxDecoration(
-                      color: CourseDomainTones.forDomain(
-                        course.domainId,
-                        order,
-                      ).ink,
-                      borderRadius: AppRadius.brSm,
-                    ),
-                  ),
-                  const SizedBox(width: AppSpacing.sm),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          course.branchLabel,
-                          style: AppTypography.bodyMedium,
-                        ),
-                        if (course.teacherLabel != null)
-                          Text(
-                            course.teacherLabel!,
-                            style: AppTypography.bodySmall,
-                          ),
-                      ],
-                    ),
-                  ),
-                  Text(
-                    course.weeklyHours == null
-                        ? l10n.classTimetableHoursPlaced(
-                            counts[course.coursId] ?? 0,
-                          )
-                        : l10n.classTimetableHoursOf(
-                            counts[course.coursId] ?? 0,
-                            course.weeklyHours!,
-                          ),
-                    maxLines: 1,
-                    softWrap: false,
-                    style: AppTypography.labelMedium,
-                  ),
-                ],
-              ),
-            ),
-        ],
-      ),
     );
   }
 }

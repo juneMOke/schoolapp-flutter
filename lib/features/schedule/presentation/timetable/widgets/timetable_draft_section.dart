@@ -1,38 +1,32 @@
 import 'dart:async';
 
-import 'package:dartz/dartz.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/components/buttons/primary_button.dart';
 import 'package:school_app_flutter/core/components/buttons/secondary_button.dart';
-import 'package:school_app_flutter/core/components/cards/eteelo_panel_card.dart';
-import 'package:school_app_flutter/core/components/dialogs/eteelo_adaptive_sheet.dart';
-import 'package:school_app_flutter/core/components/dialogs/eteelo_form_dialog.dart';
 import 'package:school_app_flutter/core/components/status/eteelo_notice.dart';
-import 'package:school_app_flutter/core/error/failures.dart';
-import 'package:school_app_flutter/core/offline/record_sync_state.dart';
+import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
+import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
-import 'package:school_app_flutter/core/widgets/app_confirmation_dialog.dart';
-import 'package:school_app_flutter/core/widgets/app_snack_bar.dart';
-import 'package:school_app_flutter/features/schedule/data/timetable/timetable_editor.dart';
-import 'package:school_app_flutter/features/schedule/domain/entities/time_slot.dart';
 import 'package:school_app_flutter/features/schedule/domain/entities/timetable/class_timetable_view.dart';
-import 'package:school_app_flutter/features/schedule/domain/entities/weekday.dart';
-import 'package:school_app_flutter/features/schedule/domain/services/timetable_metrics.dart';
 import 'package:school_app_flutter/features/schedule/presentation/helpers/schedule_class_palette.dart';
 import 'package:school_app_flutter/features/schedule/presentation/timetable/bloc/class_timetable_cubit.dart';
 import 'package:school_app_flutter/features/schedule/presentation/timetable/class_week_builder.dart';
 import 'package:school_app_flutter/features/schedule/presentation/timetable/copy_action.dart';
-import 'package:school_app_flutter/features/schedule/presentation/timetable/draft_conflicts.dart';
-import 'package:school_app_flutter/features/schedule/presentation/timetable/widgets/publish_timetable_dialog.dart';
-import 'package:school_app_flutter/features/schedule/presentation/timetable/widgets/slot_options_sheet.dart';
+import 'package:school_app_flutter/features/schedule/presentation/timetable/draft_drop.dart';
+import 'package:school_app_flutter/features/schedule/presentation/timetable/timetable_marks.dart';
+import 'package:school_app_flutter/features/schedule/presentation/timetable/widgets/draft_gestures.dart';
+import 'package:school_app_flutter/features/schedule/presentation/timetable/widgets/timetable_course_reserve.dart';
 import 'package:school_app_flutter/features/schedule/presentation/widgets/schedule_week_grid.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
-/// Le brouillon d'une classe (EDT §4.1, colonne Brouillon) : l'aide et les
-/// actions, les avis (hors ligne, contrôle indisponible), la réserve, puis la
-/// grille éditable — on place en **touchant un créneau** (I8), à toutes les
-/// largeurs. La vue Semaine est imposée (R12).
+/// Le brouillon d'une classe (EDT §4.1, colonne Brouillon) : les avis, l'aide
+/// et les actions, la réserve, puis la grille éditable. On place en
+/// **touchant un créneau** (I8) à toutes les largeurs ; à partir de 976 dp
+/// reçus, on glisse aussi (R14) et la réserve passe à côté de la grille. La
+/// vue Semaine est imposée (R12) ; le brouillon est la semaine type, sans
+/// dates ni bandeaux (R17).
 class TimetableDraftSection extends StatelessWidget {
   final ClassTimetableView view;
   final ClassTimetableCubit cubit;
@@ -49,178 +43,190 @@ class TimetableDraftSection extends StatelessWidget {
     this.busy = false,
   });
 
+  /// À la souris (poste, web) le glisser part tout de suite ; au doigt,
+  /// après un appui long (R14).
+  static bool get _pointerFirst =>
+      kIsWeb ||
+      const {
+        TargetPlatform.linux,
+        TargetPlatform.macOS,
+        TargetPlatform.windows,
+      }.contains(defaultTargetPlatform);
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final conflicts = DraftConflicts.of(view);
-    // Une case refusée par le serveur (R18) est marquée comme un conflit et
-    // retient la publication : elle n'est pas au serveur.
-    final rejected = {
-      for (final c in view.draft)
-        if (c.syncState == RecordSyncState.failed) c.id,
-    };
-    final week = ClassWeekBuilder.build(view, view.draft);
-    final volumes = PlacedHours.volumes(
-      plannedByCours: {
-        for (final c in view.programme) c.coursId: c.weeklyHours,
-      },
-      placedCoursIds: [for (final c in view.draft) c.coursId],
-    );
-    final toPlace = volumes.where((v) => (v.remaining ?? 0) > 0).length;
-    final (placed, planned) = PlacedHours.totals(volumes);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        if (!online) EteeloNotice.warning(l10n.classTimetableOfflineDraft),
-        if (!view.othersKnown) EteeloNotice.warning(l10n.classTimetablePartial),
-        Wrap(
-          spacing: AppSpacing.sm,
-          runSpacing: AppSpacing.sm,
-          crossAxisAlignment: WrapCrossAlignment.center,
-          children: [
-            Text(l10n.classTimetableHelpDraft, style: AppTypography.bodySmall),
-            SecondaryButton(
-              label: l10n.classTimetableCopy,
-              icon: Icons.copy_all_outlined,
-              fullWidth: false,
-              onPressed: view.othersKnown && !busy
-                  ? () => unawaited(copyTimetable(context, cubit))
-                  : null,
-            ),
-            SecondaryButton(
-              label: l10n.classTimetableAbandon,
-              icon: Icons.delete_outline,
-              fullWidth: false,
-              onPressed: busy ? null : () => unawaited(_abandon(context)),
-            ),
-            PrimaryButton(
-              label: l10n.classTimetablePublish,
-              icon: Icons.publish_outlined,
-              fullWidth: false,
-              // Hors ligne, rien à placer ou un geste en cours : Publier
-              // attend (refus.vide, R9).
-              onPressed: busy || !online || view.draft.every((c) => c.isEmpty)
-                  ? null
-                  : () => unawaited(
-                      _publish(context, conflicts.length, rejected.length),
-                    ),
-            ),
-          ],
-        ),
-        const SizedBox(height: AppSpacing.md),
-        EteeloPanelCard(
-          title: l10n.classTimetableReserveTitle,
-          child: Text(
-            [
-              l10n.classTimetableReserveCount(toPlace),
-              if (planned != null) l10n.classTimetableHoursOf(placed, planned),
-            ].join(' · '),
-            style: AppTypography.bodyMedium,
-          ),
-        ),
-        const SizedBox(height: AppSpacing.md),
-        ScheduleWeekGrid(
-          timetable: week,
+    final gestures = DraftGestures(context, view: view, cubit: cubit);
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final wide = constraints.maxWidth >= AppBreakpoints.sideBySideMin;
+        final narrow = constraints.maxWidth < AppBreakpoints.dataTableCardsMax;
+        final editable = view.othersKnown && !busy;
+        final drag = wide && editable
+            ? ScheduleGridDrag(
+                longPress: !_pointerFirst,
+                canDrop: (data, day, slot) =>
+                    DraftDrop.onSlot(view, data, day, slot) is! DropIgnored,
+                onDrop: (data, day, slot) => unawaited(
+                  gestures.apply(DraftDrop.onSlot(view, data, day, slot)),
+                ),
+              )
+            : null;
+        final reserve = TimetableCourseReserve(
+          view: view,
+          drag: drag,
+          onDropped: (data) =>
+              unawaited(gestures.apply(DraftDrop.onReserve(data))),
+        );
+        final grid = ScheduleWeekGrid(
+          timetable: ClassWeekBuilder.build(view, view.draft),
           palette: ScheduleClassPalette.byCourse(
             ClassWeekBuilder.courseVisuals(view),
           ),
           today: null,
           keepSaturday: true,
-          conflictSessionIds: {...conflicts.keys, ...rejected},
-          onTapSlot: view.othersKnown
-              ? (day, slot) => unawaited(_openSlot(context, day, slot))
+          marks: ScheduleGridMarks(
+            alerts: TimetableMarks.draftAlerts(view, l10n),
+          ),
+          drag: drag,
+          onTapSlot: editable
+              ? (day, slot) => unawaited(gestures.openSlot(day, slot))
               : null,
+        );
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            if (!online) EteeloNotice.warning(l10n.classTimetableOfflineDraft),
+            if (!view.othersKnown)
+              EteeloNotice.warning(l10n.classTimetablePartial),
+            _Actions(
+              view: view,
+              cubit: cubit,
+              online: online,
+              busy: busy,
+              narrow: narrow,
+              help: wide
+                  ? l10n.classTimetableHelpDrag
+                  : l10n.classTimetableHelpDraft,
+              gestures: gestures,
+            ),
+            const SizedBox(height: AppSpacing.md),
+            if (wide)
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox(
+                    width: AppDimensions.timetableReserveWidth,
+                    child: reserve,
+                  ),
+                  const SizedBox(width: AppSpacing.md),
+                  Expanded(child: grid),
+                ],
+              )
+            else ...[
+              reserve,
+              const SizedBox(height: AppSpacing.md),
+              grid,
+            ],
+          ],
+        );
+      },
+    );
+  }
+}
+
+/// La barre d'actions du brouillon (EDT §4.6 C) : l'aide, Abandonner,
+/// Copier, Publier ; sous 600 dp, une seule ligne — Copier et Abandonner en
+/// icônes de 48 dp, Publier prend le reste, l'aide passe dessous (A10).
+class _Actions extends StatelessWidget {
+  final ClassTimetableView view;
+  final ClassTimetableCubit cubit;
+  final bool online;
+  final bool busy;
+  final bool narrow;
+  final String help;
+  final DraftGestures gestures;
+
+  const _Actions({
+    required this.view,
+    required this.cubit,
+    required this.online,
+    required this.busy,
+    required this.narrow,
+    required this.help,
+    required this.gestures,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final copy = view.othersKnown && !busy
+        ? () => unawaited(copyTimetable(context, cubit))
+        : null;
+    final abandon = busy ? null : () => unawaited(gestures.abandon());
+    // Hors ligne, rien à placer ou un geste en cours : Publier attend
+    // (refus.vide, R9).
+    final publish = busy || !online || view.draft.every((c) => c.isEmpty)
+        ? null
+        : () => unawaited(gestures.publish(online: online));
+    final helpText = Text(help, style: AppTypography.bodySmall);
+    if (narrow) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              IconButton.outlined(
+                tooltip: l10n.classTimetableCopyFrom,
+                onPressed: copy,
+                icon: const Icon(Icons.copy_all_outlined),
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              IconButton.outlined(
+                tooltip: l10n.classTimetableAbandon,
+                onPressed: abandon,
+                icon: const Icon(Icons.delete_outline),
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              Expanded(
+                child: PrimaryButton(
+                  label: l10n.classTimetablePublish,
+                  icon: Icons.publish_outlined,
+                  onPressed: publish,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.xs),
+          helpText,
+        ],
+      );
+    }
+    return Wrap(
+      spacing: AppSpacing.sm,
+      runSpacing: AppSpacing.sm,
+      crossAxisAlignment: WrapCrossAlignment.center,
+      children: [
+        helpText,
+        SecondaryButton(
+          label: l10n.classTimetableAbandon,
+          icon: Icons.delete_outline,
+          fullWidth: false,
+          onPressed: abandon,
+        ),
+        SecondaryButton(
+          label: l10n.classTimetableCopy,
+          icon: Icons.copy_all_outlined,
+          fullWidth: false,
+          onPressed: copy,
+        ),
+        PrimaryButton(
+          label: l10n.classTimetablePublish,
+          icon: Icons.publish_outlined,
+          fullWidth: false,
+          onPressed: publish,
         ),
       ],
-    );
-  }
-
-  Future<void> _openSlot(
-    BuildContext context,
-    Weekday day,
-    TimeSlot slot,
-  ) async {
-    final current = [
-      for (final c in view.draft)
-        if (c.day == day && c.slotId == slot.id && !c.isEmpty) c,
-    ].firstOrNull;
-    final choice = await showEteeloAdaptiveSheet<SlotChoice>(
-      context: context,
-      builder: (_) => SlotOptionsSheet(
-        view: view,
-        day: day,
-        slot: slot,
-        currentCoursId: current?.coursId,
-      ),
-    );
-    if (!context.mounted || choice == null) return;
-    final result = await cubit.setCells([CellChange(day, slot, choice.course)]);
-    if (!context.mounted) return;
-    _report(context, result);
-  }
-
-  Future<void> _abandon(BuildContext context) async {
-    final l10n = AppLocalizations.of(context)!;
-    final name = view.classroom.name;
-    final confirmed = await showAppConfirmationDialog(
-      context: context,
-      title: l10n.classTimetableAbandonTitle,
-      message: view.header?.isPublished ?? false
-          ? l10n.classTimetableAbandonBody(name)
-          : l10n.classTimetableAbandonBodyNew(name),
-      confirmLabel: l10n.classTimetableAbandon,
-      cancelLabel: l10n.classTimetableCancel,
-      isDestructive: true,
-    );
-    if (!context.mounted || !confirmed) return;
-    final result = await cubit.abandonDraft();
-    if (!context.mounted) return;
-    _report(context, result, success: l10n.classTimetableSnackAbandoned);
-  }
-
-  Future<void> _publish(
-    BuildContext context,
-    int conflicts,
-    int rejected,
-  ) async {
-    final l10n = AppLocalizations.of(context)!;
-    final placed = [
-      for (final c in view.draft)
-        if (!c.isEmpty) c,
-    ];
-    final ok = await EteeloFormDialog.show<bool>(
-      context,
-      PublishTimetableDialog(
-        sessions: placed.length,
-        teachers: {for (final c in placed) ?c.teacherId}.length,
-        conflicts: conflicts,
-        rejected: rejected,
-        online: online,
-        pending: view.hasPending,
-      ),
-    );
-    if (!context.mounted || ok != true) return;
-    final result = await cubit.publish();
-    if (!context.mounted) return;
-    _report(context, result, success: l10n.classTimetableSnackPublished);
-  }
-
-  static void _report(
-    BuildContext context,
-    Either<Failure, Unit> result, {
-    String? success,
-  }) {
-    final l10n = AppLocalizations.of(context)!;
-    result.fold(
-      (f) => AppSnackBar.showError(
-        context,
-        f is TimetableRefusalFailure
-            ? l10n.classTimetableRefusal(f.code)
-            : l10n.classTimetableSaveFailed,
-      ),
-      (_) {
-        if (success != null) AppSnackBar.showSuccess(context, success);
-      },
     );
   }
 }

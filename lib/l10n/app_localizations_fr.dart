@@ -24839,4 +24839,110 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get classTimetableErrorServer =>
       'Une erreur est survenue. Réessayez dans un instant.';
+
+  @override
+  String get classTimetableNow => 'En cours';
+
+  @override
+  String classTimetableNowAt(String time) {
+    return 'En cours · $time';
+  }
+
+  @override
+  String classTimetableNext(String course, String time) {
+    return 'Ensuite : $course à $time';
+  }
+
+  @override
+  String get classTimetableNoClassNow => 'Pas de cours en ce moment';
+
+  @override
+  String get classTimetableNoMoreToday => 'Plus de cours aujourd\'hui';
+
+  @override
+  String get classTimetableDrop => 'Déposer';
+
+  @override
+  String get classTimetableOutOfProgramme => 'Hors programme';
+
+  @override
+  String get classTimetableRejectedCell => 'Refusée par le serveur';
+
+  @override
+  String classTimetablePublishOutOfProgramme(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count séances hors programme à libérer avant de publier.',
+      one: '1 séance hors programme à libérer avant de publier.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get classTimetableKpiConflictsOpen => 'à résoudre avant de publier';
+
+  @override
+  String get classTimetableKpiConflictsNone => 'aucun professeur en double';
+
+  @override
+  String get classTimetableHelpDrag =>
+      'Glissez un cours depuis la réserve, ou touchez un créneau pour le choisir.';
+
+  @override
+  String get classTimetableReserveDragHint =>
+      'Glissez vers la grille · déposez ici pour retirer';
+
+  @override
+  String get classTimetableReserveDropToRemove =>
+      'Déposer pour retirer de la grille';
+
+  @override
+  String get classTimetableReserveShow => 'Voir';
+
+  @override
+  String get classTimetableReserveHide => 'Masquer';
+
+  @override
+  String classTimetableDropConflict(String name, String classroom) {
+    return '$name a déjà cours en $classroom à ce créneau';
+  }
+
+  @override
+  String get classTimetableHoverHint =>
+      'Survolez un cours pour le repérer dans la grille';
+
+  @override
+  String get classTimetableAllDomains => 'Tous les domaines';
+
+  @override
+  String get classTimetableNoDomain => 'Sans domaine';
+
+  @override
+  String get classTimetableSessionTeacher => 'Enseignant';
+
+  @override
+  String get classTimetableSessionRoom => 'Salle';
+
+  @override
+  String get classTimetableSessionVolume => 'Volume hebdo';
+
+  @override
+  String get classTimetableSessionClass => 'Classe';
+
+  @override
+  String get classTimetableSessionWeek => 'Toutes les séances de la semaine';
+
+  @override
+  String get classTimetableSessionClose => 'Fermer';
+
+  @override
+  String classTimetableSessionLength(int minutes) {
+    return '$minutes min';
+  }
+
+  @override
+  String classTimetableDayHours(int hours) {
+    return '$hours h';
+  }
 }

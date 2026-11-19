@@ -24664,4 +24664,110 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get classTimetableErrorServer =>
       'Something went wrong. Try again in a moment.';
+
+  @override
+  String get classTimetableNow => 'Now';
+
+  @override
+  String classTimetableNowAt(String time) {
+    return 'Now · $time';
+  }
+
+  @override
+  String classTimetableNext(String course, String time) {
+    return 'Next: $course at $time';
+  }
+
+  @override
+  String get classTimetableNoClassNow => 'No class right now';
+
+  @override
+  String get classTimetableNoMoreToday => 'No more classes today';
+
+  @override
+  String get classTimetableDrop => 'Drop';
+
+  @override
+  String get classTimetableOutOfProgramme => 'Not in the programme';
+
+  @override
+  String get classTimetableRejectedCell => 'Refused by the server';
+
+  @override
+  String classTimetablePublishOutOfProgramme(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count sessions not in the programme to clear before publishing.',
+      one: '1 session not in the programme to clear before publishing.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get classTimetableKpiConflictsOpen => 'to resolve before publishing';
+
+  @override
+  String get classTimetableKpiConflictsNone => 'no teacher booked twice';
+
+  @override
+  String get classTimetableHelpDrag =>
+      'Drag a course from the reserve, or tap a slot to choose it.';
+
+  @override
+  String get classTimetableReserveDragHint =>
+      'Drag to the grid · drop here to remove';
+
+  @override
+  String get classTimetableReserveDropToRemove =>
+      'Drop to remove from the grid';
+
+  @override
+  String get classTimetableReserveShow => 'Show';
+
+  @override
+  String get classTimetableReserveHide => 'Hide';
+
+  @override
+  String classTimetableDropConflict(String name, String classroom) {
+    return '$name already teaches $classroom at this slot';
+  }
+
+  @override
+  String get classTimetableHoverHint =>
+      'Hover over a course to find it in the grid';
+
+  @override
+  String get classTimetableAllDomains => 'All domains';
+
+  @override
+  String get classTimetableNoDomain => 'No domain';
+
+  @override
+  String get classTimetableSessionTeacher => 'Teacher';
+
+  @override
+  String get classTimetableSessionRoom => 'Room';
+
+  @override
+  String get classTimetableSessionVolume => 'Weekly hours';
+
+  @override
+  String get classTimetableSessionClass => 'Class';
+
+  @override
+  String get classTimetableSessionWeek => 'All sessions of the week';
+
+  @override
+  String get classTimetableSessionClose => 'Close';
+
+  @override
+  String classTimetableSessionLength(int minutes) {
+    return '$minutes min';
+  }
+
+  @override
+  String classTimetableDayHours(int hours) {
+    return '$hours h';
+  }
 }

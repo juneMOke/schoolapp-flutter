@@ -1,3 +1,10 @@
+import 'package:school_app_flutter/features/schedule/presentation/timetable/widgets/class_timetable_consultation.dart';
+import 'package:flutter/gestures.dart';
+import 'package:dartz/dartz.dart';
+import 'package:school_app_flutter/core/components/cards/eteelo_dashed_border.dart';
+import 'package:school_app_flutter/features/schedule/data/timetable/timetable_editor.dart';
+import 'package:school_app_flutter/features/schedule/presentation/timetable/widgets/timetable_course_reserve.dart';
+import 'package:school_app_flutter/features/schedule/presentation/widgets/schedule_session_chip.dart';
 import 'package:bloc_test/bloc_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:school_app_flutter/features/schedule/data/timetable/class_calendar_reader.dart';
@@ -20,6 +27,7 @@ import 'package:school_app_flutter/features/schedule/domain/services/slot_overla
 import 'package:school_app_flutter/features/schedule/presentation/helpers/schedule_class_palette.dart';
 import 'package:school_app_flutter/features/schedule/presentation/timetable/class_week_builder.dart';
 import 'package:school_app_flutter/features/schedule/presentation/timetable/widgets/class_picker.dart';
+import 'package:school_app_flutter/features/schedule/presentation/timetable/widgets/class_timetable_distribution.dart';
 import 'package:school_app_flutter/features/schedule/presentation/timetable/widgets/class_timetable_summary.dart';
 import 'package:school_app_flutter/features/schedule/presentation/widgets/schedule_week_grid.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
@@ -267,6 +275,188 @@ void main() {
       ),
     );
     expect(find.textContaining('Jour férié'), findsOneWidget);
+  });
+
+  testWidgets('≥ 976 : un cours glissé de la réserve vers un créneau libre '
+      'est posé (I9)', (tester) async {
+    setTestWindow(tester, const Size(1440, 1100));
+    registerFallbackValue(<CellChange>[]);
+    final base = _view();
+    final view = ClassTimetableView(
+      classroom: base.classroom,
+      grid: base.grid,
+      slots: base.slots,
+      header: const ClassTimetableHeader(
+        id: 'h',
+        classroomId: 'c7a',
+        academicYearId: 'y',
+        revision: 1,
+        draftId: 'd',
+      ),
+      published: const [],
+      draft: const [],
+      programme: base.programme,
+      othersKnown: true,
+    );
+    final cubit = _Cubit();
+    when(() => cubit.state).thenReturn(ClassTimetableState(view: view));
+    when(
+      () => cubit.setCells(any()),
+    ).thenAnswer((_) async => const Right(unit));
+    await tester.pumpWidget(
+      _host(TimetableDraftSection(view: view, cubit: cubit, online: true)),
+    );
+    final source = find.descendant(
+      of: find.byType(TimetableCourseReserve),
+      matching: find.text('Mathématiques'),
+    );
+    final target = find.byType(EteeloDashedContainer).first;
+    final gesture = await tester.startGesture(tester.getCenter(source));
+    await gesture.moveBy(const Offset(20, 20));
+    await tester.pump();
+    await gesture.moveTo(tester.getCenter(target));
+    await tester.pump();
+    await gesture.up();
+    await tester.pumpAndSettle();
+    final captured =
+        verify(() => cubit.setCells(captureAny())).captured.single
+            as List<CellChange>;
+    expect(captured.single.course?.coursId, 'math');
+    expect(captured.single.day, Weekday.mon);
+  }, variant: TargetPlatformVariant.only(TargetPlatform.linux));
+
+  testWidgets(
+    '≥ 976 au doigt : le cours se glisse après un appui long (R14)',
+    (tester) async {
+      setTestWindow(tester, const Size(1440, 1100));
+      registerFallbackValue(<CellChange>[]);
+      final base = _view();
+      final view = ClassTimetableView(
+        classroom: base.classroom,
+        grid: base.grid,
+        slots: base.slots,
+        header: const ClassTimetableHeader(
+          id: 'h',
+          classroomId: 'c7a',
+          academicYearId: 'y',
+          revision: 1,
+          draftId: 'd',
+        ),
+        published: const [],
+        draft: const [],
+        programme: base.programme,
+        othersKnown: true,
+      );
+      final cubit = _Cubit();
+      when(() => cubit.state).thenReturn(ClassTimetableState(view: view));
+      when(
+        () => cubit.setCells(any()),
+      ).thenAnswer((_) async => const Right(unit));
+      await tester.pumpWidget(
+        _host(TimetableDraftSection(view: view, cubit: cubit, online: true)),
+      );
+      final source = find.descendant(
+        of: find.byType(TimetableCourseReserve),
+        matching: find.text('Mathématiques'),
+      );
+      final target = find.byType(EteeloDashedContainer).first;
+      final gesture = await tester.startGesture(tester.getCenter(source));
+      await tester.pump(kLongPressTimeout + const Duration(milliseconds: 50));
+      await gesture.moveBy(const Offset(20, 20));
+      await tester.pump();
+      await gesture.moveTo(tester.getCenter(target));
+      await tester.pump();
+      await gesture.up();
+      await tester.pumpAndSettle();
+      final captured =
+          verify(() => cubit.setCells(captureAny())).captured.single
+              as List<CellChange>;
+      expect(captured.single.course?.coursId, 'math');
+      expect(captured.single.day, Weekday.mon);
+    },
+    variant: TargetPlatformVariant.only(TargetPlatform.android),
+  );
+
+  testAtReferenceFormats('consultation complète : En cours, jour férié, '
+      'répartition et domaines', (tester, format) async {
+    final view = _view();
+    final cubit = _Cubit();
+    final days = DaysBetween.compute(
+      from: DateTime.utc(2026, 6, 29),
+      to: DateTime.utc(2026, 7, 5),
+      elements: [
+        CalendarElement(
+          id: 'f',
+          source: CalendarSource.national,
+          nature: CalendarNature.publicHoliday,
+          title: 'Fête de l’indépendance nationale',
+          startDate: DateTime.utc(2026, 6, 30),
+          endDate: DateTime.utc(2026, 6, 30),
+        ),
+      ],
+    );
+    final state = ClassTimetableState(
+      view: view,
+      week: DateTime.utc(2026, 6, 29),
+      calendar: ClassCalendarWeek(
+        days: days,
+        calendar: SchoolCalendar(
+          id: 'c',
+          yearLabel: '2025-2026',
+          status: CalendarStatus.published,
+          startDate: DateTime.utc(2025, 9, 1),
+          endDate: DateTime.utc(2026, 7, 3),
+          framework: FrameworkState.integrated,
+          revision: 1,
+        ),
+      ),
+    );
+    when(() => cubit.state).thenReturn(state);
+    when(() => cubit.thisWeek).thenReturn(DateTime.utc(2026, 11, 16));
+    await tester.pumpWidget(
+      _host(
+        ClassTimetableConsultation(
+          state: state,
+          cubit: cubit,
+          view: view,
+          onEdit: () {},
+        ),
+      ),
+    );
+    expect(find.text('Tous les domaines'), findsOneWidget);
+  });
+
+  testWidgets('un jour férié : en-tête nommé, séances barrées (A23)', (
+    tester,
+  ) async {
+    setTestWindow(tester, const Size(1280, 900));
+    final view = _view();
+    await tester.pumpWidget(
+      _host(
+        ScheduleWeekGrid(
+          timetable: ClassWeekBuilder.build(view, view.published),
+          palette: ScheduleClassPalette.byCourse(
+            ClassWeekBuilder.courseVisuals(view),
+          ),
+          today: null,
+          keepSaturday: true,
+          marks: const ScheduleGridMarks(
+            closedDays: {
+              Weekday.tue: ScheduleClosedDay(
+                header: 'Jour férié',
+                period: 'Indépendance',
+              ),
+            },
+          ),
+        ),
+      ),
+    );
+    expect(find.text('Jour férié'), findsOneWidget);
+    expect(find.text('Indépendance'), findsOneWidget);
+    final struck = tester
+        .widgetList<ScheduleSessionChip>(find.byType(ScheduleSessionChip))
+        .where((c) => c.struck);
+    expect(struck, hasLength(6), reason: 'les six séances du mardi');
   });
 }
 

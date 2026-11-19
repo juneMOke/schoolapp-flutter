@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:school_app_flutter/features/school_calendar/domain/services/days_between.dart';
-import 'package:school_app_flutter/features/schedule/presentation/timetable/widgets/dated_week_bar.dart';
+import 'package:school_app_flutter/features/schedule/presentation/timetable/draft_conflicts.dart';
+import 'package:school_app_flutter/features/schedule/presentation/timetable/widgets/class_timetable_consultation.dart';
 import 'package:school_app_flutter/core/components/buttons/secondary_button.dart';
 import 'package:school_app_flutter/features/schedule/presentation/timetable/copy_action.dart';
 import 'package:school_app_flutter/features/schedule/presentation/timetable/widgets/ended_gestures_notice.dart';
@@ -10,20 +10,11 @@ import 'package:school_app_flutter/core/widgets/app_snack_bar.dart';
 import 'package:school_app_flutter/core/components/buttons/primary_button.dart';
 import 'package:school_app_flutter/features/auth/presentation/widgets/permission_gate.dart';
 import 'package:school_app_flutter/core/auth/permissions.dart';
-import 'package:school_app_flutter/core/components/controls/segmented_tab_filter.dart';
 import 'package:school_app_flutter/core/components/skeletons/eteelo_list_skeleton.dart';
-import 'package:school_app_flutter/core/helpers/school_time.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_empty_result.dart';
-import 'package:school_app_flutter/features/schedule/domain/entities/weekday.dart';
-import 'package:school_app_flutter/features/schedule/domain/services/timetable_metrics.dart';
-import 'package:school_app_flutter/features/schedule/presentation/helpers/schedule_class_palette.dart';
 import 'package:school_app_flutter/features/schedule/presentation/timetable/bloc/class_timetable_cubit.dart';
-import 'package:school_app_flutter/features/schedule/presentation/timetable/class_week_builder.dart';
 import 'package:school_app_flutter/features/schedule/presentation/timetable/widgets/class_timetable_summary.dart';
-import 'package:school_app_flutter/features/schedule/presentation/widgets/schedule_day_view.dart';
-import 'package:school_app_flutter/features/schedule/presentation/widgets/schedule_view_mode.dart';
-import 'package:school_app_flutter/features/schedule/presentation/widgets/schedule_week_grid.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Le contenu d'une classe choisie : les états vides, la version publiée en
@@ -76,7 +67,11 @@ class ClassTimetableContent extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           ?ended,
-          ClassTimetableSummary(view: view, cells: view.draft),
+          ClassTimetableSummary(
+            view: view,
+            cells: view.draft,
+            conflicts: DraftConflicts.of(view).length,
+          ),
           const SizedBox(height: AppSpacing.md),
           TimetableDraftSection(
             view: view,
@@ -114,99 +109,12 @@ class ClassTimetableContent extends StatelessWidget {
               ),
       );
     }
-    // La semaine datée (R17) : les jours fermés (férié, vacances) n'ont pas
-    // de cours ; « aujourd'hui » ne se marque que sur la semaine en cours.
-    final calendar = state.calendar;
-    final closed = {
-      for (final d in calendar?.days ?? const <CalendarDay>[])
-        if (d.isClosed) ?CurrentSession.weekdayOf(d.date),
-    };
-    final week = ClassWeekBuilder.build(view, [
-      for (final c in view.published)
-        if (!closed.contains(c.day)) c,
-    ]);
-    final palette = ScheduleClassPalette.byCourse(
-      ClassWeekBuilder.courseVisuals(view),
-    );
-    final isThisWeek = state.week == null;
-    // R11 : « aujourd'hui » n'est mis en avant que cette semaine, et jamais
-    // un jour sans cours (férié, vacances).
-    final now = isThisWeek
-        ? CurrentSession.weekdayOf(SchoolTime.wallClock(DateTime.now()))
-        : null;
-    final today = closed.contains(now) ? null : now;
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final mode =
-            state.mode ??
-            (defaultScheduleViewMode(constraints.maxWidth) ==
-                    ScheduleViewMode.day
-                ? ClassTimetableMode.day
-                : ClassTimetableMode.week);
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            ?ended,
-            ClassTimetableSummary(view: view, cells: view.published),
-            const SizedBox(height: AppSpacing.md),
-            Wrap(
-              spacing: AppSpacing.md,
-              runSpacing: AppSpacing.sm,
-              crossAxisAlignment: WrapCrossAlignment.center,
-              children: [
-                if (start != null)
-                  PrimaryButton(
-                    label: l10n.classTimetableEdit,
-                    icon: Icons.edit_outlined,
-                    fullWidth: false,
-                    onPressed: start,
-                  ),
-                SegmentedTabFilter<ClassTimetableMode>(
-                  selected: mode,
-                  onSelected: cubit.setMode,
-                  options: [
-                    SegmentedTabOption(
-                      label: l10n.classTimetableWeek,
-                      value: ClassTimetableMode.week,
-                    ),
-                    SegmentedTabOption(
-                      label: l10n.classTimetableDay,
-                      value: ClassTimetableMode.day,
-                    ),
-                  ],
-                ),
-              ],
-            ),
-            const SizedBox(height: AppSpacing.sm),
-            DatedWeekBar(
-              monday: state.week ?? cubit.thisWeek,
-              isThisWeek: isThisWeek,
-              onPrevious: () => unawaited(cubit.shiftWeek(-1)),
-              onNext: () => unawaited(cubit.shiftWeek(1)),
-              onThisWeek: () => unawaited(cubit.setWeek(null)),
-            ),
-            if (calendar != null) PeriodBanners(week: calendar),
-            const SizedBox(height: AppSpacing.md),
-            if (mode == ClassTimetableMode.week)
-              ScheduleWeekGrid(
-                timetable: week,
-                palette: palette,
-                today: today,
-                keepSaturday: true,
-              )
-            else
-              ScheduleDayView(
-                timetable: week,
-                palette: palette,
-                today: today,
-                selectedDay: state.day ?? today ?? Weekday.mon,
-                onDaySelected: cubit.setDay,
-              ),
-            const SizedBox(height: AppSpacing.lg),
-            ClassTimetableDistribution(view: view, cells: view.published),
-          ],
-        );
-      },
+    return ClassTimetableConsultation(
+      state: state,
+      cubit: cubit,
+      view: view,
+      onEdit: start,
+      ended: ended,
     );
   }
 

@@ -37695,6 +37695,174 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Something went wrong. Try again in a moment.'**
   String get classTimetableErrorServer;
+
+  /// No description provided for @classTimetableNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Now'**
+  String get classTimetableNow;
+
+  /// No description provided for @classTimetableNowAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Now · {time}'**
+  String classTimetableNowAt(String time);
+
+  /// No description provided for @classTimetableNext.
+  ///
+  /// In en, this message translates to:
+  /// **'Next: {course} at {time}'**
+  String classTimetableNext(String course, String time);
+
+  /// No description provided for @classTimetableNoClassNow.
+  ///
+  /// In en, this message translates to:
+  /// **'No class right now'**
+  String get classTimetableNoClassNow;
+
+  /// No description provided for @classTimetableNoMoreToday.
+  ///
+  /// In en, this message translates to:
+  /// **'No more classes today'**
+  String get classTimetableNoMoreToday;
+
+  /// No description provided for @classTimetableDrop.
+  ///
+  /// In en, this message translates to:
+  /// **'Drop'**
+  String get classTimetableDrop;
+
+  /// No description provided for @classTimetableOutOfProgramme.
+  ///
+  /// In en, this message translates to:
+  /// **'Not in the programme'**
+  String get classTimetableOutOfProgramme;
+
+  /// No description provided for @classTimetableRejectedCell.
+  ///
+  /// In en, this message translates to:
+  /// **'Refused by the server'**
+  String get classTimetableRejectedCell;
+
+  /// No description provided for @classTimetablePublishOutOfProgramme.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 session not in the programme to clear before publishing.} other{{count} sessions not in the programme to clear before publishing.}}'**
+  String classTimetablePublishOutOfProgramme(int count);
+
+  /// No description provided for @classTimetableKpiConflictsOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'to resolve before publishing'**
+  String get classTimetableKpiConflictsOpen;
+
+  /// No description provided for @classTimetableKpiConflictsNone.
+  ///
+  /// In en, this message translates to:
+  /// **'no teacher booked twice'**
+  String get classTimetableKpiConflictsNone;
+
+  /// No description provided for @classTimetableHelpDrag.
+  ///
+  /// In en, this message translates to:
+  /// **'Drag a course from the reserve, or tap a slot to choose it.'**
+  String get classTimetableHelpDrag;
+
+  /// No description provided for @classTimetableReserveDragHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Drag to the grid · drop here to remove'**
+  String get classTimetableReserveDragHint;
+
+  /// No description provided for @classTimetableReserveDropToRemove.
+  ///
+  /// In en, this message translates to:
+  /// **'Drop to remove from the grid'**
+  String get classTimetableReserveDropToRemove;
+
+  /// No description provided for @classTimetableReserveShow.
+  ///
+  /// In en, this message translates to:
+  /// **'Show'**
+  String get classTimetableReserveShow;
+
+  /// No description provided for @classTimetableReserveHide.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide'**
+  String get classTimetableReserveHide;
+
+  /// No description provided for @classTimetableDropConflict.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} already teaches {classroom} at this slot'**
+  String classTimetableDropConflict(String name, String classroom);
+
+  /// No description provided for @classTimetableHoverHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Hover over a course to find it in the grid'**
+  String get classTimetableHoverHint;
+
+  /// No description provided for @classTimetableAllDomains.
+  ///
+  /// In en, this message translates to:
+  /// **'All domains'**
+  String get classTimetableAllDomains;
+
+  /// No description provided for @classTimetableNoDomain.
+  ///
+  /// In en, this message translates to:
+  /// **'No domain'**
+  String get classTimetableNoDomain;
+
+  /// No description provided for @classTimetableSessionTeacher.
+  ///
+  /// In en, this message translates to:
+  /// **'Teacher'**
+  String get classTimetableSessionTeacher;
+
+  /// No description provided for @classTimetableSessionRoom.
+  ///
+  /// In en, this message translates to:
+  /// **'Room'**
+  String get classTimetableSessionRoom;
+
+  /// No description provided for @classTimetableSessionVolume.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekly hours'**
+  String get classTimetableSessionVolume;
+
+  /// No description provided for @classTimetableSessionClass.
+  ///
+  /// In en, this message translates to:
+  /// **'Class'**
+  String get classTimetableSessionClass;
+
+  /// No description provided for @classTimetableSessionWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'All sessions of the week'**
+  String get classTimetableSessionWeek;
+
+  /// No description provided for @classTimetableSessionClose.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get classTimetableSessionClose;
+
+  /// No description provided for @classTimetableSessionLength.
+  ///
+  /// In en, this message translates to:
+  /// **'{minutes} min'**
+  String classTimetableSessionLength(int minutes);
+
+  /// No description provided for @classTimetableDayHours.
+  ///
+  /// In en, this message translates to:
+  /// **'{hours} h'**
+  String classTimetableDayHours(int hours);
 }
 
 class _AppLocalizationsDelegate

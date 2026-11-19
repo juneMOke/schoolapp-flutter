@@ -1498,6 +1498,25 @@ class AppDimensions {
   /// Un cours bloqué (conflit professeur) dans le choix d'un créneau (EDT O2).
   static const timetableBlockedOptionOpacity = 0.6;
 
+  /// Une séance estompée : autre cours que celui repéré, ou hors du filtre de
+  /// domaine (EDT §4.6 D, « les autres séances à 28 % »).
+  static const timetableDimmedOpacity = 0.28;
+
+  /// Le fantôme d'une séance pendant qu'on la glisse (EDT §4.6 D, 45 %).
+  static const timetableDragGhostOpacity = 0.45;
+
+  /// L'anneau d'une séance reliée (survol ou focus de son cours).
+  static const timetableLinkedRingWidth = 2.0;
+
+  /// Les hachures d'un jour sans cours (férié, vacances) : écart et trait.
+  static const timetableHatchGap = 8.0;
+  static const timetableHatchStroke = 1.0;
+
+  /// La réserve « Cours à placer » à côté de la grille (≥ 976, EDT A11), et
+  /// la hauteur d'une de ses lignes (cible ≥ 48 dp).
+  static const timetableReserveWidth = 280.0;
+  static const timetableReserveLineMinHeight = 48.0;
+
   /// Un élément passé, estompé dans les listes (§4.3).
   static const calendarPastOpacity = 0.6;
 

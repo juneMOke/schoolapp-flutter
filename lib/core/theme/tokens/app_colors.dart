@@ -852,6 +852,11 @@ class AppColors {
   /// Tranches à venir, hachurées.
   static const treasuryChartFutureFill = Color(0xFFFAF8F2);
   static const treasuryChartFutureHatch = Color(0xFFECE7DA);
+
+  /// Un jour sans cours dans l'emploi du temps (EDT §4.6 « jour fermé ») :
+  /// le fond et ses hachures.
+  static const timetableClosedDay = Color(0xFFF6F3EC);
+  static const timetableClosedHatch = Color(0xFFE4DDCD);
   static const treasuryChartFutureInk = Color(0xFFC9C3B0);
 
   /// Ombre du filtre sélectionné (terre cuite 70 %).

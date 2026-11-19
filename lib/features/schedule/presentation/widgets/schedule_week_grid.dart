@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/components/cards/eteelo_dashed_border.dart';
 import 'package:school_app_flutter/core/components/controls/eteelo_activatable.dart';
+import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
@@ -14,7 +15,10 @@ import 'package:school_app_flutter/features/schedule/domain/entities/weekly_time
 import 'package:school_app_flutter/features/schedule/presentation/helpers/schedule_class_palette.dart';
 import 'package:school_app_flutter/features/schedule/presentation/helpers/schedule_time_format.dart';
 import 'package:school_app_flutter/features/schedule/presentation/helpers/schedule_weekday_labels.dart';
+import 'package:school_app_flutter/features/schedule/presentation/widgets/schedule_grid_marks.dart';
 import 'package:school_app_flutter/features/schedule/presentation/widgets/schedule_session_chip.dart';
+
+export 'package:school_app_flutter/features/schedule/presentation/widgets/schedule_grid_marks.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 part 'schedule_week_grid_cell.dart';
@@ -45,8 +49,11 @@ class ScheduleWeekGrid extends StatelessWidget {
   /// dessine alors en tirets « + ».
   final void Function(Weekday day, TimeSlot slot)? onTapSlot;
 
-  /// Les cases à montrer en conflit (fond rouge pâle, bord d'erreur).
-  final Set<String> conflictSessionIds;
+  /// Jours fermés, alertes, séance en cours, cours repéré (EDT §4.6 D).
+  final ScheduleGridMarks marks;
+
+  /// Le glisser-déposer du brouillon (≥ 976 dp reçus, R14) ; `null` : aucun.
+  final ScheduleGridDrag? drag;
 
   const ScheduleWeekGrid({
     super.key,
@@ -56,7 +63,8 @@ class ScheduleWeekGrid extends StatelessWidget {
     this.onOpenCell,
     this.keepSaturday = false,
     this.onTapSlot,
-    this.conflictSessionIds = const {},
+    this.marks = ScheduleGridMarks.none,
+    this.drag,
   });
 
   @override
@@ -100,9 +108,10 @@ class ScheduleWeekGrid extends StatelessWidget {
                     columnWidth: columnWidth,
                     gutter: _gutter,
                     today: today,
+                    closedDays: marks.closedDays,
                     l10n: l10n,
                   ),
-                  for (final row in rows)
+                  for (final (index, row) in rows.indexed)
                     _isBreak(row)
                         ? _BreakBand(row: row, l10n: l10n)
                         : _SlotRow(
@@ -116,7 +125,10 @@ class ScheduleWeekGrid extends StatelessWidget {
                             l10n: l10n,
                             onOpenCell: onOpenCell,
                             onTapSlot: onTapSlot,
-                            conflictSessionIds: conflictSessionIds,
+                            marks: marks,
+                            drag: drag,
+                            firstRow:
+                                index == rows.indexWhere((r) => !_isBreak(r)),
                           ),
                 ],
               ),

@@ -7,6 +7,7 @@ class _GridHeader extends StatelessWidget {
   final double columnWidth;
   final double gutter;
   final Weekday? today;
+  final Map<Weekday, ScheduleClosedDay> closedDays;
   final AppLocalizations l10n;
 
   const _GridHeader({
@@ -14,6 +15,7 @@ class _GridHeader extends StatelessWidget {
     required this.columnWidth,
     required this.gutter,
     required this.today,
+    required this.closedDays,
     required this.l10n,
   });
 
@@ -56,7 +58,16 @@ class _GridHeader extends StatelessWidget {
                           fontWeight: FontWeight.w600,
                         ),
                       ),
-                      if (day == today) ...[
+                      if (closedDays[day] case final closed?)
+                        Text(
+                          closed.header,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: AppTypography.labelSmall.copyWith(
+                            color: AppColors.textSecondary,
+                          ),
+                        )
+                      else if (day == today) ...[
                         const SizedBox(height: 1),
                         Text(
                           l10n.scheduleToday,
@@ -88,7 +99,9 @@ class _SlotRow extends StatelessWidget {
   final AppLocalizations l10n;
   final void Function(TimetableCell cell)? onOpenCell;
   final void Function(Weekday day, TimeSlot slot)? onTapSlot;
-  final Set<String> conflictSessionIds;
+  final ScheduleGridMarks marks;
+  final ScheduleGridDrag? drag;
+  final bool firstRow;
 
   const _SlotRow({
     required this.row,
@@ -101,7 +114,9 @@ class _SlotRow extends StatelessWidget {
     required this.l10n,
     required this.onOpenCell,
     required this.onTapSlot,
-    required this.conflictSessionIds,
+    required this.marks,
+    required this.drag,
+    required this.firstRow,
   });
 
   @override
@@ -131,14 +146,15 @@ class _SlotRow extends StatelessWidget {
                   day: day,
                   timeSlot: row.timeSlot,
                   isToday: day == today,
+                  firstRow: firstRow,
                   minHeight: minHeight,
+                  width: columnWidth,
                   palette: palette,
                   l10n: l10n,
                   onOpenCell: onOpenCell,
                   onTapSlot: onTapSlot,
-                  conflict: conflictSessionIds.contains(
-                    row.cellFor(day)?.sessionId,
-                  ),
+                  marks: marks,
+                  drag: drag,
                 ),
               ),
           ],
