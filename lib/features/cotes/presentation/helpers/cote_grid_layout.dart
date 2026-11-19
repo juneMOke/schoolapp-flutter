@@ -2,6 +2,7 @@ import 'dart:ui';
 
 import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
+import 'package:school_app_flutter/core/theme/course_domain_tones.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/features/cotes/domain/entities/cote_classe.dart';
 import 'package:school_app_flutter/features/cotes/domain/entities/cote_scope.dart';
@@ -141,15 +142,11 @@ class CoteTone {
   Color get mark => ink.withValues(alpha: 0.55);
 }
 
-const List<CoteTone> _tones = [
-  CoteTone(AppColors.bleuArdoise, AppColors.bleuArdoiseSoft),
-  CoteTone(
-    AppColors.terreCuite,
-    AppColors.coteDomainTerreSoft,
-    strong: AppColors.terreCuiteDark,
-  ),
-  CoteTone(AppColors.vertSavane, AppColors.coteDomainVertSoft),
-  CoteTone(AppColors.coteDomainPrune, AppColors.coteDomainPruneSoft),
+/// La rotation des domaines est celle de [CourseDomainTones] : un domaine a la
+/// même couleur ici et dans l'emploi du temps (EDT Q12).
+final List<CoteTone> _tones = [
+  for (final tone in CourseDomainTones.palette)
+    CoteTone(tone.ink, tone.soft, strong: tone.strong),
 ];
 
 /// Une ligne de la grille.
