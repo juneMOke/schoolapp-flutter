@@ -34,14 +34,14 @@ void main() {
           endTime: '09:10:00',
         ),
       ];
-      final target = ClassTimetableView(
+      final target = const ClassTimetableView(
         classroom: _option,
         grid: null,
         slots: slots,
         header: null,
-        published: const [],
-        draft: const [],
-        programme: const [
+        published: [],
+        draft: [],
+        programme: [
           TimetableCourse(
             coursId: 'fr7c',
             classroomId: 'c7c',
@@ -52,11 +52,11 @@ void main() {
         ],
         othersKnown: true,
       );
-      final source = CopySource(
+      final source = const CopySource(
         classroom: _option,
         isDraft: false,
-        branchByCours: const {'fr7a': 'FR', 'lat7a': 'LAT'},
-        cells: const [
+        branchByCours: {'fr7a': 'FR', 'lat7a': 'LAT'},
+        cells: [
           ClassTimetableCell(
             id: 'a',
             classroomId: 'c7a',
