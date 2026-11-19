@@ -306,4 +306,27 @@ void main() {
       expect(filtered.emphasisOf(_gridCell('b', 'fr')), SessionEmphasis.normal);
     });
   });
+
+  test('l’ordre des teintes : domainOrder, puis l’id du domaine — comme la '
+      'pièce imprimée (EDT-10)', () {
+    TimetableCourse course(String id, String? domain, int? order) =>
+        TimetableCourse(
+          coursId: id,
+          classroomId: 'c',
+          branchId: id,
+          branchLabel: id,
+          domainId: domain,
+          domainOrder: order,
+        );
+    final view = _view(
+      programme: [
+        course('a', 'zeta', 1),
+        course('b', 'alpha', 1),
+        course('c', 'sans-ordre', null),
+        course('d', 'premier', 0),
+        course('e', null, 0),
+      ],
+    );
+    expect(view.domainOrder, ['premier', 'alpha', 'zeta', 'sans-ordre']);
+  });
 }

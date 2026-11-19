@@ -24638,6 +24638,10 @@ class AppLocalizationsFr extends AppLocalizations {
           'Le brouillon a été modifié depuis un autre poste : il a été rechargé.',
       'TIMETABLE_DRAFT_ENDED':
           'Ce brouillon a été publié ou abandonné entre-temps.',
+      'TIMETABLE_VERSION_CHANGED':
+          'L\'emploi du temps a été republié entre-temps : réessayez, la nouvelle version sera imprimée.',
+      'TIMETABLE_NOT_PUBLISHED':
+          'Cette classe n\'a pas encore d\'emploi du temps publié à imprimer.',
       'other': 'Le serveur a refusé ce geste.',
     });
     return '$_temp0';
@@ -24950,4 +24954,20 @@ class AppLocalizationsFr extends AppLocalizations {
   String journalClosedDay(String kind, String period) {
     return 'Pas de cours · $kind · $period. Une séance de rattrapage peut quand même être notée.';
   }
+
+  @override
+  String get classTimetablePrint => 'Imprimer';
+
+  @override
+  String get classTimetablePrintOffline =>
+      'L\'impression demande une connexion : la pièce est composée par le serveur.';
+
+  @override
+  String classTimetablePrintTitle(String name) {
+    return 'Emploi du temps · $name';
+  }
+
+  @override
+  String get classTimetablePrintFailed =>
+      'La pièce n\'a pas pu être obtenue. Réessayez dans un instant.';
 }

@@ -9,6 +9,7 @@ import 'package:school_app_flutter/features/schedule/data/timetable/timetable_da
 import 'package:school_app_flutter/features/schedule/data/timetable/timetable_draft_dao.dart';
 import 'package:school_app_flutter/features/schedule/data/timetable/timetable_draft_outbox_handler.dart';
 import 'package:school_app_flutter/features/schedule/data/timetable/timetable_editor.dart';
+import 'package:school_app_flutter/features/schedule/data/timetable/timetable_printer.dart';
 import 'package:school_app_flutter/features/schedule/presentation/timetable/bloc/class_timetable_cubit.dart';
 import 'package:school_app_flutter/features/schedule/data/timetable/timetable_pull_handlers.dart';
 import 'package:school_app_flutter/features/schedule/data/sync/time_grids_pull_handler.dart';
@@ -317,6 +318,10 @@ void registerAcademicsOffline(GetIt getIt) {
         ids: getIt<IdGenerator>(),
         schoolId: () => getIt<CurrentUserContext>().schoolId,
         engine: getIt<SyncEngine>(),
+      ),
+      printer: TimetablePrinter(
+        dio: getIt<Dio>(),
+        requiredAuth: getIt<Map<String, dynamic>>(),
       ),
       coordinator: getIt<PullCoordinator>(),
     ),

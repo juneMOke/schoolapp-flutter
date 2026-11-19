@@ -4,13 +4,14 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 export 'class_timetable_state.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/core/offline/pull_coordinator.dart';
-import 'package:school_app_flutter/features/schedule/data/sync/time_grids_pull_handler.dart';
 import 'package:school_app_flutter/features/schedule/data/timetable/class_calendar_reader.dart';
 import 'package:school_app_flutter/features/schedule/data/timetable/class_timetable_reader.dart';
 import 'package:school_app_flutter/features/schedule/data/timetable/timetable_editor.dart';
-import 'package:school_app_flutter/features/schedule/data/timetable/timetable_pull_handlers.dart';
+import 'package:school_app_flutter/features/schedule/data/timetable/timetable_printer.dart';
+import 'package:school_app_flutter/core/components/documents/printable_document.dart';
 import 'package:school_app_flutter/features/schedule/domain/entities/timetable/class_timetable_view.dart';
 import 'package:school_app_flutter/features/schedule/domain/entities/timetable/copy_source.dart';
+import 'package:school_app_flutter/features/schedule/presentation/timetable/bloc/class_timetable_resources.dart';
 import 'package:school_app_flutter/features/schedule/presentation/timetable/bloc/class_timetable_state.dart';
 import 'package:school_app_flutter/features/schedule/presentation/timetable/bloc/dated_week_cubit.dart';
 import 'package:school_app_flutter/features/schedule/presentation/timetable/timetable_copy_plan.dart';
@@ -25,6 +26,7 @@ class ClassTimetableCubit extends Cubit<ClassTimetableState>
   @override
   final ClassCalendarReader? calendarReader;
   final TimetableEditor? _editor;
+  final TimetablePrinter? _printer;
   final PullCoordinator? _coordinator;
   @override
   final DateTime Function() schoolToday;
@@ -33,25 +35,19 @@ class ClassTimetableCubit extends Cubit<ClassTimetableState>
     this._reader, {
     this.calendarReader,
     TimetableEditor? editor,
+    TimetablePrinter? printer,
     PullCoordinator? coordinator,
     DateTime Function()? schoolToday,
   }) : _editor = editor,
+       _printer = printer,
        _coordinator = coordinator,
        schoolToday = schoolToday ?? DateTime.now,
        super(const ClassTimetableState());
 
-  static const Set<String> resources = {
-    kScheduleTimeGridsResource,
-    'schedule_time_slots',
-    kScheduleProgrammesResource,
-    kScheduleTimetablesResource,
-    kScheduleTimetableCellsResource,
-  };
-
   Future<void> load({bool pull = false}) async {
     try {
-      final coordinator = _coordinator;
-      if (pull && coordinator != null) await coordinator.pullSubset(resources);
+      final coordinator = pull ? _coordinator : null;
+      await coordinator?.pullSubset(kClassTimetableResources);
       final options = await _reader.classOptions();
       if (isClosed) return;
       emit(
@@ -153,9 +149,8 @@ class ClassTimetableCubit extends Cubit<ClassTimetableState>
   Future<Either<Failure, Unit>> abandonDraft() =>
       _edit((editor, view) => editor.abandon(view));
 
-  /// En ligne : la révision lue ; ensuite les flux redescendent la version.
-  /// « Le brouillon a changé » (TIMETABLE_DRAFT_CHANGED) : l'en-tête est
-  /// re-tiré, la prochaine tentative part avec la bonne révision.
+  /// En ligne, avec la révision lue ; après, ou sur TIMETABLE_DRAFT_CHANGED,
+  /// les flux sont re-tirés (la tentative suivante a la bonne révision).
   Future<Either<Failure, Unit>> publish() async {
     final result = await _edit((editor, view) => editor.publish(view));
     final coordinator = _coordinator;
@@ -166,13 +161,42 @@ class ClassTimetableCubit extends Cubit<ClassTimetableState>
     );
     if (changed && coordinator != null && !isClosed) {
       try {
-        await coordinator.pullSubset(resources);
+        await coordinator.pullSubset(kClassTimetableResources);
       } catch (_) {
         // Le tirage suivant rattrapera ; la version locale reste lisible.
       }
       await _reloadView();
     }
     return result;
+  }
+
+  /// Imprimer la version publiée (R16) : la pièce du serveur. Une version
+  /// dépassée (TIMETABLE_VERSION_CHANGED) : l'en-tête est re-tiré, puis la
+  /// demande repart une fois, avec la version courante.
+  Future<Either<Failure, PrintableDocument>> printPublished() async {
+    final printer = _printer;
+    final view = state.view;
+    if (printer == null || view == null || state.busy) {
+      return const Left(StorageFailure());
+    }
+    emit(state.copyWith(busy: true));
+    try {
+      final first = await printer.print(view);
+      final stale = first.fold(
+        (f) =>
+            f is TimetableRefusalFailure &&
+            f.code == 'TIMETABLE_VERSION_CHANGED',
+        (_) => false,
+      );
+      final coordinator = _coordinator;
+      if (!stale || coordinator == null || isClosed) return first;
+      await coordinator.pullSubset(kClassTimetableResources);
+      await _reloadView();
+      final fresh = state.view;
+      return fresh == null ? first : printer.print(fresh);
+    } finally {
+      if (!isClosed) emit(state.copyWith(busy: false));
+    }
   }
 
   Future<Either<Failure, Unit>> _edit(

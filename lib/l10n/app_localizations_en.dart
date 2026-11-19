@@ -24464,6 +24464,10 @@ class AppLocalizationsEn extends AppLocalizations {
           'The draft was changed from another device: it was reloaded.',
       'TIMETABLE_DRAFT_ENDED':
           'This draft was published or discarded meanwhile.',
+      'TIMETABLE_VERSION_CHANGED':
+          'The timetable was republished meanwhile: try again to print the new version.',
+      'TIMETABLE_NOT_PUBLISHED':
+          'This class has no published timetable to print yet.',
       'other': 'The server refused this action.',
     });
     return '$_temp0';
@@ -24775,4 +24779,20 @@ class AppLocalizationsEn extends AppLocalizations {
   String journalClosedDay(String kind, String period) {
     return 'No classes · $kind · $period. A make-up session can still be recorded.';
   }
+
+  @override
+  String get classTimetablePrint => 'Print';
+
+  @override
+  String get classTimetablePrintOffline =>
+      'Printing needs a connection: the document is composed by the server.';
+
+  @override
+  String classTimetablePrintTitle(String name) {
+    return 'Timetable · $name';
+  }
+
+  @override
+  String get classTimetablePrintFailed =>
+      'The document could not be fetched. Try again in a moment.';
 }

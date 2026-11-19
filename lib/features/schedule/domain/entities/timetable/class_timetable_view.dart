@@ -90,18 +90,23 @@ class ClassTimetableView extends Equatable {
   bool get hasDraft => header?.draftId != null;
 
   /// Les domaines de la classe, dans l'ordre de la grille de notes (bulletin).
+  /// Les domaines dans l'ordre de leur teinte (D10) : `domainOrder`
+  /// croissant (sans ordre en dernier), puis l'identifiant du domaine — la
+  /// même règle que la pièce imprimée par le serveur (EDT-10), pour qu'un
+  /// domaine ait la même couleur à l'écran et sur le papier.
   List<String> get domainOrder {
-    final sorted = [...programme]
-      ..sort(
-        (a, b) =>
-            (a.domainOrder ?? 1 << 30).compareTo(b.domainOrder ?? 1 << 30),
-      );
-    final ids = <String>[];
-    for (final c in sorted) {
+    final orderOf = <String, int>{};
+    for (final c in programme) {
       final id = c.domainId;
-      if (id != null && !ids.contains(id)) ids.add(id);
+      if (id == null) continue;
+      final order = c.domainOrder ?? 1 << 30;
+      final known = orderOf[id];
+      if (known == null || order < known) orderOf[id] = order;
     }
-    return ids;
+    return orderOf.keys.toList()..sort((a, b) {
+      final byOrder = orderOf[a]!.compareTo(orderOf[b]!);
+      return byOrder != 0 ? byOrder : a.compareTo(b);
+    });
   }
 
   @override

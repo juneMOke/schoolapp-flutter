@@ -13339,7 +13339,7 @@
   "classTimetableSnackPublished": "Emploi du temps publié · visible des professeurs",
   "classTimetableSnackAbandoned": "Brouillon abandonné",
   "classTimetableSaveFailed": "Enregistrement impossible — Réessayer",
-  "classTimetableRefusal": "{code, select, TIMETABLE_DRAFT_UNKNOWN{Ce brouillon n'est pas encore connu du serveur : ses modifications partiront avec lui.} TIMETABLE_GESTURE_INVALID{Une modification était incomplète : elle n'a pas été enregistrée.} TIMETABLE_CONFLICT{Un autre emploi du temps occupe désormais un de vos professeurs : résolvez les conflits signalés avant de publier.} TIMETABLE_EMPTY{Placez au moins une séance avant de publier.} TIMETABLE_OUT_OF_PROGRAMME{Une séance porte un cours retiré du programme : libérez-la avant de publier.} TIMETABLE_DRAFT_CHANGED{Le brouillon a été modifié depuis un autre poste : il a été rechargé.} TIMETABLE_DRAFT_ENDED{Ce brouillon a été publié ou abandonné entre-temps.} other{Le serveur a refusé ce geste.}}",
+  "classTimetableRefusal": "{code, select, TIMETABLE_DRAFT_UNKNOWN{Ce brouillon n'est pas encore connu du serveur : ses modifications partiront avec lui.} TIMETABLE_GESTURE_INVALID{Une modification était incomplète : elle n'a pas été enregistrée.} TIMETABLE_CONFLICT{Un autre emploi du temps occupe désormais un de vos professeurs : résolvez les conflits signalés avant de publier.} TIMETABLE_EMPTY{Placez au moins une séance avant de publier.} TIMETABLE_OUT_OF_PROGRAMME{Une séance porte un cours retiré du programme : libérez-la avant de publier.} TIMETABLE_DRAFT_CHANGED{Le brouillon a été modifié depuis un autre poste : il a été rechargé.} TIMETABLE_DRAFT_ENDED{Ce brouillon a été publié ou abandonné entre-temps.} TIMETABLE_VERSION_CHANGED{L'emploi du temps a été republié entre-temps : réessayez, la nouvelle version sera imprimée.} TIMETABLE_NOT_PUBLISHED{Cette classe n'a pas encore d'emploi du temps publié à imprimer.} other{Le serveur a refusé ce geste.}}",
   "@classTimetableRefusal": {"placeholders": {"code": {"type": "String"}}},
   "syncAggregateTimetableDraft": "Brouillons d'emploi du temps",
   "classTimetableCopy": "Copier…",
@@ -13433,5 +13433,10 @@
   "classTimetableDayHours": "{hours} h",
   "@classTimetableDayHours": {"placeholders": {"hours": {"type": "int"}}},
   "journalClosedDay": "Pas de cours · {kind} · {period}. Une séance de rattrapage peut quand même être notée.",
-  "@journalClosedDay": {"placeholders": {"kind": {"type": "String"}, "period": {"type": "String"}}}
+  "@journalClosedDay": {"placeholders": {"kind": {"type": "String"}, "period": {"type": "String"}}},
+  "classTimetablePrint": "Imprimer",
+  "classTimetablePrintOffline": "L'impression demande une connexion : la pièce est composée par le serveur.",
+  "classTimetablePrintTitle": "Emploi du temps · {name}",
+  "@classTimetablePrintTitle": {"placeholders": {"name": {"type": "String"}}},
+  "classTimetablePrintFailed": "La pièce n'a pas pu être obtenue. Réessayez dans un instant."
 }

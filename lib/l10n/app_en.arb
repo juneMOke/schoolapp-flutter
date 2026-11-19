@@ -13169,7 +13169,7 @@
   "classTimetableSnackPublished": "Timetable published · visible to teachers",
   "classTimetableSnackAbandoned": "Draft discarded",
   "classTimetableSaveFailed": "Could not save — Retry",
-  "classTimetableRefusal": "{code, select, TIMETABLE_DRAFT_UNKNOWN{The server does not know this draft yet: its changes will follow it.} TIMETABLE_GESTURE_INVALID{A change was incomplete and was not saved.} TIMETABLE_CONFLICT{Another timetable now takes one of your teachers: resolve the flagged conflicts before publishing.} TIMETABLE_EMPTY{Place at least one session before publishing.} TIMETABLE_OUT_OF_PROGRAMME{A session holds a course removed from the programme: free it before publishing.} TIMETABLE_DRAFT_CHANGED{The draft was changed from another device: it was reloaded.} TIMETABLE_DRAFT_ENDED{This draft was published or discarded meanwhile.} other{The server refused this action.}}",
+  "classTimetableRefusal": "{code, select, TIMETABLE_DRAFT_UNKNOWN{The server does not know this draft yet: its changes will follow it.} TIMETABLE_GESTURE_INVALID{A change was incomplete and was not saved.} TIMETABLE_CONFLICT{Another timetable now takes one of your teachers: resolve the flagged conflicts before publishing.} TIMETABLE_EMPTY{Place at least one session before publishing.} TIMETABLE_OUT_OF_PROGRAMME{A session holds a course removed from the programme: free it before publishing.} TIMETABLE_DRAFT_CHANGED{The draft was changed from another device: it was reloaded.} TIMETABLE_DRAFT_ENDED{This draft was published or discarded meanwhile.} TIMETABLE_VERSION_CHANGED{The timetable was republished meanwhile: try again to print the new version.} TIMETABLE_NOT_PUBLISHED{This class has no published timetable to print yet.} other{The server refused this action.}}",
   "@classTimetableRefusal": {"placeholders": {"code": {"type": "String"}}},
   "syncAggregateTimetableDraft": "Timetable drafts",
   "classTimetableCopy": "Copy…",
@@ -13263,5 +13263,10 @@
   "classTimetableDayHours": "{hours} h",
   "@classTimetableDayHours": {"placeholders": {"hours": {"type": "int"}}},
   "journalClosedDay": "No classes · {kind} · {period}. A make-up session can still be recorded.",
-  "@journalClosedDay": {"placeholders": {"kind": {"type": "String"}, "period": {"type": "String"}}}
+  "@journalClosedDay": {"placeholders": {"kind": {"type": "String"}, "period": {"type": "String"}}},
+  "classTimetablePrint": "Print",
+  "classTimetablePrintOffline": "Printing needs a connection: the document is composed by the server.",
+  "classTimetablePrintTitle": "Timetable · {name}",
+  "@classTimetablePrintTitle": {"placeholders": {"name": {"type": "String"}}},
+  "classTimetablePrintFailed": "The document could not be fetched. Try again in a moment."
 }

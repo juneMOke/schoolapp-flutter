@@ -115,6 +115,7 @@ class ClassTimetableContent extends StatelessWidget {
       view: view,
       onEdit: start,
       ended: ended,
+      online: online,
     );
   }
 

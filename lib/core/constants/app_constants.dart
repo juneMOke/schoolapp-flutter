@@ -1816,6 +1816,17 @@ class AppConstants {
   static String timetablePublishEndpoint(String classroomId, String draftId) =>
       '/api/v1/schedule/classrooms/$classroomId/timetable/draft/$draftId/publish';
 
+  /// **GET** `?version=` = la pièce `ET` de la version publiée (EDT-10, PR back
+  /// à venir) : A4 paysage, numérotée et horodatée, non archivée — composée
+  /// par l'éditique du serveur, jamais sur l'appareil. Sous `schedule.read`.
+  /// 422 `TIMETABLE_VERSION_CHANGED` (version dépassée : re-tirer l'en-tête),
+  /// 422 `TIMETABLE_NOT_PUBLISHED`.
+  static String timetablePdfEndpoint(String classroomId) =>
+      '/api/v1/schedule/classrooms/$classroomId/timetable.pdf';
+
+  /// Le rendu d'une page A4 : le délai de guichet n'y suffirait pas toujours.
+  static const Duration timetablePdfTimeout = Duration(seconds: 60);
+
   // ── Calendrier scolaire (contrat figé avec le back le 2026-11-19) ──
   /// **GET** (keyset) = les cadres nationaux publiés des années de l'école,
   /// une ligne par cadre (flux `calendar.framework`, `calendar.read`).

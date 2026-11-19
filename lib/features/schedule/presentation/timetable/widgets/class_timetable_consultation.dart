@@ -1,8 +1,10 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:school_app_flutter/core/components/buttons/primary_button.dart';
-import 'package:school_app_flutter/core/components/controls/segmented_tab_filter.dart';
+import 'package:school_app_flutter/features/schedule/presentation/timetable/widgets/consultation_actions.dart';
+import 'package:school_app_flutter/features/schedule/presentation/timetable/print_action.dart';
+import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
+import 'package:school_app_flutter/core/components/keyboard/page_action_shortcut.dart';
 import 'package:school_app_flutter/core/components/dialogs/eteelo_adaptive_sheet.dart';
 import 'package:school_app_flutter/core/helpers/school_time.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
@@ -40,6 +42,9 @@ class ClassTimetableConsultation extends StatefulWidget {
   /// L'avis des gestes faits sur un brouillon fini (R18), s'il y en a.
   final Widget? ended;
 
+  /// « Imprimer » demande le réseau : la pièce vient du serveur (R16).
+  final bool online;
+
   const ClassTimetableConsultation({
     super.key,
     required this.state,
@@ -47,6 +52,7 @@ class ClassTimetableConsultation extends StatefulWidget {
     required this.view,
     this.onEdit,
     this.ended,
+    this.online = true,
   });
 
   @override
@@ -99,6 +105,12 @@ class _ClassTimetableConsultationState
       ClassWeekBuilder.courseVisuals(view),
     );
     void open(TimetableCell cell) => unawaited(_open(context, cell, monday));
+    // R16 : seule une classe publiée s'imprime ; hors ligne, le bouton reste
+    // visible et inactif, avec sa raison.
+    final published = view.header?.isPublished ?? false;
+    final print = published && widget.online && !state.busy
+        ? () => unawaited(printTimetable(context, cubit))
+        : null;
     return LayoutBuilder(
       builder: (context, constraints) {
         final mode =
@@ -107,79 +119,69 @@ class _ClassTimetableConsultationState
                     ScheduleViewMode.day
                 ? ClassTimetableMode.day
                 : ClassTimetableMode.week);
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            ?widget.ended,
-            ClassTimetableSummary(view: view, cells: view.published, now: now),
-            const SizedBox(height: AppSpacing.md),
-            Wrap(
-              spacing: AppSpacing.md,
-              runSpacing: AppSpacing.sm,
-              crossAxisAlignment: WrapCrossAlignment.center,
-              children: [
-                if (widget.onEdit case final edit?)
-                  PrimaryButton(
-                    label: l10n.classTimetableEdit,
-                    icon: Icons.edit_outlined,
-                    fullWidth: false,
-                    onPressed: edit,
-                  ),
-                SegmentedTabFilter<ClassTimetableMode>(
-                  selected: mode,
-                  onSelected: cubit.setMode,
-                  options: [
-                    SegmentedTabOption(
-                      label: l10n.classTimetableWeek,
-                      value: ClassTimetableMode.week,
-                    ),
-                    SegmentedTabOption(
-                      label: l10n.classTimetableDay,
-                      value: ClassTimetableMode.day,
-                    ),
-                  ],
-                ),
-              ],
-            ),
-            const SizedBox(height: AppSpacing.sm),
-            DatedWeekBar(
-              monday: monday,
-              isThisWeek: isThisWeek,
-              onPrevious: () => unawaited(cubit.shiftWeek(-1)),
-              onNext: () => unawaited(cubit.shiftWeek(1)),
-              onThisWeek: () => unawaited(cubit.setWeek(null)),
-            ),
-            if (calendar != null) PeriodBanners(week: calendar),
-            const SizedBox(height: AppSpacing.md),
-            if (mode == ClassTimetableMode.week)
-              ScheduleWeekGrid(
-                timetable: week,
-                palette: palette,
-                today: today,
-                keepSaturday: true,
-                marks: marks,
-                onOpenCell: open,
-              )
-            else
-              ScheduleDayView(
-                timetable: week,
-                palette: palette,
-                today: today,
-                selectedDay: state.day ?? weekday ?? Weekday.mon,
-                onDaySelected: cubit.setDay,
-                marks: marks,
-                onOpenCell: open,
+        final narrow = constraints.maxWidth < AppBreakpoints.dataTableCardsMax;
+        return PageActionShortcut(
+          action: PageAction.print,
+          onInvoke: print,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              ?widget.ended,
+              ClassTimetableSummary(
+                view: view,
+                cells: view.published,
+                now: now,
               ),
-            const SizedBox(height: AppSpacing.lg),
-            ClassTimetableDistribution(
-              view: view,
-              cells: view.published,
-              linkedCoursId: _linked,
-              onHoverCours: _hover,
-              domainFilter: _domain,
-              onDomainFilter: (d) => setState(() => _domain = d),
-            ),
-          ],
+              const SizedBox(height: AppSpacing.md),
+              ConsultationActions(
+                mode: mode,
+                onMode: cubit.setMode,
+                published: published,
+                online: widget.online,
+                narrow: narrow,
+                onPrint: print,
+                onEdit: widget.onEdit,
+              ),
+              const SizedBox(height: AppSpacing.sm),
+              DatedWeekBar(
+                monday: monday,
+                isThisWeek: isThisWeek,
+                onPrevious: () => unawaited(cubit.shiftWeek(-1)),
+                onNext: () => unawaited(cubit.shiftWeek(1)),
+                onThisWeek: () => unawaited(cubit.setWeek(null)),
+              ),
+              if (calendar != null) PeriodBanners(week: calendar),
+              const SizedBox(height: AppSpacing.md),
+              if (mode == ClassTimetableMode.week)
+                ScheduleWeekGrid(
+                  timetable: week,
+                  palette: palette,
+                  today: today,
+                  keepSaturday: true,
+                  marks: marks,
+                  onOpenCell: open,
+                )
+              else
+                ScheduleDayView(
+                  timetable: week,
+                  palette: palette,
+                  today: today,
+                  selectedDay: state.day ?? weekday ?? Weekday.mon,
+                  onDaySelected: cubit.setDay,
+                  marks: marks,
+                  onOpenCell: open,
+                ),
+              const SizedBox(height: AppSpacing.lg),
+              ClassTimetableDistribution(
+                view: view,
+                cells: view.published,
+                linkedCoursId: _linked,
+                onHoverCours: _hover,
+                domainFilter: _domain,
+                onDomainFilter: (d) => setState(() => _domain = d),
+              ),
+            ],
+          ),
         );
       },
     );

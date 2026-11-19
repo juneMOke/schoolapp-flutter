@@ -37441,7 +37441,7 @@ abstract class AppLocalizations {
   /// No description provided for @classTimetableRefusal.
   ///
   /// In en, this message translates to:
-  /// **'{code, select, TIMETABLE_DRAFT_UNKNOWN{The server does not know this draft yet: its changes will follow it.} TIMETABLE_GESTURE_INVALID{A change was incomplete and was not saved.} TIMETABLE_CONFLICT{Another timetable now takes one of your teachers: resolve the flagged conflicts before publishing.} TIMETABLE_EMPTY{Place at least one session before publishing.} TIMETABLE_OUT_OF_PROGRAMME{A session holds a course removed from the programme: free it before publishing.} TIMETABLE_DRAFT_CHANGED{The draft was changed from another device: it was reloaded.} TIMETABLE_DRAFT_ENDED{This draft was published or discarded meanwhile.} other{The server refused this action.}}'**
+  /// **'{code, select, TIMETABLE_DRAFT_UNKNOWN{The server does not know this draft yet: its changes will follow it.} TIMETABLE_GESTURE_INVALID{A change was incomplete and was not saved.} TIMETABLE_CONFLICT{Another timetable now takes one of your teachers: resolve the flagged conflicts before publishing.} TIMETABLE_EMPTY{Place at least one session before publishing.} TIMETABLE_OUT_OF_PROGRAMME{A session holds a course removed from the programme: free it before publishing.} TIMETABLE_DRAFT_CHANGED{The draft was changed from another device: it was reloaded.} TIMETABLE_DRAFT_ENDED{This draft was published or discarded meanwhile.} TIMETABLE_VERSION_CHANGED{The timetable was republished meanwhile: try again to print the new version.} TIMETABLE_NOT_PUBLISHED{This class has no published timetable to print yet.} other{The server refused this action.}}'**
   String classTimetableRefusal(String code);
 
   /// No description provided for @syncAggregateTimetableDraft.
@@ -37869,6 +37869,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No classes · {kind} · {period}. A make-up session can still be recorded.'**
   String journalClosedDay(String kind, String period);
+
+  /// No description provided for @classTimetablePrint.
+  ///
+  /// In en, this message translates to:
+  /// **'Print'**
+  String get classTimetablePrint;
+
+  /// No description provided for @classTimetablePrintOffline.
+  ///
+  /// In en, this message translates to:
+  /// **'Printing needs a connection: the document is composed by the server.'**
+  String get classTimetablePrintOffline;
+
+  /// No description provided for @classTimetablePrintTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Timetable · {name}'**
+  String classTimetablePrintTitle(String name);
+
+  /// No description provided for @classTimetablePrintFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The document could not be fetched. Try again in a moment.'**
+  String get classTimetablePrintFailed;
 }
 
 class _AppLocalizationsDelegate
