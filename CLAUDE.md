@@ -20,6 +20,10 @@ flutter analyze
 flutter test
 flutter run
 
+# Design system de Claude Design (jetons, seuils, composants) — après une
+# évolution de lib/core/theme, lib/core/constants ou des composants partagés
+dart run scripts/design_system/export_design_system.dart --out <dossier> --merge <tokens.json publié>
+
 # Première fois après clone — activer les hooks locaux Git
 bash scripts/install_git_hooks.sh
 ```
@@ -80,6 +84,8 @@ Si `build_runner` casse : `flutter clean` puis relancer (cf. AGENTS.md §"When B
 | Pour... | Aller voir |
 |---|---|
 | Patterns détaillés (BLoC, Retrofit, Model, FeatureScope) | `AGENTS.md` |
+| Gabarit de spec front (besoin, écrans, états — sans BLoC) | `SPEC_TEMPLATE.md` |
+| Demander une spec à Claude Design (prompts types) | `SPEC_PROMPT_DESIGN.md` |
 | Templates de nouvelle feature | `FEATURE_TEMPLATE.md`, `QUICK_TEMPLATE.md`, `USAGE_GUIDE.md` |
 | Index général de la doc | `INDEX.md` |
 | Registrations DI | `lib/core/di/injection.dart` |
