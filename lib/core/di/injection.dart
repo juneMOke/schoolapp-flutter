@@ -81,12 +81,9 @@ import 'package:school_app_flutter/features/schedule/data/datasources/schedule_r
 import 'package:school_app_flutter/features/schedule/data/repositories/schedule_repository_impl.dart';
 import 'package:school_app_flutter/features/schedule/data/repositories/offline/schedule_offline_repository_impl.dart';
 import 'package:school_app_flutter/features/schedule/domain/repositories/schedule_repository.dart';
-import 'package:school_app_flutter/features/schedule/domain/usecases/create_session_usecase.dart';
 import 'package:school_app_flutter/features/schedule/domain/usecases/create_time_slot_usecase.dart';
-import 'package:school_app_flutter/features/schedule/domain/usecases/delete_session_usecase.dart';
 import 'package:school_app_flutter/features/schedule/domain/usecases/get_classroom_grid_usecase.dart';
 import 'package:school_app_flutter/features/schedule/domain/usecases/get_my_timetable_usecase.dart';
-import 'package:school_app_flutter/features/schedule/presentation/bloc/schedule_edit_bloc.dart';
 import 'package:school_app_flutter/features/schedule/presentation/bloc/timetable_bloc.dart';
 import 'package:school_app_flutter/features/academic_year/data/datasources/enrollment_academic_info_remote_data_source.dart';
 import 'package:school_app_flutter/features/academic_year/data/repositories/academic_year_context_repository_impl.dart';
@@ -1424,26 +1421,10 @@ Future<void> configureDependencies({
     () => CreateTimeSlotUseCase(getIt<ScheduleRepository>()),
   );
 
-  getIt.registerFactory<CreateSessionUseCase>(
-    () => CreateSessionUseCase(getIt<ScheduleRepository>()),
-  );
-
-  getIt.registerFactory<DeleteSessionUseCase>(
-    () => DeleteSessionUseCase(getIt<ScheduleRepository>()),
-  );
-
   getIt.registerFactory<TimetableBloc>(
     () => TimetableBloc(
       getMyTimetable: getIt<GetMyTimetableUseCase>(),
       getClassroomGrid: getIt<GetClassroomGridUseCase>(),
-    ),
-  );
-
-  getIt.registerFactory<ScheduleEditBloc>(
-    () => ScheduleEditBloc(
-      createTimeSlot: getIt<CreateTimeSlotUseCase>(),
-      createSession: getIt<CreateSessionUseCase>(),
-      deleteSession: getIt<DeleteSessionUseCase>(),
     ),
   );
 

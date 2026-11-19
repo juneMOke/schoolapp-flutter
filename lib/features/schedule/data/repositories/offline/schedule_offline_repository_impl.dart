@@ -3,9 +3,7 @@ import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/core/offline/current_user_context.dart';
 import 'package:school_app_flutter/features/schedule/data/datasources/offline/schedule_ref_local_data_source.dart';
 import 'package:school_app_flutter/features/schedule/data/models/offline/ref_recurring_session_row.dart';
-import 'package:school_app_flutter/features/schedule/domain/entities/create_session_request.dart';
 import 'package:school_app_flutter/features/schedule/domain/entities/create_time_slot_request.dart';
-import 'package:school_app_flutter/features/schedule/domain/entities/session.dart';
 import 'package:school_app_flutter/features/schedule/domain/entities/time_slot.dart';
 import 'package:school_app_flutter/features/schedule/domain/entities/timetable_cell.dart';
 import 'package:school_app_flutter/features/schedule/domain/entities/timetable_row.dart';
@@ -142,13 +140,4 @@ class ScheduleOfflineRepositoryImpl implements ScheduleRepository {
   Future<Either<Failure, TimeSlot>> createTimeSlot(
     CreateTimeSlotRequest request,
   ) => _online.createTimeSlot(request);
-
-  @override
-  Future<Either<Failure, Session>> createSession(
-    CreateSessionRequest request,
-  ) => _online.createSession(request);
-
-  @override
-  Future<Either<Failure, Unit>> deleteSession(String sessionId) =>
-      _online.deleteSession(sessionId);
 }
