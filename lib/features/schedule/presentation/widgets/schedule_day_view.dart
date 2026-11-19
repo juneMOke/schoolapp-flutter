@@ -3,6 +3,7 @@ import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
+import 'package:school_app_flutter/features/schedule/domain/entities/time_slot.dart';
 import 'package:school_app_flutter/features/schedule/domain/entities/timetable_row.dart';
 import 'package:school_app_flutter/features/schedule/domain/entities/timetable_cell.dart';
 import 'package:school_app_flutter/features/schedule/domain/entities/weekday.dart';
@@ -67,7 +68,7 @@ class ScheduleDayView extends StatelessWidget {
     final rows = timetable.rows
         .where((row) => row.cellFor(day) != null)
         .toList();
-    rows.sort((a, b) => a.timeSlot.order.compareTo(b.timeSlot.order));
+    rows.sort((a, b) => TimeSlot.compareByTime(a.timeSlot, b.timeSlot));
     return rows;
   }
 }
@@ -111,7 +112,7 @@ class _DayList extends StatelessWidget {
     return ScheduleDayRow(
       slot: row.timeSlot,
       cell: cell,
-      visual: palette.visualForClassroom(cell.classroomId),
+      visual: palette.visualForCell(cell),
       onTap: onOpenCell == null ? null : () => onOpenCell!(cell),
     );
   }

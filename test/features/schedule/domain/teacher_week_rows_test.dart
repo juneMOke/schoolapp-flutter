@@ -67,4 +67,20 @@ void main() {
     expect(TimeGrid.forCycle('PRI', all)!.id, 'g2');
     expect(TimeGrid.forCycle('SEC', all)!.id, 'g1');
   });
+
+  test('la grille et la vue Jour rangent par heure, pas par numéro', () {
+    const rows = [
+      TimeSlot(id: 'b', order: 1, startTime: '07:45:00', endTime: '08:35:00'),
+      TimeSlot(
+        id: 'r',
+        order: -1,
+        startTime: '09:10:00',
+        endTime: '09:30:00',
+        isBreak: true,
+      ),
+      TimeSlot(id: 'a', order: 2, startTime: '07:30:00', endTime: '08:20:00'),
+    ];
+    final sorted = [...rows]..sort(TimeSlot.compareByTime);
+    expect(sorted.map((s) => s.id), ['a', 'b', 'r']);
+  });
 }

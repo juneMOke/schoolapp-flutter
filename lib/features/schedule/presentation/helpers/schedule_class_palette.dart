@@ -1,4 +1,5 @@
 import 'package:school_app_flutter/features/academics/presentation/helpers/academics_class_visual.dart';
+import 'package:school_app_flutter/features/schedule/domain/entities/timetable_cell.dart';
 import 'package:school_app_flutter/features/schedule/domain/entities/weekly_timetable.dart';
 
 /// Entrée de légende : une classe présente dans la semaine, associée à sa
@@ -29,7 +30,32 @@ class ScheduleClassPalette {
   /// classroomId → libellé (pour la légende), dans l'ordre d'apparition.
   final Map<String, String> _labelById;
 
-  const ScheduleClassPalette._(this._rankById, this._labelById);
+  /// La teinte par cours (emploi du temps d'une classe, EDT-D10) : chaque
+  /// cours prend la couleur de son **domaine** ; `null` = teinte par classe.
+  final Map<String, AcademicsClassVisual>? _byCours;
+
+  const ScheduleClassPalette._(
+    this._rankById,
+    this._labelById, [
+    this._byCours,
+  ]);
+
+  /// Une classe : ses séances se colorent par domaine de cours, avec la
+  /// grammaire partagée `CourseDomainTones` (Q12).
+  factory ScheduleClassPalette.byCourse(
+    Map<String, AcademicsClassVisual> byCours,
+  ) => ScheduleClassPalette._(const {}, const {}, byCours);
+
+  /// La teinte d'une case : celle de son cours en mode domaine, sinon celle de
+  /// sa classe.
+  AcademicsClassVisual visualForCell(TimetableCell cell) {
+    final byCours = _byCours;
+    final coursId = cell.coursId;
+    if (byCours != null) {
+      return byCours[coursId] ?? AcademicsClassVisual.forIndex(0);
+    }
+    return visualForClassroom(cell.classroomId);
+  }
 
   /// Construit la palette depuis la matrice chargée, en parcourant les cases
   /// occupées ligne par ligne, jour par jour (ordre stable et reproductible).

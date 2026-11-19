@@ -44,10 +44,10 @@ class ScheduleWeekGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    // Lignes triées par créneau croissant : l'entité documente cet invariant
-    // mais ne le garantit pas (comme la vue Jour, on l'applique côté rendu).
+    // Lignes triées par heure (EDT-1) : l'entité documente cet invariant mais
+    // ne le garantit pas (comme la vue Jour, on l'applique côté rendu).
     final rows = [...timetable.rows]
-      ..sort((a, b) => a.timeSlot.order.compareTo(b.timeSlot.order));
+      ..sort((a, b) => TimeSlot.compareByTime(a.timeSlot, b.timeSlot));
 
     return LayoutBuilder(
       builder: (context, constraints) {

@@ -177,7 +177,7 @@ class _ScheduleViewState extends State<ScheduleView> {
         coursId: cell.coursId,
         brancheNom: cell.subjectLabel,
         classroomName: cell.classroomLabel,
-        visual: palette.visualForClassroom(cell.classroomId),
+        visual: palette.visualForCell(cell),
       ),
     );
   }

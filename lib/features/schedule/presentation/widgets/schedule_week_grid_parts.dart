@@ -208,7 +208,7 @@ class _Cell extends StatelessWidget {
           ? null
           : ScheduleSessionChip(
               cell: current,
-              visual: palette.visualForClassroom(current.classroomId),
+              visual: palette.visualForCell(current),
               // Libellé lecteur d'écran : le jour n'est porté que par la colonne
               // (invisible au balayage), on le compose donc explicitement.
               semanticsLabel:
