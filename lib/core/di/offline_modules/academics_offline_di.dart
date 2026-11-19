@@ -1,4 +1,7 @@
+import 'package:sqflite_common/sqlite_api.dart';
+import 'package:school_app_flutter/core/offline/keyset_pull_runner.dart';
 import 'package:school_app_flutter/core/di/offline_modules/evaluation_depot_di.dart';
+import 'package:school_app_flutter/features/schedule/data/sync/time_grids_pull_handler.dart';
 import 'package:school_app_flutter/features/enrollment/offline/data/local/dao/enrollment_referential_dao.dart';
 import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
@@ -165,6 +168,7 @@ void registerAcademicsOffline(GetIt getIt) {
       online: getIt<ScheduleRepositoryImpl>(),
       refLocalDataSource: getIt<ScheduleRefLocalDataSource>(),
       currentUser: getIt<CurrentUserContext>(),
+      gridDao: TimeGridDao(getIt<Database>()),
     ),
   );
   // Impl offline-first de CourseRepository (getMyCourses local ; détail/création
@@ -265,6 +269,16 @@ void registerAcademicsOffline(GetIt getIt) {
   // `test/core/di/offline_pull_registration_order_test.dart`.
   getIt<PullCoordinator>().registerHandler(
     GradesReferentialPullHandler(getIt<GradesReferentialPullRepositoryImpl>()),
+  );
+  // Les grilles avant les créneaux qui les désignent.
+  getIt<PullCoordinator>().registerHandler(
+    TimeGridsPullHandler(
+      dio: getIt<Dio>(),
+      runner: KeysetPullRunner(getIt<SyncMetaDao>()),
+      dao: TimeGridDao(getIt<Database>()),
+      currentUser: getIt<CurrentUserContext>(),
+      requiredAuth: getIt<Map<String, dynamic>>(),
+    ),
   );
   getIt<PullCoordinator>().registerHandler(
     TimeSlotsPullHandler(getIt<SchedulePullRepositoryImpl>()),

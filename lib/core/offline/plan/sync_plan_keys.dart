@@ -125,6 +125,10 @@ abstract final class SyncPlanKeys {
   static const String disciplineCases = 'discipline.cases';
   static const String scheduleTimeSlots = 'schedule.time-slots';
   static const String scheduleSessions = 'schedule.sessions';
+
+  /// Les grilles horaires de l'école (une par cycle au plus), récréation
+  /// comprise, accordées par `schedule.read` (EDT-1).
+  static const String scheduleTimeGrids = 'schedule.time-grids';
   static const String academicsGradesReferential =
       'academics.grades-referential';
   static const String academicsCours = 'academics.cours';
@@ -244,6 +248,7 @@ const Map<String, List<String>> kSyncPlanAliases = {
   SyncPlanKeys.disciplineCases: ['disciplinary_cases'],
   SyncPlanKeys.scheduleTimeSlots: ['schedule_time_slots'],
   SyncPlanKeys.scheduleSessions: ['schedule_sessions'],
+  SyncPlanKeys.scheduleTimeGrids: ['schedule_time_grids'],
   SyncPlanKeys.academicsGradesReferential: ['academics_grades_referential'],
   SyncPlanKeys.academicsCours: ['academics_cours'],
   SyncPlanKeys.academicsEvaluations: ['academics_evaluations'],
@@ -392,6 +397,8 @@ const Set<String> _kCursorKeyPrefixes = {
   'enrollment_suspensions',
   // Les clôtures de caisse, cadrées par l'école du jeton.
   'treasury_closures',
+  // Les grilles horaires, cadrées par l'école du jeton.
+  'schedule_time_grids',
   // Le calendrier scolaire, cadré par l'école du jeton.
   'calendar_framework',
   'calendar_calendars',

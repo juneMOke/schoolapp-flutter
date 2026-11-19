@@ -183,6 +183,40 @@ Future<void> migrateTenantDatabase(
     // tirage suivant, sans re-tirage forcé.
     await _addColumnIfTable(db, 'ref_school_levels', 'catalog_level_code');
   }
+  if (upTo(84)) {
+    // Les grilles par cycle (EDT-1) et les minutes des séances (EDT-3).
+    await _createTables(db, [refTimeGridsTable]);
+    await _addColumnIfTable(db, 'ref_time_slots', 'time_grid_id');
+    await _addColumnIfTable(
+      db,
+      'ref_recurring_sessions',
+      'start_minute',
+      type: 'INTEGER',
+    );
+    await _addColumnIfTable(
+      db,
+      'ref_recurring_sessions',
+      'end_minute',
+      type: 'INTEGER',
+    );
+    await _repullScheduleReference(db);
+  }
+}
+
+/// v84 — les créneaux et les séances déjà connus n'ont ni grille ni minutes :
+/// leurs curseurs et leurs drapeaux d'amorçage (`…_bootstrap`, scopés ou non)
+/// repartent de zéro ; le re-tirage les patche ligne à ligne.
+Future<void> _repullScheduleReference(DatabaseExecutor db) async {
+  final hasMeta = await db.rawQuery(
+    "SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'sync_meta'",
+  );
+  if (hasMeta.isEmpty) return;
+  for (final resource in ['schedule_time_slots', 'schedule_sessions']) {
+    await db.execute('DELETE FROM sync_meta WHERE substr(resource, 1, ?) = ?', [
+      resource.length,
+      resource,
+    ]);
+  }
 }
 
 /// v82 — `payment_allocations.level_correction_id` : la marque d'une ligne de

@@ -15,14 +15,19 @@ class TimeSlot extends Equatable {
   /// Libellé optionnel du créneau (ex. « Récréation »).
   final String? label;
 
+  /// La récréation de la grille (EDT-R1) : une bande, jamais un créneau où
+  /// poser une séance. Posée par la composition locale, pas par le serveur.
+  final bool isBreak;
+
   const TimeSlot({
     required this.id,
     required this.order,
     required this.startTime,
     required this.endTime,
     this.label,
+    this.isBreak = false,
   });
 
   @override
-  List<Object?> get props => [id, order, startTime, endTime, label];
+  List<Object?> get props => [id, order, startTime, endTime, label, isBreak];
 }

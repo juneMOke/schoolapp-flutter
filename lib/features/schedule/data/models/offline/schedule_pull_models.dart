@@ -53,6 +53,7 @@ class TimeSlotDeltaDto {
   final String startTime;
   final String endTime;
   final String? label;
+  final String? timeGridId;
   final String serverUpdatedAt;
 
   const TimeSlotDeltaDto({
@@ -61,6 +62,7 @@ class TimeSlotDeltaDto {
     required this.startTime,
     required this.endTime,
     this.label,
+    this.timeGridId,
     required this.serverUpdatedAt,
   });
 
@@ -70,6 +72,7 @@ class TimeSlotDeltaDto {
     startTime: j['startTime'] as String,
     endTime: j['endTime'] as String,
     label: j['label'] as String?,
+    timeGridId: j['timeGridId'] as String?,
     serverUpdatedAt: j['serverUpdatedAt'] as String,
   );
 
@@ -79,6 +82,7 @@ class TimeSlotDeltaDto {
     startTime: startTime,
     endTime: endTime,
     label: label,
+    timeGridId: timeGridId,
     serverUpdatedAt: _isoToMs(serverUpdatedAt),
     syncedAt: syncedAt,
   );
@@ -112,6 +116,11 @@ class RecurringSessionDeltaDto {
   final String teacherLabel;
   final String classroomLabel;
   final String subjectLabel;
+
+  /// Les minutes du créneau recopiées (v84, A12) : la vue enseignant se range
+  /// par heure, deux grilles pouvant coexister.
+  final int? startMinute;
+  final int? endMinute;
   final String serverUpdatedAt;
 
   const RecurringSessionDeltaDto({
@@ -126,6 +135,8 @@ class RecurringSessionDeltaDto {
     required this.teacherLabel,
     required this.classroomLabel,
     required this.subjectLabel,
+    this.startMinute,
+    this.endMinute,
     required this.serverUpdatedAt,
   });
 
@@ -142,6 +153,8 @@ class RecurringSessionDeltaDto {
         teacherLabel: j['teacherLabel'] as String,
         classroomLabel: j['classroomLabel'] as String,
         subjectLabel: j['subjectLabel'] as String,
+        startMinute: (j['startMinute'] as num?)?.toInt(),
+        endMinute: (j['endMinute'] as num?)?.toInt(),
         serverUpdatedAt: j['serverUpdatedAt'] as String,
       );
 
@@ -157,6 +170,8 @@ class RecurringSessionDeltaDto {
     teacherLabel: teacherLabel,
     classroomLabel: classroomLabel,
     subjectLabel: subjectLabel,
+    startMinute: startMinute,
+    endMinute: endMinute,
     serverUpdatedAt: _isoToMs(serverUpdatedAt),
     syncedAt: syncedAt,
   );

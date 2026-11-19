@@ -3,6 +3,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:school_app_flutter/features/schedule/data/sync/time_grids_pull_handler.dart';
 import 'package:school_app_flutter/features/school_calendar/data/sync/calendar_pullers.dart';
 import 'package:school_app_flutter/features/treasury/data/sync/treasury_closure_puller.dart';
 import 'package:school_app_flutter/features/payroll/domain/repositories/payroll_pull_repository.dart';
@@ -279,11 +280,11 @@ void main() {
   group('le registre lui-même', () {
     // Le compte fige la surface : un flux ajouté sans arête déclarée fait
     // rougir ici, ce qui force à trancher sa place plutôt qu'à la subir.
-    test('quarante-cinq handlers, aucune ressource enregistrée deux fois', () {
-      expect(coordinator.registered, hasLength(45));
+    test('quarante-six handlers, aucune ressource enregistrée deux fois', () {
+      expect(coordinator.registered, hasLength(46));
       expect(
         order().toSet(),
-        hasLength(45),
+        hasLength(46),
         reason: 'Doublon de ressource : ${order()}',
       );
     });
@@ -313,11 +314,11 @@ void main() {
       ]);
     });
 
-    // Les quarante-trois autres restent gouvernés par leur permission : sans cette
+    // Les quarante-quatre autres restent gouvernés par leur permission : sans cette
     // assertion, le test ci-dessus passerait aussi si le drapeau avait disparu
     // du contrat et rendait `false` partout.
     test(
-      'les quarante-trois autres flux déclarent tous une exigence de lecture',
+      'les quarante-quatre autres flux déclarent tous une exigence de lecture',
       () {
         final sansExigence = coordinator.registered
             .where((h) => !h.isBaseline && h.requiredPermissions.isEmpty)
@@ -329,7 +330,7 @@ void main() {
         expect(sansExigence, isEmpty);
         expect(
           coordinator.registered.where((h) => !h.isBaseline),
-          hasLength(43),
+          hasLength(44),
         );
       },
     );
@@ -358,7 +359,7 @@ void main() {
   // handlers, tous les tests ci-dessus deviendraient verts par vacuité pour les
   // arêtes qu'ils ne trouveraient plus. On vérifie donc que les vingt et une
   // ressources attendues sont là, nommément.
-  test('les quarante-cinq ressources attendues sont toutes enregistrées', () {
+  test('les quarante-six ressources attendues sont toutes enregistrées', () {
     expect(order().toSet(), {
       kTombstonesResource,
       EnrollmentPullRepositoryImpl.referentialResource,
@@ -402,6 +403,7 @@ void main() {
       kEnrollmentSuspensionsResource,
       kTreasuryClosuresResource,
       kAcademicsCotesResourcePrefix,
+      kScheduleTimeGridsResource,
       kCalendarFrameworkResource,
       kCalendarCalendarsResource,
       kCalendarEventsResource,

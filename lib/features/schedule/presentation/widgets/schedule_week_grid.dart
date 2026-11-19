@@ -122,6 +122,7 @@ class ScheduleWeekGrid extends StatelessWidget {
   /// colonnes affichées — donc évaluée sur `row.cells`, pas sur les jours
   /// visibles).
   static bool _isBreak(TimetableRow row) {
+    if (row.timeSlot.isBreak) return true;
     final label = row.timeSlot.label?.trim();
     if (label == null || label.isEmpty) {
       return false;

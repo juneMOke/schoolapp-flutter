@@ -23,6 +23,11 @@ class RefRecurringSessionRow extends Equatable {
   final String teacherLabel;
   final String classroomLabel;
   final String subjectLabel;
+
+  /// Les minutes du créneau, recopiées par le serveur (v84) ; `null` avant
+  /// EDT-3.
+  final int? startMinute;
+  final int? endMinute;
   final int? serverUpdatedAt;
   final int syncedAt;
 
@@ -39,6 +44,8 @@ class RefRecurringSessionRow extends Equatable {
     required this.teacherLabel,
     required this.classroomLabel,
     required this.subjectLabel,
+    this.startMinute,
+    this.endMinute,
     this.serverUpdatedAt,
     required this.syncedAt,
   });
@@ -64,6 +71,8 @@ class RefRecurringSessionRow extends Equatable {
         teacherLabel: map['teacher_label'] as String,
         classroomLabel: map['classroom_label'] as String,
         subjectLabel: map['subject_label'] as String,
+        startMinute: _asIntOrNull(map['start_minute']),
+        endMinute: _asIntOrNull(map['end_minute']),
         serverUpdatedAt: _asIntOrNull(map['server_updated_at']),
         syncedAt: _asIntOrNull(map['synced_at']) ?? 0,
       );
@@ -81,6 +90,8 @@ class RefRecurringSessionRow extends Equatable {
     'teacher_label': teacherLabel,
     'classroom_label': classroomLabel,
     'subject_label': subjectLabel,
+    'start_minute': startMinute,
+    'end_minute': endMinute,
     'server_updated_at': serverUpdatedAt,
     'synced_at': syncedAt,
   };
@@ -99,6 +110,8 @@ class RefRecurringSessionRow extends Equatable {
     teacherLabel,
     classroomLabel,
     subjectLabel,
+    startMinute,
+    endMinute,
     serverUpdatedAt,
     syncedAt,
   ];

@@ -48,6 +48,7 @@ const TableSchema refTimeSlotsTable = TableSchema(
       start_time TEXT NOT NULL,
       end_time TEXT NOT NULL,
       label TEXT,
+      time_grid_id TEXT,
       server_updated_at INTEGER,
       synced_at INTEGER NOT NULL
     )
@@ -55,6 +56,27 @@ const TableSchema refTimeSlotsTable = TableSchema(
   createIndexSql: [
     'CREATE INDEX idx_ref_time_slots_order ON ref_time_slots(slot_order)',
   ],
+);
+
+/// `ref_time_grids` (v84) — les grilles horaires de l'école (EDT-R1, D2) : leur
+/// nom, leur récréation (une bande de la grille, jamais un créneau), et les
+/// **codes** des cycles qui la suivent (`cycle_codes`, séparés par des
+/// virgules) : un cycle se recrée chaque année, son code reste. Un cycle sans
+/// grille nommée suit la grille `is_default`. Flux `schedule.time-grids`.
+const TableSchema refTimeGridsTable = TableSchema(
+  name: 'ref_time_grids',
+  createTableSql: '''
+    CREATE TABLE ref_time_grids (
+      id TEXT PRIMARY KEY,
+      name TEXT NOT NULL,
+      is_default INTEGER NOT NULL DEFAULT 0,
+      cycle_codes TEXT NOT NULL DEFAULT '',
+      break_start TEXT,
+      break_end TEXT,
+      server_updated_at INTEGER,
+      synced_at INTEGER NOT NULL
+    )
+  ''',
 );
 
 /// `ref_recurring_sessions` — remplissage hebdomadaire récurrent de l'emploi du
@@ -81,6 +103,8 @@ const TableSchema refRecurringSessionsTable = TableSchema(
       teacher_label TEXT NOT NULL,
       classroom_label TEXT NOT NULL,
       subject_label TEXT NOT NULL,
+      start_minute INTEGER,
+      end_minute INTEGER,
       server_updated_at INTEGER,
       synced_at INTEGER NOT NULL
     )
@@ -360,6 +384,7 @@ const TableSchema refSousPeriodeTable = TableSchema(
 /// `buildOfflineSchema()`.
 const List<TableSchema> academicsOfflineTables = [
   refTimeSlotsTable,
+  refTimeGridsTable,
   refRecurringSessionsTable,
   refCoursTable,
   evaluationTable,

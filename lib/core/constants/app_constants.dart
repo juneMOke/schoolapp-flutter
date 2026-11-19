@@ -900,7 +900,11 @@ class AppConstants {
   // `cal_framework_items`, `school_calendars`, `school_calendar_events` — et
   // `ref_school_levels.catalog_level_code` (re-tirage du référentiel).
   // Palier d'école.
-  static const int offlineDbSchemaVersion = 83;
+  // v84 (2026-11-19) : les grilles par cycle — `ref_time_grids` (reliées aux
+  // cycles par leurs codes), `ref_time_slots.time_grid_id` — et
+  // `ref_recurring_sessions.start_minute` / `end_minute`. Re-tirage des
+  // créneaux et des séances. Palier d'école.
+  static const int offlineDbSchemaVersion = 84;
 
   /// Dernière version de la base unique HÉRITÉE : là où l'escalier
   /// `migrateOfflineDatabase` s'arrête pour toujours.
@@ -1780,6 +1784,11 @@ class AppConstants {
   /// arrête l'encaissement en espèces d'une devise close aujourd'hui (R11).
   static const String syncTreasuryClosuresEndpoint =
       '/api/v1/sync/treasury/closures';
+
+  /// **GET** (keyset) = les grilles horaires de l'école, récréation comprise
+  /// (flux `schedule.time-grids`, `schedule.read`, EDT-1).
+  static const String syncScheduleTimeGridsEndpoint =
+      '/api/v1/sync/schedule/time-grids';
 
   // ── Calendrier scolaire (contrat figé avec le back le 2026-11-19) ──
   /// **GET** (keyset) = les cadres nationaux publiés des années de l'école,
