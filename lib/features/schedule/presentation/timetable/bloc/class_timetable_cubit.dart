@@ -1,150 +1,44 @@
 import 'package:dartz/dartz.dart';
-import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+
+export 'class_timetable_state.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/core/offline/pull_coordinator.dart';
 import 'package:school_app_flutter/features/schedule/data/sync/time_grids_pull_handler.dart';
 import 'package:school_app_flutter/features/schedule/data/timetable/class_calendar_reader.dart';
 import 'package:school_app_flutter/features/schedule/data/timetable/class_timetable_reader.dart';
-import 'package:school_app_flutter/features/school_calendar/domain/services/calendar_days.dart';
 import 'package:school_app_flutter/features/schedule/data/timetable/timetable_editor.dart';
 import 'package:school_app_flutter/features/schedule/data/timetable/timetable_pull_handlers.dart';
 import 'package:school_app_flutter/features/schedule/domain/entities/timetable/class_timetable_view.dart';
 import 'package:school_app_flutter/features/schedule/domain/entities/timetable/copy_source.dart';
+import 'package:school_app_flutter/features/schedule/presentation/timetable/bloc/class_timetable_state.dart';
+import 'package:school_app_flutter/features/schedule/presentation/timetable/bloc/dated_week_cubit.dart';
 import 'package:school_app_flutter/features/schedule/presentation/timetable/timetable_copy_plan.dart';
 import 'package:school_app_flutter/features/schedule/domain/entities/weekday.dart';
-
-enum ClassTimetableStatus { loading, ready, failure }
-
-/// Semaine ou Jour (EDT-R12) ; `null` : la vue par défaut selon la largeur.
-enum ClassTimetableMode { week, day }
-
-class ClassTimetableState extends Equatable {
-  final ClassTimetableStatus status;
-  final Failure? failure;
-  final List<TimetableClassOption> options;
-  final String? classroomId;
-  final ClassTimetableView? view;
-  final ClassTimetableMode? mode;
-  final Weekday? day;
-
-  /// Le lundi de la semaine datée affichée (R17) ; `null` : cette semaine.
-  final DateTime? week;
-
-  /// Ce que le calendrier publié dit de cette semaine, pour cette classe.
-  final ClassCalendarWeek? calendar;
-
-  const ClassTimetableState({
-    this.status = ClassTimetableStatus.loading,
-    this.failure,
-    this.options = const [],
-    this.classroomId,
-    this.view,
-    this.mode,
-    this.day,
-    this.week,
-    this.calendar,
-  });
-
-  TimetableClassOption? get selected {
-    for (final o in options) {
-      if (o.classroomId == classroomId) return o;
-    }
-    return null;
-  }
-
-  ClassTimetableState copyWith({
-    ClassTimetableStatus? status,
-    Failure? failure,
-    List<TimetableClassOption>? options,
-    String? classroomId,
-    ClassTimetableView? view,
-    bool clearView = false,
-    ClassTimetableMode? mode,
-    bool clearMode = false,
-    Weekday? day,
-    bool clearDay = false,
-    DateTime? week,
-    bool clearWeek = false,
-    ClassCalendarWeek? calendar,
-  }) => ClassTimetableState(
-    status: status ?? this.status,
-    failure: failure,
-    options: options ?? this.options,
-    classroomId: classroomId ?? this.classroomId,
-    view: clearView ? null : (view ?? this.view),
-    mode: clearMode ? null : (mode ?? this.mode),
-    day: clearDay ? null : (day ?? this.day),
-    week: clearWeek ? null : (week ?? this.week),
-    calendar: calendar ?? this.calendar,
-  );
-
-  @override
-  List<Object?> get props => [
-    status,
-    failure,
-    options,
-    classroomId,
-    view,
-    mode,
-    day,
-    week,
-    calendar,
-  ];
-}
 
 /// Agenda & Horaires ▸ Emploi du temps : la consultation par classe, lue en
 /// local (A17 : les versions publiées de toutes les classes descendent sous
 /// `schedule.read`).
-class ClassTimetableCubit extends Cubit<ClassTimetableState> {
+class ClassTimetableCubit extends Cubit<ClassTimetableState>
+    with DatedWeekCubit {
   final ClassTimetableReader _reader;
-  final ClassCalendarReader? _calendarReader;
+  @override
+  final ClassCalendarReader? calendarReader;
   final TimetableEditor? _editor;
   final PullCoordinator? _coordinator;
-  final DateTime Function() _schoolToday;
+  @override
+  final DateTime Function() schoolToday;
 
   ClassTimetableCubit(
     this._reader, {
-    ClassCalendarReader? calendarReader,
+    this.calendarReader,
     TimetableEditor? editor,
     PullCoordinator? coordinator,
     DateTime Function()? schoolToday,
-  }) : _calendarReader = calendarReader,
-       _editor = editor,
+  }) : _editor = editor,
        _coordinator = coordinator,
-       _schoolToday = schoolToday ?? DateTime.now,
+       schoolToday = schoolToday ?? DateTime.now,
        super(const ClassTimetableState());
-
-  /// Le lundi de la semaine en cours, à l'heure de l'école.
-  DateTime get thisWeek => CalendarDays.mondayOf(_schoolToday());
-
-  /// Semaine précédente / suivante (I24) ; « Revenir à cette semaine ».
-  Future<void> shiftWeek(int delta) =>
-      setWeek(CalendarDays.addDays(state.week ?? thisWeek, 7 * delta));
-
-  Future<void> setWeek(DateTime? monday) async {
-    final target = monday == null ? null : CalendarDays.mondayOf(monday);
-    emit(
-      target == null || target == thisWeek
-          ? state.copyWith(clearWeek: true)
-          : state.copyWith(week: target),
-    );
-    await _reloadCalendar();
-  }
-
-  Future<void> _reloadCalendar() async {
-    final reader = _calendarReader;
-    final selected = state.selected;
-    if (reader == null || selected == null) return;
-    final monday = state.week ?? thisWeek;
-    final week = await reader.week(
-      selected,
-      monday,
-      CalendarDays.addDays(monday, 6),
-    );
-    if (isClosed || state.classroomId != selected.classroomId) return;
-    emit(state.copyWith(calendar: week));
-  }
 
   static const Set<String> resources = {
     kScheduleTimeGridsResource,
@@ -178,14 +72,12 @@ class ClassTimetableCubit extends Cubit<ClassTimetableState> {
   Future<void> selectClass(String? classroomId) async {
     if (classroomId == state.classroomId) return;
     emit(
-      classroomId == null
-          ? ClassTimetableState(
-              status: state.status,
-              options: state.options,
-              mode: state.mode,
-              day: state.day,
-            )
-          : state.copyWith(classroomId: classroomId, clearView: true),
+      state.copyWith(
+        classroomId: classroomId,
+        clearClassroom: classroomId == null,
+        clearView: true,
+        clearCalendar: true,
+      ),
     );
     await _reloadView();
   }
@@ -239,8 +131,10 @@ class ClassTimetableCubit extends Cubit<ClassTimetableState> {
     final courses = {for (final c in current.programme) c.coursId: c};
     final result = await setCells([
       for (final c in view.ended)
+        // Un cours sorti du programme ne se rejoue pas en « libérer ».
         if (slots[c.slotId] case final slot?)
-          CellChange(c.day, slot, courses[c.coursId]),
+          if (c.coursId == null || courses.containsKey(c.coursId))
+            CellChange(c.day, slot, courses[c.coursId]),
     ]);
     if (result.isRight()) {
       await _reader.discard(view.ended);
@@ -260,11 +154,22 @@ class ClassTimetableCubit extends Cubit<ClassTimetableState> {
       _edit((editor, view) => editor.abandon(view));
 
   /// En ligne : la révision lue ; ensuite les flux redescendent la version.
+  /// « Le brouillon a changé » (TIMETABLE_DRAFT_CHANGED) : l'en-tête est
+  /// re-tiré, la prochaine tentative part avec la bonne révision.
   Future<Either<Failure, Unit>> publish() async {
     final result = await _edit((editor, view) => editor.publish(view));
     final coordinator = _coordinator;
-    if (result.isRight() && coordinator != null) {
-      await coordinator.pullSubset(resources);
+    final changed = result.fold(
+      (f) =>
+          f is TimetableRefusalFailure && f.code == 'TIMETABLE_DRAFT_CHANGED',
+      (_) => true,
+    );
+    if (changed && coordinator != null && !isClosed) {
+      try {
+        await coordinator.pullSubset(resources);
+      } catch (_) {
+        // Le tirage suivant rattrapera ; la version locale reste lisible.
+      }
       await _reloadView();
     }
     return result;
@@ -276,18 +181,45 @@ class ClassTimetableCubit extends Cubit<ClassTimetableState> {
   ) async {
     final editor = _editor;
     final view = state.view;
-    if (editor == null || view == null) return const Left(StorageFailure());
-    final result = await gesture(editor, view);
-    await _reloadView();
-    return result;
+    if (editor == null || view == null || state.busy) {
+      return const Left(StorageFailure());
+    }
+    emit(state.copyWith(busy: true));
+    try {
+      final result = await gesture(editor, view);
+      await _reloadView();
+      return result;
+    } finally {
+      if (!isClosed) emit(state.copyWith(busy: false));
+    }
   }
 
   Future<void> _reloadView() async {
     final selected = state.selected;
-    if (selected == null) return;
-    final view = await _reader.load(selected);
-    if (isClosed || state.classroomId != selected.classroomId) return;
-    emit(state.copyWith(view: view));
-    await _reloadCalendar();
+    if (selected == null) {
+      // Une classe inconnue dans l'adresse (fermée, d'une autre école, lien
+      // périmé) : l'adresse se corrige, le sélecteur reste ouvert.
+      if (state.classroomId != null &&
+          state.status == ClassTimetableStatus.ready &&
+          !isClosed) {
+        emit(state.copyWith(clearClassroom: true, clearView: true));
+      }
+      return;
+    }
+    try {
+      final view = await _reader.load(selected);
+      if (isClosed || state.classroomId != selected.classroomId) return;
+      emit(state.copyWith(view: view));
+    } catch (e) {
+      if (isClosed) return;
+      emit(
+        state.copyWith(
+          status: ClassTimetableStatus.failure,
+          failure: StorageFailure(e.toString()),
+        ),
+      );
+      return;
+    }
+    await reloadCalendar();
   }
 }

@@ -78,11 +78,16 @@ class ClassTimetableContent extends StatelessWidget {
           ?ended,
           ClassTimetableSummary(view: view, cells: view.draft),
           const SizedBox(height: AppSpacing.md),
-          TimetableDraftSection(view: view, cubit: cubit, online: online),
+          TimetableDraftSection(
+            view: view,
+            cubit: cubit,
+            online: online,
+            busy: state.busy,
+          ),
         ],
       );
     }
-    final start = canWrite && view.programme.isNotEmpty
+    final start = canWrite && view.programme.isNotEmpty && !state.busy
         ? () => unawaited(_start(context))
         : null;
     if (view.published.isEmpty) {
@@ -124,9 +129,12 @@ class ClassTimetableContent extends StatelessWidget {
       ClassWeekBuilder.courseVisuals(view),
     );
     final isThisWeek = state.week == null;
-    final today = isThisWeek
+    // R11 : « aujourd'hui » n'est mis en avant que cette semaine, et jamais
+    // un jour sans cours (férié, vacances).
+    final now = isThisWeek
         ? CurrentSession.weekdayOf(SchoolTime.wallClock(DateTime.now()))
         : null;
+    final today = closed.contains(now) ? null : now;
     return LayoutBuilder(
       builder: (context, constraints) {
         final mode =

@@ -1,20 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/components/buttons/primary_button.dart';
 import 'package:school_app_flutter/core/components/cards/eteelo_panel_card.dart';
-import 'package:school_app_flutter/core/components/controls/eteelo_activatable.dart';
 import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
-import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
-import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
-import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_empty_result.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_page_header.dart';
 import 'package:school_app_flutter/features/school_calendar/domain/entities/calendar_enums.dart';
 import 'package:school_app_flutter/features/school_calendar/domain/entities/school_calendar.dart';
 import 'package:school_app_flutter/features/school_calendar/presentation/bloc/school_calendar_state.dart';
-import 'package:school_app_flutter/features/school_calendar/presentation/helpers/calendar_labels.dart';
 import 'package:school_app_flutter/features/school_calendar/presentation/widgets/calendar_year_banner.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
+import 'package:school_app_flutter/features/school_calendar/presentation/widgets/list/calendar_card.dart';
 
 /// La liste des calendriers (CAL §4.1, niveau 1) : l'année en vigueur dans le
 /// bandeau, puis les cartes — à venir et brouillons d'abord, archives ensuite.
@@ -43,9 +39,10 @@ class CalendarsListView extends StatelessWidget {
             state.phaseOf(c) == CalendarPhase.ended)
           c,
     ];
+    // Le calendrier en vigueur a son bandeau : il ne revient pas dans la liste.
     final active = [
       for (final c in calendars)
-        if (!archived.contains(c)) c,
+        if (!archived.contains(c) && c != inForce) c,
     ];
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -163,7 +160,7 @@ class _CardsSection extends StatelessWidget {
                 for (final c in calendars)
                   SizedBox(
                     width: width,
-                    child: _CalendarCard(
+                    child: CalendarCard(
                       calendar: c,
                       phase: state.phaseOf(c),
                       onOpen: () => onOpen(c.yearLabel),
@@ -172,79 +169,6 @@ class _CardsSection extends StatelessWidget {
               ],
             );
           },
-        ),
-      ),
-    );
-  }
-}
-
-class _CalendarCard extends StatelessWidget {
-  final SchoolCalendar calendar;
-  final CalendarPhase phase;
-  final VoidCallback onOpen;
-
-  const _CalendarCard({
-    required this.calendar,
-    required this.phase,
-    required this.onOpen,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    final published = calendar.publishedAt;
-    return EteeloActivatable(
-      onActivate: onOpen,
-      semanticLabel: l10n.schoolCalendarTitleYear(calendar.yearLabel),
-      builder: (context, highlight) => Container(
-        padding: const EdgeInsets.all(AppSpacing.lg),
-        decoration: BoxDecoration(
-          color: AppColors.surfaceRaised,
-          borderRadius: AppRadius.brMd,
-          border: Border.all(
-            color: highlight.any ? AppColors.terreCuite : AppColors.border,
-          ),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(calendar.yearLabel, style: AppTypography.titleMedium),
-            const SizedBox(height: AppSpacing.xs),
-            Text(
-              CalendarLabels.phase(l10n, phase),
-              style: AppTypography.labelMedium.copyWith(
-                color: phase == CalendarPhase.draft
-                    ? AppColors.terreCuiteInk
-                    : AppColors.bleuArdoise,
-              ),
-            ),
-            const SizedBox(height: AppSpacing.xs),
-            Text(
-              CalendarLabels.range(
-                context,
-                calendar.startDate,
-                calendar.endDate,
-              ),
-              style: AppTypography.bodySmall,
-            ),
-            Text(
-              calendar.hasFramework
-                  ? l10n.schoolCalendarFrameworkIntegrated
-                  : l10n.schoolCalendarFrameworkAwaited,
-              style: AppTypography.bodySmall.copyWith(
-                color: AppColors.textSecondary,
-              ),
-            ),
-            if (published != null)
-              Text(
-                l10n.schoolCalendarPublishedOn(
-                  CalendarLabels.day(context, published),
-                ),
-                style: AppTypography.bodySmall.copyWith(
-                  color: AppColors.textSecondary,
-                ),
-              ),
-          ],
         ),
       ),
     );

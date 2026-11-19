@@ -74,7 +74,9 @@ class CalendarMonthDayCell extends StatelessWidget {
               const Spacer(),
               if (hidden > 0)
                 Text(
-                  compact ? '+$hidden' : l10n.calendarMonthMore(hidden),
+                  compact
+                      ? l10n.calendarMonthMoreCompact(hidden)
+                      : l10n.calendarMonthMore(hidden),
                   maxLines: 1,
                   softWrap: false,
                   overflow: TextOverflow.fade,

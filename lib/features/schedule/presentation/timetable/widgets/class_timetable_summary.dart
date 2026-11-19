@@ -118,8 +118,8 @@ class ClassTimetableSummary extends StatelessWidget {
                   EteeloKpiCardData(
                     label: l10n.classTimetableKpiTeachers,
                     value: teachers,
-                    accent: AppColors.vertSavane,
-                    accentSoft: AppColors.bleuArdoiseSoft,
+                    accent: AppColors.hrTeachersAccent,
+                    accentSoft: AppColors.hrTeachersSoft,
                     icon: Icons.person_outline,
                   ),
                 ],

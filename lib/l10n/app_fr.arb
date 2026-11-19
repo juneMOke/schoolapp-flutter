@@ -13385,5 +13385,17 @@
   "classTimetableOutOfYear": "Hors année scolaire",
   "classTimetableNextStart": "rentrée le {date}",
   "@classTimetableNextStart": {"placeholders": {"date": {"type": "String"}}},
-  "classTimetableNoClassToday": "Pas de cours aujourd'hui"
+  "classTimetableNoClassToday": "Pas de cours aujourd'hui",
+  "classTimetablePublishRejected": "{count, plural, =1{1 case a été refusée par le serveur : reposez-la ou libérez-la.} other{{count} cases ont été refusées par le serveur : reposez-les ou libérez-les.}}",
+  "@classTimetablePublishRejected": {"placeholders": {"count": {"type": "int"}}},
+  "calendarMonthMoreCompact": "+{count}",
+  "@calendarMonthMoreCompact": {"placeholders": {"count": {"type": "int"}}},
+  "classTimetableErrorNetworkTitle": "Connexion impossible",
+  "classTimetableErrorNetwork": "L'emploi du temps n'a pas pu être relu. Vérifiez la connexion, puis réessayez.",
+  "classTimetableErrorUnauthorizedTitle": "Session expirée",
+  "classTimetableError401": "Votre session a expiré pour votre sécurité. Reconnectez-vous pour consulter l'emploi du temps.",
+  "classTimetableErrorForbiddenTitle": "Accès refusé",
+  "classTimetableError403": "Votre compte n'a pas le droit de consulter l'emploi du temps. Demandez l'accès à l'administrateur de votre école.",
+  "classTimetableErrorServerTitle": "L'emploi du temps n'a pas pu s'ouvrir",
+  "classTimetableErrorServer": "Une erreur est survenue. Réessayez dans un instant."
 }

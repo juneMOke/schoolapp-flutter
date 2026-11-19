@@ -13215,5 +13215,17 @@
   "classTimetableOutOfYear": "Outside the school year",
   "classTimetableNextStart": "school starts on {date}",
   "@classTimetableNextStart": {"placeholders": {"date": {"type": "String"}}},
-  "classTimetableNoClassToday": "No classes today"
+  "classTimetableNoClassToday": "No classes today",
+  "classTimetablePublishRejected": "{count, plural, =1{1 slot was refused by the server: set it again or clear it.} other{{count} slots were refused by the server: set them again or clear them.}}",
+  "@classTimetablePublishRejected": {"placeholders": {"count": {"type": "int"}}},
+  "calendarMonthMoreCompact": "+{count}",
+  "@calendarMonthMoreCompact": {"placeholders": {"count": {"type": "int"}}},
+  "classTimetableErrorNetworkTitle": "Cannot connect",
+  "classTimetableErrorNetwork": "The timetable could not be reloaded. Check the connection, then try again.",
+  "classTimetableErrorUnauthorizedTitle": "Session expired",
+  "classTimetableError401": "Your session expired for your security. Sign in again to view the timetable.",
+  "classTimetableErrorForbiddenTitle": "Access denied",
+  "classTimetableError403": "Your account is not allowed to view the timetable. Ask your school administrator for access.",
+  "classTimetableErrorServerTitle": "The timetable could not open",
+  "classTimetableErrorServer": "Something went wrong. Try again in a moment."
 }

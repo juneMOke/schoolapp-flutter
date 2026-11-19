@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/components/keyboard/page_action_shortcut.dart';
 import 'package:school_app_flutter/features/school_calendar/domain/services/calendar_days.dart';
 import 'package:school_app_flutter/core/widgets/app_snack_bar.dart';
 import 'package:school_app_flutter/core/offline/online_only.dart';
@@ -18,7 +19,7 @@ import 'package:school_app_flutter/features/schedule/domain/entities/weekday.dar
 import 'package:school_app_flutter/features/schedule/presentation/timetable/bloc/class_timetable_cubit.dart';
 import 'package:school_app_flutter/features/schedule/presentation/timetable/widgets/class_picker.dart';
 import 'package:school_app_flutter/features/schedule/presentation/timetable/widgets/class_timetable_content.dart';
-import 'package:school_app_flutter/features/school_calendar/presentation/widgets/states/school_calendar_error_state.dart';
+import 'package:school_app_flutter/features/schedule/presentation/timetable/widgets/states/class_timetable_error_state.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Agenda & Horaires ▸ Emploi du temps : l'emploi du temps publié d'une classe,
@@ -104,7 +105,7 @@ class _Body extends StatelessWidget {
         showAvatar: false,
         semanticsLabel: l10n.classTimetableLoading,
       ),
-      ClassTimetableStatus.failure => SchoolCalendarErrorState(
+      ClassTimetableStatus.failure => ClassTimetableErrorState(
         failure: state.failure ?? const StorageFailure(),
         onRetry: () => unawaited(cubit.load(pull: true)),
       ),
@@ -128,13 +129,18 @@ class _Body extends StatelessWidget {
         ],
       ),
     };
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        header,
-        const SizedBox(height: AppSpacing.lg),
-        content,
-      ],
+    // EDT au poste : F5 relit les flux de l'emploi du temps.
+    return PageActionShortcut(
+      action: PageAction.refresh,
+      onInvoke: () => unawaited(cubit.load(pull: true)),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          header,
+          const SizedBox(height: AppSpacing.lg),
+          content,
+        ],
+      ),
     );
   }
 }

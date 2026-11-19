@@ -14,6 +14,9 @@ class PublishTimetableDialog extends StatelessWidget {
   final int sessions;
   final int teachers;
   final int conflicts;
+
+  /// Des cases refusées par le serveur : elles ne sont pas au brouillon.
+  final int rejected;
   final bool online;
   final bool pending;
 
@@ -22,6 +25,7 @@ class PublishTimetableDialog extends StatelessWidget {
     required this.sessions,
     required this.teachers,
     required this.conflicts,
+    this.rejected = 0,
     required this.online,
     required this.pending,
   });
@@ -29,7 +33,7 @@ class PublishTimetableDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final blocked = conflicts > 0 || !online || pending;
+    final blocked = conflicts > 0 || rejected > 0 || !online || pending;
     void submit() => Navigator.of(context).pop(true);
     return EteeloFormDialog(
       title: l10n.classTimetablePublishTitle,
@@ -50,6 +54,8 @@ class PublishTimetableDialog extends StatelessWidget {
             EteeloNotice.error(l10n.classTimetableConflictsBlocking(conflicts))
           else
             EteeloNotice.warning(l10n.classTimetableNoConflict),
+          if (rejected > 0)
+            EteeloNotice.error(l10n.classTimetablePublishRejected(rejected)),
           if (!online) EteeloNotice.error(l10n.classTimetablePublishOffline),
           if (pending) EteeloNotice.error(l10n.classTimetablePublishPending),
           Text(

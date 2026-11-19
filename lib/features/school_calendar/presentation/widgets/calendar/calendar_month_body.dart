@@ -1,3 +1,4 @@
+import 'package:school_app_flutter/features/school_calendar/presentation/widgets/calendar/calendar_actions_row.dart';
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/components/cards/eteelo_panel_card.dart';
 import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
@@ -9,7 +10,6 @@ import 'package:school_app_flutter/features/school_calendar/domain/services/cale
 import 'package:school_app_flutter/features/school_calendar/presentation/bloc/school_calendar_cubit.dart';
 import 'package:school_app_flutter/features/school_calendar/presentation/bloc/school_calendar_state.dart';
 import 'package:school_app_flutter/features/school_calendar/presentation/helpers/calendar_labels.dart';
-import 'package:school_app_flutter/features/school_calendar/presentation/widgets/calendar/calendar_detail_view.dart';
 import 'package:school_app_flutter/features/school_calendar/presentation/widgets/calendar/calendar_element_list.dart';
 import 'package:school_app_flutter/features/school_calendar/presentation/widgets/month/school_calendar_month_grid.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';

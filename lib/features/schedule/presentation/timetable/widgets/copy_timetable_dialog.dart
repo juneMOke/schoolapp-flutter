@@ -46,10 +46,12 @@ class _CopyTimetableDialogState extends State<CopyTimetableDialog> {
     final plan = source == null
         ? null
         : TimetableCopyPlan.of(widget.target, source);
+    // Rien de repris : copier viderait le brouillon sans rien poser (M4).
+    final canCopy = plan != null && plan.result.taken > 0;
     return EteeloFormDialog(
       eyebrow: l10n.classTimetableCopyEyebrow(widget.target.classroom.name),
       title: l10n.classTimetableCopyTitle,
-      onSubmit: source == null ? null : _submit,
+      onSubmit: canCopy ? _submit : null,
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -140,7 +142,7 @@ class _CopyTimetableDialogState extends State<CopyTimetableDialog> {
         PrimaryButton(
           label: l10n.classTimetableCopySubmit,
           fullWidth: false,
-          onPressed: source == null ? null : _submit,
+          onPressed: canCopy ? _submit : null,
         ),
       ],
     );

@@ -1,3 +1,4 @@
+import 'package:school_app_flutter/features/school_calendar/presentation/widgets/overlays/publish_calendar_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/components/dialogs/eteelo_adaptive_sheet.dart';
 import 'package:school_app_flutter/core/components/dialogs/eteelo_form_dialog.dart';
@@ -30,7 +31,13 @@ class SchoolCalendarPageActions {
       builder: (_) => ElementDetailSheet(
         element: element,
         scopes: cubit.state.scopes,
-        canEdit: rights.canEdit(element.nature),
+        // R13 : un calendrier archivé ne se touche plus, même depuis O1.
+        canEdit:
+            rights.canEdit(element.nature) &&
+            !(switch (cubit.state.calendar) {
+              final c? => cubit.state.phaseOf(c).isReadOnly,
+              null => true,
+            }),
       ),
     );
     if (!context.mounted || choice == null) return;

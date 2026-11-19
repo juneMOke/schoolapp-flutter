@@ -71,20 +71,22 @@ class SlotOptionsSheet extends StatelessWidget {
             ),
             Text(l10n.classTimetableSlotHelp, style: AppTypography.bodySmall),
             const SizedBox(height: AppSpacing.md),
+            // R5 : un cours prévu à 0 h n'est pas à placer.
             for (final course in view.programme)
-              _Option(
-                course: course,
-                current: course.coursId == currentCoursId,
-                blocking: course.coursId == currentCoursId
-                    ? null
-                    : DraftConflicts.blocking(
-                        view,
-                        course,
-                        day,
-                        slot,
-                      )?.classroomLabel,
-                placed: placed[course.coursId] ?? 0,
-              ),
+              if (course.weeklyHours != 0)
+                _Option(
+                  course: course,
+                  current: course.coursId == currentCoursId,
+                  blocking: course.coursId == currentCoursId
+                      ? null
+                      : DraftConflicts.blocking(
+                          view,
+                          course,
+                          day,
+                          slot,
+                        )?.classroomLabel,
+                  placed: placed[course.coursId] ?? 0,
+                ),
             if (currentCoursId != null) ...[
               const SizedBox(height: AppSpacing.sm),
               SecondaryButton(

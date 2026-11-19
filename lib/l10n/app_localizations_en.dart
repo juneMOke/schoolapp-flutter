@@ -24619,4 +24619,49 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get classTimetableNoClassToday => 'No classes today';
+
+  @override
+  String classTimetablePublishRejected(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          '$count slots were refused by the server: set them again or clear them.',
+      one: '1 slot was refused by the server: set it again or clear it.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String calendarMonthMoreCompact(int count) {
+    return '+$count';
+  }
+
+  @override
+  String get classTimetableErrorNetworkTitle => 'Cannot connect';
+
+  @override
+  String get classTimetableErrorNetwork =>
+      'The timetable could not be reloaded. Check the connection, then try again.';
+
+  @override
+  String get classTimetableErrorUnauthorizedTitle => 'Session expired';
+
+  @override
+  String get classTimetableError401 =>
+      'Your session expired for your security. Sign in again to view the timetable.';
+
+  @override
+  String get classTimetableErrorForbiddenTitle => 'Access denied';
+
+  @override
+  String get classTimetableError403 =>
+      'Your account is not allowed to view the timetable. Ask your school administrator for access.';
+
+  @override
+  String get classTimetableErrorServerTitle => 'The timetable could not open';
+
+  @override
+  String get classTimetableErrorServer =>
+      'Something went wrong. Try again in a moment.';
 }

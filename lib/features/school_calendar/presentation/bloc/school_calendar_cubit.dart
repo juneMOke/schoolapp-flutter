@@ -7,13 +7,15 @@ import 'package:school_app_flutter/features/school_calendar/domain/entities/cale
 import 'package:school_app_flutter/features/school_calendar/domain/entities/school_calendar.dart';
 import 'package:school_app_flutter/features/school_calendar/domain/repositories/school_calendar_repository.dart';
 import 'package:school_app_flutter/features/school_calendar/domain/services/calendar_days.dart';
+import 'package:school_app_flutter/features/school_calendar/presentation/bloc/calendar_view_controls.dart';
 import 'package:school_app_flutter/features/school_calendar/presentation/bloc/school_calendar_state.dart';
 
 /// Le calendrier scolaire à l'écran : la liste des calendriers, puis un
 /// calendrier en trois vues. Tout se lit en local ; les gestes sur les
 /// événements partent par le lot, les trois gestes en ligne passent par le
 /// dépôt (A18).
-class SchoolCalendarCubit extends Cubit<SchoolCalendarState> {
+class SchoolCalendarCubit extends Cubit<SchoolCalendarState>
+    with CalendarViewControls {
   final SchoolCalendarRepository _repository;
   final DateTime Function() _schoolToday;
 
@@ -73,59 +75,10 @@ class SchoolCalendarCubit extends Cubit<SchoolCalendarState> {
   void closeCalendar() =>
       emit(state.copyWith(closeCalendar: true, events: const []));
 
-  void setView(CalendarView view) =>
-      emit(state.copyWith(view: view, clearSelectedDay: true));
-
-  /// Mois précédent / suivant, dans les bornes de l'année (CAL-I3).
-  void shiftMonth(int delta) {
-    final calendar = state.calendar;
-    final month = state.month;
-    if (calendar == null || month == null) return;
-    final next = DateTime.utc(month.year, month.month + delta);
-    final first = DateTime.utc(
-      calendar.startDate.year,
-      calendar.startDate.month,
-    );
-    final last = DateTime.utc(calendar.endDate.year, calendar.endDate.month);
-    if (next.isBefore(first) || next.isAfter(last)) return;
-    emit(state.copyWith(month: next, clearSelectedDay: true));
-  }
-
-  void showMonth(DateTime month) => emit(
-    state.copyWith(
-      month: DateTime.utc(month.year, month.month),
-      view: CalendarView.month,
-      clearSelectedDay: true,
-    ),
-  );
-
   void showCurrentMonth() {
     final calendar = state.calendar;
     if (calendar != null) showMonth(_defaultMonth(calendar));
   }
-
-  /// Toucher un jour (compact) le sélectionne ; le retoucher le libère (I7).
-  void selectDay(DateTime? day) => day == null || day == state.selectedDay
-      ? emit(state.copyWith(clearSelectedDay: true))
-      : emit(state.copyWith(selectedDay: CalendarDays.of(day)));
-
-  void toggleNature(CalendarNature nature) {
-    final hidden = {...state.hiddenNatures};
-    if (!hidden.remove(nature)) hidden.add(nature);
-    emit(state.copyWith(hiddenNatures: hidden));
-  }
-
-  void setSource(CalendarSourceFilter source) =>
-      emit(state.copyWith(source: source));
-
-  void setVerifyOnly(bool value) => emit(
-    state.copyWith(
-      verifyOnly: value,
-      view: value ? CalendarView.list : state.view,
-    ),
-  );
-
-  void setRhythm(PeriodRhythm rhythm) => emit(state.copyWith(rhythm: rhythm));
 
   /// L'adresse rouverte (F5, lien) : remet chaque réglage d'un coup.
   Future<void> restore({
@@ -198,27 +151,39 @@ class SchoolCalendarCubit extends Cubit<SchoolCalendarState> {
   creatableYears() => _repository.creatableYears();
 
   Future<Either<Failure, SchoolCalendar>> create(String yearLabel) =>
-      _online(_repository.create(yearLabel));
+      _online(() => _repository.create(yearLabel));
 
   Future<Either<Failure, SchoolCalendar>> duplicate(
     List<CalendarNature> natures,
   ) {
     final calendar = state.calendar;
     if (calendar == null) return Future.value(const Left(StorageFailure()));
-    return _online(_repository.duplicate(source: calendar, natures: natures));
+    return _online(
+      () => _repository.duplicate(source: calendar, natures: natures),
+    );
   }
 
   Future<Either<Failure, SchoolCalendar>> publish() {
     final calendar = state.calendar;
     if (calendar == null) return Future.value(const Left(StorageFailure()));
-    return _online(_repository.publish(calendar));
+    return _online(() => _repository.publish(calendar));
   }
 
   /// Un geste en ligne réussi rouvre la bibliothèque, puis le calendrier rendu.
+  /// Un second appui pendant l'envoi ne relance pas le geste (I19).
+  bool _inFlight = false;
+
   Future<Either<Failure, SchoolCalendar>> _online(
-    Future<Either<Failure, SchoolCalendar>> call,
+    Future<Either<Failure, SchoolCalendar>> Function() call,
   ) async {
-    final result = await call;
+    if (_inFlight) return const Left(StorageFailure());
+    _inFlight = true;
+    final Either<Failure, SchoolCalendar> result;
+    try {
+      result = await call();
+    } finally {
+      _inFlight = false;
+    }
     final calendar = result.toOption().toNullable();
     if (calendar != null && !isClosed) {
       await load();
@@ -230,10 +195,20 @@ class SchoolCalendarCubit extends Cubit<SchoolCalendarState> {
   Future<void> _reloadEvents() async {
     final calendar = state.calendar;
     if (calendar == null) return;
-    final events = await _repository.events(calendar.id);
-    final pending = await _repository.pendingCount(calendar.id);
-    if (isClosed) return;
-    emit(state.copyWith(events: events, pendingCount: pending));
+    try {
+      final events = await _repository.events(calendar.id);
+      final pending = await _repository.pendingCount(calendar.id);
+      if (isClosed) return;
+      emit(state.copyWith(events: events, pendingCount: pending));
+    } catch (e) {
+      if (isClosed) return;
+      emit(
+        state.copyWith(
+          status: SchoolCalendarStatus.failure,
+          failure: StorageFailure(e.toString()),
+        ),
+      );
+    }
   }
 
   SchoolCalendar? _calendarOf(String yearLabel) {

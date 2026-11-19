@@ -24793,4 +24793,50 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get classTimetableNoClassToday => 'Pas de cours aujourd\'hui';
+
+  @override
+  String classTimetablePublishRejected(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          '$count cases ont été refusées par le serveur : reposez-les ou libérez-les.',
+      one: '1 case a été refusée par le serveur : reposez-la ou libérez-la.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String calendarMonthMoreCompact(int count) {
+    return '+$count';
+  }
+
+  @override
+  String get classTimetableErrorNetworkTitle => 'Connexion impossible';
+
+  @override
+  String get classTimetableErrorNetwork =>
+      'L\'emploi du temps n\'a pas pu être relu. Vérifiez la connexion, puis réessayez.';
+
+  @override
+  String get classTimetableErrorUnauthorizedTitle => 'Session expirée';
+
+  @override
+  String get classTimetableError401 =>
+      'Votre session a expiré pour votre sécurité. Reconnectez-vous pour consulter l\'emploi du temps.';
+
+  @override
+  String get classTimetableErrorForbiddenTitle => 'Accès refusé';
+
+  @override
+  String get classTimetableError403 =>
+      'Votre compte n\'a pas le droit de consulter l\'emploi du temps. Demandez l\'accès à l\'administrateur de votre école.';
+
+  @override
+  String get classTimetableErrorServerTitle =>
+      'L\'emploi du temps n\'a pas pu s\'ouvrir';
+
+  @override
+  String get classTimetableErrorServer =>
+      'Une erreur est survenue. Réessayez dans un instant.';
 }

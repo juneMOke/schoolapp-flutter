@@ -37635,6 +37635,66 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No classes today'**
   String get classTimetableNoClassToday;
+
+  /// No description provided for @classTimetablePublishRejected.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 slot was refused by the server: set it again or clear it.} other{{count} slots were refused by the server: set them again or clear them.}}'**
+  String classTimetablePublishRejected(int count);
+
+  /// No description provided for @calendarMonthMoreCompact.
+  ///
+  /// In en, this message translates to:
+  /// **'+{count}'**
+  String calendarMonthMoreCompact(int count);
+
+  /// No description provided for @classTimetableErrorNetworkTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cannot connect'**
+  String get classTimetableErrorNetworkTitle;
+
+  /// No description provided for @classTimetableErrorNetwork.
+  ///
+  /// In en, this message translates to:
+  /// **'The timetable could not be reloaded. Check the connection, then try again.'**
+  String get classTimetableErrorNetwork;
+
+  /// No description provided for @classTimetableErrorUnauthorizedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Session expired'**
+  String get classTimetableErrorUnauthorizedTitle;
+
+  /// No description provided for @classTimetableError401.
+  ///
+  /// In en, this message translates to:
+  /// **'Your session expired for your security. Sign in again to view the timetable.'**
+  String get classTimetableError401;
+
+  /// No description provided for @classTimetableErrorForbiddenTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Access denied'**
+  String get classTimetableErrorForbiddenTitle;
+
+  /// No description provided for @classTimetableError403.
+  ///
+  /// In en, this message translates to:
+  /// **'Your account is not allowed to view the timetable. Ask your school administrator for access.'**
+  String get classTimetableError403;
+
+  /// No description provided for @classTimetableErrorServerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'The timetable could not open'**
+  String get classTimetableErrorServerTitle;
+
+  /// No description provided for @classTimetableErrorServer.
+  ///
+  /// In en, this message translates to:
+  /// **'Something went wrong. Try again in a moment.'**
+  String get classTimetableErrorServer;
 }
 
 class _AppLocalizationsDelegate

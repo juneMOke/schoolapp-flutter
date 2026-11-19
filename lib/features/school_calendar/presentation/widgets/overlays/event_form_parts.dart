@@ -1,3 +1,6 @@
+import 'package:school_app_flutter/features/school_calendar/domain/entities/calendar_scope_options.dart';
+import 'package:school_app_flutter/features/school_calendar/domain/entities/calendar_scope.dart';
+import 'package:school_app_flutter/core/widgets/eteelo_select_input.dart';
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/components/status/eteelo_notice.dart';
 import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
@@ -115,6 +118,51 @@ class EventFormMessages extends StatelessWidget {
                   )
                 : l10n.schoolCalendarWarnExam(warning.overlapped.title),
           ),
+      ],
+    );
+  }
+}
+
+/// « Concerne » (CAL-R6) : l'école, un cycle, ou un niveau d'un cycle.
+class EventScopeSelect extends StatelessWidget {
+  final CalendarScope scope;
+  final CalendarScopeOptions options;
+  final ValueChanged<CalendarScope> onChanged;
+
+  const EventScopeSelect({
+    super.key,
+    required this.scope,
+    required this.options,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    return EteeloSelectInput<String>(
+      label: l10n.schoolCalendarConcerns,
+      value: scope.wire,
+      onChanged: (v) => onChanged(CalendarScope.parse(v)),
+      items: [
+        EteeloSelectItem(
+          value: const SchoolScope().wire,
+          label: l10n.schoolCalendarScopeSchool,
+        ),
+        for (final cycle in options.cycles) ...[
+          EteeloSelectItem(
+            value: CycleScope(cycle.code).wire,
+            label: l10n.schoolCalendarScopeCycle(cycle.name),
+          ),
+          for (final level in options.levels)
+            if (level.cycleCode == cycle.code)
+              EteeloSelectItem(
+                value: LevelScope(
+                  cycleCode: cycle.code,
+                  levelCode: level.code,
+                ).wire,
+                label: l10n.schoolCalendarScopeLevel(level.name),
+              ),
+        ],
       ],
     );
   }

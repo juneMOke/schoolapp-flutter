@@ -9,6 +9,7 @@ import 'package:school_app_flutter/core/components/dialogs/eteelo_adaptive_sheet
 import 'package:school_app_flutter/core/components/dialogs/eteelo_form_dialog.dart';
 import 'package:school_app_flutter/core/components/status/eteelo_notice.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
+import 'package:school_app_flutter/core/offline/record_sync_state.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/core/widgets/app_confirmation_dialog.dart';
@@ -37,17 +38,27 @@ class TimetableDraftSection extends StatelessWidget {
   final ClassTimetableCubit cubit;
   final bool online;
 
+  /// Un geste est en cours : les actions attendent (I19).
+  final bool busy;
+
   const TimetableDraftSection({
     super.key,
     required this.view,
     required this.cubit,
     required this.online,
+    this.busy = false,
   });
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final conflicts = DraftConflicts.of(view);
+    // Une case refusée par le serveur (R18) est marquée comme un conflit et
+    // retient la publication : elle n'est pas au serveur.
+    final rejected = {
+      for (final c in view.draft)
+        if (c.syncState == RecordSyncState.failed) c.id,
+    };
     final week = ClassWeekBuilder.build(view, view.draft);
     final volumes = PlacedHours.volumes(
       plannedByCours: {
@@ -72,7 +83,7 @@ class TimetableDraftSection extends StatelessWidget {
               label: l10n.classTimetableCopy,
               icon: Icons.copy_all_outlined,
               fullWidth: false,
-              onPressed: view.othersKnown
+              onPressed: view.othersKnown && !busy
                   ? () => unawaited(copyTimetable(context, cubit))
                   : null,
             ),
@@ -80,13 +91,19 @@ class TimetableDraftSection extends StatelessWidget {
               label: l10n.classTimetableAbandon,
               icon: Icons.delete_outline,
               fullWidth: false,
-              onPressed: () => unawaited(_abandon(context)),
+              onPressed: busy ? null : () => unawaited(_abandon(context)),
             ),
             PrimaryButton(
               label: l10n.classTimetablePublish,
               icon: Icons.publish_outlined,
               fullWidth: false,
-              onPressed: () => unawaited(_publish(context, conflicts.length)),
+              // Hors ligne, rien à placer ou un geste en cours : Publier
+              // attend (refus.vide, R9).
+              onPressed: busy || !online || view.draft.every((c) => c.isEmpty)
+                  ? null
+                  : () => unawaited(
+                      _publish(context, conflicts.length, rejected.length),
+                    ),
             ),
           ],
         ),
@@ -94,9 +111,10 @@ class TimetableDraftSection extends StatelessWidget {
         EteeloPanelCard(
           title: l10n.classTimetableReserveTitle,
           child: Text(
-            planned == null
-                ? l10n.classTimetableReserveCount(toPlace)
-                : '${l10n.classTimetableReserveCount(toPlace)} · $placed/$planned h',
+            [
+              l10n.classTimetableReserveCount(toPlace),
+              if (planned != null) l10n.classTimetableHoursOf(placed, planned),
+            ].join(' · '),
             style: AppTypography.bodyMedium,
           ),
         ),
@@ -108,7 +126,7 @@ class TimetableDraftSection extends StatelessWidget {
           ),
           today: null,
           keepSaturday: true,
-          conflictSessionIds: conflicts.keys.toSet(),
+          conflictSessionIds: {...conflicts.keys, ...rejected},
           onTapSlot: view.othersKnown
               ? (day, slot) => unawaited(_openSlot(context, day, slot))
               : null,
@@ -160,7 +178,11 @@ class TimetableDraftSection extends StatelessWidget {
     _report(context, result, success: l10n.classTimetableSnackAbandoned);
   }
 
-  Future<void> _publish(BuildContext context, int conflicts) async {
+  Future<void> _publish(
+    BuildContext context,
+    int conflicts,
+    int rejected,
+  ) async {
     final l10n = AppLocalizations.of(context)!;
     final placed = [
       for (final c in view.draft)
@@ -172,6 +194,7 @@ class TimetableDraftSection extends StatelessWidget {
         sessions: placed.length,
         teachers: {for (final c in placed) ?c.teacherId}.length,
         conflicts: conflicts,
+        rejected: rejected,
         online: online,
         pending: view.hasPending,
       ),

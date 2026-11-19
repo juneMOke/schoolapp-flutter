@@ -17,6 +17,7 @@ import 'package:school_app_flutter/features/schedule/presentation/helpers/schedu
 import 'package:school_app_flutter/features/schedule/presentation/widgets/schedule_session_chip.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
+part 'schedule_week_grid_cell.dart';
 part 'schedule_week_grid_parts.dart';
 part 'schedule_week_grid_break.dart';
 

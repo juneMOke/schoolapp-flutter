@@ -1,3 +1,13 @@
+import 'package:bloc_test/bloc_test.dart';
+import 'package:mocktail/mocktail.dart';
+import 'package:school_app_flutter/features/schedule/data/timetable/class_calendar_reader.dart';
+import 'package:school_app_flutter/features/schedule/presentation/timetable/bloc/class_timetable_cubit.dart';
+import 'package:school_app_flutter/features/schedule/presentation/timetable/widgets/dated_week_bar.dart';
+import 'package:school_app_flutter/features/schedule/presentation/timetable/widgets/timetable_draft_section.dart';
+import 'package:school_app_flutter/features/school_calendar/domain/entities/calendar_element.dart';
+import 'package:school_app_flutter/features/school_calendar/domain/entities/calendar_enums.dart';
+import 'package:school_app_flutter/features/school_calendar/domain/entities/school_calendar.dart';
+import 'package:school_app_flutter/features/school_calendar/domain/services/days_between.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -164,4 +174,101 @@ void main() {
     );
     expect(find.text('Mathématiques'), findsWidgets);
   });
+
+  testAtReferenceFormats('brouillon : actions, réserve, grille, semaine datée '
+      'et bandeaux', (tester, format) async {
+    final base = _view();
+    final view = ClassTimetableView(
+      classroom: base.classroom,
+      grid: base.grid,
+      slots: base.slots,
+      header: const ClassTimetableHeader(
+        id: 'h',
+        classroomId: 'c7a',
+        academicYearId: 'y',
+        revision: 1,
+        publishedVersion: 1,
+        draftId: 'd',
+      ),
+      published: base.published,
+      draft: [
+        for (final c in base.published)
+          ClassTimetableCell(
+            id: 'D${c.id}',
+            classroomId: c.classroomId,
+            classroomLabel: c.classroomLabel,
+            status: TimetableCellStatus.draft,
+            draftId: 'd',
+            day: c.day,
+            slotId: c.slotId,
+            range: c.range,
+            coursId: c.coursId,
+            teacherId: c.teacherId,
+            subjectLabel: c.subjectLabel,
+            teacherLabel: c.teacherLabel,
+          ),
+      ],
+      programme: base.programme,
+      othersKnown: true,
+    );
+    final cubit = _Cubit();
+    when(() => cubit.state).thenReturn(ClassTimetableState(view: view));
+    final days = DaysBetween.compute(
+      from: DateTime.utc(2026, 6, 29),
+      to: DateTime.utc(2026, 7, 5),
+      elements: [
+        CalendarElement(
+          id: 'f',
+          source: CalendarSource.national,
+          nature: CalendarNature.publicHoliday,
+          title: 'Fête de l’indépendance nationale',
+          startDate: DateTime.utc(2026, 6, 30),
+          endDate: DateTime.utc(2026, 6, 30),
+        ),
+        CalendarElement(
+          id: 'x',
+          source: CalendarSource.school,
+          nature: CalendarNature.exam,
+          title: 'Examens du second semestre, toutes classes',
+          startDate: DateTime.utc(2026, 7, 1),
+          endDate: DateTime.utc(2026, 7, 3),
+        ),
+      ],
+    );
+    await tester.pumpWidget(
+      _host(
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            DatedWeekBar(
+              monday: DateTime.utc(2026, 6, 29),
+              isThisWeek: false,
+              onPrevious: () {},
+              onNext: () {},
+              onThisWeek: () {},
+            ),
+            PeriodBanners(
+              week: ClassCalendarWeek(
+                days: days,
+                calendar: SchoolCalendar(
+                  id: 'c',
+                  yearLabel: '2025-2026',
+                  status: CalendarStatus.published,
+                  startDate: DateTime.utc(2025, 9, 1),
+                  endDate: DateTime.utc(2026, 7, 3),
+                  framework: FrameworkState.integrated,
+                  revision: 1,
+                ),
+              ),
+            ),
+            TimetableDraftSection(view: view, cubit: cubit, online: false),
+          ],
+        ),
+      ),
+    );
+    expect(find.textContaining('Jour férié'), findsOneWidget);
+  });
 }
+
+class _Cubit extends MockCubit<ClassTimetableState>
+    implements ClassTimetableCubit {}

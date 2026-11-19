@@ -1,6 +1,8 @@
+import 'package:school_app_flutter/features/school_calendar/presentation/widgets/calendar/calendar_actions_row.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/components/keyboard/page_action_shortcut.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
 import 'package:school_app_flutter/core/components/skeletons/eteelo_list_skeleton.dart';
@@ -56,9 +58,50 @@ class _Screen extends StatelessWidget {
       builder: (context, state) => CalendarLocation(
         state: state,
         cubit: cubit,
-        child: AppPageBackground(
-          width: PageContentWidth.wide,
-          child: _content(context, state, cubit),
+        child: _shortcuts(
+          context,
+          state,
+          cubit,
+          AppPageBackground(
+            width: PageContentWidth.wide,
+            child: _content(context, state, cubit),
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// CAL-I20 au poste : F5 relit, Ctrl+N ajoute (un calendrier dans la
+  /// liste, un événement dans un calendrier ouvert), Ctrl+P imprime.
+  Widget _shortcuts(
+    BuildContext context,
+    SchoolCalendarState state,
+    SchoolCalendarCubit cubit,
+    Widget child,
+  ) {
+    final rights = CalendarRights.of(context);
+    final actions = SchoolCalendarPageActions(context, cubit, rights);
+    final calendar = state.calendar;
+    final VoidCallback? create = switch (calendar) {
+      null when rights.canPublish && online => () => unawaited(
+        actions.create(),
+      ),
+      final c? when rights.canWrite && !state.phaseOf(c).isReadOnly =>
+        () => unawaited(actions.edit(day: state.selectedDay)),
+      _ => null,
+    };
+    return PageActionShortcut(
+      action: PageAction.refresh,
+      onInvoke: () => unawaited(cubit.load(pull: true)),
+      child: PageActionShortcut(
+        action: PageAction.create,
+        onInvoke: create,
+        child: PageActionShortcut(
+          action: PageAction.print,
+          onInvoke: calendar != null && calendar.isPublished
+              ? () => unawaited(printSchoolCalendar(context, state))
+              : null,
+          child: child,
         ),
       ),
     );
@@ -184,8 +227,11 @@ class CalendarLocation extends StatelessWidget {
         ),
         day: CalendarDays.tryParse(values[dayParam]),
         hidden: {
+          // Une valeur inconnue s'ignore (elle ne masque pas « Vie de
+          // l'école » par le repli de `fromWire`).
           for (final raw in (values[hiddenParam] ?? '').split(','))
-            if (raw.isNotEmpty) CalendarNature.fromWire(raw),
+            for (final n in CalendarNature.values)
+              if (n.wire == raw) n,
         },
         source: CalendarSourceFilter.values.firstWhere(
           (s) => s.name == values[sourceParam],

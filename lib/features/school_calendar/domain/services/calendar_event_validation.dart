@@ -44,6 +44,9 @@ class CalendarEventCheck extends Equatable {
 /// Le serveur refuse les mêmes erreurs (`CALENDAR_DATES_INVALID`,
 /// `CALENDAR_OUT_OF_YEAR`) ; les avertissements, eux, restent à l'écran.
 class CalendarEventValidation {
+  /// La note d'un événement (contrat : 500 caractères au plus).
+  static const int noteMaxLength = 500;
+
   const CalendarEventValidation._();
 
   static CalendarEventCheck check({

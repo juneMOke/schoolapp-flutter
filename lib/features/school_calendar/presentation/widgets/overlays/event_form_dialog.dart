@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:school_app_flutter/core/components/buttons/primary_button.dart';
 import 'package:school_app_flutter/core/components/buttons/secondary_button.dart';
 import 'package:school_app_flutter/core/components/controls/eteelo_filter_chip.dart';
 import 'package:school_app_flutter/core/components/dialogs/eteelo_form_dialog.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/widgets/app_confirmation_dialog.dart';
-import 'package:school_app_flutter/core/widgets/eteelo_select_input.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_text_input.dart';
 import 'package:school_app_flutter/features/school_calendar/domain/entities/calendar_element.dart';
 import 'package:school_app_flutter/features/school_calendar/domain/entities/calendar_enums.dart';
@@ -55,6 +55,7 @@ class _EventFormDialogState extends State<EventFormDialog> {
   late final TextEditingController _title;
   late final TextEditingController _note;
   late CalendarNature _nature;
+  late final CalendarNature _initialNature;
   DateTime? _start;
   DateTime? _end;
   late CalendarScope _scope;
@@ -70,6 +71,7 @@ class _EventFormDialogState extends State<EventFormDialog> {
         (widget.natures.contains(CalendarNature.schoolLife)
             ? CalendarNature.schoolLife
             : widget.natures.first);
+    _initialNature = _nature;
     _start = initial?.startDate ?? widget.initialDay;
     _end = initial?.endDate ?? widget.initialDay;
     _scope = initial?.scope ?? const SchoolScope();
@@ -86,7 +88,9 @@ class _EventFormDialogState extends State<EventFormDialog> {
       _title.text.trim() != (widget.initial?.title ?? '') ||
       _note.text.trim() != (widget.initial?.note ?? '') ||
       _start != (widget.initial?.startDate ?? widget.initialDay) ||
-      _end != (widget.initial?.endDate ?? widget.initialDay);
+      _end != (widget.initial?.endDate ?? widget.initialDay) ||
+      _nature != _initialNature ||
+      _scope != (widget.initial?.scope ?? const SchoolScope());
 
   CalendarEventCheck? get _check {
     final start = _start;
@@ -196,31 +200,10 @@ class _EventFormDialogState extends State<EventFormDialog> {
               onEnd: (d) => setState(() => _end = d),
             ),
             const SizedBox(height: AppSpacing.md),
-            EteeloSelectInput<String>(
-              label: l10n.schoolCalendarConcerns,
-              value: _scope.wire,
-              onChanged: (v) => setState(() => _scope = CalendarScope.parse(v)),
-              items: [
-                EteeloSelectItem(
-                  value: const SchoolScope().wire,
-                  label: l10n.schoolCalendarScopeSchool,
-                ),
-                for (final cycle in widget.scopes.cycles) ...[
-                  EteeloSelectItem(
-                    value: CycleScope(cycle.code).wire,
-                    label: l10n.schoolCalendarScopeCycle(cycle.name),
-                  ),
-                  for (final level in widget.scopes.levels)
-                    if (level.cycleCode == cycle.code)
-                      EteeloSelectItem(
-                        value: LevelScope(
-                          cycleCode: cycle.code,
-                          levelCode: level.code,
-                        ).wire,
-                        label: l10n.schoolCalendarScopeLevel(level.name),
-                      ),
-                ],
-              ],
+            EventScopeSelect(
+              scope: _scope,
+              options: widget.scopes,
+              onChanged: (scope) => setState(() => _scope = scope),
             ),
             const SizedBox(height: AppSpacing.md),
             EteeloTextInput(
@@ -229,6 +212,11 @@ class _EventFormDialogState extends State<EventFormDialog> {
               keyboardType: EteeloTextInputType.multiline,
               minLines: 2,
               maxLines: 4,
+              inputFormatters: [
+                LengthLimitingTextInputFormatter(
+                  CalendarEventValidation.noteMaxLength,
+                ),
+              ],
             ),
             const SizedBox(height: AppSpacing.md),
             EventFormMessages(

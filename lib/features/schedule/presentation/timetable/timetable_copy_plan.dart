@@ -24,13 +24,16 @@ class TimetableCopyPlan {
             GridSlot(slotId: s.id, order: s.order, range: range),
       ],
       sourceCells: [
+        // Un cours de la source sans branche connue (sorti de son programme)
+        // compte « sans cours équivalent » : une branche qu'aucun cours de la
+        // cible ne porte.
         for (final c in source.cells)
-          if (c.coursId != null && source.branchByCours[c.coursId] != null)
+          if (c.coursId case final coursId?)
             SourceCell(
               day: c.day,
               slotId: c.slotId,
-              coursId: c.coursId!,
-              branchId: source.branchByCours[c.coursId]!,
+              coursId: coursId,
+              branchId: source.branchByCours[coursId] ?? '?$coursId',
             ),
       ],
       targetCourses: [
