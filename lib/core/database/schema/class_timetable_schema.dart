@@ -28,6 +28,12 @@ const TableSchema ttProgrammesTable = TableSchema(
 
 /// `tt_class_timetables` (v85) — l'en-tête de l'emploi du temps d'une classe
 /// (flux `schedule.timetables`) : version publiée, brouillon ouvert, révision.
+///
+/// Les gestes de brouillon « commencer » et « abandonner » faits sur
+/// l'appareil y attendent leur envoi (`pending_gesture` START | ABANDON, sur
+/// `pending_draft_id`, à l'horloge `pending_clock`) ; un refus garde son code.
+/// Une classe jamais publiée n'a pas d'en-tête serveur : la ligne locale a
+/// pour id `local:<classe>` jusqu'au premier tirage.
 const TableSchema ttClassTimetablesTable = TableSchema(
   name: 'tt_class_timetables',
   createTableSql: '''
@@ -44,6 +50,10 @@ const TableSchema ttClassTimetablesTable = TableSchema(
       draft_updated_by_name TEXT,
       draft_updated_by_role TEXT,
       revision INTEGER NOT NULL DEFAULT 0,
+      pending_gesture TEXT,
+      pending_draft_id TEXT,
+      pending_clock INTEGER,
+      sync_error_code TEXT,
       server_updated_at INTEGER,
       synced_at INTEGER NOT NULL
     )
@@ -59,9 +69,10 @@ const TableSchema ttClassTimetablesTable = TableSchema(
 /// l'appareil (dernier écrit gagne par case, `client_updated_at`).
 ///
 /// Une case nomme ses minutes et son enseignant : les conflits se calculent
-/// sur l'appareil (A11). `id` est celui du serveur, stable pour (classe,
-/// statut, brouillon, jour, créneau) ; une case posée ici, encore inconnue du
-/// serveur, a un id local de même forme.
+/// sur l'appareil (A11). `id` est la **clé naturelle** (statut, classe,
+/// brouillon, jour, créneau — `ClassTimetableCell.keyOf`), jamais l'id du
+/// serveur : une case posée ici et la même case renvoyée par le flux tombent
+/// sur la même ligne.
 const TableSchema ttCellsTable = TableSchema(
   name: 'tt_cells',
   createTableSql: '''

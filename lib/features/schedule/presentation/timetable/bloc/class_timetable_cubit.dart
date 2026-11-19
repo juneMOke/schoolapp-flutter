@@ -1,9 +1,11 @@
+import 'package:dartz/dartz.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/core/offline/pull_coordinator.dart';
 import 'package:school_app_flutter/features/schedule/data/sync/time_grids_pull_handler.dart';
 import 'package:school_app_flutter/features/schedule/data/timetable/class_timetable_reader.dart';
+import 'package:school_app_flutter/features/schedule/data/timetable/timetable_editor.dart';
 import 'package:school_app_flutter/features/schedule/data/timetable/timetable_pull_handlers.dart';
 import 'package:school_app_flutter/features/schedule/domain/entities/timetable/class_timetable_view.dart';
 import 'package:school_app_flutter/features/schedule/domain/entities/weekday.dart';
@@ -77,11 +79,16 @@ class ClassTimetableState extends Equatable {
 /// `schedule.read`).
 class ClassTimetableCubit extends Cubit<ClassTimetableState> {
   final ClassTimetableReader _reader;
+  final TimetableEditor? _editor;
   final PullCoordinator? _coordinator;
 
-  ClassTimetableCubit(this._reader, {PullCoordinator? coordinator})
-    : _coordinator = coordinator,
-      super(const ClassTimetableState());
+  ClassTimetableCubit(
+    this._reader, {
+    TimetableEditor? editor,
+    PullCoordinator? coordinator,
+  }) : _editor = editor,
+       _coordinator = coordinator,
+       super(const ClassTimetableState());
 
   static const Set<String> resources = {
     kScheduleTimeGridsResource,
@@ -134,6 +141,40 @@ class ClassTimetableCubit extends Cubit<ClassTimetableState> {
   void setDay(Weekday? day) => emit(
     day == null ? state.copyWith(clearDay: true) : state.copyWith(day: day),
   );
+
+  // ── Brouillon (sous `schedule.write`) ──
+
+  Future<Either<Failure, Unit>> startDraft() =>
+      _edit((editor, view) => editor.start(view));
+
+  Future<Either<Failure, Unit>> setCells(List<CellChange> changes) =>
+      _edit((editor, view) => editor.setCells(view, changes));
+
+  Future<Either<Failure, Unit>> abandonDraft() =>
+      _edit((editor, view) => editor.abandon(view));
+
+  /// En ligne : la révision lue ; ensuite les flux redescendent la version.
+  Future<Either<Failure, Unit>> publish() async {
+    final result = await _edit((editor, view) => editor.publish(view));
+    final coordinator = _coordinator;
+    if (result.isRight() && coordinator != null) {
+      await coordinator.pullSubset(resources);
+      await _reloadView();
+    }
+    return result;
+  }
+
+  Future<Either<Failure, Unit>> _edit(
+    Future<Either<Failure, Unit>> Function(TimetableEditor, ClassTimetableView)
+    gesture,
+  ) async {
+    final editor = _editor;
+    final view = state.view;
+    if (editor == null || view == null) return const Left(StorageFailure());
+    final result = await gesture(editor, view);
+    await _reloadView();
+    return result;
+  }
 
   Future<void> _reloadView() async {
     final selected = state.selected;

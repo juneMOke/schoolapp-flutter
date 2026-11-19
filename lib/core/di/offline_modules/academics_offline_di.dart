@@ -1,8 +1,12 @@
+import 'package:school_app_flutter/core/offline/outbox_dao.dart';
 import 'package:sqflite_common/sqlite_api.dart';
 import 'package:school_app_flutter/core/offline/keyset_pull_runner.dart';
 import 'package:school_app_flutter/core/di/offline_modules/evaluation_depot_di.dart';
 import 'package:school_app_flutter/features/schedule/data/timetable/class_timetable_reader.dart';
 import 'package:school_app_flutter/features/schedule/data/timetable/timetable_dao.dart';
+import 'package:school_app_flutter/features/schedule/data/timetable/timetable_draft_dao.dart';
+import 'package:school_app_flutter/features/schedule/data/timetable/timetable_draft_outbox_handler.dart';
+import 'package:school_app_flutter/features/schedule/data/timetable/timetable_editor.dart';
 import 'package:school_app_flutter/features/schedule/presentation/timetable/bloc/class_timetable_cubit.dart';
 import 'package:school_app_flutter/features/schedule/data/timetable/timetable_pull_handlers.dart';
 import 'package:school_app_flutter/features/schedule/data/sync/time_grids_pull_handler.dart';
@@ -299,7 +303,24 @@ void registerAcademicsOffline(GetIt getIt) {
         getIt<SyncMetaDao>(),
         schoolId: () => getIt<CurrentUserContext>().schoolId,
       ),
+      editor: TimetableEditor(
+        db: getIt<Database>(),
+        dio: getIt<Dio>(),
+        requiredAuth: getIt<Map<String, dynamic>>(),
+        ids: getIt<IdGenerator>(),
+        schoolId: () => getIt<CurrentUserContext>().schoolId,
+        engine: getIt<SyncEngine>(),
+      ),
       coordinator: getIt<PullCoordinator>(),
+    ),
+  );
+  // Les gestes de brouillon partent par le lot (A18), web compris.
+  getIt<SyncEngine>().registerHandler(
+    TimetableDraftOutboxHandler(
+      dio: getIt<Dio>(),
+      dao: TimetableDraftDao(getIt<Database>()),
+      outbox: OutboxDao(getIt<Database>()),
+      requiredAuth: getIt<Map<String, dynamic>>(),
     ),
   );
   getIt<PullCoordinator>()

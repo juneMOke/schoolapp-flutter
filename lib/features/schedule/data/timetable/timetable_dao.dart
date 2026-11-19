@@ -44,18 +44,34 @@ class TimetableDao {
     return courses.length;
   }
 
+  /// Un en-tête descendu remplace la ligne de sa classe (et la ligne locale
+  /// `local:<classe>` d'une classe jamais publiée), **en gardant** un geste de
+  /// brouillon encore en attente sur l'appareil.
   Future<int> applyHeaders(
     List<PulledTimetableRow<ClassTimetableHeader>> rows,
     int nowMs,
   ) async {
-    final batch = _db.batch();
     for (final row in rows) {
       final h = row.value;
-      if (row.deleted) {
-        batch.delete(headers, where: 'id = ?', whereArgs: [h.id]);
-        continue;
-      }
-      batch.insert(headers, {
+      final kept = await _db.query(
+        headers,
+        columns: [
+          'pending_gesture',
+          'pending_draft_id',
+          'pending_clock',
+          'sync_error_code',
+        ],
+        where: 'classroom_id = ? AND pending_gesture IS NOT NULL',
+        whereArgs: [h.classroomId],
+        limit: 1,
+      );
+      await _db.delete(
+        headers,
+        where: 'classroom_id = ? OR id = ?',
+        whereArgs: [h.classroomId, h.id],
+      );
+      if (row.deleted) continue;
+      await _db.insert(headers, {
         'id': h.id,
         'classroom_id': h.classroomId,
         'academic_year_id': h.academicYearId,
@@ -68,11 +84,11 @@ class TimetableDao {
         'draft_updated_by_name': h.draftUpdatedBy?.name,
         'draft_updated_by_role': h.draftUpdatedBy?.role,
         'revision': h.revision,
+        if (kept.isNotEmpty) ...kept.first,
         'server_updated_at': row.serverUpdatedAtMs,
         'synced_at': nowMs,
-      }, conflictAlgorithm: ConflictAlgorithm.replace);
+      });
     }
-    await batch.commit(noResult: true);
     return rows.length;
   }
 
@@ -196,24 +212,35 @@ class TimetableDao {
     weeklyHours: r['weekly_hours'] as int?,
   );
 
-  static ClassTimetableHeader _headerOf(Map<String, Object?> r) =>
-      ClassTimetableHeader(
-        id: r['id']! as String,
-        classroomId: r['classroom_id']! as String,
-        academicYearId: r['academic_year_id']! as String,
-        publishedVersion: r['published_version'] as int?,
-        publishedAt: DateTime.tryParse((r['published_at'] as String?) ?? ''),
-        publishedBy: _actor(r['published_by_name'], r['published_by_role']),
-        draftId: r['draft_id'] as String?,
-        draftUpdatedAt: DateTime.tryParse(
-          (r['draft_updated_at'] as String?) ?? '',
-        ),
-        draftUpdatedBy: _actor(
-          r['draft_updated_by_name'],
-          r['draft_updated_by_role'],
-        ),
-        revision: (r['revision'] as int?) ?? 0,
-      );
+  /// Le brouillon que l'écran montre tient compte d'un geste en attente :
+  /// un « commencer » ouvre son brouillon, un « abandonner » le ferme.
+  static ClassTimetableHeader _headerOf(Map<String, Object?> r) {
+    final pending = r['pending_gesture'] as String?;
+    final draftId = switch (pending) {
+      'START' => r['pending_draft_id'] as String?,
+      'ABANDON' => null,
+      _ => r['draft_id'] as String?,
+    };
+    return ClassTimetableHeader(
+      id: r['id']! as String,
+      classroomId: r['classroom_id']! as String,
+      academicYearId: r['academic_year_id']! as String,
+      publishedVersion: r['published_version'] as int?,
+      publishedAt: DateTime.tryParse((r['published_at'] as String?) ?? ''),
+      publishedBy: _actor(r['published_by_name'], r['published_by_role']),
+      draftId: draftId,
+      draftUpdatedAt: DateTime.tryParse(
+        (r['draft_updated_at'] as String?) ?? '',
+      ),
+      draftUpdatedBy: _actor(
+        r['draft_updated_by_name'],
+        r['draft_updated_by_role'],
+      ),
+      revision: (r['revision'] as int?) ?? 0,
+      pendingGesture: pending,
+      errorCode: r['sync_error_code'] as String?,
+    );
+  }
 
   static TimetableActor? _actor(Object? name, Object? role) =>
       name == null && role == null

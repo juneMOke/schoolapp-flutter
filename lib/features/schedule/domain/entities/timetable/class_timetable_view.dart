@@ -2,6 +2,7 @@ import 'package:equatable/equatable.dart';
 import 'package:school_app_flutter/features/schedule/domain/entities/time_grid.dart';
 import 'package:school_app_flutter/features/schedule/domain/entities/time_slot.dart';
 import 'package:school_app_flutter/features/schedule/domain/entities/timetable/class_timetable.dart';
+import 'package:school_app_flutter/features/schedule/domain/services/slot_overlap.dart';
 
 /// Une classe proposée par le choix Cycle → Niveau → Classe (EDT §4.6 A).
 class TimetableClassOption extends Equatable {
@@ -43,6 +44,13 @@ class ClassTimetableView extends Equatable {
   /// contrôle des conflits est indisponible (EDT §5, « partiel »).
   final bool othersKnown;
 
+  /// Les séances qui occupent les enseignants ailleurs (publiées et
+  /// brouillons des autres classes) : les conflits sur l'appareil (R4, A11).
+  final List<TeacherBooking> bookings;
+
+  /// Des gestes de cette classe attendent leur envoi : « Publier » attend.
+  final bool hasPending;
+
   const ClassTimetableView({
     required this.classroom,
     required this.grid,
@@ -52,6 +60,8 @@ class ClassTimetableView extends Equatable {
     required this.draft,
     required this.programme,
     required this.othersKnown,
+    this.bookings = const [],
+    this.hasPending = false,
   });
 
   bool get hasDraft => header?.draftId != null;
@@ -81,5 +91,7 @@ class ClassTimetableView extends Equatable {
     draft,
     programme,
     othersKnown,
+    bookings,
+    hasPending,
   ];
 }

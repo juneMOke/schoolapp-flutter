@@ -87,6 +87,8 @@ class _SlotRow extends StatelessWidget {
   final ScheduleClassPalette palette;
   final AppLocalizations l10n;
   final void Function(TimetableCell cell)? onOpenCell;
+  final void Function(Weekday day, TimeSlot slot)? onTapSlot;
+  final Set<String> conflictSessionIds;
 
   const _SlotRow({
     required this.row,
@@ -98,6 +100,8 @@ class _SlotRow extends StatelessWidget {
     required this.palette,
     required this.l10n,
     required this.onOpenCell,
+    required this.onTapSlot,
+    required this.conflictSessionIds,
   });
 
   @override
@@ -131,6 +135,10 @@ class _SlotRow extends StatelessWidget {
                   palette: palette,
                   l10n: l10n,
                   onOpenCell: onOpenCell,
+                  onTapSlot: onTapSlot,
+                  conflict: conflictSessionIds.contains(
+                    row.cellFor(day)?.sessionId,
+                  ),
                 ),
               ),
           ],
@@ -182,6 +190,8 @@ class _Cell extends StatelessWidget {
   final ScheduleClassPalette palette;
   final AppLocalizations l10n;
   final void Function(TimetableCell cell)? onOpenCell;
+  final void Function(Weekday day, TimeSlot slot)? onTapSlot;
+  final bool conflict;
 
   const _Cell({
     required this.cell,
@@ -192,11 +202,15 @@ class _Cell extends StatelessWidget {
     required this.palette,
     required this.l10n,
     required this.onOpenCell,
+    required this.onTapSlot,
+    required this.conflict,
   });
 
   @override
   Widget build(BuildContext context) {
     final current = cell;
+    final tapSlot = onTapSlot;
+    if (tapSlot != null) return _editable(context, current, tapSlot);
     return Container(
       constraints: BoxConstraints(minHeight: minHeight),
       padding: const EdgeInsets.all(5),
@@ -218,6 +232,58 @@ class _Cell extends StatelessWidget {
                   '${current.subjectLabel} · ${current.classroomLabel}',
               onTap: onOpenCell == null ? null : () => onOpenCell!(current),
             ),
+    );
+  }
+
+  /// En brouillon : la case entière est une cible (48 dp et plus), libre en
+  /// tirets « + », occupée avec sa puce — en rouge si elle est en conflit.
+  Widget _editable(
+    BuildContext context,
+    TimetableCell? current,
+    void Function(Weekday day, TimeSlot slot) tapSlot,
+  ) {
+    final range =
+        '${ScheduleTimeFormat.hourMinute(timeSlot.startTime)} – '
+        '${ScheduleTimeFormat.hourMinute(timeSlot.endTime)}';
+    return Container(
+      constraints: BoxConstraints(minHeight: minHeight),
+      padding: const EdgeInsets.all(AppSpacing.xs),
+      decoration: const BoxDecoration(
+        border: Border(left: BorderSide(color: AppColors.border)),
+      ),
+      child: EteeloActivatable(
+        onActivate: () => tapSlot(day, timeSlot),
+        semanticLabel:
+            '${ScheduleWeekdayLabels.long(l10n, day)} · $range'
+            '${current == null ? '' : ' · ${current.subjectLabel}'}',
+        builder: (context, highlight) => current == null
+            ? EteeloDashedContainer(
+                backgroundColor: highlight.any
+                    ? AppColors.terreCuiteSoft
+                    : AppColors.surfaceRaised,
+                borderColor: AppColors.terreCuite,
+                borderRadius: AppRadius.brSm,
+                padding: const EdgeInsets.all(AppSpacing.xs),
+                child: const Center(
+                  child: Icon(Icons.add, color: AppColors.terreCuite),
+                ),
+              )
+            : DecoratedBox(
+                decoration: conflict
+                    ? BoxDecoration(
+                        color: AppColors.feeStatusDueSoft,
+                        borderRadius: AppRadius.brSm,
+                        border: Border.all(color: AppColors.error),
+                      )
+                    : const BoxDecoration(),
+                child: IgnorePointer(
+                  child: ScheduleSessionChip(
+                    cell: current,
+                    visual: palette.visualForCell(current),
+                  ),
+                ),
+              ),
+      ),
     );
   }
 }

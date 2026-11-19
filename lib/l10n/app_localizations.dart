@@ -37233,6 +37233,222 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Loading timetables'**
   String get classTimetableLoading;
+
+  /// No description provided for @classTimetableEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get classTimetableEdit;
+
+  /// No description provided for @classTimetableCreate.
+  ///
+  /// In en, this message translates to:
+  /// **'Create the timetable'**
+  String get classTimetableCreate;
+
+  /// No description provided for @classTimetableAbandon.
+  ///
+  /// In en, this message translates to:
+  /// **'Discard'**
+  String get classTimetableAbandon;
+
+  /// No description provided for @classTimetablePublish.
+  ///
+  /// In en, this message translates to:
+  /// **'Publish'**
+  String get classTimetablePublish;
+
+  /// No description provided for @classTimetableHelpDraft.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap a slot in the grid to place a course.'**
+  String get classTimetableHelpDraft;
+
+  /// No description provided for @classTimetableReserveTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Courses to place'**
+  String get classTimetableReserveTitle;
+
+  /// No description provided for @classTimetableReserveCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{All courses placed} =1{1 course to place} other{{count} courses to place}}'**
+  String classTimetableReserveCount(int count);
+
+  /// No description provided for @classTimetableRemaining.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} h left'**
+  String classTimetableRemaining(int count);
+
+  /// No description provided for @classTimetableComplete.
+  ///
+  /// In en, this message translates to:
+  /// **'complete'**
+  String get classTimetableComplete;
+
+  /// No description provided for @classTimetableOver.
+  ///
+  /// In en, this message translates to:
+  /// **'+{count} h'**
+  String classTimetableOver(int count);
+
+  /// No description provided for @classTimetableSlotTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Slot {start} – {end}'**
+  String classTimetableSlotTitle(String start, String end);
+
+  /// No description provided for @classTimetableSlotHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick the course to place; courses with a teacher conflict are blocked.'**
+  String get classTimetableSlotHelp;
+
+  /// No description provided for @classTimetableSlotFree.
+  ///
+  /// In en, this message translates to:
+  /// **'Free the slot'**
+  String get classTimetableSlotFree;
+
+  /// No description provided for @classTimetableConflict.
+  ///
+  /// In en, this message translates to:
+  /// **'Conflict'**
+  String get classTimetableConflict;
+
+  /// No description provided for @classTimetableBusyIn.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} already teaches {classroom}'**
+  String classTimetableBusyIn(String name, String classroom);
+
+  /// No description provided for @classTimetableConflictWith.
+  ///
+  /// In en, this message translates to:
+  /// **'Conflict with {classroom}'**
+  String classTimetableConflictWith(String classroom);
+
+  /// No description provided for @classTimetableConflictsKpi.
+  ///
+  /// In en, this message translates to:
+  /// **'Conflicts'**
+  String get classTimetableConflictsKpi;
+
+  /// No description provided for @classTimetablePartial.
+  ///
+  /// In en, this message translates to:
+  /// **'Conflict checks unavailable: editing resumes once the other classes are loaded.'**
+  String get classTimetablePartial;
+
+  /// No description provided for @classTimetableOfflineDraft.
+  ///
+  /// In en, this message translates to:
+  /// **'Offline. Your changes stay on this device and will be sent when the network returns. Conflicts are checked against the timetables known to this device; publishing waits for the network.'**
+  String get classTimetableOfflineDraft;
+
+  /// No description provided for @classTimetablePublishTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Publish the timetable'**
+  String get classTimetablePublishTitle;
+
+  /// No description provided for @classTimetablePublishSessions.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} sessions per week'**
+  String classTimetablePublishSessions(int count);
+
+  /// No description provided for @classTimetablePublishTeachers.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 teacher will see this new timetable in Courses ▸ Timetable and My journal} other{{count} teachers will see this new timetable in Courses ▸ Timetable and My journal}}'**
+  String classTimetablePublishTeachers(int count);
+
+  /// No description provided for @classTimetableNoConflict.
+  ///
+  /// In en, this message translates to:
+  /// **'No teacher conflict'**
+  String get classTimetableNoConflict;
+
+  /// No description provided for @classTimetableConflictsBlocking.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 teacher conflict to resolve before publishing} other{{count} teacher conflicts to resolve before publishing}}'**
+  String classTimetableConflictsBlocking(int count);
+
+  /// No description provided for @classTimetablePublishPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Changes are waiting to be sent: publishing waits until they are gone.'**
+  String get classTimetablePublishPending;
+
+  /// No description provided for @classTimetablePublishOffline.
+  ///
+  /// In en, this message translates to:
+  /// **'Offline: publishing waits for the network.'**
+  String get classTimetablePublishOffline;
+
+  /// No description provided for @classTimetablePublishConsequence.
+  ///
+  /// In en, this message translates to:
+  /// **'The teachers concerned see their timetable and journal updated at once. The previous version is replaced.'**
+  String get classTimetablePublishConsequence;
+
+  /// No description provided for @classTimetableAbandonTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Discard the draft?'**
+  String get classTimetableAbandonTitle;
+
+  /// No description provided for @classTimetableAbandonBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The changes to {name} will be lost. The published version stays in force.'**
+  String classTimetableAbandonBody(String name);
+
+  /// No description provided for @classTimetableAbandonBodyNew.
+  ///
+  /// In en, this message translates to:
+  /// **'The timetable of {name} will be deleted.'**
+  String classTimetableAbandonBodyNew(String name);
+
+  /// No description provided for @classTimetableCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get classTimetableCancel;
+
+  /// No description provided for @classTimetableSnackPublished.
+  ///
+  /// In en, this message translates to:
+  /// **'Timetable published · visible to teachers'**
+  String get classTimetableSnackPublished;
+
+  /// No description provided for @classTimetableSnackAbandoned.
+  ///
+  /// In en, this message translates to:
+  /// **'Draft discarded'**
+  String get classTimetableSnackAbandoned;
+
+  /// No description provided for @classTimetableSaveFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not save — Retry'**
+  String get classTimetableSaveFailed;
+
+  /// No description provided for @classTimetableRefusal.
+  ///
+  /// In en, this message translates to:
+  /// **'{code, select, TIMETABLE_DRAFT_UNKNOWN{The server does not know this draft yet: its changes will follow it.} TIMETABLE_GESTURE_INVALID{A change was incomplete and was not saved.} TIMETABLE_CONFLICT{Another timetable now takes one of your teachers: resolve the flagged conflicts before publishing.} TIMETABLE_EMPTY{Place at least one session before publishing.} TIMETABLE_OUT_OF_PROGRAMME{A session holds a course removed from the programme: free it before publishing.} TIMETABLE_DRAFT_CHANGED{The draft was changed from another device: it was reloaded.} TIMETABLE_DRAFT_ENDED{This draft was published or discarded meanwhile.} other{The server refused this action.}}'**
+  String classTimetableRefusal(String code);
+
+  /// No description provided for @syncAggregateTimetableDraft.
+  ///
+  /// In en, this message translates to:
+  /// **'Timetable drafts'**
+  String get syncAggregateTimetableDraft;
 }
 
 class _AppLocalizationsDelegate

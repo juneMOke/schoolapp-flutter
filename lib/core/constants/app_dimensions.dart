@@ -1495,6 +1495,9 @@ class AppDimensions {
   /// La liste du mois à côté du mois, dès `sideBySideMin` reçus (§4.1).
   static const calendarSideListWidth = 280.0;
 
+  /// Un cours bloqué (conflit professeur) dans le choix d'un créneau (EDT O2).
+  static const timetableBlockedOptionOpacity = 0.6;
+
   /// Un élément passé, estompé dans les listes (§4.3).
   static const calendarPastOpacity = 0.6;
 

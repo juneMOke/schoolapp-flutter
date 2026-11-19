@@ -24467,4 +24467,182 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get classTimetableLoading => 'Chargement des emplois du temps';
+
+  @override
+  String get classTimetableEdit => 'Modifier';
+
+  @override
+  String get classTimetableCreate => 'Créer l\'emploi du temps';
+
+  @override
+  String get classTimetableAbandon => 'Abandonner';
+
+  @override
+  String get classTimetablePublish => 'Publier';
+
+  @override
+  String get classTimetableHelpDraft =>
+      'Touchez un créneau de la grille pour y placer un cours.';
+
+  @override
+  String get classTimetableReserveTitle => 'Cours à placer';
+
+  @override
+  String classTimetableReserveCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count cours à placer',
+      one: '1 cours à placer',
+      zero: 'Tous les cours sont placés',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String classTimetableRemaining(int count) {
+    return 'reste $count h';
+  }
+
+  @override
+  String get classTimetableComplete => 'complet';
+
+  @override
+  String classTimetableOver(int count) {
+    return '+$count h';
+  }
+
+  @override
+  String classTimetableSlotTitle(String start, String end) {
+    return 'Créneau $start – $end';
+  }
+
+  @override
+  String get classTimetableSlotHelp =>
+      'Choisissez le cours à placer ; les cours en conflit professeur sont bloqués.';
+
+  @override
+  String get classTimetableSlotFree => 'Libérer le créneau';
+
+  @override
+  String get classTimetableConflict => 'Conflit';
+
+  @override
+  String classTimetableBusyIn(String name, String classroom) {
+    return '$name a déjà cours en $classroom';
+  }
+
+  @override
+  String classTimetableConflictWith(String classroom) {
+    return 'Conflit avec $classroom';
+  }
+
+  @override
+  String get classTimetableConflictsKpi => 'Conflits';
+
+  @override
+  String get classTimetablePartial =>
+      'Contrôle des conflits indisponible : la modification reprendra quand les autres classes seront chargées.';
+
+  @override
+  String get classTimetableOfflineDraft =>
+      'Hors ligne. Vos modifications restent sur cet appareil et partiront au retour du réseau. Les conflits sont contrôlés avec les emplois du temps connus de l\'appareil ; la publication attend le réseau.';
+
+  @override
+  String get classTimetablePublishTitle => 'Publier l\'emploi du temps';
+
+  @override
+  String classTimetablePublishSessions(int count) {
+    return '$count séances par semaine';
+  }
+
+  @override
+  String classTimetablePublishTeachers(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          '$count professeurs verront ce nouvel emploi du temps dans Cours ▸ Emploi du temps et Mon journal',
+      one:
+          '1 professeur verra ce nouvel emploi du temps dans Cours ▸ Emploi du temps et Mon journal',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get classTimetableNoConflict => 'Aucun conflit professeur';
+
+  @override
+  String classTimetableConflictsBlocking(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count conflits professeur à résoudre avant de publier',
+      one: '1 conflit professeur à résoudre avant de publier',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get classTimetablePublishPending =>
+      'Des modifications attendent d\'être envoyées : la publication attend qu\'elles soient parties.';
+
+  @override
+  String get classTimetablePublishOffline =>
+      'Hors ligne : la publication attend le retour du réseau.';
+
+  @override
+  String get classTimetablePublishConsequence =>
+      'Les professeurs concernés voient immédiatement leur emploi du temps et leur journal mis à jour. La version précédente est remplacée.';
+
+  @override
+  String get classTimetableAbandonTitle => 'Abandonner le brouillon ?';
+
+  @override
+  String classTimetableAbandonBody(String name) {
+    return 'Les modifications de $name seront perdues. La version publiée reste en vigueur.';
+  }
+
+  @override
+  String classTimetableAbandonBodyNew(String name) {
+    return 'L\'emploi du temps de $name sera supprimé.';
+  }
+
+  @override
+  String get classTimetableCancel => 'Annuler';
+
+  @override
+  String get classTimetableSnackPublished =>
+      'Emploi du temps publié · visible des professeurs';
+
+  @override
+  String get classTimetableSnackAbandoned => 'Brouillon abandonné';
+
+  @override
+  String get classTimetableSaveFailed =>
+      'Enregistrement impossible — Réessayer';
+
+  @override
+  String classTimetableRefusal(String code) {
+    String _temp0 = intl.Intl.selectLogic(code, {
+      'TIMETABLE_DRAFT_UNKNOWN':
+          'Ce brouillon n\'est pas encore connu du serveur : ses modifications partiront avec lui.',
+      'TIMETABLE_GESTURE_INVALID':
+          'Une modification était incomplète : elle n\'a pas été enregistrée.',
+      'TIMETABLE_CONFLICT':
+          'Un autre emploi du temps occupe désormais un de vos professeurs : résolvez les conflits signalés avant de publier.',
+      'TIMETABLE_EMPTY': 'Placez au moins une séance avant de publier.',
+      'TIMETABLE_OUT_OF_PROGRAMME':
+          'Une séance porte un cours retiré du programme : libérez-la avant de publier.',
+      'TIMETABLE_DRAFT_CHANGED':
+          'Le brouillon a été modifié depuis un autre poste : il a été rechargé.',
+      'TIMETABLE_DRAFT_ENDED':
+          'Ce brouillon a été publié ou abandonné entre-temps.',
+      'other': 'Le serveur a refusé ce geste.',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String get syncAggregateTimetableDraft => 'Brouillons d\'emploi du temps';
 }

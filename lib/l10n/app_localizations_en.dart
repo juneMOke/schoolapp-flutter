@@ -24295,4 +24295,180 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get classTimetableLoading => 'Loading timetables';
+
+  @override
+  String get classTimetableEdit => 'Edit';
+
+  @override
+  String get classTimetableCreate => 'Create the timetable';
+
+  @override
+  String get classTimetableAbandon => 'Discard';
+
+  @override
+  String get classTimetablePublish => 'Publish';
+
+  @override
+  String get classTimetableHelpDraft =>
+      'Tap a slot in the grid to place a course.';
+
+  @override
+  String get classTimetableReserveTitle => 'Courses to place';
+
+  @override
+  String classTimetableReserveCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count courses to place',
+      one: '1 course to place',
+      zero: 'All courses placed',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String classTimetableRemaining(int count) {
+    return '$count h left';
+  }
+
+  @override
+  String get classTimetableComplete => 'complete';
+
+  @override
+  String classTimetableOver(int count) {
+    return '+$count h';
+  }
+
+  @override
+  String classTimetableSlotTitle(String start, String end) {
+    return 'Slot $start – $end';
+  }
+
+  @override
+  String get classTimetableSlotHelp =>
+      'Pick the course to place; courses with a teacher conflict are blocked.';
+
+  @override
+  String get classTimetableSlotFree => 'Free the slot';
+
+  @override
+  String get classTimetableConflict => 'Conflict';
+
+  @override
+  String classTimetableBusyIn(String name, String classroom) {
+    return '$name already teaches $classroom';
+  }
+
+  @override
+  String classTimetableConflictWith(String classroom) {
+    return 'Conflict with $classroom';
+  }
+
+  @override
+  String get classTimetableConflictsKpi => 'Conflicts';
+
+  @override
+  String get classTimetablePartial =>
+      'Conflict checks unavailable: editing resumes once the other classes are loaded.';
+
+  @override
+  String get classTimetableOfflineDraft =>
+      'Offline. Your changes stay on this device and will be sent when the network returns. Conflicts are checked against the timetables known to this device; publishing waits for the network.';
+
+  @override
+  String get classTimetablePublishTitle => 'Publish the timetable';
+
+  @override
+  String classTimetablePublishSessions(int count) {
+    return '$count sessions per week';
+  }
+
+  @override
+  String classTimetablePublishTeachers(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          '$count teachers will see this new timetable in Courses ▸ Timetable and My journal',
+      one:
+          '1 teacher will see this new timetable in Courses ▸ Timetable and My journal',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get classTimetableNoConflict => 'No teacher conflict';
+
+  @override
+  String classTimetableConflictsBlocking(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count teacher conflicts to resolve before publishing',
+      one: '1 teacher conflict to resolve before publishing',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get classTimetablePublishPending =>
+      'Changes are waiting to be sent: publishing waits until they are gone.';
+
+  @override
+  String get classTimetablePublishOffline =>
+      'Offline: publishing waits for the network.';
+
+  @override
+  String get classTimetablePublishConsequence =>
+      'The teachers concerned see their timetable and journal updated at once. The previous version is replaced.';
+
+  @override
+  String get classTimetableAbandonTitle => 'Discard the draft?';
+
+  @override
+  String classTimetableAbandonBody(String name) {
+    return 'The changes to $name will be lost. The published version stays in force.';
+  }
+
+  @override
+  String classTimetableAbandonBodyNew(String name) {
+    return 'The timetable of $name will be deleted.';
+  }
+
+  @override
+  String get classTimetableCancel => 'Cancel';
+
+  @override
+  String get classTimetableSnackPublished =>
+      'Timetable published · visible to teachers';
+
+  @override
+  String get classTimetableSnackAbandoned => 'Draft discarded';
+
+  @override
+  String get classTimetableSaveFailed => 'Could not save — Retry';
+
+  @override
+  String classTimetableRefusal(String code) {
+    String _temp0 = intl.Intl.selectLogic(code, {
+      'TIMETABLE_DRAFT_UNKNOWN':
+          'The server does not know this draft yet: its changes will follow it.',
+      'TIMETABLE_GESTURE_INVALID': 'A change was incomplete and was not saved.',
+      'TIMETABLE_CONFLICT':
+          'Another timetable now takes one of your teachers: resolve the flagged conflicts before publishing.',
+      'TIMETABLE_EMPTY': 'Place at least one session before publishing.',
+      'TIMETABLE_OUT_OF_PROGRAMME':
+          'A session holds a course removed from the programme: free it before publishing.',
+      'TIMETABLE_DRAFT_CHANGED':
+          'The draft was changed from another device: it was reloaded.',
+      'TIMETABLE_DRAFT_ENDED':
+          'This draft was published or discarded meanwhile.',
+      'other': 'The server refused this action.',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String get syncAggregateTimetableDraft => 'Timetable drafts';
 }

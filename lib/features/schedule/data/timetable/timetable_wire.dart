@@ -73,15 +73,28 @@ class TimetableWire {
     final start = _int(j['startMinute']);
     final end = _int(j['endMinute']);
     if (start == null || end == null) throw const FormatException('minutes');
+    final classroomId = _req(j, 'classroomId');
+    final status = TimetableCellStatus.fromWire(j['status'] as String?);
+    final draftId = j['draftId'] as String?;
+    final day = WeekdayX.fromWire(_req(j, 'day'));
+    final slotId = _req(j, 'slotId');
     return PulledTimetableRow(
       ClassTimetableCell(
-        id: _req(j, 'id'),
-        classroomId: _req(j, 'classroomId'),
+        // La clé naturelle, pas l'id serveur : une case posée sur l'appareil
+        // et sa jumelle descendue tombent sur la même ligne.
+        id: ClassTimetableCell.keyOf(
+          classroomId: classroomId,
+          status: status,
+          draftId: draftId,
+          day: day,
+          slotId: slotId,
+        ),
+        classroomId: classroomId,
         classroomLabel: (j['classroomLabel'] as String?) ?? '',
-        status: TimetableCellStatus.fromWire(j['status'] as String?),
-        draftId: j['draftId'] as String?,
-        day: WeekdayX.fromWire(_req(j, 'day')),
-        slotId: _req(j, 'slotId'),
+        status: status,
+        draftId: draftId,
+        day: day,
+        slotId: slotId,
         range: MinuteRange(start, end),
         coursId: j['coursId'] as String?,
         teacherId: j['teacherId'] as String?,

@@ -1,6 +1,7 @@
 import 'package:school_app_flutter/core/offline/sync_meta_dao.dart';
 import 'package:school_app_flutter/features/schedule/data/sync/time_grids_pull_handler.dart';
 import 'package:school_app_flutter/features/schedule/data/timetable/timetable_dao.dart';
+import 'package:school_app_flutter/features/schedule/data/timetable/timetable_draft_dao.dart';
 import 'package:school_app_flutter/features/schedule/data/timetable/timetable_pull_handlers.dart';
 import 'package:school_app_flutter/features/schedule/domain/entities/time_grid.dart';
 import 'package:school_app_flutter/features/schedule/domain/entities/time_slot.dart';
@@ -92,6 +93,10 @@ class ClassTimetableReader {
       othersKnown:
           await _meta.getCursor('$kScheduleTimetableCellsResource@$schoolId') !=
           null,
+      bookings: await _dao.bookingsOutside(classroom.classroomId),
+      hasPending: await TimetableDraftDao(
+        _db,
+      ).hasPending(classroom.classroomId),
     );
   }
 }

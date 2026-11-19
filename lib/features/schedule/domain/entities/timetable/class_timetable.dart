@@ -35,6 +35,13 @@ class ClassTimetableHeader extends Equatable {
   final TimetableActor? draftUpdatedBy;
   final int revision;
 
+  /// Un geste de brouillon (START | ABANDON) fait sur l'appareil, pas encore
+  /// accusé ; [draftId] en tient déjà compte.
+  final String? pendingGesture;
+
+  /// Le refus du dernier geste de brouillon (`TIMETABLE_DRAFT_ENDED`…).
+  final String? errorCode;
+
   const ClassTimetableHeader({
     required this.id,
     required this.classroomId,
@@ -46,6 +53,8 @@ class ClassTimetableHeader extends Equatable {
     this.draftId,
     this.draftUpdatedAt,
     this.draftUpdatedBy,
+    this.pendingGesture,
+    this.errorCode,
   });
 
   bool get isPublished => publishedVersion != null;
@@ -64,6 +73,8 @@ class ClassTimetableHeader extends Equatable {
     draftUpdatedAt,
     draftUpdatedBy,
     revision,
+    pendingGesture,
+    errorCode,
   ];
 }
 

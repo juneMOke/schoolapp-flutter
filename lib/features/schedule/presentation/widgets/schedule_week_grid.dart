@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/components/cards/eteelo_dashed_border.dart';
+import 'package:school_app_flutter/core/components/controls/eteelo_activatable.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
@@ -37,6 +39,14 @@ class ScheduleWeekGrid extends StatelessWidget {
   /// (EDT-R1), là où la vue enseignant le masque sous 760.
   final bool keepSaturday;
 
+  /// Brouillon (EDT-I8) : toucher un créneau, libre ou occupé, l'ouvre — le
+  /// geste principal au doigt, à toutes les largeurs. Un créneau libre se
+  /// dessine alors en tirets « + ».
+  final void Function(Weekday day, TimeSlot slot)? onTapSlot;
+
+  /// Les cases à montrer en conflit (fond rouge pâle, bord d'erreur).
+  final Set<String> conflictSessionIds;
+
   const ScheduleWeekGrid({
     super.key,
     required this.timetable,
@@ -44,6 +54,8 @@ class ScheduleWeekGrid extends StatelessWidget {
     required this.today,
     this.onOpenCell,
     this.keepSaturday = false,
+    this.onTapSlot,
+    this.conflictSessionIds = const {},
   });
 
   @override
@@ -102,6 +114,8 @@ class ScheduleWeekGrid extends StatelessWidget {
                             palette: palette,
                             l10n: l10n,
                             onOpenCell: onOpenCell,
+                            onTapSlot: onTapSlot,
+                            conflictSessionIds: conflictSessionIds,
                           ),
                 ],
               ),
