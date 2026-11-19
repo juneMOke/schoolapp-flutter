@@ -134,6 +134,12 @@ class TimetableDraftOutboxHandler
           continue;
         }
         await _reconcile(g, outcome, result, nowMs);
+        // Chaque résultat porte l'en-tête à jour : sa révision est celle que
+        // la publication devra présenter (la révision monte à chaque geste).
+        final timetable = result['timetable'];
+        if (timetable is Map && timetable['revision'] is int) {
+          await _dao.noteRevision(g.classroomId, timetable['revision'] as int);
+        }
       }
       if (unresolved > 0) {
         return const OutboxDispatchResult.retry(
@@ -187,6 +193,7 @@ class TimetableDraftOutboxHandler
         await _dao.cellApplied(
           g,
           server: server?.value,
+          serverUpdatedAtMs: server?.serverUpdatedAtMs,
           superseded: outcome == 'SUPERSEDED',
           nowMs: nowMs,
         );

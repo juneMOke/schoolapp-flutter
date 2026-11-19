@@ -151,13 +151,18 @@ class CalendarEventDao {
       );
 
   /// REJECTED : la ligne reste à l'écran, marquée, avec son code (CAL-I19).
+  /// Une suppression refusée n'a pas eu lieu : l'événement revient, marqué.
   Future<void> markRejected({
     required String id,
     required int pushedAt,
     required String? code,
   }) => _db.update(
     _table,
-    {'sync_status': RecordSyncState.failed.dbValue, 'sync_error_code': code},
+    {
+      'sync_status': RecordSyncState.failed.dbValue,
+      'sync_error_code': code,
+      'deleted': 0,
+    },
     where: 'id = ? AND client_updated_at = ? AND sync_status = ?',
     whereArgs: [id, pushedAt, RecordSyncState.pending.dbValue],
   );

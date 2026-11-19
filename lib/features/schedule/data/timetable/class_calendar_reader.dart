@@ -69,7 +69,13 @@ class ClassCalendarReader {
         rhythm: PeriodRhythm.fromWire(classroom.periodType),
         catalogLevelCode: classroom.catalogLevelCode,
       ),
-      elements: [...?framework?.items, for (final e in events) e.element],
+      // Un événement refusé par le serveur n'a pas cours (il est montré en
+      // erreur dans le calendrier, jamais compté dans une semaine de classe).
+      elements: [
+        ...?framework?.items,
+        for (final e in events)
+          if (!e.isRejected) e.element,
+      ],
     );
     return ClassCalendarWeek(
       days: days,

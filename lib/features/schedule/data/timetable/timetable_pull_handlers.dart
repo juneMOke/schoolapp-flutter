@@ -179,9 +179,10 @@ class ProgrammesPullHandler implements PullHandler {
           headers: {'If-None-Match': ?etag},
         ),
       );
+      // Une ligne illisible est sautée, pas tout le programme de l'école.
       final items = [
         for (final raw in (response.data?['items'] as List?) ?? const [])
-          TimetableWire.course(raw),
+          ?_courseOrNull(raw),
       ];
       final applied = await _dao.replaceProgrammes(items, nowMs);
       await _meta.setCursor(
@@ -198,6 +199,14 @@ class ProgrammesPullHandler implements PullHandler {
       return PullOutcome.error(e.message ?? e.toString());
     } catch (e) {
       return PullOutcome.error(e.toString());
+    }
+  }
+
+  static TimetableCourse? _courseOrNull(Object? raw) {
+    try {
+      return TimetableWire.course(raw);
+    } on Object {
+      return null;
     }
   }
 }

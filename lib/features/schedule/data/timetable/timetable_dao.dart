@@ -51,13 +51,32 @@ class TimetableDao {
     List<PulledTimetableRow<ClassTimetableHeader>> rows,
     int nowMs,
   ) async {
+    final db = _db;
     for (final row in rows) {
+      // Lire le geste gardé, effacer, réécrire : d'un seul tenant, sinon un
+      // « commencer » posé entre deux étapes serait perdu.
+      if (db is Database) {
+        await db.transaction((txn) => _applyHeader(txn, row, nowMs));
+      } else {
+        await _applyHeader(db, row, nowMs);
+      }
+    }
+    return rows.length;
+  }
+
+  static Future<void> _applyHeader(
+    DatabaseExecutor db,
+    PulledTimetableRow<ClassTimetableHeader> row,
+    int nowMs,
+  ) async {
+    {
       final h = row.value;
-      final kept = await _db.query(
+      final kept = await db.query(
         headers,
         columns: [
           'pending_gesture',
           'pending_draft_id',
+          'pending_abandon_draft_id',
           'pending_clock',
           'sync_error_code',
         ],
@@ -65,13 +84,13 @@ class TimetableDao {
         whereArgs: [h.classroomId],
         limit: 1,
       );
-      await _db.delete(
+      await db.delete(
         headers,
         where: 'classroom_id = ? OR id = ?',
         whereArgs: [h.classroomId, h.id],
       );
-      if (row.deleted) continue;
-      await _db.insert(headers, {
+      if (row.deleted) return;
+      await db.insert(headers, {
         'id': h.id,
         'classroom_id': h.classroomId,
         'academic_year_id': h.academicYearId,
@@ -89,14 +108,15 @@ class TimetableDao {
         'synced_at': nowMs,
       });
     }
-    return rows.length;
   }
 
   Future<int> applyCells(
     List<PulledTimetableRow<ClassTimetableCell>> rows,
     int nowMs,
   ) async {
-    const pending = "sync_status = 'PENDING_SYNC'";
+    // Une ligne de l'appareil — en attente, ou refusée et montrée avec son
+    // refus (R18) — ne cède jamais à un tirage : seul l'utilisateur la règle.
+    const pending = "sync_status <> 'SYNCED'";
     final batch = _db.batch();
     for (final row in rows) {
       final c = row.value;
@@ -183,12 +203,33 @@ class TimetableDao {
 
   /// Les séances qui occupent des enseignants ailleurs que dans [classroomId],
   /// publiées et en brouillon (R4, Q4) — pour les conflits sur l'appareil.
+  ///
+  /// Seulement les classes de la même année, la version publiée et le
+  /// brouillon **ouvert** de chacune (tel que l'appareil le voit, geste en
+  /// attente compris) ; une case refusée n'occupe personne.
   Future<List<TeacherBooking>> bookingsOutside(String classroomId) async => [
-    for (final r in await _db.query(
-      cells,
-      where:
-          'classroom_id <> ? AND teacher_id IS NOT NULL AND cours_id IS NOT NULL',
-      whereArgs: [classroomId],
+    for (final r in await _db.rawQuery(
+      '''
+      SELECT c.* FROM $cells c
+      JOIN $headers h ON h.classroom_id = c.classroom_id
+      JOIN ref_classrooms k ON k.id = c.classroom_id
+      WHERE c.classroom_id <> ?
+        AND c.teacher_id IS NOT NULL AND c.cours_id IS NOT NULL
+        AND c.sync_status <> ?
+        AND k.academic_year_id =
+            (SELECT academic_year_id FROM ref_classrooms WHERE id = ?)
+        AND (c.status = ? OR c.draft_id = CASE
+              WHEN h.pending_gesture IN ('START', 'RESTART')
+                THEN h.pending_draft_id
+              WHEN h.pending_gesture = 'ABANDON' THEN NULL
+              ELSE h.draft_id END)
+      ''',
+      [
+        classroomId,
+        RecordSyncState.failed.dbValue,
+        classroomId,
+        TimetableCellStatus.published.wire,
+      ],
     ))
       TeacherBooking(
         teacherId: r['teacher_id']! as String,
@@ -217,7 +258,7 @@ class TimetableDao {
   static ClassTimetableHeader _headerOf(Map<String, Object?> r) {
     final pending = r['pending_gesture'] as String?;
     final draftId = switch (pending) {
-      'START' => r['pending_draft_id'] as String?,
+      'START' || 'RESTART' => r['pending_draft_id'] as String?,
       'ABANDON' => null,
       _ => r['draft_id'] as String?,
     };

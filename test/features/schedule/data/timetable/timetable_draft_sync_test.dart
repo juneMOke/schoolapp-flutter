@@ -170,9 +170,10 @@ void main() {
         CellGesture,
         CellGesture,
       ]);
+      // Un brouillon jamais envoyé s'abandonne sur l'appareil seul.
       await editor.abandon(await view());
       final after = await TimetableDraftDao(db).pending();
-      expect(after.map((g) => g.runtimeType), [AbandonGesture]);
+      expect(after, isEmpty);
       expect((await view()).hasDraft, isFalse);
     },
   );

@@ -206,7 +206,23 @@ Future<void> migrateTenantDatabase(
     // L'emploi du temps par classe (EDT-2, EDT-6) et la salle de la classe.
     await _createTables(db, classTimetableTables);
     await _addColumnIfTable(db, 'ref_classrooms', 'room');
+    await _repullClassrooms(db);
   }
+}
+
+/// v85 — les classes déjà connues n'ont pas de salle : le flux des classes est
+/// en keyset, une classe inchangée ne redescendrait jamais. Son curseur (et
+/// lui seul : `classrooms` exact ou scopé `classrooms@…`, jamais
+/// `classroom_members`) repart de zéro ; le re-tirage patche ligne à ligne.
+Future<void> _repullClassrooms(DatabaseExecutor db) async {
+  final hasMeta = await db.rawQuery(
+    "SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'sync_meta'",
+  );
+  if (hasMeta.isEmpty) return;
+  await db.execute(
+    "DELETE FROM sync_meta WHERE resource = 'classrooms' "
+    "OR resource LIKE 'classrooms@%' OR resource LIKE 'classrooms\\_%' ESCAPE '\\'",
+  );
 }
 
 /// v84 — les créneaux et les séances déjà connus n'ont ni grille ni minutes :

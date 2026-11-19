@@ -273,4 +273,35 @@ void main() {
       expect(events.map((e) => e.element.title), ['Local']);
     },
   );
+
+  test(
+    'une suppression refusée n’a pas eu lieu : l’événement revient, marqué',
+    () async {
+      await repository.saveEvent(calendarId: 'cal', element: event('a'));
+      await push(
+        (body) => {
+          'results': [
+            {'id': 'a', 'outcome': 'APPLIED'},
+          ],
+        },
+      );
+      now = now.add(const Duration(seconds: 1));
+      await repository.deleteEvent(calendarId: 'cal', element: event('a'));
+      expect(await repository.events('cal'), isEmpty);
+      await push(
+        (body) => {
+          'results': [
+            {
+              'id': 'a',
+              'outcome': 'REJECTED',
+              'reason': 'CALENDAR_ELEMENT_LOCKED',
+            },
+          ],
+        },
+      );
+      final back = (await repository.events('cal')).single;
+      expect(back.syncState, RecordSyncState.failed);
+      expect(back.errorCode, 'CALENDAR_ELEMENT_LOCKED');
+    },
+  );
 }

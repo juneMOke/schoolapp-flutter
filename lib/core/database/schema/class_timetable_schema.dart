@@ -30,8 +30,9 @@ const TableSchema ttProgrammesTable = TableSchema(
 /// (flux `schedule.timetables`) : version publiée, brouillon ouvert, révision.
 ///
 /// Les gestes de brouillon « commencer » et « abandonner » faits sur
-/// l'appareil y attendent leur envoi (`pending_gesture` START | ABANDON, sur
-/// `pending_draft_id`, à l'horloge `pending_clock`) ; un refus garde son code.
+/// l'appareil y attendent leur envoi (`pending_gesture` START | ABANDON |
+/// RESTART, sur `pending_draft_id`, à l'horloge `pending_clock`) ; RESTART
+/// abandonne d'abord `pending_abandon_draft_id`. Un refus garde son code.
 /// Une classe jamais publiée n'a pas d'en-tête serveur : la ligne locale a
 /// pour id `local:<classe>` jusqu'au premier tirage.
 const TableSchema ttClassTimetablesTable = TableSchema(
@@ -52,6 +53,7 @@ const TableSchema ttClassTimetablesTable = TableSchema(
       revision INTEGER NOT NULL DEFAULT 0,
       pending_gesture TEXT,
       pending_draft_id TEXT,
+      pending_abandon_draft_id TEXT,
       pending_clock INTEGER,
       sync_error_code TEXT,
       server_updated_at INTEGER,

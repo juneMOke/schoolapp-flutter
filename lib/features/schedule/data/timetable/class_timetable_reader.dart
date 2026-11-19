@@ -59,9 +59,16 @@ class ClassTimetableReader {
   Future<ClassTimetableView> load(TimetableClassOption classroom) async {
     final grids = await _grids.all();
     final grid = TimeGrid.forCycle(classroom.cycleCode, grids.values);
+    // Sans grille pour ce cycle alors que l'école en a : seuls les créneaux
+    // hors grille (aucun le plus souvent, d'où l'écran « pas de grille ») —
+    // jamais le mélange des créneaux de toutes les grilles.
     final slotRows = await _db.query(
       'ref_time_slots',
-      where: grid == null ? null : 'time_grid_id = ? OR time_grid_id IS NULL',
+      where: grid != null
+          ? 'time_grid_id = ? OR time_grid_id IS NULL'
+          : grids.isEmpty
+          ? null
+          : 'time_grid_id IS NULL',
       whereArgs: grid == null ? null : [grid.id],
     );
     final slots = [

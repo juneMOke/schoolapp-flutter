@@ -76,7 +76,13 @@ class TimetableWire {
     final classroomId = _req(j, 'classroomId');
     final status = TimetableCellStatus.fromWire(j['status'] as String?);
     final draftId = j['draftId'] as String?;
-    final day = WeekdayX.fromWire(_req(j, 'day'));
+    // Un jour inconnu (`SUN`…) ne retombe pas sur lundi : il écraserait la
+    // clé de la case du lundi. La ligne est sautée, comptée par le tirage.
+    final wireDay = _req(j, 'day').toUpperCase();
+    if (!Weekday.values.any((d) => d.wire == wireDay)) {
+      throw FormatException('day', wireDay);
+    }
+    final day = WeekdayX.fromWire(wireDay);
     final slotId = _req(j, 'slotId');
     return PulledTimetableRow(
       ClassTimetableCell(
