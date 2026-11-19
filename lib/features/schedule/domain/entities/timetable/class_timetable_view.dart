@@ -14,6 +14,11 @@ class TimetableClassOption extends Equatable {
   final String levelName;
   final String? room;
 
+  /// Le rythme des périodes du cycle et le code catalogue du niveau : ce qui
+  /// rend un élément du calendrier pertinent pour la classe (A2).
+  final String? periodType;
+  final String? catalogLevelCode;
+
   const TimetableClassOption({
     required this.classroomId,
     required this.name,
@@ -22,10 +27,20 @@ class TimetableClassOption extends Equatable {
     required this.levelCode,
     required this.levelName,
     this.room,
+    this.periodType,
+    this.catalogLevelCode,
   });
 
   @override
-  List<Object?> get props => [classroomId, name, cycleCode, levelCode, room];
+  List<Object?> get props => [
+    classroomId,
+    name,
+    cycleCode,
+    levelCode,
+    room,
+    periodType,
+    catalogLevelCode,
+  ];
 }
 
 /// Tout ce que l'écran montre d'une classe, lu en local.

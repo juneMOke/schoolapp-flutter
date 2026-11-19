@@ -1,5 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/features/school_calendar/domain/services/days_between.dart';
+import 'package:school_app_flutter/features/schedule/presentation/timetable/widgets/dated_week_bar.dart';
 import 'package:school_app_flutter/core/components/buttons/secondary_button.dart';
 import 'package:school_app_flutter/features/schedule/presentation/timetable/copy_action.dart';
 import 'package:school_app_flutter/features/schedule/presentation/timetable/widgets/ended_gestures_notice.dart';
@@ -107,13 +109,24 @@ class ClassTimetableContent extends StatelessWidget {
               ),
       );
     }
-    final week = ClassWeekBuilder.build(view, view.published);
+    // La semaine datée (R17) : les jours fermés (férié, vacances) n'ont pas
+    // de cours ; « aujourd'hui » ne se marque que sur la semaine en cours.
+    final calendar = state.calendar;
+    final closed = {
+      for (final d in calendar?.days ?? const <CalendarDay>[])
+        if (d.isClosed) ?CurrentSession.weekdayOf(d.date),
+    };
+    final week = ClassWeekBuilder.build(view, [
+      for (final c in view.published)
+        if (!closed.contains(c.day)) c,
+    ]);
     final palette = ScheduleClassPalette.byCourse(
       ClassWeekBuilder.courseVisuals(view),
     );
-    final today = CurrentSession.weekdayOf(
-      SchoolTime.wallClock(DateTime.now()),
-    );
+    final isThisWeek = state.week == null;
+    final today = isThisWeek
+        ? CurrentSession.weekdayOf(SchoolTime.wallClock(DateTime.now()))
+        : null;
     return LayoutBuilder(
       builder: (context, constraints) {
         final mode =
@@ -156,6 +169,15 @@ class ClassTimetableContent extends StatelessWidget {
                 ),
               ],
             ),
+            const SizedBox(height: AppSpacing.sm),
+            DatedWeekBar(
+              monday: state.week ?? cubit.thisWeek,
+              isThisWeek: isThisWeek,
+              onPrevious: () => unawaited(cubit.shiftWeek(-1)),
+              onNext: () => unawaited(cubit.shiftWeek(1)),
+              onThisWeek: () => unawaited(cubit.setWeek(null)),
+            ),
+            if (calendar != null) PeriodBanners(week: calendar),
             const SizedBox(height: AppSpacing.md),
             if (mode == ClassTimetableMode.week)
               ScheduleWeekGrid(

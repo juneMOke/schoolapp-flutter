@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/features/school_calendar/domain/services/calendar_days.dart';
 import 'package:school_app_flutter/core/widgets/app_snack_bar.dart';
 import 'package:school_app_flutter/core/offline/online_only.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -29,6 +30,7 @@ class ClassTimetablePage extends StatelessWidget {
   static const classParam = 'classe';
   static const modeParam = 'vue';
   static const dayParam = 'jour';
+  static const weekParam = 'semaine';
 
   @override
   Widget build(BuildContext context) => BlocProvider(
@@ -49,9 +51,13 @@ class ClassTimetablePage extends StatelessWidget {
             classParam: state.classroomId,
             modeParam: state.mode?.name,
             dayParam: state.day?.wire,
+            weekParam: state.week == null
+                ? null
+                : CalendarDays.format(state.week!),
           },
           onLocation: (values) {
             unawaited(cubit.selectClass(values[classParam]));
+            unawaited(cubit.setWeek(CalendarDays.tryParse(values[weekParam])));
             cubit
               ..setMode(
                 ClassTimetableMode.values

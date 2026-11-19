@@ -13369,5 +13369,21 @@
   "classTimetableEndedResume": "Reprendre dans un nouveau brouillon",
   "classTimetableEndedDiscard": "Ignorer",
   "classTimetableSuperseded": "{count, plural, =1{Une case a été modifiée depuis un autre appareil : la version la plus récente est gardée.} other{{count} cases ont été modifiées depuis un autre appareil : la version la plus récente est gardée.}}",
-  "@classTimetableSuperseded": {"placeholders": {"count": {"type": "int"}}}
+  "@classTimetableSuperseded": {"placeholders": {"count": {"type": "int"}}},
+  "classTimetableWeekOf": "Semaine du {start} au {end}",
+  "@classTimetableWeekOf": {"placeholders": {"start": {"type": "String"}, "end": {"type": "String"}}},
+  "classTimetableThisWeek": "Cette semaine",
+  "classTimetableBackToThisWeek": "Revenir à cette semaine",
+  "classTimetablePreviousWeek": "Semaine précédente",
+  "classTimetableNextWeek": "Semaine suivante",
+  "classTimetablePeriodKind": "{nature, select, PUBLIC_HOLIDAY{Jour férié} BREAK{Vacances} other{Examens}}",
+  "@classTimetablePeriodKind": {"placeholders": {"nature": {"type": "String"}}},
+  "classTimetablePeriodDays": "{count, plural, =1{1 jour cette semaine} other{{count} jours cette semaine}}",
+  "@classTimetablePeriodDays": {"placeholders": {"count": {"type": "int"}}},
+  "classTimetableWholeWeek": "Toute la semaine",
+  "classTimetableNoClasses": "pas de cours",
+  "classTimetableOutOfYear": "Hors année scolaire",
+  "classTimetableNextStart": "rentrée le {date}",
+  "@classTimetableNextStart": {"placeholders": {"date": {"type": "String"}}},
+  "classTimetableNoClassToday": "Pas de cours aujourd'hui"
 }

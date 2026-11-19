@@ -4,7 +4,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/core/offline/pull_coordinator.dart';
 import 'package:school_app_flutter/features/schedule/data/sync/time_grids_pull_handler.dart';
+import 'package:school_app_flutter/features/schedule/data/timetable/class_calendar_reader.dart';
 import 'package:school_app_flutter/features/schedule/data/timetable/class_timetable_reader.dart';
+import 'package:school_app_flutter/features/school_calendar/domain/services/calendar_days.dart';
 import 'package:school_app_flutter/features/schedule/data/timetable/timetable_editor.dart';
 import 'package:school_app_flutter/features/schedule/data/timetable/timetable_pull_handlers.dart';
 import 'package:school_app_flutter/features/schedule/domain/entities/timetable/class_timetable_view.dart';
@@ -26,6 +28,12 @@ class ClassTimetableState extends Equatable {
   final ClassTimetableMode? mode;
   final Weekday? day;
 
+  /// Le lundi de la semaine datée affichée (R17) ; `null` : cette semaine.
+  final DateTime? week;
+
+  /// Ce que le calendrier publié dit de cette semaine, pour cette classe.
+  final ClassCalendarWeek? calendar;
+
   const ClassTimetableState({
     this.status = ClassTimetableStatus.loading,
     this.failure,
@@ -34,6 +42,8 @@ class ClassTimetableState extends Equatable {
     this.view,
     this.mode,
     this.day,
+    this.week,
+    this.calendar,
   });
 
   TimetableClassOption? get selected {
@@ -54,6 +64,9 @@ class ClassTimetableState extends Equatable {
     bool clearMode = false,
     Weekday? day,
     bool clearDay = false,
+    DateTime? week,
+    bool clearWeek = false,
+    ClassCalendarWeek? calendar,
   }) => ClassTimetableState(
     status: status ?? this.status,
     failure: failure,
@@ -62,6 +75,8 @@ class ClassTimetableState extends Equatable {
     view: clearView ? null : (view ?? this.view),
     mode: clearMode ? null : (mode ?? this.mode),
     day: clearDay ? null : (day ?? this.day),
+    week: clearWeek ? null : (week ?? this.week),
+    calendar: calendar ?? this.calendar,
   );
 
   @override
@@ -73,6 +88,8 @@ class ClassTimetableState extends Equatable {
     view,
     mode,
     day,
+    week,
+    calendar,
   ];
 }
 
@@ -81,16 +98,53 @@ class ClassTimetableState extends Equatable {
 /// `schedule.read`).
 class ClassTimetableCubit extends Cubit<ClassTimetableState> {
   final ClassTimetableReader _reader;
+  final ClassCalendarReader? _calendarReader;
   final TimetableEditor? _editor;
   final PullCoordinator? _coordinator;
+  final DateTime Function() _schoolToday;
 
   ClassTimetableCubit(
     this._reader, {
+    ClassCalendarReader? calendarReader,
     TimetableEditor? editor,
     PullCoordinator? coordinator,
-  }) : _editor = editor,
+    DateTime Function()? schoolToday,
+  }) : _calendarReader = calendarReader,
+       _editor = editor,
        _coordinator = coordinator,
+       _schoolToday = schoolToday ?? DateTime.now,
        super(const ClassTimetableState());
+
+  /// Le lundi de la semaine en cours, à l'heure de l'école.
+  DateTime get thisWeek => CalendarDays.mondayOf(_schoolToday());
+
+  /// Semaine précédente / suivante (I24) ; « Revenir à cette semaine ».
+  Future<void> shiftWeek(int delta) =>
+      setWeek(CalendarDays.addDays(state.week ?? thisWeek, 7 * delta));
+
+  Future<void> setWeek(DateTime? monday) async {
+    final target = monday == null ? null : CalendarDays.mondayOf(monday);
+    emit(
+      target == null || target == thisWeek
+          ? state.copyWith(clearWeek: true)
+          : state.copyWith(week: target),
+    );
+    await _reloadCalendar();
+  }
+
+  Future<void> _reloadCalendar() async {
+    final reader = _calendarReader;
+    final selected = state.selected;
+    if (reader == null || selected == null) return;
+    final monday = state.week ?? thisWeek;
+    final week = await reader.week(
+      selected,
+      monday,
+      CalendarDays.addDays(monday, 6),
+    );
+    if (isClosed || state.classroomId != selected.classroomId) return;
+    emit(state.copyWith(calendar: week));
+  }
 
   static const Set<String> resources = {
     kScheduleTimeGridsResource,
@@ -234,5 +288,6 @@ class ClassTimetableCubit extends Cubit<ClassTimetableState> {
     final view = await _reader.load(selected);
     if (isClosed || state.classroomId != selected.classroomId) return;
     emit(state.copyWith(view: view));
+    await _reloadCalendar();
   }
 }

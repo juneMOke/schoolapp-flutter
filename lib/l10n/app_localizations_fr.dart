@@ -24738,4 +24738,59 @@ class AppLocalizationsFr extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String classTimetableWeekOf(String start, String end) {
+    return 'Semaine du $start au $end';
+  }
+
+  @override
+  String get classTimetableThisWeek => 'Cette semaine';
+
+  @override
+  String get classTimetableBackToThisWeek => 'Revenir à cette semaine';
+
+  @override
+  String get classTimetablePreviousWeek => 'Semaine précédente';
+
+  @override
+  String get classTimetableNextWeek => 'Semaine suivante';
+
+  @override
+  String classTimetablePeriodKind(String nature) {
+    String _temp0 = intl.Intl.selectLogic(nature, {
+      'PUBLIC_HOLIDAY': 'Jour férié',
+      'BREAK': 'Vacances',
+      'other': 'Examens',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String classTimetablePeriodDays(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count jours cette semaine',
+      one: '1 jour cette semaine',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get classTimetableWholeWeek => 'Toute la semaine';
+
+  @override
+  String get classTimetableNoClasses => 'pas de cours';
+
+  @override
+  String get classTimetableOutOfYear => 'Hors année scolaire';
+
+  @override
+  String classTimetableNextStart(String date) {
+    return 'rentrée le $date';
+  }
+
+  @override
+  String get classTimetableNoClassToday => 'Pas de cours aujourd\'hui';
 }

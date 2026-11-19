@@ -13199,5 +13199,21 @@
   "classTimetableEndedResume": "Resume in a new draft",
   "classTimetableEndedDiscard": "Ignore",
   "classTimetableSuperseded": "{count, plural, =1{A slot was changed from another device: the latest version is kept.} other{{count} slots were changed from another device: the latest version is kept.}}",
-  "@classTimetableSuperseded": {"placeholders": {"count": {"type": "int"}}}
+  "@classTimetableSuperseded": {"placeholders": {"count": {"type": "int"}}},
+  "classTimetableWeekOf": "Week of {start} to {end}",
+  "@classTimetableWeekOf": {"placeholders": {"start": {"type": "String"}, "end": {"type": "String"}}},
+  "classTimetableThisWeek": "This week",
+  "classTimetableBackToThisWeek": "Back to this week",
+  "classTimetablePreviousWeek": "Previous week",
+  "classTimetableNextWeek": "Next week",
+  "classTimetablePeriodKind": "{nature, select, PUBLIC_HOLIDAY{Public holiday} BREAK{Holidays} other{Exams}}",
+  "@classTimetablePeriodKind": {"placeholders": {"nature": {"type": "String"}}},
+  "classTimetablePeriodDays": "{count, plural, =1{1 day this week} other{{count} days this week}}",
+  "@classTimetablePeriodDays": {"placeholders": {"count": {"type": "int"}}},
+  "classTimetableWholeWeek": "The whole week",
+  "classTimetableNoClasses": "no classes",
+  "classTimetableOutOfYear": "Outside the school year",
+  "classTimetableNextStart": "school starts on {date}",
+  "@classTimetableNextStart": {"placeholders": {"date": {"type": "String"}}},
+  "classTimetableNoClassToday": "No classes today"
 }

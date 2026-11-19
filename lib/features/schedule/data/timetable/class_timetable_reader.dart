@@ -32,7 +32,8 @@ class ClassTimetableReader {
   Future<List<TimetableClassOption>> classOptions() async {
     final rows = await _db.rawQuery('''
       SELECT c.id, c.name, c.room, g.code AS cycle_code, g.name AS cycle_name,
-             l.code AS level_code, l.name AS level_name
+             g.period_type, l.code AS level_code, l.name AS level_name,
+             l.catalog_level_code
       FROM ref_classrooms c
       JOIN ref_academic_years y ON y.id = c.academic_year_id AND y.is_current = 1
       JOIN ref_school_level_groups g ON g.id = c.school_level_group_id
@@ -49,6 +50,8 @@ class ClassTimetableReader {
           cycleName: r['cycle_name']! as String,
           levelCode: r['level_code']! as String,
           levelName: r['level_name']! as String,
+          periodType: r['period_type'] as String?,
+          catalogLevelCode: r['catalog_level_code'] as String?,
         ),
     ];
   }

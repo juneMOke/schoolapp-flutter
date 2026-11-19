@@ -37563,6 +37563,78 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count, plural, =1{A slot was changed from another device: the latest version is kept.} other{{count} slots were changed from another device: the latest version is kept.}}'**
   String classTimetableSuperseded(int count);
+
+  /// No description provided for @classTimetableWeekOf.
+  ///
+  /// In en, this message translates to:
+  /// **'Week of {start} to {end}'**
+  String classTimetableWeekOf(String start, String end);
+
+  /// No description provided for @classTimetableThisWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'This week'**
+  String get classTimetableThisWeek;
+
+  /// No description provided for @classTimetableBackToThisWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to this week'**
+  String get classTimetableBackToThisWeek;
+
+  /// No description provided for @classTimetablePreviousWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous week'**
+  String get classTimetablePreviousWeek;
+
+  /// No description provided for @classTimetableNextWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'Next week'**
+  String get classTimetableNextWeek;
+
+  /// No description provided for @classTimetablePeriodKind.
+  ///
+  /// In en, this message translates to:
+  /// **'{nature, select, PUBLIC_HOLIDAY{Public holiday} BREAK{Holidays} other{Exams}}'**
+  String classTimetablePeriodKind(String nature);
+
+  /// No description provided for @classTimetablePeriodDays.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 day this week} other{{count} days this week}}'**
+  String classTimetablePeriodDays(int count);
+
+  /// No description provided for @classTimetableWholeWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'The whole week'**
+  String get classTimetableWholeWeek;
+
+  /// No description provided for @classTimetableNoClasses.
+  ///
+  /// In en, this message translates to:
+  /// **'no classes'**
+  String get classTimetableNoClasses;
+
+  /// No description provided for @classTimetableOutOfYear.
+  ///
+  /// In en, this message translates to:
+  /// **'Outside the school year'**
+  String get classTimetableOutOfYear;
+
+  /// No description provided for @classTimetableNextStart.
+  ///
+  /// In en, this message translates to:
+  /// **'school starts on {date}'**
+  String classTimetableNextStart(String date);
+
+  /// No description provided for @classTimetableNoClassToday.
+  ///
+  /// In en, this message translates to:
+  /// **'No classes today'**
+  String get classTimetableNoClassToday;
 }
 
 class _AppLocalizationsDelegate

@@ -1,7 +1,9 @@
+import 'package:school_app_flutter/core/helpers/school_time.dart';
 import 'package:school_app_flutter/core/offline/outbox_dao.dart';
 import 'package:sqflite_common/sqlite_api.dart';
 import 'package:school_app_flutter/core/offline/keyset_pull_runner.dart';
 import 'package:school_app_flutter/core/di/offline_modules/evaluation_depot_di.dart';
+import 'package:school_app_flutter/features/schedule/data/timetable/class_calendar_reader.dart';
 import 'package:school_app_flutter/features/schedule/data/timetable/class_timetable_reader.dart';
 import 'package:school_app_flutter/features/schedule/data/timetable/timetable_dao.dart';
 import 'package:school_app_flutter/features/schedule/data/timetable/timetable_draft_dao.dart';
@@ -303,6 +305,11 @@ void registerAcademicsOffline(GetIt getIt) {
         getIt<SyncMetaDao>(),
         schoolId: () => getIt<CurrentUserContext>().schoolId,
       ),
+      calendarReader: ClassCalendarReader(
+        getIt<Database>(),
+        schoolId: () => getIt<CurrentUserContext>().schoolId,
+      ),
+      schoolToday: () => SchoolTime.today(DateTime.now()),
       editor: TimetableEditor(
         db: getIt<Database>(),
         dio: getIt<Dio>(),
