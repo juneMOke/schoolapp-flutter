@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/constants/app_dimensions.dart';
+import 'package:school_app_flutter/features/schedule/presentation/widgets/schedule_grid_marks.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
@@ -17,12 +19,24 @@ class ScheduleDayRow extends StatelessWidget {
   final AcademicsClassVisual visual;
   final VoidCallback? onTap;
 
+  /// Un jour sans cours : la séance est barrée (EDT-R17).
+  final bool struck;
+
+  /// « En cours » (R11).
+  final String? badge;
+
+  /// Estompée (filtre de domaine) ou normale.
+  final SessionEmphasis emphasis;
+
   const ScheduleDayRow({
     super.key,
     required this.slot,
     required this.cell,
     required this.visual,
     this.onTap,
+    this.struck = false,
+    this.badge,
+    this.emphasis = SessionEmphasis.normal,
   });
 
   @override
@@ -34,72 +48,94 @@ class ScheduleDayRow extends StatelessWidget {
     final start = ScheduleTimeFormat.hourMinute(slot.startTime);
     final end = ScheduleTimeFormat.hourMinute(slot.endTime);
 
-    return Semantics(
-      button: onTap != null,
-      onTap: onTap,
-      // Un seul nœud sémantique : exclut les Text descendants (heure/branche/
-      // classe/chevron) au profit d'un libellé composé — patron partagé
-      // (cf. SegmentedTabFilter). onTap est reporté ici pour rester activable.
-      excludeSemantics: true,
-      label: '$start – $end · ${cell.subjectLabel} · $subtitle',
-      child: InkWell(
+    final strike = struck
+        ? const TextStyle(decoration: TextDecoration.lineThrough)
+        : const TextStyle();
+    final badge = this.badge;
+    return Opacity(
+      opacity: struck || emphasis == SessionEmphasis.dimmed
+          ? AppDimensions.timetableDimmedOpacity
+          : 1,
+      child: Semantics(
+        button: onTap != null,
         onTap: onTap,
-        hoverColor: AppColors.stateHover,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.lg,
-            vertical: AppSpacing.md,
-          ),
-          child: IntrinsicHeight(
-            child: Row(
-              children: [
-                _TimeColumn(slot: slot),
-                const SizedBox(width: AppSpacing.md),
-                Container(
-                  width: 4,
-                  decoration: BoxDecoration(
-                    color: visual.accent,
-                    borderRadius: AppRadius.brPill,
+        // Un seul nœud sémantique : exclut les Text descendants (heure/branche/
+        // classe/chevron) au profit d'un libellé composé — patron partagé
+        // (cf. SegmentedTabFilter). onTap est reporté ici pour rester activable.
+        excludeSemantics: true,
+        label: [
+          '$start – $end · ${cell.subjectLabel} · $subtitle',
+          ?badge,
+        ].join(' · '),
+        child: InkWell(
+          onTap: onTap,
+          hoverColor: AppColors.stateHover,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.lg,
+              vertical: AppSpacing.md,
+            ),
+            child: IntrinsicHeight(
+              child: Row(
+                children: [
+                  _TimeColumn(slot: slot),
+                  const SizedBox(width: AppSpacing.md),
+                  Container(
+                    width: 4,
+                    decoration: BoxDecoration(
+                      color: visual.accent,
+                      borderRadius: AppRadius.brPill,
+                    ),
                   ),
-                ),
-                const SizedBox(width: AppSpacing.md),
-                Expanded(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        cell.subjectLabel,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: AppTypography.bodyMedium.copyWith(
-                          color: AppColors.textPrimary,
-                          fontWeight: FontWeight.w600,
+                  const SizedBox(width: AppSpacing.md),
+                  Expanded(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          cell.subjectLabel,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: AppTypography.bodyMedium
+                              .copyWith(
+                                color: AppColors.textPrimary,
+                                fontWeight: FontWeight.w600,
+                              )
+                              .merge(strike),
                         ),
-                      ),
-                      const SizedBox(height: 1),
-                      Text(
-                        subtitle,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: AppTypography.bodySmall.copyWith(
-                          color: AppColors.textSecondary,
+                        const SizedBox(height: 1),
+                        Text(
+                          subtitle,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: AppTypography.bodySmall
+                              .copyWith(color: AppColors.textSecondary)
+                              .merge(strike),
                         ),
-                      ),
-                    ],
+                        if (badge != null)
+                          Text(
+                            badge,
+                            style: AppTypography.labelSmall.copyWith(
+                              color: AppColors.terreCuite,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                      ],
+                    ),
                   ),
-                ),
-                // Un chevron promet une destination : il ne s'affiche que si
-                // la rangée est réellement ouvrable (même règle que
-                // `CoursEvalRow`).
-                if (onTap != null) ...[
-                  const SizedBox(width: AppSpacing.sm),
-                  const Icon(
-                    Icons.chevron_right_rounded,
-                    color: AppColors.textMuted,
-                  ),
+                  // Un chevron promet une destination : il ne s'affiche que si
+                  // la rangée est réellement ouvrable (même règle que
+                  // `CoursEvalRow`).
+                  if (onTap != null) ...[
+                    const SizedBox(width: AppSpacing.sm),
+                    const Icon(
+                      Icons.chevron_right_rounded,
+                      color: AppColors.textMuted,
+                    ),
+                  ],
                 ],
-              ],
+              ),
             ),
           ),
         ),

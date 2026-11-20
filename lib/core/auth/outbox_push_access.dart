@@ -47,6 +47,21 @@ const ModuleAccess kGradeWritePushAccess = ModuleAccess([
   Perm.academicsGradeWrite,
 ]);
 
+/// `POST /sync/schedule/draft-cells` — `schedule.write` : construire le
+/// brouillon d'un emploi du temps (direction, conseiller, secrétariat).
+const ModuleAccess kScheduleWritePushAccess = ModuleAccess([
+  Perm.scheduleWrite,
+]);
+
+/// `POST /sync/calendar/events` — un des trois droits d'écriture par nature
+/// (K10) ; le serveur refuse ligne à ligne une nature hors du droit
+/// (`CALENDAR_NATURE_FORBIDDEN`).
+const ModuleAccess kCalendarEventPushAccess = ModuleAccess([
+  Perm.calendarAssessmentWrite,
+  Perm.calendarLifeWrite,
+  Perm.calendarHolidayWrite,
+]);
+
 /// `POST /sync/academics/cotes` — `academics.grade.enter`.
 const ModuleAccess kGradeEnterPushAccess = ModuleAccess([
   Perm.academicsGradeEnter,

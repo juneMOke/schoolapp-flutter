@@ -125,6 +125,19 @@ abstract final class SyncPlanKeys {
   static const String disciplineCases = 'discipline.cases';
   static const String scheduleTimeSlots = 'schedule.time-slots';
   static const String scheduleSessions = 'schedule.sessions';
+
+  /// Les grilles horaires de l'école (une par cycle au plus), récréation
+  /// comprise, accordées par `schedule.read` (EDT-1).
+  static const String scheduleTimeGrids = 'schedule.time-grids';
+
+  /// Le programme de chaque classe (bundle ETag), accordé par `schedule.write`.
+  static const String scheduleProgrammes = 'schedule.programmes';
+
+  /// Les en-têtes d'emploi du temps des classes.
+  static const String scheduleTimetables = 'schedule.timetables';
+
+  /// Les cases des emplois du temps (publiées ; brouillons sous `schedule.write`).
+  static const String scheduleTimetableCells = 'schedule.timetable-cells';
   static const String academicsGradesReferential =
       'academics.grades-referential';
   static const String academicsCours = 'academics.cours';
@@ -206,6 +219,17 @@ abstract final class SyncPlanKeys {
   /// Les clôtures de caisse de l'école, réouvertures comprises, accordées par
   /// `treasury.read` : une devise close aujourd'hui n'encaisse plus en espèces.
   static const String treasuryClosures = 'treasury.closures';
+
+  /// Les cadres nationaux publiés des années de l'école, une ligne par cadre,
+  /// accordés par `calendar.read`.
+  static const String calendarFramework = 'calendar.framework';
+
+  /// Les en-têtes des calendriers de l'école ; un brouillon seulement pour un
+  /// droit d'écriture.
+  static const String calendarCalendars = 'calendar.calendars';
+
+  /// Les événements de l'école, suppressions en `deleted:true`.
+  static const String calendarEvents = 'calendar.events';
 }
 
 /// `planKey` → les `PullHandler.resource` qu'elle couvre.
@@ -233,6 +257,10 @@ const Map<String, List<String>> kSyncPlanAliases = {
   SyncPlanKeys.disciplineCases: ['disciplinary_cases'],
   SyncPlanKeys.scheduleTimeSlots: ['schedule_time_slots'],
   SyncPlanKeys.scheduleSessions: ['schedule_sessions'],
+  SyncPlanKeys.scheduleTimeGrids: ['schedule_time_grids'],
+  SyncPlanKeys.scheduleProgrammes: ['schedule_programmes'],
+  SyncPlanKeys.scheduleTimetables: ['schedule_timetables'],
+  SyncPlanKeys.scheduleTimetableCells: ['schedule_timetable_cells'],
   SyncPlanKeys.academicsGradesReferential: ['academics_grades_referential'],
   SyncPlanKeys.academicsCours: ['academics_cours'],
   SyncPlanKeys.academicsEvaluations: ['academics_evaluations'],
@@ -257,6 +285,9 @@ const Map<String, List<String>> kSyncPlanAliases = {
   SyncPlanKeys.studentPhotos: ['student_photos'],
   SyncPlanKeys.enrollmentSuspensions: ['enrollment_suspensions'],
   SyncPlanKeys.treasuryClosures: ['treasury_closures'],
+  SyncPlanKeys.calendarFramework: ['calendar_framework'],
+  SyncPlanKeys.calendarCalendars: ['calendar_calendars'],
+  SyncPlanKeys.calendarEvents: ['calendar_events'],
 };
 
 /// L'index inverse, construit une fois : `PullHandler.resource` → `planKey`.
@@ -378,4 +409,13 @@ const Set<String> _kCursorKeyPrefixes = {
   'enrollment_suspensions',
   // Les clôtures de caisse, cadrées par l'école du jeton.
   'treasury_closures',
+  // Les grilles horaires, cadrées par l'école du jeton.
+  'schedule_time_grids',
+  'schedule_programmes',
+  'schedule_timetables',
+  'schedule_timetable_cells',
+  // Le calendrier scolaire, cadré par l'école du jeton.
+  'calendar_framework',
+  'calendar_calendars',
+  'calendar_events',
 };

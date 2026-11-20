@@ -31,6 +31,10 @@ class AppBreakpoints {
   /// l'ancien seuil de 1 024 les en privait.
   static const double sideBySideMin = 976.0;
 
+  /// Le mois du calendrier scolaire passe en compact (traits sans texte,
+  /// initiales des jours) sous cette largeur **reçue** (spec Calendrier §4.1).
+  static const double calendarMonthCompactMax = dataTableCardsMax;
+
   /// Fenêtre sous laquelle une modale de saisie (`EteeloFormDialog`) prend
   /// tout l'écran : centrée, elle gardait 40 dp de marge par côté, soit
   /// ~230 dp de champ sur un téléphone.

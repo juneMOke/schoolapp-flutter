@@ -1,0 +1,159 @@
+{
+  "description": "Phase d'un calendrier scolaire (A3). DRAFT si non publié ; publié : UPCOMING avant startDate, IN_FORCE de startDate à endDate inclus, puis ARCHIVED à partir de nextFrameworkStartDate (startDate du cadre de l'année suivante) ou, s'il est nul, du premier lundi de septembre strictement après endDate ; ENDED entre les deux. today = date du jour à Kinshasa. Même fichier côté tablette.",
+  "cases": [
+    {
+      "name": "brouillon : toujours DRAFT, même après la fin",
+      "input": {
+        "status": "DRAFT",
+        "startDate": "2026-09-07",
+        "endDate": "2027-07-02",
+        "nextFrameworkStartDate": null,
+        "today": "2027-08-01"
+      },
+      "expected": "DRAFT"
+    },
+    {
+      "name": "publié, avant la rentrée",
+      "input": {
+        "status": "PUBLISHED",
+        "startDate": "2026-09-07",
+        "endDate": "2027-07-02",
+        "nextFrameworkStartDate": null,
+        "today": "2026-08-25"
+      },
+      "expected": "UPCOMING"
+    },
+    {
+      "name": "publié, la veille de la rentrée",
+      "input": {
+        "status": "PUBLISHED",
+        "startDate": "2026-09-07",
+        "endDate": "2027-07-02",
+        "nextFrameworkStartDate": null,
+        "today": "2026-09-06"
+      },
+      "expected": "UPCOMING"
+    },
+    {
+      "name": "publié, le jour de la rentrée (borne incluse)",
+      "input": {
+        "status": "PUBLISHED",
+        "startDate": "2026-09-07",
+        "endDate": "2027-07-02",
+        "nextFrameworkStartDate": null,
+        "today": "2026-09-07"
+      },
+      "expected": "IN_FORCE"
+    },
+    {
+      "name": "publié, en cours d'année",
+      "input": {
+        "status": "PUBLISHED",
+        "startDate": "2025-09-01",
+        "endDate": "2026-07-03",
+        "nextFrameworkStartDate": null,
+        "today": "2026-06-10"
+      },
+      "expected": "IN_FORCE"
+    },
+    {
+      "name": "publié, le dernier jour (borne incluse)",
+      "input": {
+        "status": "PUBLISHED",
+        "startDate": "2025-09-01",
+        "endDate": "2026-07-03",
+        "nextFrameworkStartDate": null,
+        "today": "2026-07-03"
+      },
+      "expected": "IN_FORCE"
+    },
+    {
+      "name": "publié, le lendemain de la fin",
+      "input": {
+        "status": "PUBLISHED",
+        "startDate": "2025-09-01",
+        "endDate": "2026-07-03",
+        "nextFrameworkStartDate": null,
+        "today": "2026-07-04"
+      },
+      "expected": "ENDED"
+    },
+    {
+      "name": "sans cadre suivant : terminé la veille du premier lundi de septembre",
+      "input": {
+        "status": "PUBLISHED",
+        "startDate": "2025-09-01",
+        "endDate": "2026-07-03",
+        "nextFrameworkStartDate": null,
+        "today": "2026-09-06"
+      },
+      "expected": "ENDED"
+    },
+    {
+      "name": "sans cadre suivant : archivé le premier lundi de septembre",
+      "input": {
+        "status": "PUBLISHED",
+        "startDate": "2025-09-01",
+        "endDate": "2026-07-03",
+        "nextFrameworkStartDate": null,
+        "today": "2026-09-07"
+      },
+      "expected": "ARCHIVED"
+    },
+    {
+      "name": "cadre suivant connu : terminé la veille de sa rentrée",
+      "input": {
+        "status": "PUBLISHED",
+        "startDate": "2025-09-01",
+        "endDate": "2026-07-03",
+        "nextFrameworkStartDate": "2026-09-02",
+        "today": "2026-09-01"
+      },
+      "expected": "ENDED"
+    },
+    {
+      "name": "cadre suivant connu : archivé à sa rentrée, avant le premier lundi",
+      "input": {
+        "status": "PUBLISHED",
+        "startDate": "2025-09-01",
+        "endDate": "2026-07-03",
+        "nextFrameworkStartDate": "2026-09-02",
+        "today": "2026-09-02"
+      },
+      "expected": "ARCHIVED"
+    },
+    {
+      "name": "premier lundi de septembre = 1er septembre",
+      "input": {
+        "status": "PUBLISHED",
+        "startDate": "2014-09-01",
+        "endDate": "2015-07-03",
+        "nextFrameworkStartDate": null,
+        "today": "2015-09-07"
+      },
+      "expected": "ARCHIVED"
+    },
+    {
+      "name": "fin en septembre après le premier lundi : archivé l'année suivante",
+      "input": {
+        "status": "PUBLISHED",
+        "startDate": "2025-09-01",
+        "endDate": "2026-09-10",
+        "nextFrameworkStartDate": null,
+        "today": "2026-12-01"
+      },
+      "expected": "ENDED"
+    },
+    {
+      "name": "archivé des années plus tard",
+      "input": {
+        "status": "PUBLISHED",
+        "startDate": "2020-09-07",
+        "endDate": "2021-07-02",
+        "nextFrameworkStartDate": null,
+        "today": "2026-06-10"
+      },
+      "expected": "ARCHIVED"
+    }
+  ]
+}

@@ -270,6 +270,23 @@ enum Perm {
   scheduleRead('schedule.read'),
   scheduleWrite('schedule.write'),
 
+  // ── Calendrier scolaire ───────────────────────────────────────────────────
+  /// Consulter les calendriers publiés ; un brouillon n'est servi qu'avec un
+  /// droit d'écriture ci-dessous (K10).
+  calendarRead('calendar.read'),
+
+  /// Interrogations et examens de l'école (direction, conseiller pédagogique).
+  calendarAssessmentWrite('calendar.assessment.write'),
+
+  /// Vie de l'école : réunions, fêtes, remises de bulletins.
+  calendarLifeWrite('calendar.life.write'),
+
+  /// Congés propres à l'école.
+  calendarHolidayWrite('calendar.holiday.write'),
+
+  /// Créer, dupliquer et publier un calendrier (direction).
+  calendarPublish('calendar.publish'),
+
   // ── Administration (aucun consommateur dans l'APK à ce jour) ──────────────
   // Comptes et définitions de rôle : ces écrans vivent côté serveur/back-office.
   // Elles sont déclarées ici pour que le catalogue client reste le miroir exact

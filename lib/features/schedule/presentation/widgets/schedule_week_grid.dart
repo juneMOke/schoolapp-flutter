@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/components/cards/eteelo_dashed_border.dart';
+import 'package:school_app_flutter/core/components/controls/eteelo_activatable.dart';
+import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
@@ -12,9 +15,13 @@ import 'package:school_app_flutter/features/schedule/domain/entities/weekly_time
 import 'package:school_app_flutter/features/schedule/presentation/helpers/schedule_class_palette.dart';
 import 'package:school_app_flutter/features/schedule/presentation/helpers/schedule_time_format.dart';
 import 'package:school_app_flutter/features/schedule/presentation/helpers/schedule_weekday_labels.dart';
+import 'package:school_app_flutter/features/schedule/presentation/widgets/schedule_grid_marks.dart';
 import 'package:school_app_flutter/features/schedule/presentation/widgets/schedule_session_chip.dart';
+
+export 'package:school_app_flutter/features/schedule/presentation/widgets/schedule_grid_marks.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
+part 'schedule_week_grid_cell.dart';
 part 'schedule_week_grid_parts.dart';
 part 'schedule_week_grid_break.dart';
 
@@ -33,21 +40,40 @@ class ScheduleWeekGrid extends StatelessWidget {
   final Weekday? today;
   final void Function(TimetableCell cell)? onOpenCell;
 
+  /// Garde le samedi à toutes les largeurs : une classe a cours le samedi
+  /// (EDT-R1), là où la vue enseignant le masque sous 760.
+  final bool keepSaturday;
+
+  /// Brouillon (EDT-I8) : toucher un créneau, libre ou occupé, l'ouvre — le
+  /// geste principal au doigt, à toutes les largeurs. Un créneau libre se
+  /// dessine alors en tirets « + ».
+  final void Function(Weekday day, TimeSlot slot)? onTapSlot;
+
+  /// Jours fermés, alertes, séance en cours, cours repéré (EDT §4.6 D).
+  final ScheduleGridMarks marks;
+
+  /// Le glisser-déposer du brouillon (≥ 976 dp reçus, R14) ; `null` : aucun.
+  final ScheduleGridDrag? drag;
+
   const ScheduleWeekGrid({
     super.key,
     required this.timetable,
     required this.palette,
     required this.today,
     this.onOpenCell,
+    this.keepSaturday = false,
+    this.onTapSlot,
+    this.marks = ScheduleGridMarks.none,
+    this.drag,
   });
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    // Lignes triées par créneau croissant : l'entité documente cet invariant
-    // mais ne le garantit pas (comme la vue Jour, on l'applique côté rendu).
+    // Lignes triées par heure (EDT-1) : l'entité documente cet invariant mais
+    // ne le garantit pas (comme la vue Jour, on l'applique côté rendu).
     final rows = [...timetable.rows]
-      ..sort((a, b) => a.timeSlot.order.compareTo(b.timeSlot.order));
+      ..sort((a, b) => TimeSlot.compareByTime(a.timeSlot, b.timeSlot));
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -82,9 +108,10 @@ class ScheduleWeekGrid extends StatelessWidget {
                     columnWidth: columnWidth,
                     gutter: _gutter,
                     today: today,
+                    closedDays: marks.closedDays,
                     l10n: l10n,
                   ),
-                  for (final row in rows)
+                  for (final (index, row) in rows.indexed)
                     _isBreak(row)
                         ? _BreakBand(row: row, l10n: l10n)
                         : _SlotRow(
@@ -97,6 +124,11 @@ class ScheduleWeekGrid extends StatelessWidget {
                             palette: palette,
                             l10n: l10n,
                             onOpenCell: onOpenCell,
+                            onTapSlot: onTapSlot,
+                            marks: marks,
+                            drag: drag,
+                            firstRow:
+                                index == rows.indexWhere((r) => !_isBreak(r)),
                           ),
                 ],
               ),
@@ -108,7 +140,7 @@ class ScheduleWeekGrid extends StatelessWidget {
   }
 
   List<Weekday> _visibleDays(double available) {
-    if (available >= _narrowBreakpoint) {
+    if (keepSaturday || available >= _narrowBreakpoint) {
       return timetable.days;
     }
     final withoutSat = timetable.days
@@ -122,6 +154,7 @@ class ScheduleWeekGrid extends StatelessWidget {
   /// colonnes affichées — donc évaluée sur `row.cells`, pas sur les jours
   /// visibles).
   static bool _isBreak(TimetableRow row) {
+    if (row.timeSlot.isBreak) return true;
     final label = row.timeSlot.label?.trim();
     if (label == null || label.isEmpty) {
       return false;

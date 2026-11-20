@@ -1,0 +1,117 @@
+{
+  "description": "Chevauchement de deux créneaux le même jour, en minutes depuis minuit : a.startMinute < b.endMinute ET b.startMinute < a.endMinute. Deux créneaux jointifs ne se chevauchent pas. Un conflit = même enseignant non nul, même jour, autre classe (version publiée ou brouillon), créneaux qui se chevauchent.",
+  "cases": [
+    {
+      "name": "identiques",
+      "input": {
+        "a": {
+          "startMinute": 450,
+          "endMinute": 500
+        },
+        "b": {
+          "startMinute": 450,
+          "endMinute": 500
+        }
+      },
+      "expected": true
+    },
+    {
+      "name": "jointifs : 07:30-08:20 puis 08:20-09:10",
+      "input": {
+        "a": {
+          "startMinute": 450,
+          "endMinute": 500
+        },
+        "b": {
+          "startMinute": 500,
+          "endMinute": 550
+        }
+      },
+      "expected": false
+    },
+    {
+      "name": "jointifs dans l'autre sens",
+      "input": {
+        "a": {
+          "startMinute": 500,
+          "endMinute": 550
+        },
+        "b": {
+          "startMinute": 450,
+          "endMinute": 500
+        }
+      },
+      "expected": false
+    },
+    {
+      "name": "disjoints",
+      "input": {
+        "a": {
+          "startMinute": 450,
+          "endMinute": 500
+        },
+        "b": {
+          "startMinute": 560,
+          "endMinute": 600
+        }
+      },
+      "expected": false
+    },
+    {
+      "name": "chevauchement partiel entre deux grilles : 07:30-08:20 et 08:00-08:45",
+      "input": {
+        "a": {
+          "startMinute": 450,
+          "endMinute": 500
+        },
+        "b": {
+          "startMinute": 480,
+          "endMinute": 525
+        }
+      },
+      "expected": true
+    },
+    {
+      "name": "inclusion : 07:30-09:10 contient 08:00-08:20",
+      "input": {
+        "a": {
+          "startMinute": 450,
+          "endMinute": 550
+        },
+        "b": {
+          "startMinute": 480,
+          "endMinute": 500
+        }
+      },
+      "expected": true
+    },
+    {
+      "name": "une minute en commun",
+      "input": {
+        "a": {
+          "startMinute": 450,
+          "endMinute": 501
+        },
+        "b": {
+          "startMinute": 500,
+          "endMinute": 550
+        }
+      },
+      "expected": true
+    },
+    {
+      "name": "même début, durées différentes",
+      "input": {
+        "a": {
+          "startMinute": 450,
+          "endMinute": 495
+        },
+        "b": {
+          "startMinute": 450,
+          "endMinute": 540
+        }
+      },
+      "expected": true
+    }
+  ]
+}

@@ -1,5 +1,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:school_app_flutter/core/constants/menu_constants.dart';
+import 'package:school_app_flutter/features/schedule/presentation/timetable/pages/class_timetable_page.dart';
+import 'package:school_app_flutter/features/school_calendar/presentation/pages/school_calendar_page.dart';
 import 'package:school_app_flutter/features/academics/presentation/pages/courses_coordinator_page.dart';
 import 'package:school_app_flutter/features/academics/presentation/pages/courses_feature_scope.dart';
 import 'package:school_app_flutter/features/attendances/presentation/pages/attendance_feature_scope.dart';
@@ -165,6 +167,10 @@ class ShellScreen extends StatelessWidget {
         return const CashClosingPage();
       case MenuConstants.treasuryConfigId:
         return const CashRegistersPage();
+      case MenuConstants.schoolCalendarId:
+        return const SchoolCalendarPage();
+      case MenuConstants.classTimetableId:
+        return const ClassTimetablePage();
       case MenuConstants.hrPayrollDashboardId:
         return const PayrollDashboardPage();
       case MenuConstants.hrPayrollId:

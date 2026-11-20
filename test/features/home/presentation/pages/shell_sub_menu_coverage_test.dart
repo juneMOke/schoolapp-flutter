@@ -96,6 +96,8 @@ const Map<String, String> _constants = {
   'expenseQueueId': 'depenses-validations',
   'treasuryDashboardId': 'tr-dash',
   'treasuryConfigId': 'tr-config',
+  'schoolCalendarId': 'agenda-calendrier',
+  'classTimetableId': 'agenda-emploi-du-temps',
   'treasuryClosingId': 'tr-cloture',
   'communicationAnnouncementsId': 'communication-communiques',
   'communicationTemplatesId': 'communication-modeles',

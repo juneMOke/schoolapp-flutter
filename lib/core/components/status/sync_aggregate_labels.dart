@@ -25,6 +25,10 @@ String syncAggregateLabel(AppLocalizations l10n, String aggregateType) {
       return l10n.syncAggregateNotesBatch;
     case 'ACADEMICS_COTES_BATCH':
       return l10n.syncAggregateCotesBatch;
+    case 'CALENDAR_EVENTS_BATCH':
+      return l10n.syncAggregateCalendarEvents;
+    case 'SCHEDULE_DRAFT_BATCH':
+      return l10n.syncAggregateTimetableDraft;
     case 'ACADEMICS_EVALUATION':
       return l10n.syncAggregateEvaluation;
     case 'ENROLLMENT_LEVEL_CORRECTION':

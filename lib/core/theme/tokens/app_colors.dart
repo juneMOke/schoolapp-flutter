@@ -758,6 +758,21 @@ class AppColors {
   static const coteDomainPrune = Color(0xFF7A4E68);
   static const coteDomainPruneSoft = Color(0xFFF5EDF2);
 
+  // ── Calendrier scolaire (spec Calendrier v1, §4.6 « Teintes des natures ») ──
+  /// Fond doux des interrogations : l'or doux, éclairci.
+  static const calendarAssessmentSoft = Color(0xFFFBF3E3);
+
+  /// Fond doux de la vie de l'école : un gris chaud, neutre.
+  static const calendarSchoolLifeSoft = Color(0xFFF1EDE2);
+
+  /// Fond doux des congés : le vert savane du bulletin.
+  static const calendarBreakSoft = coteDomainVertSoft;
+
+  /// Le jour férié en prune (Q6, défaut « on ajoute le prune ») — la couleur
+  /// que le bulletin donne déjà à son quatrième domaine.
+  static const calendarHoliday = coteDomainPrune;
+  static const calendarHolidaySoft = coteDomainPruneSoft;
+
   // ── Trésorerie (spec Trésorerie V1.5, §05 « Jetons proposés ») ──
   /// Dégradé de la caisse USD, départ (spec Trésorerie §05).
   static const treasuryUsdDeep = Color(0xFF0E2D42);
@@ -837,6 +852,11 @@ class AppColors {
   /// Tranches à venir, hachurées.
   static const treasuryChartFutureFill = Color(0xFFFAF8F2);
   static const treasuryChartFutureHatch = Color(0xFFECE7DA);
+
+  /// Un jour sans cours dans l'emploi du temps (EDT §4.6 « jour fermé ») :
+  /// le fond et ses hachures.
+  static const timetableClosedDay = Color(0xFFF6F3EC);
+  static const timetableClosedHatch = Color(0xFFE4DDCD);
   static const treasuryChartFutureInk = Color(0xFFC9C3B0);
 
   /// Ombre du filtre sélectionné (terre cuite 70 %).

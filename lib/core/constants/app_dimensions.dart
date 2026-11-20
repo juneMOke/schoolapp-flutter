@@ -1461,4 +1461,67 @@ class AppDimensions {
   static const treasuryXlsxGutter = 36.0;
   static const treasuryXlsxHeaderHeight = 24.0;
   static const treasuryXlsxRowHeight = 32.0;
+
+  // ── Calendrier scolaire (spec Calendrier v1, §4.6) ──
+  /// Une case du mois avec libellés : le numéro, puis quatre couloirs.
+  static const calendarMonthCellMinHeight = 104.0;
+
+  /// Une case du mois compact (sous 600) : la cible tient au doigt.
+  static const calendarMonthCompactCellMinHeight =
+      presenceMarkCalendarCellHeight;
+
+  /// La ligne du numéro du jour.
+  static const calendarMonthDayHeader = 24.0;
+
+  /// Une bande d'élément : avec son intitulé, ou en trait sans texte (compact).
+  static const calendarBandHeight = 18.0;
+  static const calendarBandCompactHeight = 6.0;
+  static const calendarBandGap = 2.0;
+
+  /// Le contour en tirets d'un élément de l'école (CAL-R4).
+  static const calendarBandDashStroke = 1.0;
+  static const calendarBandDash = 5.0;
+  static const calendarBandDashGap = 3.0;
+  static const calendarBandCompactDash = 3.0;
+  static const calendarBandCompactDashGap = 2.0;
+
+  /// Le rond du jour du jour.
+  static const calendarTodayRing = 1.5;
+
+  /// Une carte de mini-mois (vue Année) et ses cases.
+  static const calendarYearMonthMinWidth = 230.0;
+  static const calendarYearDayCell = 26.0;
+
+  /// La liste du mois à côté du mois, dès `sideBySideMin` reçus (§4.1).
+  static const calendarSideListWidth = 280.0;
+
+  /// Un cours bloqué (conflit professeur) dans le choix d'un créneau (EDT O2).
+  static const timetableBlockedOptionOpacity = 0.6;
+
+  /// Une séance estompée : autre cours que celui repéré, ou hors du filtre de
+  /// domaine (EDT §4.6 D, « les autres séances à 28 % »).
+  static const timetableDimmedOpacity = 0.28;
+
+  /// Le fantôme d'une séance pendant qu'on la glisse (EDT §4.6 D, 45 %).
+  static const timetableDragGhostOpacity = 0.45;
+
+  /// L'anneau d'une séance reliée (survol ou focus de son cours).
+  static const timetableLinkedRingWidth = 2.0;
+
+  /// Les hachures d'un jour sans cours (férié, vacances) : écart et trait.
+  static const timetableHatchGap = 8.0;
+  static const timetableHatchStroke = 1.0;
+
+  /// La réserve « Cours à placer » à côté de la grille (≥ 976, EDT A11), et
+  /// la hauteur d'une de ses lignes (cible ≥ 48 dp).
+  static const timetableReserveWidth = 280.0;
+  static const timetableReserveLineMinHeight = 48.0;
+
+  /// Un élément passé, estompé dans les listes (§4.3).
+  static const calendarPastOpacity = 0.6;
+
+  /// Les tailles de la pastille de date (CalendarDateChip).
+  static const calendarDateChipSmall = 34.0;
+  static const calendarDateChipMedium = 40.0;
+  static const calendarDateChipLarge = 44.0;
 }

@@ -36,6 +36,7 @@ class MenuFactory {
       _createClassesMenu(l10n),
       _createDisciplinesMenu(l10n),
       _createCoursesMenu(l10n),
+      _createAgendaMenu(l10n),
       _createResultatsMenu(l10n),
       _createDocumentsMenu(l10n),
       _createCommunicationMenu(l10n),
@@ -479,6 +480,28 @@ class MenuFactory {
           id: MenuConstants.myCoursesId,
           title: l10n.subMenuMyCourses,
           route: AppRoutesNames.myCourses,
+        ),
+      ],
+    );
+  }
+
+  /// Menu Agenda & Horaires : le calendrier scolaire, puis l'emploi du temps
+  /// par classe.
+  static MenuItem _createAgendaMenu(AppLocalizations l10n) {
+    return MenuItem(
+      id: MenuConstants.agendaMenuId,
+      title: l10n.menuAgenda,
+      icon: Icons.event_note_outlined,
+      subMenus: [
+        SubMenuItem(
+          id: MenuConstants.schoolCalendarId,
+          title: l10n.subMenuSchoolCalendar,
+          route: AppRoutesNames.schoolCalendar,
+        ),
+        SubMenuItem(
+          id: MenuConstants.classTimetableId,
+          title: l10n.subMenuClassTimetable,
+          route: AppRoutesNames.classTimetable,
         ),
       ],
     );

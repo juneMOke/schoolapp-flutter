@@ -12,6 +12,9 @@ class ClassroomDto extends Equatable {
   final String name;
   final int? capacity;
   final String? grilleId;
+
+  /// La salle de la classe (v85, EDT-2) : une salle par classe.
+  final String? room;
   final String? teacherId;
   final String? teacherFirstName;
   final String? teacherLastName;
@@ -30,6 +33,7 @@ class ClassroomDto extends Equatable {
     required this.name,
     this.capacity,
     this.grilleId,
+    this.room,
     this.teacherId,
     this.teacherFirstName,
     this.teacherLastName,
@@ -64,6 +68,7 @@ class ClassroomDto extends Equatable {
     name: json['name'] as String,
     capacity: _asIntOrNull(json['capacity']),
     grilleId: json['grilleId'] as String?,
+    room: json['room'] as String?,
     teacherId: json['teacherId'] as String?,
     teacherFirstName: json['teacherFirstName'] as String?,
     teacherLastName: json['teacherLastName'] as String?,
@@ -84,6 +89,7 @@ class ClassroomDto extends Equatable {
     name: map['name'] as String,
     capacity: _asIntOrNull(map['capacity']),
     grilleId: map['grille_id'] as String?,
+    room: map['room'] as String?,
     teacherId: map['teacher_id'] as String?,
     teacherFirstName: map['teacher_first_name'] as String?,
     teacherLastName: map['teacher_last_name'] as String?,
@@ -104,6 +110,7 @@ class ClassroomDto extends Equatable {
     'name': name,
     'capacity': capacity,
     'grille_id': grilleId,
+    'room': room,
     'teacher_id': teacherId,
     'teacher_first_name': teacherFirstName,
     'teacher_last_name': teacherLastName,
@@ -145,6 +152,7 @@ class ClassroomDto extends Equatable {
     name,
     capacity,
     grilleId,
+    room,
     teacherId,
     teacherFirstName,
     teacherLastName,

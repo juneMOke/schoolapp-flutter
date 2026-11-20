@@ -7,6 +7,7 @@ import 'package:school_app_flutter/features/class_journal/domain/services/journa
 import 'package:school_app_flutter/features/class_journal/domain/usecases/journal_day_loader.dart';
 import 'package:school_app_flutter/features/class_journal/presentation/bloc/journal_change_source.dart';
 import 'package:school_app_flutter/features/class_journal/presentation/bloc/journal_day_state.dart';
+import 'package:school_app_flutter/features/school_calendar/domain/entities/calendar_element.dart';
 
 /// La page du journal : un jour, la navigation jour par jour, et — pour une
 /// lecture locale — une relecture silencieuse à chaque signal
@@ -15,6 +16,7 @@ import 'package:school_app_flutter/features/class_journal/presentation/bloc/jour
 class JournalDayCubit extends Cubit<JournalDayState> {
   final JournalDayLoader _load;
   final JournalChangeSource? _source;
+  final Future<CalendarElement?> Function(DateTime day)? _closedDayOf;
   AcademicYear? _year;
   void Function()? _unwatch;
   Timer? _midnight;
@@ -25,8 +27,10 @@ class JournalDayCubit extends Cubit<JournalDayState> {
     required JournalDayLoader load,
     JournalChangeSource? source,
     DateTime? initialDate,
+    Future<CalendarElement?> Function(DateTime day)? closedDayOf,
   }) : _load = load,
        _source = source,
+       _closedDayOf = closedDayOf,
        super(
          JournalDayIdle(date: initialDate ?? load.today(), today: load.today()),
        );
@@ -102,11 +106,26 @@ class JournalDayCubit extends Cubit<JournalDayState> {
     if (year == null) return;
     final seq = ++_seq;
     final result = await _load(date, year: year);
+    final closedBy = await _closedBy(date);
     if (isClosed || seq != _seq) return;
-    result.fold((failure) {
-      if (keepOnFailure && state is JournalDayReady) return;
-      emit(JournalDayFailure(failure: failure, date: date, today: today));
-    }, (day) => emit(JournalDayReady(day: day, date: date, today: today)));
+    result.fold(
+      (failure) {
+        if (keepOnFailure && state is JournalDayReady) return;
+        emit(JournalDayFailure(failure: failure, date: date, today: today));
+      },
+      (day) => emit(
+        JournalDayReady(day: day, date: date, today: today, closedBy: closedBy),
+      ),
+    );
+  }
+
+  /// Le calendrier n'est qu'un avis : son échec ne coûte pas la page.
+  Future<CalendarElement?> _closedBy(DateTime date) async {
+    try {
+      return await _closedDayOf?.call(date);
+    } catch (_) {
+      return null;
+    }
   }
 
   static DateTime _shift(DateTime d, int days) =>

@@ -7,6 +7,7 @@ class _GridHeader extends StatelessWidget {
   final double columnWidth;
   final double gutter;
   final Weekday? today;
+  final Map<Weekday, ScheduleClosedDay> closedDays;
   final AppLocalizations l10n;
 
   const _GridHeader({
@@ -14,6 +15,7 @@ class _GridHeader extends StatelessWidget {
     required this.columnWidth,
     required this.gutter,
     required this.today,
+    required this.closedDays,
     required this.l10n,
   });
 
@@ -56,7 +58,16 @@ class _GridHeader extends StatelessWidget {
                           fontWeight: FontWeight.w600,
                         ),
                       ),
-                      if (day == today) ...[
+                      if (closedDays[day] case final closed?)
+                        Text(
+                          closed.header,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: AppTypography.labelSmall.copyWith(
+                            color: AppColors.textSecondary,
+                          ),
+                        )
+                      else if (day == today) ...[
                         const SizedBox(height: 1),
                         Text(
                           l10n.scheduleToday,
@@ -87,6 +98,10 @@ class _SlotRow extends StatelessWidget {
   final ScheduleClassPalette palette;
   final AppLocalizations l10n;
   final void Function(TimetableCell cell)? onOpenCell;
+  final void Function(Weekday day, TimeSlot slot)? onTapSlot;
+  final ScheduleGridMarks marks;
+  final ScheduleGridDrag? drag;
+  final bool firstRow;
 
   const _SlotRow({
     required this.row,
@@ -98,6 +113,10 @@ class _SlotRow extends StatelessWidget {
     required this.palette,
     required this.l10n,
     required this.onOpenCell,
+    required this.onTapSlot,
+    required this.marks,
+    required this.drag,
+    required this.firstRow,
   });
 
   @override
@@ -127,10 +146,15 @@ class _SlotRow extends StatelessWidget {
                   day: day,
                   timeSlot: row.timeSlot,
                   isToday: day == today,
+                  firstRow: firstRow,
                   minHeight: minHeight,
+                  width: columnWidth,
                   palette: palette,
                   l10n: l10n,
                   onOpenCell: onOpenCell,
+                  onTapSlot: onTapSlot,
+                  marks: marks,
+                  drag: drag,
                 ),
               ),
           ],
@@ -168,56 +192,6 @@ class _TimeGutter extends StatelessWidget {
           ),
         ],
       ),
-    );
-  }
-}
-
-/// Case de la grille : vide (créneau libre) ou puce de séance cliquable.
-class _Cell extends StatelessWidget {
-  final TimetableCell? cell;
-  final Weekday day;
-  final TimeSlot timeSlot;
-  final bool isToday;
-  final double minHeight;
-  final ScheduleClassPalette palette;
-  final AppLocalizations l10n;
-  final void Function(TimetableCell cell)? onOpenCell;
-
-  const _Cell({
-    required this.cell,
-    required this.day,
-    required this.timeSlot,
-    required this.isToday,
-    required this.minHeight,
-    required this.palette,
-    required this.l10n,
-    required this.onOpenCell,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final current = cell;
-    return Container(
-      constraints: BoxConstraints(minHeight: minHeight),
-      padding: const EdgeInsets.all(5),
-      decoration: BoxDecoration(
-        color: isToday ? AppColors.stateHover : null,
-        border: const Border(left: BorderSide(color: AppColors.border)),
-      ),
-      child: current == null
-          ? null
-          : ScheduleSessionChip(
-              cell: current,
-              visual: palette.visualForClassroom(current.classroomId),
-              // Libellé lecteur d'écran : le jour n'est porté que par la colonne
-              // (invisible au balayage), on le compose donc explicitement.
-              semanticsLabel:
-                  '${ScheduleWeekdayLabels.long(l10n, day)} · '
-                  '${ScheduleTimeFormat.hourMinute(timeSlot.startTime)} – '
-                  '${ScheduleTimeFormat.hourMinute(timeSlot.endTime)} · '
-                  '${current.subjectLabel} · ${current.classroomLabel}',
-              onTap: onOpenCell == null ? null : () => onOpenCell!(current),
-            ),
     );
   }
 }

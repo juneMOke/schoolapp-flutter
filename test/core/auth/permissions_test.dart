@@ -95,6 +95,11 @@ void main() {
     Perm.teacherWrite: 'teacher.write',
     Perm.scheduleRead: 'schedule.read',
     Perm.scheduleWrite: 'schedule.write',
+    Perm.calendarRead: 'calendar.read',
+    Perm.calendarAssessmentWrite: 'calendar.assessment.write',
+    Perm.calendarLifeWrite: 'calendar.life.write',
+    Perm.calendarHolidayWrite: 'calendar.holiday.write',
+    Perm.calendarPublish: 'calendar.publish',
     Perm.authUserRead: 'auth.user.read',
     Perm.authUserWrite: 'auth.user.write',
     Perm.authPermissionRead: 'auth.permission.read',
@@ -184,7 +189,11 @@ void main() {
       // 83 → 86 : `treasury.read`, `treasury.close`,
       // `treasury.register.write` — la trésorerie (contrat PR back #222).
       // ⚠️ Déclarées avant que le serveur ne les sème (lot back T1).
-      expect(Perm.values, hasLength(86));
+      // 86 → 91 : `calendar.read`, `calendar.assessment.write`,
+      // `calendar.life.write`, `calendar.holiday.write`,
+      // `calendar.publish` — le calendrier scolaire (doc unifié K10).
+      // ⚠️ Déclarées avant que le serveur ne les sème (lot back CAL-2).
+      expect(Perm.values, hasLength(91));
     },
   );
 

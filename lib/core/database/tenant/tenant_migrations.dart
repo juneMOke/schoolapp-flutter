@@ -19,6 +19,8 @@ import 'package:school_app_flutter/core/database/schema/staff_offline_schema.dar
 import 'package:school_app_flutter/core/database/schema/student_attendance_v2_schema.dart';
 import 'package:school_app_flutter/core/database/schema/student_photo_schema.dart';
 import 'package:school_app_flutter/core/database/schema/ticket_print_jobs_schema.dart';
+import 'package:school_app_flutter/core/database/schema/class_timetable_schema.dart';
+import 'package:school_app_flutter/core/database/schema/school_calendar_schema.dart';
 import 'package:school_app_flutter/core/database/schema/treasury_schema.dart';
 import 'package:school_app_flutter/core/database/table_schema.dart';
 
@@ -174,6 +176,68 @@ Future<void> migrateTenantDatabase(
   if (upTo(82)) {
     await _addColumnIfTable(db, 'payment_allocations', 'level_correction_id');
     await _repullPayments(db);
+  }
+  if (upTo(83)) {
+    await _createTables(db, schoolCalendarTables);
+    // `catalog_level_code` arrive par le référentiel Inscription, un bundle
+    // relu en entier à chaque tirage (toujours 200) : la colonne se remplit au
+    // tirage suivant, sans re-tirage forcé.
+    await _addColumnIfTable(db, 'ref_school_levels', 'catalog_level_code');
+  }
+  if (upTo(84)) {
+    // Les grilles par cycle (EDT-1) et les minutes des séances (EDT-3).
+    await _createTables(db, [refTimeGridsTable]);
+    await _addColumnIfTable(db, 'ref_time_slots', 'time_grid_id');
+    await _addColumnIfTable(
+      db,
+      'ref_recurring_sessions',
+      'start_minute',
+      type: 'INTEGER',
+    );
+    await _addColumnIfTable(
+      db,
+      'ref_recurring_sessions',
+      'end_minute',
+      type: 'INTEGER',
+    );
+    await _repullScheduleReference(db);
+  }
+  if (upTo(85)) {
+    // L'emploi du temps par classe (EDT-2, EDT-6) et la salle de la classe.
+    await _createTables(db, classTimetableTables);
+    await _addColumnIfTable(db, 'ref_classrooms', 'room');
+    await _repullClassrooms(db);
+  }
+}
+
+/// v85 — les classes déjà connues n'ont pas de salle : le flux des classes est
+/// en keyset, une classe inchangée ne redescendrait jamais. Son curseur (et
+/// lui seul : `classrooms` exact ou scopé `classrooms@…`, jamais
+/// `classroom_members`) repart de zéro ; le re-tirage patche ligne à ligne.
+Future<void> _repullClassrooms(DatabaseExecutor db) async {
+  final hasMeta = await db.rawQuery(
+    "SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'sync_meta'",
+  );
+  if (hasMeta.isEmpty) return;
+  await db.execute(
+    "DELETE FROM sync_meta WHERE resource = 'classrooms' "
+    "OR resource LIKE 'classrooms@%' OR resource LIKE 'classrooms\\_%' ESCAPE '\\'",
+  );
+}
+
+/// v84 — les créneaux et les séances déjà connus n'ont ni grille ni minutes :
+/// leurs curseurs et leurs drapeaux d'amorçage (`…_bootstrap`, scopés ou non)
+/// repartent de zéro ; le re-tirage les patche ligne à ligne.
+Future<void> _repullScheduleReference(DatabaseExecutor db) async {
+  final hasMeta = await db.rawQuery(
+    "SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'sync_meta'",
+  );
+  if (hasMeta.isEmpty) return;
+  for (final resource in ['schedule_time_slots', 'schedule_sessions']) {
+    await db.execute('DELETE FROM sync_meta WHERE substr(resource, 1, ?) = ?', [
+      resource.length,
+      resource,
+    ]);
   }
 }
 

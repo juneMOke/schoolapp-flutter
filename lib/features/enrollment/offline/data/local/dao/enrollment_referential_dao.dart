@@ -134,6 +134,7 @@ class EnrollmentReferentialDao {
             'level_group_id': l.levelGroupId,
             'display_order': l.displayOrder,
             'split_into_classrooms': l.splitIntoClassrooms ? 1 : 0,
+            'catalog_level_code': l.catalogLevelCode,
             'synced_at': syncedAt,
           }, conflictAlgorithm: ConflictAlgorithm.replace);
         }

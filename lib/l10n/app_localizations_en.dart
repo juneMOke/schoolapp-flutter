@@ -23498,4 +23498,1301 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get treasuryConfigureRegisters => 'Configure the registers';
+
+  @override
+  String calendarWeekdayShort(String weekday) {
+    String _temp0 = intl.Intl.selectLogic(weekday, {
+      '1': 'Mon',
+      '2': 'Tue',
+      '3': 'Wed',
+      '4': 'Thu',
+      '5': 'Fri',
+      '6': 'Sat',
+      'other': 'Sun',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String calendarMonthMore(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '+$count more',
+      one: '+1 more',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get syncAggregateCalendarEvents => 'School calendar events';
+
+  @override
+  String get menuAgenda => 'Calendar & Timetables';
+
+  @override
+  String get subMenuSchoolCalendar => 'School calendar';
+
+  @override
+  String get schoolCalendarEyebrow => 'Calendar & Timetables · School calendar';
+
+  @override
+  String get schoolCalendarTitle => 'School calendars';
+
+  @override
+  String schoolCalendarTitleYear(String year) {
+    return 'Calendar $year';
+  }
+
+  @override
+  String get schoolCalendarSubtitle =>
+      'National framework + school events, one school year per calendar.';
+
+  @override
+  String get schoolCalendarNew => 'New calendar';
+
+  @override
+  String get schoolCalendarAll => 'All calendars';
+
+  @override
+  String schoolCalendarPhase(String phase) {
+    String _temp0 = intl.Intl.selectLogic(phase, {
+      'DRAFT': 'Draft',
+      'UPCOMING': 'Upcoming',
+      'IN_FORCE': 'In force',
+      'ENDED': 'Ended',
+      'ARCHIVED': 'Archived',
+      'other': 'Draft',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String get schoolCalendarFrameworkIntegrated => 'National framework included';
+
+  @override
+  String get schoolCalendarFrameworkAwaited => 'National framework pending';
+
+  @override
+  String schoolCalendarToVerifyCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count to check',
+      one: '1 to check',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String schoolCalendarCounts(int national, int school) {
+    return '$national national · $school school';
+  }
+
+  @override
+  String get schoolCalendarCurrentYear => 'Current year';
+
+  @override
+  String schoolCalendarWeek(int week, int count) {
+    return 'Week $week / $count';
+  }
+
+  @override
+  String get schoolCalendarPeriod => 'Period';
+
+  @override
+  String get schoolCalendarNow => 'Right now';
+
+  @override
+  String get schoolCalendarNextDeadline => 'Next deadline';
+
+  @override
+  String get schoolCalendarOutOfPeriod => 'Outside a period';
+
+  @override
+  String get schoolCalendarNormalClasses => 'Regular classes';
+
+  @override
+  String schoolCalendarInDays(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'in $count days',
+      one: 'tomorrow',
+      zero: 'today',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String schoolCalendarPeriodLabel(int rank, String order, String rhythm) {
+    String _temp0 = intl.Intl.selectLogic(rhythm, {
+      'SEMESTER': 'semester',
+      'other': 'term',
+    });
+    return 'P$rank · $_temp0 $order';
+  }
+
+  @override
+  String get schoolCalendarOpen => 'Open the calendar';
+
+  @override
+  String get schoolCalendarUpcomingSection => 'Coming up';
+
+  @override
+  String get schoolCalendarFutureSection => 'Upcoming';
+
+  @override
+  String get schoolCalendarArchiveSection => 'Archives';
+
+  @override
+  String schoolCalendarPublishedOn(String date) {
+    return 'Published on $date';
+  }
+
+  @override
+  String schoolCalendarDuplicateFor(String year) {
+    return 'Duplicate for $year';
+  }
+
+  @override
+  String get schoolCalendarViewYear => 'Year';
+
+  @override
+  String get schoolCalendarViewMonth => 'Month';
+
+  @override
+  String get schoolCalendarViewList => 'List';
+
+  @override
+  String get schoolCalendarCurrentMonth => 'Current month';
+
+  @override
+  String get schoolCalendarPreviousMonth => 'Previous month';
+
+  @override
+  String get schoolCalendarNextMonth => 'Next month';
+
+  @override
+  String get schoolCalendarSourceAll => 'All';
+
+  @override
+  String get schoolCalendarSourceNational => 'National';
+
+  @override
+  String get schoolCalendarSourceSchool => 'School';
+
+  @override
+  String get schoolCalendarRhythmSemesters => 'Semesters';
+
+  @override
+  String get schoolCalendarRhythmTrimesters => 'Terms';
+
+  @override
+  String schoolCalendarNature(String nature) {
+    String _temp0 = intl.Intl.selectLogic(nature, {
+      'PERIOD': 'School period',
+      'ASSESSMENT': 'Tests',
+      'EXAM': 'Exams',
+      'BREAK': 'Holidays',
+      'PUBLIC_HOLIDAY': 'Public holiday',
+      'other': 'School life',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String schoolCalendarNatureShort(String nature) {
+    String _temp0 = intl.Intl.selectLogic(nature, {
+      'PERIOD': 'Periods',
+      'ASSESSMENT': 'Tests',
+      'EXAM': 'Exams',
+      'BREAK': 'Holidays',
+      'PUBLIC_HOLIDAY': 'Holidays',
+      'other': 'School life',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String get schoolCalendarHelpDesktop =>
+      'Click a free day to add an event there, or an element for its details.';
+
+  @override
+  String get schoolCalendarHelpTouch =>
+      'Tap a day to see what it holds and add an event.';
+
+  @override
+  String get schoolCalendarHelpRead => 'Click an element to see its details.';
+
+  @override
+  String get schoolCalendarHelpArchived => 'Archived calendar: read only.';
+
+  @override
+  String schoolCalendarVerifyNotice(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          '$count elements carried over from last year to check: their dates moved 52 weeks.',
+      one:
+          '1 element carried over from last year to check: its date moved 52 weeks.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get schoolCalendarReview => 'Review them';
+
+  @override
+  String get schoolCalendarShowAll => 'Show all';
+
+  @override
+  String get schoolCalendarWholeMonth => 'Whole month';
+
+  @override
+  String get schoolCalendarNothingThisMonth => 'Nothing this month.';
+
+  @override
+  String get schoolCalendarNothingThisDay =>
+      'Nothing that day: regular classes.';
+
+  @override
+  String get schoolCalendarAddEvent => 'Add an event';
+
+  @override
+  String schoolCalendarAddOn(String date) {
+    return 'Add on $date';
+  }
+
+  @override
+  String get schoolCalendarAdd => 'Add';
+
+  @override
+  String get schoolCalendarPublish => 'Publish';
+
+  @override
+  String get schoolCalendarPrint => 'Print';
+
+  @override
+  String get schoolCalendarDuplicate => 'Duplicate';
+
+  @override
+  String get schoolCalendarEmptyFiltered => 'No element matches';
+
+  @override
+  String get schoolCalendarEmptyFilteredHint =>
+      'Turn natures back on in the legend.';
+
+  @override
+  String get schoolCalendarDates => 'Dates';
+
+  @override
+  String get schoolCalendarConcerns => 'Concerns';
+
+  @override
+  String get schoolCalendarSource => 'Source';
+
+  @override
+  String get schoolCalendarAddedBy => 'Added by';
+
+  @override
+  String get schoolCalendarNationalFramework => 'National framework';
+
+  @override
+  String get schoolCalendarInternal => 'School';
+
+  @override
+  String schoolCalendarWhen(String state) {
+    String _temp0 = intl.Intl.selectLogic(state, {
+      'now': 'In progress',
+      'past': 'Ended',
+      'other': '',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String get schoolCalendarToVerify => 'To check';
+
+  @override
+  String get schoolCalendarNationalLocked =>
+      'National framework element: it applies to every school and cannot be changed here.';
+
+  @override
+  String get schoolCalendarCarriedOver =>
+      'Carried over from last year and moved 52 weeks. Check the date before publishing.';
+
+  @override
+  String get schoolCalendarDelete => 'Delete';
+
+  @override
+  String get schoolCalendarEdit => 'Edit';
+
+  @override
+  String get schoolCalendarDateVerified => 'Date checked';
+
+  @override
+  String get schoolCalendarClose => 'Close';
+
+  @override
+  String schoolCalendarDurationDays(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count days',
+      one: '1 day',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get schoolCalendarScopeSchool => 'Whole school';
+
+  @override
+  String schoolCalendarScopeCycle(String name) {
+    return 'Cycle · $name';
+  }
+
+  @override
+  String schoolCalendarScopeLevel(String name) {
+    return 'Level · $name';
+  }
+
+  @override
+  String schoolCalendarScopeRhythm(String rhythm) {
+    String _temp0 = intl.Intl.selectLogic(rhythm, {
+      'SEMESTER': 'Semester schools',
+      'other': 'Term schools',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String schoolCalendarScopeCatalog(String codes) {
+    return 'Levels $codes';
+  }
+
+  @override
+  String get schoolCalendarPending => 'Waiting to be sent';
+
+  @override
+  String schoolCalendarRejected(String reason) {
+    return 'Refused: $reason';
+  }
+
+  @override
+  String schoolCalendarSupersededNotice(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          '$count events were changed on another device: their latest version is kept.',
+      one:
+          'An event was changed on another device: its latest version is kept.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get schoolCalendarFormAddTitle => 'Add an event';
+
+  @override
+  String get schoolCalendarFormEditTitle => 'Edit the event';
+
+  @override
+  String get schoolCalendarFormNature => 'Nature';
+
+  @override
+  String get schoolCalendarFormTitle => 'Title';
+
+  @override
+  String get schoolCalendarFormFrom => 'From';
+
+  @override
+  String get schoolCalendarFormTo => 'To (inclusive)';
+
+  @override
+  String get schoolCalendarFormNote => 'Note (optional)';
+
+  @override
+  String get schoolCalendarFormCancel => 'Cancel';
+
+  @override
+  String get schoolCalendarFormSave => 'Save';
+
+  @override
+  String get schoolCalendarErrorEndBeforeStart =>
+      'The end date is before the start date.';
+
+  @override
+  String schoolCalendarErrorOutOfYear(String start, String end) {
+    return 'Outside the school year ($start → $end).';
+  }
+
+  @override
+  String get schoolCalendarErrorTitleTooLong =>
+      'The title is longer than 80 characters.';
+
+  @override
+  String schoolCalendarWarnOverlap(String title, String dates) {
+    return 'Overlaps “$title” ($dates).';
+  }
+
+  @override
+  String schoolCalendarWarnExam(String title) {
+    return 'During “$title”: check the pupils concerned are available.';
+  }
+
+  @override
+  String get schoolCalendarAbandonTitle => 'Discard your entry?';
+
+  @override
+  String get schoolCalendarAbandonBody => 'What you entered will be lost.';
+
+  @override
+  String get schoolCalendarAbandonKeep => 'Keep editing';
+
+  @override
+  String get schoolCalendarAbandonConfirm => 'Discard';
+
+  @override
+  String get schoolCalendarDeleteTitle => 'Delete this event?';
+
+  @override
+  String schoolCalendarDeleteBody(String title, String dates, String year) {
+    return '“$title” ($dates) leaves the $year calendar. Teachers, pupils and parents will no longer see it.';
+  }
+
+  @override
+  String schoolCalendarSnackAdded(String dates) {
+    return 'Event added · $dates';
+  }
+
+  @override
+  String get schoolCalendarSnackEdited => 'Event updated';
+
+  @override
+  String get schoolCalendarSnackDeleted => 'Event deleted';
+
+  @override
+  String get schoolCalendarSnackVerified => 'Date checked';
+
+  @override
+  String schoolCalendarSnackCreated(String year) {
+    return 'Draft $year created';
+  }
+
+  @override
+  String schoolCalendarSnackPublished(String year) {
+    return 'Calendar $year published';
+  }
+
+  @override
+  String get schoolCalendarOffline =>
+      'Offline. You see the version saved on this device; your additions and changes stay here and will be sent when the network returns. Publishing waits for the network.';
+
+  @override
+  String get schoolCalendarEmptyTitle => 'No school calendar';
+
+  @override
+  String get schoolCalendarEmptyBody =>
+      'Create this year\'s calendar: the national framework published by ETEELO is included automatically, then you add the school\'s events.';
+
+  @override
+  String schoolCalendarEmptyCreate(String year) {
+    return 'Create the $year calendar';
+  }
+
+  @override
+  String get schoolCalendarLoading => 'Loading the school calendar';
+
+  @override
+  String get schoolCalendarError401 =>
+      'Your session expired for your security. Sign in again to see the school calendar.';
+
+  @override
+  String get schoolCalendarError403 =>
+      'Your account may not view the school calendar. Ask your school administrator for access.';
+
+  @override
+  String schoolCalendarRefusal(String code) {
+    String _temp0 = intl.Intl.selectLogic(code, {
+      'CALENDAR_NATURE_FORBIDDEN':
+          'Your account cannot add this kind of event.',
+      'CALENDAR_DATES_INVALID': 'The end date is before the start date.',
+      'CALENDAR_OUT_OF_YEAR': 'The date is outside the school year.',
+      'CALENDAR_ARCHIVED':
+          'This calendar is archived and can no longer change.',
+      'CALENDAR_ELEMENT_LOCKED': 'A national framework element cannot change.',
+      'CALENDAR_NOT_FOUND': 'This calendar no longer exists.',
+      'CALENDAR_SCOPE_INVALID': 'What the event concerns is not recognised.',
+      'CALENDAR_EVENT_INVALID': 'The title or note is not valid.',
+      'CALENDAR_FRAMEWORK_MISSING':
+          'This year\'s national framework is not published yet.',
+      'CALENDAR_CHANGED':
+          'The calendar changed since you read it: it was reloaded.',
+      'CALENDAR_YEAR_TAKEN': 'This year already has a calendar.',
+      'CALENDAR_YEAR_NOT_CREATABLE': 'This year cannot be prepared yet.',
+      'other': 'The server refused this action.',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String get schoolCalendarErrorNetworkTitle => 'Cannot connect';
+
+  @override
+  String get schoolCalendarErrorNetwork =>
+      'The calendar could not be read again. Check the connection, then try again.';
+
+  @override
+  String get schoolCalendarErrorUnauthorizedTitle => 'Session expired';
+
+  @override
+  String get schoolCalendarErrorForbiddenTitle => 'Access denied';
+
+  @override
+  String get schoolCalendarErrorServerTitle => 'The calendar could not open';
+
+  @override
+  String get schoolCalendarErrorServer =>
+      'Something went wrong. Try again in a moment.';
+
+  @override
+  String schoolCalendarDuplicateEyebrow(String year) {
+    return 'From $year';
+  }
+
+  @override
+  String get schoolCalendarDuplicateEvents => 'School events';
+
+  @override
+  String schoolCalendarDuplicateEventsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count elements (meetings, celebrations, internal exams…)',
+      one: '1 element (meetings, celebrations, internal exams…)',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get schoolCalendarDuplicateWindows => 'Test windows';
+
+  @override
+  String schoolCalendarDuplicateWindowsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count windows set by the academic adviser',
+      one: '1 window set by the academic adviser',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String schoolCalendarDuplicateRule(String year) {
+    return 'Dates move 52 weeks: a Friday event stays on a Friday. Each carried-over element is marked to check. The new year\'s national framework is not copied: the official version is included once published. The result is a draft: $year stays in force.';
+  }
+
+  @override
+  String get schoolCalendarNewYear => 'School year';
+
+  @override
+  String schoolCalendarNewFrameworkReady(String year) {
+    return 'The $year national framework is published: periods, national exams, holidays and public holidays will be included.';
+  }
+
+  @override
+  String schoolCalendarNewFrameworkAwaited(String year) {
+    return 'The $year national framework is not published yet. The calendar starts empty and receives it as soon as it is published.';
+  }
+
+  @override
+  String get schoolCalendarNewTip =>
+      'To carry over the school\'s events, use “Duplicate” on last year\'s calendar instead.';
+
+  @override
+  String get schoolCalendarNewCreate => 'Create the draft';
+
+  @override
+  String get schoolCalendarNewNoYear => 'No year can be prepared for now.';
+
+  @override
+  String schoolCalendarPublishTitle(String year) {
+    return 'Publish the $year calendar?';
+  }
+
+  @override
+  String schoolCalendarPublishSummary(int total, int school) {
+    return '$total elements · $school school';
+  }
+
+  @override
+  String schoolCalendarPublishNoFramework(String year) {
+    return 'The $year national framework is not published yet: publishing waits for it.';
+  }
+
+  @override
+  String get schoolCalendarPublishOffline =>
+      'Offline: publishing waits for the network.';
+
+  @override
+  String get schoolCalendarPublishPending =>
+      'Changes are waiting to be sent: publishing waits until they are gone.';
+
+  @override
+  String schoolCalendarPublishToVerify(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count elements still to check. They will be published as is.',
+      one: '1 element still to check. It will be published as is.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get schoolCalendarPublishConsequence =>
+      'The whole school will see this calendar. Its periods, tests and exams become the reference for assessments, report cards and the timetable.';
+
+  @override
+  String get accueilModuleAgendaDescription =>
+      'The year\'s calendar: periods, exams, holidays and school events.';
+
+  @override
+  String get schoolCalendarPrintTitle => 'Print the calendar';
+
+  @override
+  String schoolCalendarPdfTitle(String year) {
+    return 'School calendar — School year $year';
+  }
+
+  @override
+  String schoolCalendarPdfPublished(String date) {
+    return 'Published version of $date';
+  }
+
+  @override
+  String get schoolCalendarPdfKeyDates => 'Key dates';
+
+  @override
+  String get schoolCalendarPdfNationalNote =>
+      'National framework public holidays and breaks apply to every school.';
+
+  @override
+  String schoolCalendarPdfPrinted(String date) {
+    return 'Printed on $date';
+  }
+
+  @override
+  String get schoolCalendarPrintFailed => 'The print could not be prepared.';
+
+  @override
+  String get subMenuClassTimetable => 'Timetable';
+
+  @override
+  String get classTimetableEyebrow => 'Calendar & Timetables · Timetable';
+
+  @override
+  String get classTimetableTitle => 'Timetables by class';
+
+  @override
+  String get classTimetableCycle => 'Cycle';
+
+  @override
+  String get classTimetableLevel => 'Level';
+
+  @override
+  String get classTimetableClass => 'Class';
+
+  @override
+  String get classTimetablePickHint => 'Pick a class to see its timetable.';
+
+  @override
+  String get classTimetablePublished => 'Published';
+
+  @override
+  String get classTimetableDraft => 'Draft';
+
+  @override
+  String classTimetablePublishedOn(String date, String name) {
+    return 'Published on $date by $name';
+  }
+
+  @override
+  String get classTimetableNeverPublished => 'Never published';
+
+  @override
+  String get classTimetableDraftOpen =>
+      'The published version stays in force until the draft is published.';
+
+  @override
+  String get classTimetableKpiHours => 'Hours placed';
+
+  @override
+  String get classTimetableKpiSessions => 'Sessions / week';
+
+  @override
+  String get classTimetableKpiTeachers => 'Teachers';
+
+  @override
+  String classTimetableKpiRemaining(int count) {
+    return '$count h left to place';
+  }
+
+  @override
+  String get classTimetableKpiComplete => 'full volume';
+
+  @override
+  String classTimetableTextCounts(int sessions, int teachers) {
+    return '$sessions sessions / week · $teachers teachers';
+  }
+
+  @override
+  String get classTimetableWeek => 'Week';
+
+  @override
+  String get classTimetableDay => 'Day';
+
+  @override
+  String get classTimetableDistribution => 'Weekly distribution';
+
+  @override
+  String classTimetableHoursOf(int placed, int planned) {
+    return '$placed/$planned h';
+  }
+
+  @override
+  String classTimetableHoursPlaced(int placed) {
+    return '$placed h';
+  }
+
+  @override
+  String classTimetableEmptyTitle(String name) {
+    return 'No timetable yet for $name';
+  }
+
+  @override
+  String get classTimetableEmptyBody => 'It has not been published yet.';
+
+  @override
+  String get classTimetableNoProgrammeTitle => 'No course in the programme';
+
+  @override
+  String classTimetableNoProgrammeBody(String name) {
+    return 'Add courses to $name before building its timetable.';
+  }
+
+  @override
+  String get classTimetableNoClassTitle => 'No open class';
+
+  @override
+  String get classTimetableNoClassBody =>
+      'No class is open for the current year.';
+
+  @override
+  String get classTimetableLoading => 'Loading timetables';
+
+  @override
+  String get classTimetableEdit => 'Edit';
+
+  @override
+  String get classTimetableCreate => 'Create the timetable';
+
+  @override
+  String get classTimetableAbandon => 'Discard';
+
+  @override
+  String get classTimetablePublish => 'Publish';
+
+  @override
+  String get classTimetableHelpDraft =>
+      'Tap a slot in the grid to place a course.';
+
+  @override
+  String get classTimetableReserveTitle => 'Courses to place';
+
+  @override
+  String classTimetableReserveCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count courses to place',
+      one: '1 course to place',
+      zero: 'All courses placed',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String classTimetableRemaining(int count) {
+    return '$count h left';
+  }
+
+  @override
+  String get classTimetableComplete => 'complete';
+
+  @override
+  String classTimetableOver(int count) {
+    return '+$count h';
+  }
+
+  @override
+  String classTimetableSlotTitle(String start, String end) {
+    return 'Slot $start – $end';
+  }
+
+  @override
+  String get classTimetableSlotHelp =>
+      'Pick the course to place; courses with a teacher conflict are blocked.';
+
+  @override
+  String get classTimetableSlotFree => 'Free the slot';
+
+  @override
+  String get classTimetableConflict => 'Conflict';
+
+  @override
+  String classTimetableBusyIn(String name, String classroom) {
+    return '$name already teaches $classroom';
+  }
+
+  @override
+  String classTimetableConflictWith(String classroom) {
+    return 'Conflict with $classroom';
+  }
+
+  @override
+  String get classTimetableConflictsKpi => 'Conflicts';
+
+  @override
+  String get classTimetablePartial =>
+      'Conflict checks unavailable: editing resumes once the other classes are loaded.';
+
+  @override
+  String get classTimetableOfflineDraft =>
+      'Offline. Your changes stay on this device and will be sent when the network returns. Conflicts are checked against the timetables known to this device; publishing waits for the network.';
+
+  @override
+  String get classTimetablePublishTitle => 'Publish the timetable';
+
+  @override
+  String classTimetablePublishSessions(int count) {
+    return '$count sessions per week';
+  }
+
+  @override
+  String classTimetablePublishTeachers(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          '$count teachers will see this new timetable in Courses ▸ Timetable and My journal',
+      one:
+          '1 teacher will see this new timetable in Courses ▸ Timetable and My journal',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get classTimetableNoConflict => 'No teacher conflict';
+
+  @override
+  String classTimetableConflictsBlocking(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count teacher conflicts to resolve before publishing',
+      one: '1 teacher conflict to resolve before publishing',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get classTimetablePublishPending =>
+      'Changes are waiting to be sent: publishing waits until they are gone.';
+
+  @override
+  String get classTimetablePublishOffline =>
+      'Offline: publishing waits for the network.';
+
+  @override
+  String get classTimetablePublishConsequence =>
+      'The teachers concerned see their timetable and journal updated at once. The previous version is replaced.';
+
+  @override
+  String get classTimetableAbandonTitle => 'Discard the draft?';
+
+  @override
+  String classTimetableAbandonBody(String name) {
+    return 'The changes to $name will be lost. The published version stays in force.';
+  }
+
+  @override
+  String classTimetableAbandonBodyNew(String name) {
+    return 'The timetable of $name will be deleted.';
+  }
+
+  @override
+  String get classTimetableCancel => 'Cancel';
+
+  @override
+  String get classTimetableSnackPublished =>
+      'Timetable published · visible to teachers';
+
+  @override
+  String get classTimetableSnackAbandoned => 'Draft discarded';
+
+  @override
+  String get classTimetableSaveFailed => 'Could not save — Retry';
+
+  @override
+  String classTimetableRefusal(String code) {
+    String _temp0 = intl.Intl.selectLogic(code, {
+      'TIMETABLE_DRAFT_UNKNOWN':
+          'The server does not know this draft yet: its changes will follow it.',
+      'TIMETABLE_GESTURE_INVALID': 'A change was incomplete and was not saved.',
+      'TIMETABLE_CONFLICT':
+          'Another timetable now takes one of your teachers: resolve the flagged conflicts before publishing.',
+      'TIMETABLE_EMPTY': 'Place at least one session before publishing.',
+      'TIMETABLE_OUT_OF_PROGRAMME':
+          'A session holds a course removed from the programme: free it before publishing.',
+      'TIMETABLE_DRAFT_CHANGED':
+          'The draft was changed from another device: it was reloaded.',
+      'TIMETABLE_DRAFT_ENDED':
+          'This draft was published or discarded meanwhile.',
+      'TIMETABLE_VERSION_CHANGED':
+          'The timetable was republished meanwhile: try again to print the new version.',
+      'TIMETABLE_NOT_PUBLISHED':
+          'This class has no published timetable to print yet.',
+      'other': 'The server refused this action.',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String get syncAggregateTimetableDraft => 'Timetable drafts';
+
+  @override
+  String get classTimetableCopy => 'Copy…';
+
+  @override
+  String get classTimetableCopyFrom => 'Copy from another class';
+
+  @override
+  String classTimetableCopyEyebrow(String name) {
+    return 'To $name';
+  }
+
+  @override
+  String get classTimetableCopyTitle => 'Copy a timetable';
+
+  @override
+  String classTimetableCopySource(int sessions, String status) {
+    return '$sessions sessions · $status';
+  }
+
+  @override
+  String classTimetableCopyTaken(int count) {
+    return '$count sessions taken';
+  }
+
+  @override
+  String classTimetableCopyConflicts(int count) {
+    return '$count teacher conflicts';
+  }
+
+  @override
+  String classTimetableCopyNoEquivalent(int count) {
+    return '$count without an equivalent course';
+  }
+
+  @override
+  String get classTimetableCopyNotice =>
+      'The result is a draft: nothing is published until you publish.';
+
+  @override
+  String get classTimetableCopySubmit => 'Copy as draft';
+
+  @override
+  String get classTimetableCopyNone =>
+      'No other class has a timetable to copy.';
+
+  @override
+  String get classTimetableCopyReplaceTitle => 'Replace the draft?';
+
+  @override
+  String classTimetableCopyReplaceBody(String name, int count) {
+    return 'The draft of $name ($count sessions) will be replaced by the copy.';
+  }
+
+  @override
+  String get classTimetableCopyReplace => 'Replace';
+
+  @override
+  String classTimetableSnackCopied(int count) {
+    return 'Copied as draft · $count sessions';
+  }
+
+  @override
+  String classTimetableEndedNotice(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          '$count changes made offline were not kept: the draft was published or discarded meanwhile.',
+      one:
+          '1 change made offline was not kept: the draft was published or discarded meanwhile.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get classTimetableEndedResume => 'Resume in a new draft';
+
+  @override
+  String get classTimetableEndedDiscard => 'Ignore';
+
+  @override
+  String classTimetableSuperseded(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          '$count slots were changed from another device: the latest version is kept.',
+      one:
+          'A slot was changed from another device: the latest version is kept.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String classTimetableWeekOf(String start, String end) {
+    return 'Week of $start to $end';
+  }
+
+  @override
+  String get classTimetableThisWeek => 'This week';
+
+  @override
+  String get classTimetableBackToThisWeek => 'Back to this week';
+
+  @override
+  String get classTimetablePreviousWeek => 'Previous week';
+
+  @override
+  String get classTimetableNextWeek => 'Next week';
+
+  @override
+  String classTimetablePeriodKind(String nature) {
+    String _temp0 = intl.Intl.selectLogic(nature, {
+      'PUBLIC_HOLIDAY': 'Public holiday',
+      'BREAK': 'Holidays',
+      'other': 'Exams',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String classTimetablePeriodDays(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count days this week',
+      one: '1 day this week',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get classTimetableWholeWeek => 'The whole week';
+
+  @override
+  String get classTimetableNoClasses => 'no classes';
+
+  @override
+  String get classTimetableOutOfYear => 'Outside the school year';
+
+  @override
+  String classTimetableNextStart(String date) {
+    return 'school starts on $date';
+  }
+
+  @override
+  String get classTimetableNoClassToday => 'No classes today';
+
+  @override
+  String classTimetablePublishRejected(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          '$count slots were refused by the server: set them again or clear them.',
+      one: '1 slot was refused by the server: set it again or clear it.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String calendarMonthMoreCompact(int count) {
+    return '+$count';
+  }
+
+  @override
+  String get classTimetableErrorNetworkTitle => 'Cannot connect';
+
+  @override
+  String get classTimetableErrorNetwork =>
+      'The timetable could not be reloaded. Check the connection, then try again.';
+
+  @override
+  String get classTimetableErrorUnauthorizedTitle => 'Session expired';
+
+  @override
+  String get classTimetableError401 =>
+      'Your session expired for your security. Sign in again to view the timetable.';
+
+  @override
+  String get classTimetableErrorForbiddenTitle => 'Access denied';
+
+  @override
+  String get classTimetableError403 =>
+      'Your account is not allowed to view the timetable. Ask your school administrator for access.';
+
+  @override
+  String get classTimetableErrorServerTitle => 'The timetable could not open';
+
+  @override
+  String get classTimetableErrorServer =>
+      'Something went wrong. Try again in a moment.';
+
+  @override
+  String get classTimetableNow => 'Now';
+
+  @override
+  String classTimetableNowAt(String time) {
+    return 'Now · $time';
+  }
+
+  @override
+  String classTimetableNext(String course, String time) {
+    return 'Next: $course at $time';
+  }
+
+  @override
+  String get classTimetableNoClassNow => 'No class right now';
+
+  @override
+  String get classTimetableNoMoreToday => 'No more classes today';
+
+  @override
+  String get classTimetableDrop => 'Drop';
+
+  @override
+  String get classTimetableOutOfProgramme => 'Not in the programme';
+
+  @override
+  String get classTimetableRejectedCell => 'Refused by the server';
+
+  @override
+  String classTimetablePublishOutOfProgramme(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count sessions not in the programme to clear before publishing.',
+      one: '1 session not in the programme to clear before publishing.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get classTimetableKpiConflictsOpen => 'to resolve before publishing';
+
+  @override
+  String get classTimetableKpiConflictsNone => 'no teacher booked twice';
+
+  @override
+  String get classTimetableHelpDrag =>
+      'Drag a course from the reserve, or tap a slot to choose it.';
+
+  @override
+  String get classTimetableReserveDragHint =>
+      'Drag to the grid · drop here to remove';
+
+  @override
+  String get classTimetableReserveDropToRemove =>
+      'Drop to remove from the grid';
+
+  @override
+  String get classTimetableReserveShow => 'Show';
+
+  @override
+  String get classTimetableReserveHide => 'Hide';
+
+  @override
+  String classTimetableDropConflict(String name, String classroom) {
+    return '$name already teaches $classroom at this slot';
+  }
+
+  @override
+  String get classTimetableHoverHint =>
+      'Hover over a course to find it in the grid';
+
+  @override
+  String get classTimetableAllDomains => 'All domains';
+
+  @override
+  String get classTimetableNoDomain => 'No domain';
+
+  @override
+  String get classTimetableSessionTeacher => 'Teacher';
+
+  @override
+  String get classTimetableSessionRoom => 'Room';
+
+  @override
+  String get classTimetableSessionVolume => 'Weekly hours';
+
+  @override
+  String get classTimetableSessionClass => 'Class';
+
+  @override
+  String get classTimetableSessionWeek => 'All sessions of the week';
+
+  @override
+  String get classTimetableSessionClose => 'Close';
+
+  @override
+  String classTimetableSessionLength(int minutes) {
+    return '$minutes min';
+  }
+
+  @override
+  String classTimetableDayHours(int hours) {
+    return '$hours h';
+  }
+
+  @override
+  String journalClosedDay(String kind, String period) {
+    return 'No classes · $kind · $period. A make-up session can still be recorded.';
+  }
+
+  @override
+  String get classTimetablePrint => 'Print';
+
+  @override
+  String get classTimetablePrintOffline =>
+      'Printing needs a connection: the document is composed by the server.';
+
+  @override
+  String classTimetablePrintTitle(String name) {
+    return 'Timetable · $name';
+  }
+
+  @override
+  String get classTimetablePrintFailed =>
+      'The document could not be fetched. Try again in a moment.';
 }

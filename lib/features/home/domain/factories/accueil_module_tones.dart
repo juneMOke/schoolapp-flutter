@@ -84,6 +84,8 @@ class AccueilModuleTones {
     MenuConstants.hrPayrollMenuId: _bleuArdoise,
     MenuConstants.classesMenuId: _terreFoncee,
     MenuConstants.coursesMenuId: _bleuArdoise,
+    // Entre les Cours (ardoise) et les Résultats (terre) : le bleu profond.
+    MenuConstants.agendaMenuId: _bleuProfond,
     MenuConstants.resultatsMenuId: _terreFoncee,
     MenuConstants.disciplinesMenuId: _bleuProfond,
     // Parler aux familles : la terre, pour rompre avec les Disciplines.

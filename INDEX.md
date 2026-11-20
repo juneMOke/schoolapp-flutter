@@ -9,6 +9,8 @@
 ```
 /home/junethink/my_project/school_app_flutter/
 │
+├── 🖼️ SPEC_TEMPLATE.md             ← Gabarit de spec front (besoin, écrans, états)
+├── 🖼️ SPEC_PROMPT_DESIGN.md        ← Prompts types pour demander une spec à Claude Design
 ├── 📄 README_TEMPLATES.md          ← Lisez d'abord (résumé)
 ├── 📘 USAGE_GUIDE.md               ← Guide complet (apprentissage)
 ├── 📋 FEATURE_TEMPLATE.md          ← Template détaillé

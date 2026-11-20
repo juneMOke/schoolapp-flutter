@@ -1,0 +1,246 @@
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:school_app_flutter/core/components/buttons/primary_button.dart';
+import 'package:school_app_flutter/core/components/buttons/secondary_button.dart';
+import 'package:school_app_flutter/core/components/controls/eteelo_filter_chip.dart';
+import 'package:school_app_flutter/core/components/dialogs/eteelo_form_dialog.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
+import 'package:school_app_flutter/core/widgets/app_confirmation_dialog.dart';
+import 'package:school_app_flutter/core/widgets/eteelo_text_input.dart';
+import 'package:school_app_flutter/features/school_calendar/domain/entities/calendar_element.dart';
+import 'package:school_app_flutter/features/school_calendar/domain/entities/calendar_enums.dart';
+import 'package:school_app_flutter/features/school_calendar/domain/entities/calendar_scope.dart';
+import 'package:school_app_flutter/features/school_calendar/domain/entities/calendar_scope_options.dart';
+import 'package:school_app_flutter/features/school_calendar/domain/services/calendar_event_validation.dart';
+import 'package:school_app_flutter/features/school_calendar/presentation/helpers/calendar_labels.dart';
+import 'package:school_app_flutter/features/school_calendar/presentation/helpers/calendar_nature_style.dart';
+import 'package:school_app_flutter/features/school_calendar/presentation/widgets/overlays/event_form_parts.dart';
+import 'package:school_app_flutter/l10n/app_localizations.dart';
+
+/// O2 — ajouter ou modifier un événement de l'école (plein écran sous 760).
+/// Rend l'élément à enregistrer, `null` si l'on abandonne. Les erreurs de
+/// CAL-R7 bloquent « Ajouter » ; les chevauchements avertissent seulement.
+class EventFormDialog extends StatefulWidget {
+  final String newId;
+  final CalendarElement? initial;
+  final DateTime? initialDay;
+  final Set<CalendarNature> natures;
+  final CalendarScopeOptions scopes;
+  final DateTime yearStart;
+  final DateTime yearEnd;
+  final List<CalendarElement> nationalElements;
+
+  const EventFormDialog({
+    super.key,
+    required this.newId,
+    required this.natures,
+    required this.scopes,
+    required this.yearStart,
+    required this.yearEnd,
+    required this.nationalElements,
+    this.initial,
+    this.initialDay,
+  });
+
+  static Future<CalendarElement?> show(
+    BuildContext context,
+    EventFormDialog dialog,
+  ) => EteeloFormDialog.show<CalendarElement>(context, dialog);
+
+  @override
+  State<EventFormDialog> createState() => _EventFormDialogState();
+}
+
+class _EventFormDialogState extends State<EventFormDialog> {
+  late final TextEditingController _title;
+  late final TextEditingController _note;
+  late CalendarNature _nature;
+  late final CalendarNature _initialNature;
+  DateTime? _start;
+  DateTime? _end;
+  late CalendarScope _scope;
+
+  @override
+  void initState() {
+    super.initState();
+    final initial = widget.initial;
+    _title = TextEditingController(text: initial?.title ?? '');
+    _note = TextEditingController(text: initial?.note ?? '');
+    _nature =
+        initial?.nature ??
+        (widget.natures.contains(CalendarNature.schoolLife)
+            ? CalendarNature.schoolLife
+            : widget.natures.first);
+    _initialNature = _nature;
+    _start = initial?.startDate ?? widget.initialDay;
+    _end = initial?.endDate ?? widget.initialDay;
+    _scope = initial?.scope ?? const SchoolScope();
+  }
+
+  @override
+  void dispose() {
+    _title.dispose();
+    _note.dispose();
+    super.dispose();
+  }
+
+  bool get _dirty =>
+      _title.text.trim() != (widget.initial?.title ?? '') ||
+      _note.text.trim() != (widget.initial?.note ?? '') ||
+      _start != (widget.initial?.startDate ?? widget.initialDay) ||
+      _end != (widget.initial?.endDate ?? widget.initialDay) ||
+      _nature != _initialNature ||
+      _scope != (widget.initial?.scope ?? const SchoolScope());
+
+  CalendarEventCheck? get _check {
+    final start = _start;
+    final end = _end;
+    if (start == null || end == null) return null;
+    return CalendarEventValidation.check(
+      title: _title.text,
+      nature: _nature,
+      startDate: start,
+      endDate: end,
+      yearStart: widget.yearStart,
+      yearEnd: widget.yearEnd,
+      nationalElements: widget.nationalElements,
+    );
+  }
+
+  void _submit() {
+    final check = _check;
+    if (check == null || !check.canSave) return;
+    final note = _note.text.trim();
+    final base = widget.initial;
+    final element = CalendarElement(
+      id: base?.id ?? widget.newId,
+      source: CalendarSource.school,
+      nature: _nature,
+      title: _title.text.trim(),
+      startDate: _start!,
+      endDate: _end!,
+      scope: _scope,
+      note: note.isEmpty ? null : note,
+      // Une modification retire la marque « à vérifier » (CAL-R9).
+      createdBy: base?.createdBy,
+    );
+    Navigator.of(context).pop(element);
+  }
+
+  Future<void> _cancel() async {
+    if (!_dirty) {
+      Navigator.of(context).pop();
+      return;
+    }
+    final l10n = AppLocalizations.of(context)!;
+    final abandon = await showAppConfirmationDialog(
+      context: context,
+      title: l10n.schoolCalendarAbandonTitle,
+      message: l10n.schoolCalendarAbandonBody,
+      confirmLabel: l10n.schoolCalendarAbandonConfirm,
+      cancelLabel: l10n.schoolCalendarAbandonKeep,
+      isDestructive: true,
+    );
+    if (abandon && mounted) Navigator.of(context).pop();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final check = _check;
+    final canSave = check?.canSave ?? false;
+    return PopScope(
+      canPop: !_dirty,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) _cancel();
+      },
+      child: EteeloFormDialog(
+        title: widget.initial == null
+            ? l10n.schoolCalendarFormAddTitle
+            : l10n.schoolCalendarFormEditTitle,
+        onSubmit: canSave ? _submit : null,
+        body: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Wrap(
+              spacing: AppSpacing.sm,
+              runSpacing: AppSpacing.sm,
+              children: [
+                for (final nature in CalendarNature.values)
+                  if (widget.natures.contains(nature))
+                    EteeloFilterChip(
+                      label: CalendarLabels.nature(l10n, nature),
+                      selected: _nature == nature,
+                      color: nature.tone.tone,
+                      soft: nature.tone.soft,
+                      ink: nature.tone.ink,
+                      icon: nature.tone.icon,
+                      onTap: () => setState(() => _nature = nature),
+                    ),
+              ],
+            ),
+            const SizedBox(height: AppSpacing.md),
+            EteeloTextInput(
+              controller: _title,
+              label: l10n.schoolCalendarFormTitle,
+              required: true,
+              capitalization: EteeloTextCapitalization.sentence,
+              onChanged: (_) => setState(() {}),
+            ),
+            const SizedBox(height: AppSpacing.md),
+            EventDatesRow(
+              start: _start,
+              end: _end,
+              yearStart: widget.yearStart,
+              yearEnd: widget.yearEnd,
+              onStart: (d) => setState(() {
+                _start = d;
+                if (_end == null || (d != null && _end!.isBefore(d))) _end = d;
+              }),
+              onEnd: (d) => setState(() => _end = d),
+            ),
+            const SizedBox(height: AppSpacing.md),
+            EventScopeSelect(
+              scope: _scope,
+              options: widget.scopes,
+              onChanged: (scope) => setState(() => _scope = scope),
+            ),
+            const SizedBox(height: AppSpacing.md),
+            EteeloTextInput(
+              controller: _note,
+              label: l10n.schoolCalendarFormNote,
+              keyboardType: EteeloTextInputType.multiline,
+              minLines: 2,
+              maxLines: 4,
+              inputFormatters: [
+                LengthLimitingTextInputFormatter(
+                  CalendarEventValidation.noteMaxLength,
+                ),
+              ],
+            ),
+            const SizedBox(height: AppSpacing.md),
+            EventFormMessages(
+              check: check,
+              yearStart: widget.yearStart,
+              yearEnd: widget.yearEnd,
+            ),
+          ],
+        ),
+        actions: [
+          SecondaryButton(
+            label: l10n.schoolCalendarFormCancel,
+            fullWidth: false,
+            onPressed: _cancel,
+          ),
+          PrimaryButton(
+            label: widget.initial == null
+                ? l10n.schoolCalendarAdd
+                : l10n.schoolCalendarFormSave,
+            fullWidth: false,
+            onPressed: canSave ? _submit : null,
+          ),
+        ],
+      ),
+    );
+  }
+}

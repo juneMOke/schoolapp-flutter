@@ -11,6 +11,10 @@ class RefTimeSlotRow extends Equatable {
   final String startTime;
   final String endTime;
   final String? label;
+
+  /// La grille du créneau (v84) : un cycle désigne sa grille, deux grilles
+  /// coexistent dans une école (EDT-R1). `null` avant EDT-1 côté serveur.
+  final String? timeGridId;
   final int? serverUpdatedAt;
   final int syncedAt;
 
@@ -20,6 +24,7 @@ class RefTimeSlotRow extends Equatable {
     required this.startTime,
     required this.endTime,
     this.label,
+    this.timeGridId,
     this.serverUpdatedAt,
     required this.syncedAt,
   });
@@ -37,6 +42,7 @@ class RefTimeSlotRow extends Equatable {
     startTime: map['start_time'] as String,
     endTime: map['end_time'] as String,
     label: map['label'] as String?,
+    timeGridId: map['time_grid_id'] as String?,
     serverUpdatedAt: _asIntOrNull(map['server_updated_at']),
     syncedAt: _asIntOrNull(map['synced_at']) ?? 0,
   );
@@ -47,6 +53,7 @@ class RefTimeSlotRow extends Equatable {
     'start_time': startTime,
     'end_time': endTime,
     'label': label,
+    'time_grid_id': timeGridId,
     'server_updated_at': serverUpdatedAt,
     'synced_at': syncedAt,
   };
@@ -58,6 +65,7 @@ class RefTimeSlotRow extends Equatable {
     startTime,
     endTime,
     label,
+    timeGridId,
     serverUpdatedAt,
     syncedAt,
   ];

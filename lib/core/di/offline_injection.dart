@@ -17,6 +17,7 @@ import 'package:school_app_flutter/core/database/tenant/offline_database_files.d
 import 'package:school_app_flutter/core/database/tenant/tenant_database.dart';
 import 'package:school_app_flutter/core/database/tenant/tenant_scope.dart';
 import 'package:school_app_flutter/core/database/tenant/tenant_session.dart';
+import 'package:school_app_flutter/core/di/offline_modules/school_calendar_di.dart';
 import 'package:school_app_flutter/core/di/offline_modules/cotes_di.dart';
 import 'package:school_app_flutter/core/di/offline_modules/communication_di.dart';
 import 'package:school_app_flutter/core/di/offline_modules/treasury_di.dart';
@@ -371,6 +372,7 @@ void registerOfflineModules(GetIt getIt) {
   registerCommunication(getIt); // Communiqués aux parents — en ligne
   registerTreasury(getIt); // Trésorerie — caisses en ligne
   registerCotes(getIt); // Saisie des notes — cache de classe et file d'envoi
+  registerSchoolCalendar(getIt); // Calendrier scolaire — flux et lot d'envoi
 }
 
 /// Plan de synchronisation par profil (ADR-015 F2).

@@ -90,13 +90,13 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  testWidgets('affiche les huit pavés modules et annonce leur page d\'entrée', (
+  testWidgets('affiche les neuf pavés modules et annonce leur page d\'entrée', (
     tester,
   ) async {
     final semantics = tester.ensureSemantics();
     await pumpAccueil(tester);
 
-    expect(find.byType(AccueilModuleBloc), findsNWidgets(8));
+    expect(find.byType(AccueilModuleBloc), findsNWidgets(9));
 
     // Le libellé d'accessibilité de l'en-tête nomme la destination réelle :
     // le tableau de bord quand il existe, sinon la première page du module.
@@ -108,6 +108,9 @@ void main() {
       'Recouvrement': 'Tableau de bord',
       'Classes': 'Tableau de bord',
       'Cours': 'Emploi du temps',
+      // `schedule.read` seul : l'emploi du temps par classe, sans le
+      // calendrier (`calendar.read`).
+      'Agenda & Horaires': 'Emploi du temps',
       'Résultats': 'Résultats par classe',
       'Disciplines': 'Tableau de bord',
       // Page unique : l'en-tête mène là où mène l'unique ligne.
@@ -127,8 +130,9 @@ void main() {
   testWidgets('annonce le nombre de pages de chaque module', (tester) async {
     await pumpAccueil(tester);
 
-    // Résultats et Configuration : page unique, au singulier.
-    expect(find.text('1 page'), findsNWidgets(2));
+    // Résultats, Configuration et Agenda & Horaires (l'emploi du temps seul,
+    // sans `calendar.read`) : page unique, au singulier.
+    expect(find.text('1 page'), findsNWidgets(3));
     // Inscriptions (Réinscription et Pré-inscription masquées par
     // `kHiddenSubMenus`), Finances (tableau de bord + Facturations) et Contrôle
     // des frais (tableau de bord + contrôle par frais) en ont deux.
@@ -201,7 +205,7 @@ void main() {
     // où il en a depuis deux ; plus le pavé Configuration). Inscriptions est
     // descendue de 4 à 2 : Réinscription et Pré-inscription sont masquées par
     // décision produit (`kHiddenSubMenus`).
-    expect(find.byType(AccueilSubModulePill), findsNWidgets(18));
+    expect(find.byType(AccueilSubModulePill), findsNWidgets(19));
   });
 
   /// L'accueil est le **seul** chemin vers `/dev/components` et

@@ -383,6 +383,14 @@ const Map<String, Map<String, ModuleAccess>> kModuleAccessRegistry = {
     MenuConstants.treasuryClosingId: ModuleAccess([Perm.treasuryRead]),
     MenuConstants.treasuryConfigId: ModuleAccess([Perm.treasuryRead]),
   },
+  // Le calendrier se LIT sous `calendar.read` ; ajouter, créer, dupliquer et
+  // publier sont gardés geste par geste (K10).
+  MenuConstants.agendaMenuId: {
+    MenuConstants.schoolCalendarId: ModuleAccess([Perm.calendarRead]),
+    // Les versions publiées de toutes les classes descendent sous
+    // `schedule.read` (A17) ; construire et publier sous `schedule.write`.
+    MenuConstants.classTimetableId: ModuleAccess([Perm.scheduleRead]),
+  },
   // RH · Personnel : les deux écrans lisent le fichier local du personnel
   // sous `hr.staff.read`. Tant que le serveur ne sème pas ce droit, le module
   // reste masqué. Créer ou modifier une fiche reste gardé geste par geste

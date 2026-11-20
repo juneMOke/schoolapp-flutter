@@ -1,4 +1,18 @@
+import 'package:school_app_flutter/core/helpers/school_time.dart';
+import 'package:school_app_flutter/core/offline/outbox_dao.dart';
+import 'package:sqflite_common/sqlite_api.dart';
+import 'package:school_app_flutter/core/offline/keyset_pull_runner.dart';
 import 'package:school_app_flutter/core/di/offline_modules/evaluation_depot_di.dart';
+import 'package:school_app_flutter/features/schedule/data/timetable/class_calendar_reader.dart';
+import 'package:school_app_flutter/features/schedule/data/timetable/class_timetable_reader.dart';
+import 'package:school_app_flutter/features/schedule/data/timetable/timetable_dao.dart';
+import 'package:school_app_flutter/features/schedule/data/timetable/timetable_draft_dao.dart';
+import 'package:school_app_flutter/features/schedule/data/timetable/timetable_draft_outbox_handler.dart';
+import 'package:school_app_flutter/features/schedule/data/timetable/timetable_editor.dart';
+import 'package:school_app_flutter/features/schedule/data/timetable/timetable_printer.dart';
+import 'package:school_app_flutter/features/schedule/presentation/timetable/bloc/class_timetable_cubit.dart';
+import 'package:school_app_flutter/features/schedule/data/timetable/timetable_pull_handlers.dart';
+import 'package:school_app_flutter/features/schedule/data/sync/time_grids_pull_handler.dart';
 import 'package:school_app_flutter/features/enrollment/offline/data/local/dao/enrollment_referential_dao.dart';
 import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
@@ -165,6 +179,7 @@ void registerAcademicsOffline(GetIt getIt) {
       online: getIt<ScheduleRepositoryImpl>(),
       refLocalDataSource: getIt<ScheduleRefLocalDataSource>(),
       currentUser: getIt<CurrentUserContext>(),
+      gridDao: TimeGridDao(getIt<Database>()),
     ),
   );
   // Impl offline-first de CourseRepository (getMyCourses local ; détail/création
@@ -266,12 +281,88 @@ void registerAcademicsOffline(GetIt getIt) {
   getIt<PullCoordinator>().registerHandler(
     GradesReferentialPullHandler(getIt<GradesReferentialPullRepositoryImpl>()),
   );
+  // Les grilles avant les créneaux qui les désignent.
+  getIt<PullCoordinator>().registerHandler(
+    TimeGridsPullHandler(
+      dio: getIt<Dio>(),
+      runner: KeysetPullRunner(getIt<SyncMetaDao>()),
+      dao: TimeGridDao(getIt<Database>()),
+      currentUser: getIt<CurrentUserContext>(),
+      requiredAuth: getIt<Map<String, dynamic>>(),
+    ),
+  );
   getIt<PullCoordinator>().registerHandler(
     TimeSlotsPullHandler(getIt<SchedulePullRepositoryImpl>()),
   );
   getIt<PullCoordinator>().registerHandler(
     SessionsPullHandler(getIt<SchedulePullRepositoryImpl>()),
   );
+  // L'emploi du temps par classe : programme, en-têtes, cases.
+  final timetableDao = TimetableDao(getIt<Database>());
+  getIt.registerFactory(
+    () => ClassTimetableCubit(
+      ClassTimetableReader(
+        getIt<Database>(),
+        getIt<SyncMetaDao>(),
+        schoolId: () => getIt<CurrentUserContext>().schoolId,
+      ),
+      calendarReader: ClassCalendarReader(
+        getIt<Database>(),
+        schoolId: () => getIt<CurrentUserContext>().schoolId,
+      ),
+      schoolToday: () => SchoolTime.today(DateTime.now()),
+      editor: TimetableEditor(
+        db: getIt<Database>(),
+        dio: getIt<Dio>(),
+        requiredAuth: getIt<Map<String, dynamic>>(),
+        ids: getIt<IdGenerator>(),
+        schoolId: () => getIt<CurrentUserContext>().schoolId,
+        engine: getIt<SyncEngine>(),
+      ),
+      printer: TimetablePrinter(
+        dio: getIt<Dio>(),
+        requiredAuth: getIt<Map<String, dynamic>>(),
+      ),
+      coordinator: getIt<PullCoordinator>(),
+    ),
+  );
+  // Les gestes de brouillon partent par le lot (A18), web compris.
+  getIt<SyncEngine>().registerHandler(
+    TimetableDraftOutboxHandler(
+      dio: getIt<Dio>(),
+      dao: TimetableDraftDao(getIt<Database>()),
+      outbox: OutboxDao(getIt<Database>()),
+      requiredAuth: getIt<Map<String, dynamic>>(),
+    ),
+  );
+  getIt<PullCoordinator>()
+    ..registerHandler(
+      ProgrammesPullHandler(
+        dio: getIt<Dio>(),
+        dao: timetableDao,
+        meta: getIt<SyncMetaDao>(),
+        currentUser: getIt<CurrentUserContext>(),
+        requiredAuth: getIt<Map<String, dynamic>>(),
+      ),
+    )
+    ..registerHandler(
+      TimetableFeedPullHandler.headers(
+        timetableDao,
+        getIt<Dio>(),
+        KeysetPullRunner(getIt<SyncMetaDao>()),
+        getIt<CurrentUserContext>(),
+        getIt<Map<String, dynamic>>(),
+      ),
+    )
+    ..registerHandler(
+      TimetableFeedPullHandler.cells(
+        timetableDao,
+        getIt<Dio>(),
+        KeysetPullRunner(getIt<SyncMetaDao>()),
+        getIt<CurrentUserContext>(),
+        getIt<Map<String, dynamic>>(),
+      ),
+    );
   getIt<PullCoordinator>().registerHandler(
     AcademicsCoursPullHandler(getIt<AcademicsCoursPullRepositoryImpl>()),
   );

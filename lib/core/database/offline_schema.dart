@@ -19,6 +19,8 @@ import 'package:school_app_flutter/core/database/schema/staff_attendance_schema.
 import 'package:school_app_flutter/core/database/schema/staff_offline_schema.dart';
 import 'package:school_app_flutter/core/database/schema/student_photo_schema.dart';
 import 'package:school_app_flutter/core/database/schema/ticket_print_jobs_schema.dart';
+import 'package:school_app_flutter/core/database/schema/class_timetable_schema.dart';
+import 'package:school_app_flutter/core/database/schema/school_calendar_schema.dart';
 import 'package:school_app_flutter/core/database/schema/treasury_schema.dart';
 import 'package:school_app_flutter/core/database/table_schema.dart';
 
@@ -138,4 +140,6 @@ List<TableSchema> buildOfflineSchema() => [
   ...coteSaisieTables, // Résultats — saisie des notes (cache et file d'envoi)
   ...enrollmentLevelCorrectionTables, // Inscriptions — correction de niveau
   ...treasuryTables, // Trésorerie — clôtures de caisse (verrou des encaissements)
+  ...schoolCalendarTables, // Calendrier scolaire — cadres, calendriers, événements
+  ...classTimetableTables, // Emploi du temps par classe — programme, en-têtes, cases
 ];

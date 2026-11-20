@@ -1,0 +1,1677 @@
+{
+  "description": "Copie d'un emploi du temps vers une classe de même grille (A6). Pour chaque case de la source dont le créneau est dans slots (les autres sont ignorées sans être comptées) : le cours de la cible de même branchId, le plus petit coursId s'il y en a plusieurs ; aucun = noEquivalent. Si ce cours a un enseignant pris dans otherCells (autres classes) le même jour sur des minutes qui chevauchent celles du créneau = conflicts, case laissée vide. Sinon la case est prise (taken). cells : toutes les cases, MON à SAT puis créneaux par order, pleines ou vides (coursId et teacherId nuls) : c'est le lot qui monte.",
+  "cases": [
+    {
+      "name": "tout se reprend : chaque case prend le cours de même branche de la cible",
+      "input": {
+        "slots": [
+          {
+            "slotId": "s1",
+            "order": 1,
+            "startMinute": 450,
+            "endMinute": 500
+          },
+          {
+            "slotId": "s2",
+            "order": 2,
+            "startMinute": 500,
+            "endMinute": 550
+          },
+          {
+            "slotId": "s3",
+            "order": 3,
+            "startMinute": 570,
+            "endMinute": 620
+          }
+        ],
+        "source": {
+          "cells": [
+            {
+              "day": "MON",
+              "slotId": "s1",
+              "coursId": "src-math",
+              "branchId": "b-math"
+            },
+            {
+              "day": "MON",
+              "slotId": "s2",
+              "coursId": "src-fr",
+              "branchId": "b-fr"
+            },
+            {
+              "day": "TUE",
+              "slotId": "s3",
+              "coursId": "src-math",
+              "branchId": "b-math"
+            }
+          ]
+        },
+        "target": {
+          "courses": [
+            {
+              "coursId": "cib-math",
+              "branchId": "b-math",
+              "teacherId": "t-kabila"
+            },
+            {
+              "coursId": "cib-fr",
+              "branchId": "b-fr",
+              "teacherId": "t-mbuyi"
+            }
+          ]
+        },
+        "otherCells": []
+      },
+      "expected": {
+        "cells": [
+          {
+            "day": "MON",
+            "slotId": "s1",
+            "coursId": "cib-math",
+            "teacherId": "t-kabila"
+          },
+          {
+            "day": "MON",
+            "slotId": "s2",
+            "coursId": "cib-fr",
+            "teacherId": "t-mbuyi"
+          },
+          {
+            "day": "MON",
+            "slotId": "s3",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "TUE",
+            "slotId": "s1",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "TUE",
+            "slotId": "s2",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "TUE",
+            "slotId": "s3",
+            "coursId": "cib-math",
+            "teacherId": "t-kabila"
+          },
+          {
+            "day": "WED",
+            "slotId": "s1",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "WED",
+            "slotId": "s2",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "WED",
+            "slotId": "s3",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "THU",
+            "slotId": "s1",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "THU",
+            "slotId": "s2",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "THU",
+            "slotId": "s3",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "FRI",
+            "slotId": "s1",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "FRI",
+            "slotId": "s2",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "FRI",
+            "slotId": "s3",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "SAT",
+            "slotId": "s1",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "SAT",
+            "slotId": "s2",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "SAT",
+            "slotId": "s3",
+            "coursId": null,
+            "teacherId": null
+          }
+        ],
+        "taken": 3,
+        "noEquivalent": 0,
+        "conflicts": 0
+      }
+    },
+    {
+      "name": "branche absente de la cible : case vide, comptée",
+      "input": {
+        "slots": [
+          {
+            "slotId": "s1",
+            "order": 1,
+            "startMinute": 450,
+            "endMinute": 500
+          },
+          {
+            "slotId": "s2",
+            "order": 2,
+            "startMinute": 500,
+            "endMinute": 550
+          },
+          {
+            "slotId": "s3",
+            "order": 3,
+            "startMinute": 570,
+            "endMinute": 620
+          }
+        ],
+        "source": {
+          "cells": [
+            {
+              "day": "MON",
+              "slotId": "s1",
+              "coursId": "src-ang",
+              "branchId": "b-ang"
+            },
+            {
+              "day": "MON",
+              "slotId": "s2",
+              "coursId": "src-fr",
+              "branchId": "b-fr"
+            }
+          ]
+        },
+        "target": {
+          "courses": [
+            {
+              "coursId": "cib-fr",
+              "branchId": "b-fr",
+              "teacherId": "t-mbuyi"
+            }
+          ]
+        },
+        "otherCells": []
+      },
+      "expected": {
+        "cells": [
+          {
+            "day": "MON",
+            "slotId": "s1",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "MON",
+            "slotId": "s2",
+            "coursId": "cib-fr",
+            "teacherId": "t-mbuyi"
+          },
+          {
+            "day": "MON",
+            "slotId": "s3",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "TUE",
+            "slotId": "s1",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "TUE",
+            "slotId": "s2",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "TUE",
+            "slotId": "s3",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "WED",
+            "slotId": "s1",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "WED",
+            "slotId": "s2",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "WED",
+            "slotId": "s3",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "THU",
+            "slotId": "s1",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "THU",
+            "slotId": "s2",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "THU",
+            "slotId": "s3",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "FRI",
+            "slotId": "s1",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "FRI",
+            "slotId": "s2",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "FRI",
+            "slotId": "s3",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "SAT",
+            "slotId": "s1",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "SAT",
+            "slotId": "s2",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "SAT",
+            "slotId": "s3",
+            "coursId": null,
+            "teacherId": null
+          }
+        ],
+        "taken": 1,
+        "noEquivalent": 1,
+        "conflicts": 0
+      }
+    },
+    {
+      "name": "conflit : le professeur de la cible est pris ailleurs sur des minutes qui chevauchent",
+      "input": {
+        "slots": [
+          {
+            "slotId": "s1",
+            "order": 1,
+            "startMinute": 450,
+            "endMinute": 500
+          },
+          {
+            "slotId": "s2",
+            "order": 2,
+            "startMinute": 500,
+            "endMinute": 550
+          },
+          {
+            "slotId": "s3",
+            "order": 3,
+            "startMinute": 570,
+            "endMinute": 620
+          }
+        ],
+        "source": {
+          "cells": [
+            {
+              "day": "WED",
+              "slotId": "s1",
+              "coursId": "src-math",
+              "branchId": "b-math"
+            },
+            {
+              "day": "WED",
+              "slotId": "s2",
+              "coursId": "src-math",
+              "branchId": "b-math"
+            }
+          ]
+        },
+        "target": {
+          "courses": [
+            {
+              "coursId": "cib-math",
+              "branchId": "b-math",
+              "teacherId": "t-kabila"
+            }
+          ]
+        },
+        "otherCells": [
+          {
+            "classroomId": "autre",
+            "day": "WED",
+            "startMinute": 480,
+            "endMinute": 525,
+            "teacherId": "t-kabila"
+          }
+        ]
+      },
+      "expected": {
+        "cells": [
+          {
+            "day": "MON",
+            "slotId": "s1",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "MON",
+            "slotId": "s2",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "MON",
+            "slotId": "s3",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "TUE",
+            "slotId": "s1",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "TUE",
+            "slotId": "s2",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "TUE",
+            "slotId": "s3",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "WED",
+            "slotId": "s1",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "WED",
+            "slotId": "s2",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "WED",
+            "slotId": "s3",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "THU",
+            "slotId": "s1",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "THU",
+            "slotId": "s2",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "THU",
+            "slotId": "s3",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "FRI",
+            "slotId": "s1",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "FRI",
+            "slotId": "s2",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "FRI",
+            "slotId": "s3",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "SAT",
+            "slotId": "s1",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "SAT",
+            "slotId": "s2",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "SAT",
+            "slotId": "s3",
+            "coursId": null,
+            "teacherId": null
+          }
+        ],
+        "taken": 0,
+        "noEquivalent": 0,
+        "conflicts": 2
+      }
+    },
+    {
+      "name": "créneau jointif ailleurs : pas de conflit",
+      "input": {
+        "slots": [
+          {
+            "slotId": "s1",
+            "order": 1,
+            "startMinute": 450,
+            "endMinute": 500
+          },
+          {
+            "slotId": "s2",
+            "order": 2,
+            "startMinute": 500,
+            "endMinute": 550
+          },
+          {
+            "slotId": "s3",
+            "order": 3,
+            "startMinute": 570,
+            "endMinute": 620
+          }
+        ],
+        "source": {
+          "cells": [
+            {
+              "day": "WED",
+              "slotId": "s2",
+              "coursId": "src-math",
+              "branchId": "b-math"
+            }
+          ]
+        },
+        "target": {
+          "courses": [
+            {
+              "coursId": "cib-math",
+              "branchId": "b-math",
+              "teacherId": "t-kabila"
+            }
+          ]
+        },
+        "otherCells": [
+          {
+            "classroomId": "autre",
+            "day": "WED",
+            "startMinute": 450,
+            "endMinute": 500,
+            "teacherId": "t-kabila"
+          }
+        ]
+      },
+      "expected": {
+        "cells": [
+          {
+            "day": "MON",
+            "slotId": "s1",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "MON",
+            "slotId": "s2",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "MON",
+            "slotId": "s3",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "TUE",
+            "slotId": "s1",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "TUE",
+            "slotId": "s2",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "TUE",
+            "slotId": "s3",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "WED",
+            "slotId": "s1",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "WED",
+            "slotId": "s2",
+            "coursId": "cib-math",
+            "teacherId": "t-kabila"
+          },
+          {
+            "day": "WED",
+            "slotId": "s3",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "THU",
+            "slotId": "s1",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "THU",
+            "slotId": "s2",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "THU",
+            "slotId": "s3",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "FRI",
+            "slotId": "s1",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "FRI",
+            "slotId": "s2",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "FRI",
+            "slotId": "s3",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "SAT",
+            "slotId": "s1",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "SAT",
+            "slotId": "s2",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "SAT",
+            "slotId": "s3",
+            "coursId": null,
+            "teacherId": null
+          }
+        ],
+        "taken": 1,
+        "noEquivalent": 0,
+        "conflicts": 0
+      }
+    },
+    {
+      "name": "autre jour ou autre professeur : pas de conflit",
+      "input": {
+        "slots": [
+          {
+            "slotId": "s1",
+            "order": 1,
+            "startMinute": 450,
+            "endMinute": 500
+          },
+          {
+            "slotId": "s2",
+            "order": 2,
+            "startMinute": 500,
+            "endMinute": 550
+          },
+          {
+            "slotId": "s3",
+            "order": 3,
+            "startMinute": 570,
+            "endMinute": 620
+          }
+        ],
+        "source": {
+          "cells": [
+            {
+              "day": "THU",
+              "slotId": "s1",
+              "coursId": "src-math",
+              "branchId": "b-math"
+            }
+          ]
+        },
+        "target": {
+          "courses": [
+            {
+              "coursId": "cib-math",
+              "branchId": "b-math",
+              "teacherId": "t-kabila"
+            }
+          ]
+        },
+        "otherCells": [
+          {
+            "classroomId": "autre",
+            "day": "FRI",
+            "startMinute": 450,
+            "endMinute": 500,
+            "teacherId": "t-kabila"
+          },
+          {
+            "classroomId": "autre",
+            "day": "THU",
+            "startMinute": 450,
+            "endMinute": 500,
+            "teacherId": "t-autre"
+          }
+        ]
+      },
+      "expected": {
+        "cells": [
+          {
+            "day": "MON",
+            "slotId": "s1",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "MON",
+            "slotId": "s2",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "MON",
+            "slotId": "s3",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "TUE",
+            "slotId": "s1",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "TUE",
+            "slotId": "s2",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "TUE",
+            "slotId": "s3",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "WED",
+            "slotId": "s1",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "WED",
+            "slotId": "s2",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "WED",
+            "slotId": "s3",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "THU",
+            "slotId": "s1",
+            "coursId": "cib-math",
+            "teacherId": "t-kabila"
+          },
+          {
+            "day": "THU",
+            "slotId": "s2",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "THU",
+            "slotId": "s3",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "FRI",
+            "slotId": "s1",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "FRI",
+            "slotId": "s2",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "FRI",
+            "slotId": "s3",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "SAT",
+            "slotId": "s1",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "SAT",
+            "slotId": "s2",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "SAT",
+            "slotId": "s3",
+            "coursId": null,
+            "teacherId": null
+          }
+        ],
+        "taken": 1,
+        "noEquivalent": 0,
+        "conflicts": 0
+      }
+    },
+    {
+      "name": "cours de la cible sans enseignant : jamais en conflit",
+      "input": {
+        "slots": [
+          {
+            "slotId": "s1",
+            "order": 1,
+            "startMinute": 450,
+            "endMinute": 500
+          },
+          {
+            "slotId": "s2",
+            "order": 2,
+            "startMinute": 500,
+            "endMinute": 550
+          },
+          {
+            "slotId": "s3",
+            "order": 3,
+            "startMinute": 570,
+            "endMinute": 620
+          }
+        ],
+        "source": {
+          "cells": [
+            {
+              "day": "FRI",
+              "slotId": "s1",
+              "coursId": "src-eps",
+              "branchId": "b-eps"
+            }
+          ]
+        },
+        "target": {
+          "courses": [
+            {
+              "coursId": "cib-eps",
+              "branchId": "b-eps",
+              "teacherId": null
+            }
+          ]
+        },
+        "otherCells": [
+          {
+            "classroomId": "autre",
+            "day": "FRI",
+            "startMinute": 450,
+            "endMinute": 500,
+            "teacherId": null
+          }
+        ]
+      },
+      "expected": {
+        "cells": [
+          {
+            "day": "MON",
+            "slotId": "s1",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "MON",
+            "slotId": "s2",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "MON",
+            "slotId": "s3",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "TUE",
+            "slotId": "s1",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "TUE",
+            "slotId": "s2",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "TUE",
+            "slotId": "s3",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "WED",
+            "slotId": "s1",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "WED",
+            "slotId": "s2",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "WED",
+            "slotId": "s3",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "THU",
+            "slotId": "s1",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "THU",
+            "slotId": "s2",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "THU",
+            "slotId": "s3",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "FRI",
+            "slotId": "s1",
+            "coursId": "cib-eps",
+            "teacherId": null
+          },
+          {
+            "day": "FRI",
+            "slotId": "s2",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "FRI",
+            "slotId": "s3",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "SAT",
+            "slotId": "s1",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "SAT",
+            "slotId": "s2",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "SAT",
+            "slotId": "s3",
+            "coursId": null,
+            "teacherId": null
+          }
+        ],
+        "taken": 1,
+        "noEquivalent": 0,
+        "conflicts": 0
+      }
+    },
+    {
+      "name": "deux cours de même branche dans la cible : le plus petit identifiant",
+      "input": {
+        "slots": [
+          {
+            "slotId": "s1",
+            "order": 1,
+            "startMinute": 450,
+            "endMinute": 500
+          },
+          {
+            "slotId": "s2",
+            "order": 2,
+            "startMinute": 500,
+            "endMinute": 550
+          },
+          {
+            "slotId": "s3",
+            "order": 3,
+            "startMinute": 570,
+            "endMinute": 620
+          }
+        ],
+        "source": {
+          "cells": [
+            {
+              "day": "SAT",
+              "slotId": "s3",
+              "coursId": "src-fr",
+              "branchId": "b-fr"
+            }
+          ]
+        },
+        "target": {
+          "courses": [
+            {
+              "coursId": "cib-fr-b",
+              "branchId": "b-fr",
+              "teacherId": "t-b"
+            },
+            {
+              "coursId": "cib-fr-a",
+              "branchId": "b-fr",
+              "teacherId": "t-a"
+            }
+          ]
+        },
+        "otherCells": []
+      },
+      "expected": {
+        "cells": [
+          {
+            "day": "MON",
+            "slotId": "s1",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "MON",
+            "slotId": "s2",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "MON",
+            "slotId": "s3",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "TUE",
+            "slotId": "s1",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "TUE",
+            "slotId": "s2",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "TUE",
+            "slotId": "s3",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "WED",
+            "slotId": "s1",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "WED",
+            "slotId": "s2",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "WED",
+            "slotId": "s3",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "THU",
+            "slotId": "s1",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "THU",
+            "slotId": "s2",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "THU",
+            "slotId": "s3",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "FRI",
+            "slotId": "s1",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "FRI",
+            "slotId": "s2",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "FRI",
+            "slotId": "s3",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "SAT",
+            "slotId": "s1",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "SAT",
+            "slotId": "s2",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "SAT",
+            "slotId": "s3",
+            "coursId": "cib-fr-a",
+            "teacherId": "t-a"
+          }
+        ],
+        "taken": 1,
+        "noEquivalent": 0,
+        "conflicts": 0
+      }
+    },
+    {
+      "name": "case d'un créneau qui n'est pas dans la grille : ignorée, non comptée",
+      "input": {
+        "slots": [
+          {
+            "slotId": "s1",
+            "order": 1,
+            "startMinute": 450,
+            "endMinute": 500
+          },
+          {
+            "slotId": "s2",
+            "order": 2,
+            "startMinute": 500,
+            "endMinute": 550
+          },
+          {
+            "slotId": "s3",
+            "order": 3,
+            "startMinute": 570,
+            "endMinute": 620
+          }
+        ],
+        "source": {
+          "cells": [
+            {
+              "day": "MON",
+              "slotId": "s9",
+              "coursId": "src-fr",
+              "branchId": "b-fr"
+            },
+            {
+              "day": "MON",
+              "slotId": "s1",
+              "coursId": "src-fr",
+              "branchId": "b-fr"
+            }
+          ]
+        },
+        "target": {
+          "courses": [
+            {
+              "coursId": "cib-fr",
+              "branchId": "b-fr",
+              "teacherId": "t-mbuyi"
+            }
+          ]
+        },
+        "otherCells": []
+      },
+      "expected": {
+        "cells": [
+          {
+            "day": "MON",
+            "slotId": "s1",
+            "coursId": "cib-fr",
+            "teacherId": "t-mbuyi"
+          },
+          {
+            "day": "MON",
+            "slotId": "s2",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "MON",
+            "slotId": "s3",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "TUE",
+            "slotId": "s1",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "TUE",
+            "slotId": "s2",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "TUE",
+            "slotId": "s3",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "WED",
+            "slotId": "s1",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "WED",
+            "slotId": "s2",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "WED",
+            "slotId": "s3",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "THU",
+            "slotId": "s1",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "THU",
+            "slotId": "s2",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "THU",
+            "slotId": "s3",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "FRI",
+            "slotId": "s1",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "FRI",
+            "slotId": "s2",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "FRI",
+            "slotId": "s3",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "SAT",
+            "slotId": "s1",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "SAT",
+            "slotId": "s2",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "SAT",
+            "slotId": "s3",
+            "coursId": null,
+            "teacherId": null
+          }
+        ],
+        "taken": 1,
+        "noEquivalent": 0,
+        "conflicts": 0
+      }
+    },
+    {
+      "name": "source vide : toutes les cases vides",
+      "input": {
+        "slots": [
+          {
+            "slotId": "s1",
+            "order": 1,
+            "startMinute": 450,
+            "endMinute": 500
+          },
+          {
+            "slotId": "s2",
+            "order": 2,
+            "startMinute": 500,
+            "endMinute": 550
+          },
+          {
+            "slotId": "s3",
+            "order": 3,
+            "startMinute": 570,
+            "endMinute": 620
+          }
+        ],
+        "source": {
+          "cells": []
+        },
+        "target": {
+          "courses": [
+            {
+              "coursId": "cib-fr",
+              "branchId": "b-fr",
+              "teacherId": "t-mbuyi"
+            }
+          ]
+        },
+        "otherCells": []
+      },
+      "expected": {
+        "cells": [
+          {
+            "day": "MON",
+            "slotId": "s1",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "MON",
+            "slotId": "s2",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "MON",
+            "slotId": "s3",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "TUE",
+            "slotId": "s1",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "TUE",
+            "slotId": "s2",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "TUE",
+            "slotId": "s3",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "WED",
+            "slotId": "s1",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "WED",
+            "slotId": "s2",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "WED",
+            "slotId": "s3",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "THU",
+            "slotId": "s1",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "THU",
+            "slotId": "s2",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "THU",
+            "slotId": "s3",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "FRI",
+            "slotId": "s1",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "FRI",
+            "slotId": "s2",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "FRI",
+            "slotId": "s3",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "SAT",
+            "slotId": "s1",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "SAT",
+            "slotId": "s2",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "SAT",
+            "slotId": "s3",
+            "coursId": null,
+            "teacherId": null
+          }
+        ],
+        "taken": 0,
+        "noEquivalent": 0,
+        "conflicts": 0
+      }
+    },
+    {
+      "name": "créneaux donnés dans le désordre : les cases sortent par jour puis par ordre",
+      "input": {
+        "slots": [
+          {
+            "slotId": "s3",
+            "order": 3,
+            "startMinute": 570,
+            "endMinute": 620
+          },
+          {
+            "slotId": "s1",
+            "order": 1,
+            "startMinute": 450,
+            "endMinute": 500
+          },
+          {
+            "slotId": "s2",
+            "order": 2,
+            "startMinute": 500,
+            "endMinute": 550
+          }
+        ],
+        "source": {
+          "cells": [
+            {
+              "day": "MON",
+              "slotId": "s3",
+              "coursId": "src-fr",
+              "branchId": "b-fr"
+            }
+          ]
+        },
+        "target": {
+          "courses": [
+            {
+              "coursId": "cib-fr",
+              "branchId": "b-fr",
+              "teacherId": "t-mbuyi"
+            }
+          ]
+        },
+        "otherCells": []
+      },
+      "expected": {
+        "cells": [
+          {
+            "day": "MON",
+            "slotId": "s1",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "MON",
+            "slotId": "s2",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "MON",
+            "slotId": "s3",
+            "coursId": "cib-fr",
+            "teacherId": "t-mbuyi"
+          },
+          {
+            "day": "TUE",
+            "slotId": "s1",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "TUE",
+            "slotId": "s2",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "TUE",
+            "slotId": "s3",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "WED",
+            "slotId": "s1",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "WED",
+            "slotId": "s2",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "WED",
+            "slotId": "s3",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "THU",
+            "slotId": "s1",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "THU",
+            "slotId": "s2",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "THU",
+            "slotId": "s3",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "FRI",
+            "slotId": "s1",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "FRI",
+            "slotId": "s2",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "FRI",
+            "slotId": "s3",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "SAT",
+            "slotId": "s1",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "SAT",
+            "slotId": "s2",
+            "coursId": null,
+            "teacherId": null
+          },
+          {
+            "day": "SAT",
+            "slotId": "s3",
+            "coursId": null,
+            "teacherId": null
+          }
+        ],
+        "taken": 1,
+        "noEquivalent": 0,
+        "conflicts": 0
+      }
+    }
+  ]
+}

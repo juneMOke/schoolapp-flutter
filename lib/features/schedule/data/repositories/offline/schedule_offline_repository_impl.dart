@@ -3,15 +3,16 @@ import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/core/offline/current_user_context.dart';
 import 'package:school_app_flutter/features/schedule/data/datasources/offline/schedule_ref_local_data_source.dart';
 import 'package:school_app_flutter/features/schedule/data/models/offline/ref_recurring_session_row.dart';
-import 'package:school_app_flutter/features/schedule/domain/entities/create_session_request.dart';
 import 'package:school_app_flutter/features/schedule/domain/entities/create_time_slot_request.dart';
-import 'package:school_app_flutter/features/schedule/domain/entities/session.dart';
 import 'package:school_app_flutter/features/schedule/domain/entities/time_slot.dart';
 import 'package:school_app_flutter/features/schedule/domain/entities/timetable_cell.dart';
 import 'package:school_app_flutter/features/schedule/domain/entities/timetable_row.dart';
 import 'package:school_app_flutter/features/schedule/domain/entities/weekday.dart';
 import 'package:school_app_flutter/features/schedule/domain/entities/weekly_timetable.dart';
 import 'package:school_app_flutter/features/schedule/domain/repositories/schedule_repository.dart';
+import 'package:school_app_flutter/features/schedule/data/sync/time_grids_pull_handler.dart';
+import 'package:school_app_flutter/features/schedule/domain/entities/time_grid.dart';
+import 'package:school_app_flutter/features/schedule/domain/services/teacher_week_rows.dart';
 
 /// Implémentation **offline-first** de [ScheduleRepository].
 ///
@@ -28,14 +29,17 @@ class ScheduleOfflineRepositoryImpl implements ScheduleRepository {
   final ScheduleRepository _online;
   final ScheduleRefLocalDataSource _refLocal;
   final CurrentUserContext? _currentUser;
+  final TimeGridDao? _gridDao;
 
   const ScheduleOfflineRepositoryImpl({
     required ScheduleRepository online,
     required ScheduleRefLocalDataSource refLocalDataSource,
     CurrentUserContext? currentUser,
+    TimeGridDao? gridDao,
   }) : _online = online,
        _refLocal = refLocalDataSource,
-       _currentUser = currentUser;
+       _currentUser = currentUser,
+       _gridDao = gridDao;
 
   @override
   Future<Either<Failure, WeeklyTimetable>> getMyTimetable(
@@ -61,24 +65,36 @@ class ScheduleOfflineRepositoryImpl implements ScheduleRepository {
         byCell['${s.timeSlotId}|${s.dayOfWeek.toUpperCase()}'] = s;
       }
 
-      final rows = slots
-          .map((slot) {
-            final cells = <Weekday, TimetableCell?>{
-              for (final d in days)
-                d: _cellFrom(byCell['${slot.id}|${d.wire}']),
-            };
-            return TimetableRow(
-              timeSlot: TimeSlot(
+      // Rangées par heure, grilles de l'enseignant seulement (EDT-1).
+      final ordered = TeacherWeekRows.compose(
+        slots: [
+          for (final slot in slots)
+            GridTimeSlot(
+              TimeSlot(
                 id: slot.id,
                 order: slot.slotOrder,
                 startTime: slot.startTime,
                 endTime: slot.endTime,
                 label: slot.label,
               ),
-              cells: cells,
-            );
-          })
-          .toList(growable: false);
+              slot.timeGridId,
+            ),
+        ],
+        usedSlotIds: {for (final s in mine) s.timeSlotId},
+        grids: await _grids(),
+      );
+      final rows = [
+        for (final slot in ordered)
+          TimetableRow(
+            timeSlot: slot,
+            cells: <Weekday, TimetableCell?>{
+              for (final d in days)
+                d: slot.isBreak
+                    ? null
+                    : _cellFrom(byCell['${slot.id}|${d.wire}']),
+            },
+          ),
+      ];
 
       return Right(
         WeeklyTimetable(
@@ -92,6 +108,11 @@ class ScheduleOfflineRepositoryImpl implements ScheduleRepository {
     } catch (e) {
       return Left(StorageFailure(e.toString()));
     }
+  }
+
+  Future<Map<String, TimeGrid>> _grids() async {
+    final dao = _gridDao;
+    return dao == null ? const {} : dao.all();
   }
 
   TimetableCell? _cellFrom(RefRecurringSessionRow? s) => s == null
@@ -119,13 +140,4 @@ class ScheduleOfflineRepositoryImpl implements ScheduleRepository {
   Future<Either<Failure, TimeSlot>> createTimeSlot(
     CreateTimeSlotRequest request,
   ) => _online.createTimeSlot(request);
-
-  @override
-  Future<Either<Failure, Session>> createSession(
-    CreateSessionRequest request,
-  ) => _online.createSession(request);
-
-  @override
-  Future<Either<Failure, Unit>> deleteSession(String sessionId) =>
-      _online.deleteSession(sessionId);
 }

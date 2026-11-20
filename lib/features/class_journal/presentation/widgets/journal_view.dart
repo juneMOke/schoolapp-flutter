@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/core/components/status/eteelo_notice.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
@@ -58,10 +59,24 @@ class JournalView extends StatelessWidget {
                 failure: failure,
                 onRetry: () => context.read<JournalDayCubit>().show(date),
               ),
-            JournalDayReady(:final day) => _ReadyBody(
-              day: day,
-              onOpen: onOpen,
-              editable: editable,
+            JournalDayReady(:final day, :final closedBy) => Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // E13 : le calendrier dit « Pas de cours », sans rien
+                // retirer — une séance de rattrapage reste saisissable.
+                if (closedBy != null) ...[
+                  EteeloNotice.warning(
+                    AppLocalizations.of(context)!.journalClosedDay(
+                      AppLocalizations.of(
+                        context,
+                      )!.classTimetablePeriodKind(closedBy.nature.wire),
+                      closedBy.title,
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.md),
+                ],
+                _ReadyBody(day: day, onOpen: onOpen, editable: editable),
+              ],
             ),
           },
         ),
