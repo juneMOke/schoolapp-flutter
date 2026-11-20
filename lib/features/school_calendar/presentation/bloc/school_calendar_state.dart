@@ -6,6 +6,7 @@ import 'package:school_app_flutter/features/school_calendar/domain/entities/cale
 import 'package:school_app_flutter/features/school_calendar/domain/entities/calendar_scope_options.dart';
 import 'package:school_app_flutter/features/school_calendar/domain/entities/school_calendar.dart';
 import 'package:school_app_flutter/features/school_calendar/domain/repositories/school_calendar_repository.dart';
+import 'package:school_app_flutter/features/school_calendar/domain/services/calendar_replacements.dart';
 import 'package:school_app_flutter/features/school_calendar/domain/services/calendar_phase_rule.dart';
 
 enum SchoolCalendarStatus { loading, ready, failure }
@@ -93,20 +94,43 @@ class SchoolCalendarState extends Equatable {
   }
 
   /// Tous les éléments du calendrier ouvert : le cadre de son année, puis les
-  /// événements de l'école ; périodes limitées au rythme effectif.
+  /// événements de l'école, remplacements résolus sur la liste entière ;
+  /// périodes du cadre limitées au rythme effectif. Un remplacement refusé à
+  /// sa création reste montré, marqué, sans masquer l'élément national qu'il
+  /// visait ; une modification refusée masque toujours (le serveur garde la
+  /// version acceptée).
   List<CalendarElement> get allElements {
     final c = calendar;
     if (c == null) return const [];
     final rhythm = effectiveRhythm;
+    final resolved = CalendarReplacements.resolveForDisplay(
+      [
+        ...?library.frameworkOf(c.yearLabel)?.items,
+        for (final record in events) record.element,
+      ],
+      inert: {
+        for (final r in events)
+          if (r.isRejectedCreation) r.element.id,
+      },
+    );
     return [
-      for (final item in library.frameworkOf(c.yearLabel)?.items ?? const [])
-        if (item.nature != CalendarNature.period ||
+      for (final e in resolved)
+        if (e.nature != CalendarNature.period ||
             rhythm == null ||
-            item.rhythm == null ||
-            item.rhythm == rhythm)
-          item,
-      for (final record in events) record.element,
+            e.rhythm == null ||
+            e.rhythm == rhythm)
+          e,
     ];
+  }
+
+  /// L'élément national du cadre de l'année, par son id.
+  CalendarElement? nationalOf(String id) {
+    final c = calendar;
+    if (c == null) return null;
+    for (final item in library.frameworkOf(c.yearLabel)?.items ?? const []) {
+      if (item.id == id) return item;
+    }
+    return null;
   }
 
   /// Ce que montrent les vues, après légende, source et « à vérifier ».

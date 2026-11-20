@@ -5,6 +5,7 @@ import 'package:school_app_flutter/core/components/documents/printable_document.
 import 'package:school_app_flutter/core/helpers/school_time.dart';
 import 'package:school_app_flutter/core/widgets/app_snack_bar.dart';
 import 'package:school_app_flutter/features/school/presentation/cubit/school_identity_cubit.dart';
+import 'package:school_app_flutter/features/school_calendar/presentation/bloc/school_calendar_cubit.dart';
 import 'package:school_app_flutter/features/school_calendar/presentation/bloc/school_calendar_state.dart';
 import 'package:school_app_flutter/features/school_calendar/presentation/export/school_calendar_pdf.dart';
 import 'package:school_app_flutter/features/school_calendar/presentation/helpers/calendar_labels.dart';
@@ -63,4 +64,29 @@ Future<void> printSchoolCalendar(
       AppSnackBar.showError(context, l10n.schoolCalendarPrintFailed);
     }
   }
+}
+
+/// Le document officiel du ministère (contrat du 2026-11-20) : servi tel quel
+/// par le serveur, sans numéro ni scellé, ouvert dans la visionneuse.
+Future<void> openFrameworkDocument(
+  BuildContext context,
+  SchoolCalendarCubit cubit,
+) async {
+  final year = cubit.state.calendar?.yearLabel;
+  if (year == null) return;
+  final l10n = AppLocalizations.of(context)!;
+  final result = await cubit.frameworkDocument();
+  if (!context.mounted) return;
+  await result.fold(
+    (_) async => AppSnackBar.showError(
+      context,
+      l10n.schoolCalendarOfficialDocumentFailed,
+      onRetry: () => openFrameworkDocument(context, cubit),
+    ),
+    (document) => showEteeloDocumentViewer(
+      context,
+      title: l10n.schoolCalendarOfficialDocumentTitle(year),
+      document: document,
+    ),
+  );
 }

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:school_app_flutter/core/components/buttons/primary_button.dart';
 import 'package:school_app_flutter/core/components/buttons/secondary_button.dart';
-import 'package:school_app_flutter/core/components/controls/eteelo_filter_chip.dart';
 import 'package:school_app_flutter/core/components/dialogs/eteelo_form_dialog.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/widgets/app_confirmation_dialog.dart';
@@ -12,14 +11,16 @@ import 'package:school_app_flutter/features/school_calendar/domain/entities/cale
 import 'package:school_app_flutter/features/school_calendar/domain/entities/calendar_scope.dart';
 import 'package:school_app_flutter/features/school_calendar/domain/entities/calendar_scope_options.dart';
 import 'package:school_app_flutter/features/school_calendar/domain/services/calendar_event_validation.dart';
-import 'package:school_app_flutter/features/school_calendar/presentation/helpers/calendar_labels.dart';
-import 'package:school_app_flutter/features/school_calendar/presentation/helpers/calendar_nature_style.dart';
 import 'package:school_app_flutter/features/school_calendar/presentation/widgets/overlays/event_form_parts.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// O2 — ajouter ou modifier un événement de l'école (plein écran sous 760).
 /// Rend l'élément à enregistrer, `null` si l'on abandonne. Les erreurs de
 /// CAL-R7 bloquent « Ajouter » ; les chevauchements avertissent seulement.
+///
+/// Remplacer un élément national ([replacing], ou un [initial] qui remplace
+/// déjà) : la nature et la portée sont celles de l'élément national, figées ;
+/// seuls l'intitulé, les dates et la note changent.
 class EventFormDialog extends StatefulWidget {
   final String newId;
   final CalendarElement? initial;
@@ -29,6 +30,9 @@ class EventFormDialog extends StatefulWidget {
   final DateTime yearStart;
   final DateTime yearEnd;
   final List<CalendarElement> nationalElements;
+
+  /// L'élément national à remplacer (un nouveau remplacement).
+  final CalendarElement? replacing;
 
   const EventFormDialog({
     super.key,
@@ -40,6 +44,7 @@ class EventFormDialog extends StatefulWidget {
     required this.nationalElements,
     this.initial,
     this.initialDay,
+    this.replacing,
   });
 
   static Future<CalendarElement?> show(
@@ -60,10 +65,16 @@ class _EventFormDialogState extends State<EventFormDialog> {
   DateTime? _end;
   late CalendarScope _scope;
 
+  /// Ce qu'on remplace : `null` pour un événement ordinaire.
+  String? get _replaces => widget.replacing?.id ?? widget.initial?.replaces;
+
+  /// Le point de départ : l'événement modifié, ou l'élément national copié.
+  CalendarElement? get _base => widget.initial ?? widget.replacing;
+
   @override
   void initState() {
     super.initState();
-    final initial = widget.initial;
+    final initial = _base;
     _title = TextEditingController(text: initial?.title ?? '');
     _note = TextEditingController(text: initial?.note ?? '');
     _nature =
@@ -85,12 +96,12 @@ class _EventFormDialogState extends State<EventFormDialog> {
   }
 
   bool get _dirty =>
-      _title.text.trim() != (widget.initial?.title ?? '') ||
-      _note.text.trim() != (widget.initial?.note ?? '') ||
-      _start != (widget.initial?.startDate ?? widget.initialDay) ||
-      _end != (widget.initial?.endDate ?? widget.initialDay) ||
+      _title.text.trim() != (_base?.title ?? '') ||
+      _note.text.trim() != (_base?.note ?? '') ||
+      _start != (_base?.startDate ?? widget.initialDay) ||
+      _end != (_base?.endDate ?? widget.initialDay) ||
       _nature != _initialNature ||
-      _scope != (widget.initial?.scope ?? const SchoolScope());
+      _scope != (_base?.scope ?? const SchoolScope());
 
   CalendarEventCheck? get _check {
     final start = _start;
@@ -103,7 +114,11 @@ class _EventFormDialogState extends State<EventFormDialog> {
       endDate: end,
       yearStart: widget.yearStart,
       yearEnd: widget.yearEnd,
-      nationalElements: widget.nationalElements,
+      // L'élément remplacé ne s'avertit pas lui-même.
+      nationalElements: [
+        for (final e in widget.nationalElements)
+          if (e.id != _replaces) e,
+      ],
     );
   }
 
@@ -123,6 +138,7 @@ class _EventFormDialogState extends State<EventFormDialog> {
       note: note.isEmpty ? null : note,
       // Une modification retire la marque « à vérifier » (CAL-R9).
       createdBy: base?.createdBy,
+      replaces: _replaces,
     );
     Navigator.of(context).pop(element);
   }
@@ -155,29 +171,20 @@ class _EventFormDialogState extends State<EventFormDialog> {
         if (!didPop) _cancel();
       },
       child: EteeloFormDialog(
-        title: widget.initial == null
+        title: widget.replacing != null
+            ? l10n.schoolCalendarFormReplaceTitle
+            : widget.initial == null
             ? l10n.schoolCalendarFormAddTitle
             : l10n.schoolCalendarFormEditTitle,
         onSubmit: canSave ? _submit : null,
         body: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Wrap(
-              spacing: AppSpacing.sm,
-              runSpacing: AppSpacing.sm,
-              children: [
-                for (final nature in CalendarNature.values)
-                  if (widget.natures.contains(nature))
-                    EteeloFilterChip(
-                      label: CalendarLabels.nature(l10n, nature),
-                      selected: _nature == nature,
-                      color: nature.tone.tone,
-                      soft: nature.tone.soft,
-                      ink: nature.tone.ink,
-                      icon: nature.tone.icon,
-                      onTap: () => setState(() => _nature = nature),
-                    ),
-              ],
+            EventNatureChoice(
+              nature: _nature,
+              natures: widget.natures,
+              locked: _replaces != null,
+              onChanged: (nature) => setState(() => _nature = nature),
             ),
             const SizedBox(height: AppSpacing.md),
             EteeloTextInput(
@@ -203,7 +210,9 @@ class _EventFormDialogState extends State<EventFormDialog> {
             EventScopeSelect(
               scope: _scope,
               options: widget.scopes,
-              onChanged: (scope) => setState(() => _scope = scope),
+              onChanged: _replaces == null
+                  ? (scope) => setState(() => _scope = scope)
+                  : null,
             ),
             const SizedBox(height: AppSpacing.md),
             EteeloTextInput(
@@ -233,7 +242,9 @@ class _EventFormDialogState extends State<EventFormDialog> {
             onPressed: _cancel,
           ),
           PrimaryButton(
-            label: widget.initial == null
+            label: widget.replacing != null
+                ? l10n.schoolCalendarReplace
+                : widget.initial == null
                 ? l10n.schoolCalendarAdd
                 : l10n.schoolCalendarFormSave,
             fullWidth: false,

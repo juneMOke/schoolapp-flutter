@@ -1,4 +1,5 @@
 import 'package:dartz/dartz.dart';
+import 'package:school_app_flutter/core/components/documents/printable_document.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/features/school_calendar/domain/entities/calendar_element.dart';
 import 'package:school_app_flutter/features/school_calendar/domain/entities/calendar_enums.dart';
@@ -42,6 +43,14 @@ CalendarElement item(
 );
 
 class FakeCalendarRepository implements SchoolCalendarRepository {
+  /// Des éléments nationaux en plus dans le cadre 2025-2026.
+  var extraItems = <CalendarElement>[];
+
+  /// Le document du ministère joint au cadre 2025-2026.
+  FrameworkDocument? document;
+  Either<Failure, PrintableDocument> documentResult = const Left(
+    ServerFailure(),
+  );
   final saved = <CalendarElement>[];
   final deleted = <CalendarElement>[];
   var stored = <SchoolEventRecord>[
@@ -79,7 +88,9 @@ class FakeCalendarRepository implements SchoolCalendarRepository {
           item('p-s', CalendarNature.period, rhythm: PeriodRhythm.semester),
           item('p-t', CalendarNature.period, rhythm: PeriodRhythm.trimester),
           item('ferie', CalendarNature.publicHoliday),
+          ...extraItems,
         ],
+        document: document,
       ),
     ],
   );
@@ -131,6 +142,15 @@ class FakeCalendarRepository implements SchoolCalendarRepository {
   }
 
   @override
+  Future<Either<Failure, Unit>> deleteEvents({
+    required String calendarId,
+    required List<CalendarElement> elements,
+  }) async {
+    deleted.addAll(elements);
+    return const Right(unit);
+  }
+
+  @override
   String newEventId() => 'new';
 
   @override
@@ -168,4 +188,14 @@ class FakeCalendarRepository implements SchoolCalendarRepository {
   Future<Either<Failure, SchoolCalendar>> publish(
     SchoolCalendar calendar,
   ) async => const Left(ServerFailure());
+
+  final documentYears = <String>[];
+
+  @override
+  Future<Either<Failure, PrintableDocument>> frameworkDocument(
+    String yearLabel,
+  ) async {
+    documentYears.add(yearLabel);
+    return documentResult;
+  }
 }

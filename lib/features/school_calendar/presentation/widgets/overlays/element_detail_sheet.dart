@@ -13,21 +13,27 @@ import 'package:school_app_flutter/features/school_calendar/presentation/widgets
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Ce que l'utilisateur choisit dans le détail d'un élément.
-enum ElementDetailChoice { edit, delete, verify }
+enum ElementDetailChoice { edit, delete, verify, replace }
 
 /// O1 — le détail d'un élément (feuille du bas sous 760, modale au-delà, par
-/// `showEteeloAdaptiveSheet`). Un élément national ne propose rien, à aucun
-/// rôle (A3) ; un élément de l'école ne propose que ce que le droit permet.
+/// `showEteeloAdaptiveSheet`). Un élément national ne se modifie jamais
+/// (A3) : s'il est remplaçable, l'école peut le **remplacer** dans son
+/// calendrier ; un élément de l'école ne propose que ce que le droit permet,
+/// et supprimer un remplacement rétablit l'élément national.
 class ElementDetailSheet extends StatelessWidget {
   final CalendarElement element;
   final CalendarScopeOptions scopes;
   final bool canEdit;
+
+  /// L'élément national que [element] remplace, s'il est connu.
+  final CalendarElement? replaced;
 
   const ElementDetailSheet({
     super.key,
     required this.element,
     required this.scopes,
     required this.canEdit,
+    this.replaced,
   });
 
   @override
@@ -95,11 +101,20 @@ class ElementDetailSheet extends StatelessWidget {
                   ? l10n.schoolCalendarNationalFramework
                   : l10n.schoolCalendarInternal,
             ),
+            if (replaced case final national?)
+              fact(
+                l10n.schoolCalendarReplacesLabel,
+                '${national.title} · ${CalendarLabels.dates(context, national)}',
+              ),
             if (author != null) fact(l10n.schoolCalendarAddedBy, author),
             if ((element.note ?? '').isNotEmpty)
               fact(l10n.schoolCalendarFormNote, element.note!),
             if (element.isNational)
-              EteeloNotice.warning(l10n.schoolCalendarNationalLocked),
+              EteeloNotice.warning(
+                element.replaceable
+                    ? l10n.schoolCalendarNationalReplaceable
+                    : l10n.schoolCalendarNationalLocked,
+              ),
             if (element.toVerify)
               EteeloNotice.warning(l10n.schoolCalendarCarriedOver),
             const SizedBox(height: AppSpacing.md),
@@ -108,10 +123,27 @@ class ElementDetailSheet extends StatelessWidget {
               runSpacing: AppSpacing.sm,
               alignment: WrapAlignment.end,
               children: [
-                if (canEdit && !element.isNational) ...[
+                if (canEdit && element.isNational && element.replaceable) ...[
                   SecondaryButton(
-                    label: l10n.schoolCalendarDelete,
-                    icon: Icons.delete_outline,
+                    label: l10n.schoolCalendarClose,
+                    fullWidth: false,
+                    onPressed: () => Navigator.of(context).pop(),
+                  ),
+                  PrimaryButton(
+                    label: l10n.schoolCalendarReplaceAction,
+                    icon: Icons.swap_horiz_rounded,
+                    fullWidth: false,
+                    onPressed: () =>
+                        Navigator.of(context).pop(ElementDetailChoice.replace),
+                  ),
+                ] else if (canEdit && !element.isNational) ...[
+                  SecondaryButton(
+                    label: element.isReplacement
+                        ? l10n.schoolCalendarRestoreNational
+                        : l10n.schoolCalendarDelete,
+                    icon: element.isReplacement
+                        ? Icons.restore_rounded
+                        : Icons.delete_outline,
                     fullWidth: false,
                     onPressed: () =>
                         Navigator.of(context).pop(ElementDetailChoice.delete),

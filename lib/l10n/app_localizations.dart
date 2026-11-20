@@ -36784,6 +36784,96 @@ abstract class AppLocalizations {
   /// **'Event updated'**
   String get schoolCalendarSnackEdited;
 
+  /// No description provided for @schoolCalendarFormReplaceTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Replace a national element'**
+  String get schoolCalendarFormReplaceTitle;
+
+  /// No description provided for @schoolCalendarReplace.
+  ///
+  /// In en, this message translates to:
+  /// **'Replace'**
+  String get schoolCalendarReplace;
+
+  /// No description provided for @schoolCalendarReplaceNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'This replacement applies to your school only. It keeps the national element\'s kind and scope; change the title, the dates or the note.'**
+  String get schoolCalendarReplaceNotice;
+
+  /// No description provided for @schoolCalendarReplacesLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Replaces the national element'**
+  String get schoolCalendarReplacesLabel;
+
+  /// No description provided for @schoolCalendarNationalReplaceable.
+  ///
+  /// In en, this message translates to:
+  /// **'National framework element: it cannot be changed, but your school can replace it in its calendar (for instance to move it).'**
+  String get schoolCalendarNationalReplaceable;
+
+  /// No description provided for @schoolCalendarReplaceAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Replace…'**
+  String get schoolCalendarReplaceAction;
+
+  /// No description provided for @schoolCalendarRestoreNational.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore the national date'**
+  String get schoolCalendarRestoreNational;
+
+  /// No description provided for @schoolCalendarSnackReplaced.
+  ///
+  /// In en, this message translates to:
+  /// **'Replacement saved: {dates}'**
+  String schoolCalendarSnackReplaced(String dates);
+
+  /// No description provided for @schoolCalendarRestoreTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore the national element?'**
+  String get schoolCalendarRestoreTitle;
+
+  /// No description provided for @schoolCalendarRestoreBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The replacement is removed: “{title}” goes back to its national framework dates ({dates}).'**
+  String schoolCalendarRestoreBody(String title, String dates);
+
+  /// No description provided for @schoolCalendarRestoreLinked.
+  ///
+  /// In en, this message translates to:
+  /// **'The {count, plural, =1{1 other replacement} other{{count} other replacements}} of this period are restored with it, in the same batch.'**
+  String schoolCalendarRestoreLinked(int count);
+
+  /// No description provided for @schoolCalendarSnackRestored.
+  ///
+  /// In en, this message translates to:
+  /// **'National element restored'**
+  String get schoolCalendarSnackRestored;
+
+  /// No description provided for @schoolCalendarOfficialDocument.
+  ///
+  /// In en, this message translates to:
+  /// **'Ministry document'**
+  String get schoolCalendarOfficialDocument;
+
+  /// No description provided for @schoolCalendarOfficialDocumentFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The ministry document could not be opened.'**
+  String get schoolCalendarOfficialDocumentFailed;
+
+  /// No description provided for @schoolCalendarOfficialDocumentTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Official calendar {year}'**
+  String schoolCalendarOfficialDocumentTitle(String year);
+
   /// No description provided for @schoolCalendarSnackDeleted.
   ///
   /// In en, this message translates to:
@@ -36853,7 +36943,7 @@ abstract class AppLocalizations {
   /// No description provided for @schoolCalendarRefusal.
   ///
   /// In en, this message translates to:
-  /// **'{code, select, CALENDAR_NATURE_FORBIDDEN{Your account cannot add this kind of event.} CALENDAR_DATES_INVALID{The end date is before the start date.} CALENDAR_OUT_OF_YEAR{The date is outside the school year.} CALENDAR_ARCHIVED{This calendar is archived and can no longer change.} CALENDAR_ELEMENT_LOCKED{A national framework element cannot change.} CALENDAR_NOT_FOUND{This calendar no longer exists.} CALENDAR_SCOPE_INVALID{What the event concerns is not recognised.} CALENDAR_EVENT_INVALID{The title or note is not valid.} CALENDAR_FRAMEWORK_MISSING{This year\'s national framework is not published yet.} CALENDAR_CHANGED{The calendar changed since you read it: it was reloaded.} CALENDAR_YEAR_TAKEN{This year already has a calendar.} CALENDAR_YEAR_NOT_CREATABLE{This year cannot be prepared yet.} other{The server refused this action.}}'**
+  /// **'{code, select, CALENDAR_NATURE_FORBIDDEN{Your account cannot add this kind of event.} CALENDAR_DATES_INVALID{The end date is before the start date.} CALENDAR_OUT_OF_YEAR{The date is outside the school year.} CALENDAR_ARCHIVED{This calendar is archived and can no longer change.} CALENDAR_ELEMENT_LOCKED{A national framework element cannot change.} CALENDAR_NOT_FOUND{This calendar no longer exists.} CALENDAR_SCOPE_INVALID{What the event concerns is not recognised.} CALENDAR_EVENT_INVALID{The title or note is not valid.} CALENDAR_FRAMEWORK_MISSING{This year\'s national framework is not published yet.} CALENDAR_CHANGED{The calendar changed since you read it: it was reloaded.} CALENDAR_YEAR_TAKEN{This year already has a calendar.} CALENDAR_YEAR_NOT_CREATABLE{This year cannot be prepared yet.} CALENDAR_REPLACEMENT_INVALID{This replacement does not match the national element: same kind and scope, on an element of this year\'s framework.} CALENDAR_ALREADY_REPLACED{The school already replaces this national element.} CALENDAR_PERIODS_INVALID{The year\'s periods would no longer be complete: a sub-period must stay within its period, with no overlap.} other{The server refused this action.}}'**
   String schoolCalendarRefusal(String code);
 
   /// No description provided for @schoolCalendarErrorNetworkTitle.

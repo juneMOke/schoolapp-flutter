@@ -9,6 +9,7 @@ import 'package:school_app_flutter/features/school_calendar/domain/entities/cale
 import 'package:school_app_flutter/features/school_calendar/presentation/bloc/school_calendar_cubit.dart';
 import 'package:school_app_flutter/features/school_calendar/presentation/helpers/calendar_labels.dart';
 import 'package:school_app_flutter/features/school_calendar/presentation/helpers/calendar_rights.dart';
+import 'package:school_app_flutter/features/school_calendar/presentation/pages/school_calendar_replace_actions.dart';
 import 'package:school_app_flutter/features/school_calendar/presentation/widgets/overlays/calendar_online_dialogs.dart';
 import 'package:school_app_flutter/features/school_calendar/presentation/widgets/overlays/element_detail_sheet.dart';
 import 'package:school_app_flutter/features/school_calendar/presentation/widgets/overlays/event_form_dialog.dart';
@@ -31,9 +32,15 @@ class SchoolCalendarPageActions {
       builder: (_) => ElementDetailSheet(
         element: element,
         scopes: cubit.state.scopes,
+        replaced: switch (element.replaces) {
+          final id? => cubit.state.nationalOf(id),
+          null => null,
+        },
         // R13 : un calendrier archivé ne se touche plus, même depuis O1.
         canEdit:
-            rights.canEdit(element.nature) &&
+            (element.isNational
+                ? rights.canReplace(element.nature)
+                : rights.canEdit(element.nature)) &&
             !(switch (cubit.state.calendar) {
               final c? => cubit.state.phaseOf(c).isReadOnly,
               null => true,
@@ -45,7 +52,9 @@ class SchoolCalendarPageActions {
       case ElementDetailChoice.edit:
         await edit(element: element);
       case ElementDetailChoice.delete:
-        await delete(element);
+        await (element.isReplacement ? restore(element) : delete(element));
+      case ElementDetailChoice.replace:
+        await replace(element);
       case ElementDetailChoice.verify:
         final result = await cubit.verify(element);
         if (!context.mounted) return;
@@ -65,11 +74,20 @@ class SchoolCalendarPageActions {
     final state = cubit.state;
     final calendar = state.calendar;
     if (calendar == null) return;
+    // Un remplacement suit le cadre : si l'élément national a changé de
+    // nature ou de portée à une republication, la modification les reprend.
+    final national = switch (element?.replaces) {
+      final id? => state.nationalOf(id),
+      null => null,
+    };
+    final initial = national == null
+        ? element
+        : element?.copyWith(nature: national.nature, scope: national.scope);
     final saved = await EventFormDialog.show(
       context,
       EventFormDialog(
         newId: cubit.newEventId(),
-        initial: element,
+        initial: initial,
         initialDay: day,
         natures: rights.writableNatures,
         scopes: state.scopes,
@@ -77,7 +95,7 @@ class SchoolCalendarPageActions {
         yearEnd: calendar.endDate,
         nationalElements: [
           for (final e in state.allElements)
-            if (e.isNational) e,
+            if (e.isNational || e.isReplacement) e,
         ],
       ),
     );

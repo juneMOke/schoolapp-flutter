@@ -27,6 +27,14 @@ class CalendarElement extends Equatable {
   final int? periodOrder;
   final int? subPeriodOrder;
 
+  /// Un événement de l'école qui remplace un élément national : l'id de cet
+  /// élément (`replacesItemId`), immuable une fois posé.
+  final String? replaces;
+
+  /// Un élément national que l'école peut remplacer (lu tel quel, jamais
+  /// recalculé : `replaceable` du cadre).
+  final bool replaceable;
+
   const CalendarElement({
     required this.id,
     required this.source,
@@ -41,9 +49,14 @@ class CalendarElement extends Equatable {
     this.rhythm,
     this.periodOrder,
     this.subPeriodOrder,
+    this.replaces,
+    this.replaceable = false,
   });
 
   bool get isNational => source == CalendarSource.national;
+
+  /// Remplace un élément national.
+  bool get isReplacement => replaces != null;
 
   /// Durée en jours, bornes incluses.
   int get durationDays => CalendarDays.between(startDate, endDate) + 1;
@@ -90,6 +103,47 @@ class CalendarElement extends Equatable {
     rhythm: rhythm,
     periodOrder: periodOrder,
     subPeriodOrder: subPeriodOrder,
+    replaces: replaces,
+    replaceable: replaceable,
+  );
+
+  /// Le remplacement de [national], avec son rythme et ses rangs de période.
+  CalendarElement inheritingPeriodOf(CalendarElement national) => _with(
+    replaces: replaces,
+    rhythm: national.rhythm,
+    periodOrder: national.periodOrder,
+    subPeriodOrder: national.subPeriodOrder,
+  );
+
+  /// Le même élément, remplaçant [target].
+  CalendarElement withReplaces(String target) => _with(
+    replaces: target,
+    rhythm: rhythm,
+    periodOrder: periodOrder,
+    subPeriodOrder: subPeriodOrder,
+  );
+
+  CalendarElement _with({
+    required String? replaces,
+    required PeriodRhythm? rhythm,
+    required int? periodOrder,
+    required int? subPeriodOrder,
+  }) => CalendarElement(
+    id: id,
+    source: source,
+    nature: nature,
+    title: title,
+    startDate: startDate,
+    endDate: endDate,
+    scope: scope,
+    note: note,
+    toVerify: toVerify,
+    createdBy: createdBy,
+    rhythm: rhythm,
+    periodOrder: periodOrder,
+    subPeriodOrder: subPeriodOrder,
+    replaces: replaces,
+    replaceable: replaceable,
   );
 
   @override
@@ -107,5 +161,7 @@ class CalendarElement extends Equatable {
     rhythm,
     periodOrder,
     subPeriodOrder,
+    replaces,
+    replaceable,
   ];
 }

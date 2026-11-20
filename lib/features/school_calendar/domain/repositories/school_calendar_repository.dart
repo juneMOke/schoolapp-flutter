@@ -1,4 +1,5 @@
 import 'package:dartz/dartz.dart';
+import 'package:school_app_flutter/core/components/documents/printable_document.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/features/school_calendar/domain/entities/calendar_element.dart';
 import 'package:school_app_flutter/features/school_calendar/domain/entities/calendar_enums.dart';
@@ -50,6 +51,13 @@ abstract class SchoolCalendarRepository {
     required CalendarElement element,
   });
 
+  /// Supprime ensemble, dans un même lot : le serveur juge les périodes sur
+  /// ce que le lot entier laisse (rétablir une période et ses sous-périodes).
+  Future<Either<Failure, Unit>> deleteEvents({
+    required String calendarId,
+    required List<CalendarElement> elements,
+  });
+
   /// Un nouvel identifiant d'événement, fabriqué par l'appareil.
   String newEventId();
 
@@ -74,4 +82,9 @@ abstract class SchoolCalendarRepository {
   });
 
   Future<Either<Failure, SchoolCalendar>> publish(SchoolCalendar calendar);
+
+  /// Le document officiel du ministère joint au cadre de [yearLabel].
+  Future<Either<Failure, PrintableDocument>> frameworkDocument(
+    String yearLabel,
+  );
 }

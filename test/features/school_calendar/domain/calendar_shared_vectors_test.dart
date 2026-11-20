@@ -7,6 +7,7 @@ import 'package:school_app_flutter/features/school_calendar/domain/entities/cale
 import 'package:school_app_flutter/features/school_calendar/domain/entities/calendar_scope.dart';
 import 'package:school_app_flutter/features/school_calendar/domain/services/calendar_days.dart';
 import 'package:school_app_flutter/features/school_calendar/domain/services/calendar_phase_rule.dart';
+import 'package:school_app_flutter/features/school_calendar/domain/services/calendar_replacements.dart';
 import 'package:school_app_flutter/features/school_calendar/domain/services/days_between.dart';
 
 /// Vecteurs partagés du lot V0 — **les mêmes fichiers que le serveur**
@@ -52,7 +53,9 @@ void main() {
             rhythm: PeriodRhythm.fromWire(classroom['rhythm']),
             catalogLevelCode: classroom['catalogLevelCode'],
           ),
-          elements: [
+          // Les remplacements se résolvent d'abord, sur la liste brute, comme
+          // `daysBetween` côté serveur.
+          elements: CalendarReplacements.resolve([
             for (final e in input['elements'] as List)
               CalendarElement(
                 id: e['id'],
@@ -62,8 +65,9 @@ void main() {
                 startDate: _day(e['startDate']),
                 endDate: _day(e['endDate']),
                 scope: CalendarScope.parse(e['scope']),
+                replaces: e['replaces'],
               ),
-          ],
+          ]),
         );
         expect([
           for (final day in days)

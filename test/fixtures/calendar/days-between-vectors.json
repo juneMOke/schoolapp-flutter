@@ -1,5 +1,5 @@
 {
-  "description": "Jours du calendrier publié vus d'une classe (CalendarPort.daysBetween, E12). Un élément concerne la classe selon sa portée : SCHOOL ; CYCLE:<code du cycle> ; LEVEL:<code du cycle>/<code du niveau> ; RHYTHM:<SEMESTER|TRIMESTER> ; CATALOG_LEVEL:<code>[,<code>…] (jamais un niveau hors catalogue) ; toute autre forme ne concerne personne. Un jour par date de from à to inclus (aucun si to < from). elementIds : les éléments du jour, par priorité de nature (PUBLIC_HOLIDAY, EXAM, BREAK, ASSESSMENT, SCHOOL_LIFE, PERIOD), puis startDate, puis id. topNature (CAL-R15) : la première nature hors PERIOD ; le samedi et le dimanche, seuls BREAK, PUBLIC_HOLIDAY et un élément d'un seul jour colorent ; null sinon. noClasses : un PUBLIC_HOLIDAY ou un BREAK concerne la classe ce jour-là.",
+  "description": "Jours du calendrier publié vus d'une classe (CalendarPort.daysBetween, E12). Un élément concerne la classe selon sa portée : SCHOOL ; CYCLE:<code du cycle> ; LEVEL:<code du cycle>/<code du niveau> ; RHYTHM:<SEMESTER|TRIMESTER> ; CATALOG_LEVEL:<code>[,<code>…] (jamais un niveau hors catalogue) ; toute autre forme ne concerne personne. Remplacements d'abord, avant toute portée : un élément dont l'id est le replaces d'un autre est écarté, et un élément dont replaces ne nomme aucun id de la liste aussi (orphelin). Un jour par date de from à to inclus (aucun si to < from). elementIds : les éléments du jour, par priorité de nature (PUBLIC_HOLIDAY, EXAM, BREAK, ASSESSMENT, SCHOOL_LIFE, PERIOD), puis startDate, puis id. topNature (CAL-R15) : la première nature hors PERIOD ; le samedi et le dimanche, seuls BREAK, PUBLIC_HOLIDAY et un élément d'un seul jour colorent ; null sinon. noClasses : un PUBLIC_HOLIDAY ou un BREAK concerne la classe ce jour-là.",
   "cases": [
     {
       "name": "semaine d'interrogations du secondaire, avec congé de niveau, kermesse et week-end",
@@ -1761,6 +1761,326 @@
           "elementIds": [
             "expo",
             "messe"
+          ],
+          "topNature": "SCHOOL_LIFE",
+          "noClasses": false
+        }
+      ]
+    },
+    {
+      "name": "remplacement : la proclamation nationale du samedi est déplacée au mardi par l'école",
+      "input": {
+        "classroom": {
+          "cycleCode": "PRI",
+          "levelCode": "6P",
+          "rhythm": "TRIMESTER",
+          "catalogLevelCode": "P6"
+        },
+        "from": "2026-11-14",
+        "to": "2026-11-17",
+        "elements": [
+          {
+            "id": "proclamation-p1",
+            "source": "NATIONAL",
+            "nature": "SCHOOL_LIFE",
+            "startDate": "2026-11-14",
+            "endDate": "2026-11-14",
+            "scope": "RHYTHM:TRIMESTER"
+          },
+          {
+            "id": "proclamation-ecole",
+            "source": "SCHOOL",
+            "nature": "SCHOOL_LIFE",
+            "startDate": "2026-11-17",
+            "endDate": "2026-11-17",
+            "scope": "RHYTHM:TRIMESTER",
+            "replaces": "proclamation-p1"
+          },
+          {
+            "id": "detente",
+            "source": "NATIONAL",
+            "nature": "BREAK",
+            "startDate": "2026-11-05",
+            "endDate": "2026-11-07",
+            "scope": "RHYTHM:TRIMESTER"
+          },
+          {
+            "id": "detente-ecole",
+            "source": "SCHOOL",
+            "nature": "BREAK",
+            "startDate": "2026-11-05",
+            "endDate": "2026-11-06",
+            "scope": "RHYTHM:TRIMESTER",
+            "replaces": "detente"
+          }
+        ]
+      },
+      "expected": [
+        {
+          "date": "2026-11-14",
+          "elementIds": [],
+          "topNature": null,
+          "noClasses": false
+        },
+        {
+          "date": "2026-11-15",
+          "elementIds": [],
+          "topNature": null,
+          "noClasses": false
+        },
+        {
+          "date": "2026-11-16",
+          "elementIds": [],
+          "topNature": null,
+          "noClasses": false
+        },
+        {
+          "date": "2026-11-17",
+          "elementIds": [
+            "proclamation-ecole"
+          ],
+          "topNature": "SCHOOL_LIFE",
+          "noClasses": false
+        }
+      ]
+    },
+    {
+      "name": "remplacement d'un congé : l'école le raccourcit, le jour rendu redevient un jour de classe",
+      "input": {
+        "classroom": {
+          "cycleCode": "PRI",
+          "levelCode": "6P",
+          "rhythm": "TRIMESTER",
+          "catalogLevelCode": "P6"
+        },
+        "from": "2026-11-05",
+        "to": "2026-11-07",
+        "elements": [
+          {
+            "id": "proclamation-p1",
+            "source": "NATIONAL",
+            "nature": "SCHOOL_LIFE",
+            "startDate": "2026-11-14",
+            "endDate": "2026-11-14",
+            "scope": "RHYTHM:TRIMESTER"
+          },
+          {
+            "id": "proclamation-ecole",
+            "source": "SCHOOL",
+            "nature": "SCHOOL_LIFE",
+            "startDate": "2026-11-17",
+            "endDate": "2026-11-17",
+            "scope": "RHYTHM:TRIMESTER",
+            "replaces": "proclamation-p1"
+          },
+          {
+            "id": "detente",
+            "source": "NATIONAL",
+            "nature": "BREAK",
+            "startDate": "2026-11-05",
+            "endDate": "2026-11-07",
+            "scope": "RHYTHM:TRIMESTER"
+          },
+          {
+            "id": "detente-ecole",
+            "source": "SCHOOL",
+            "nature": "BREAK",
+            "startDate": "2026-11-05",
+            "endDate": "2026-11-06",
+            "scope": "RHYTHM:TRIMESTER",
+            "replaces": "detente"
+          }
+        ]
+      },
+      "expected": [
+        {
+          "date": "2026-11-05",
+          "elementIds": [
+            "detente-ecole"
+          ],
+          "topNature": "BREAK",
+          "noClasses": true
+        },
+        {
+          "date": "2026-11-06",
+          "elementIds": [
+            "detente-ecole"
+          ],
+          "topNature": "BREAK",
+          "noClasses": true
+        },
+        {
+          "date": "2026-11-07",
+          "elementIds": [],
+          "topNature": null,
+          "noClasses": false
+        }
+      ]
+    },
+    {
+      "name": "remplacement de portée RHYTHM:TRIMESTER vu d'une classe semestrielle : le national s'efface, le remplacement ne la vise pas",
+      "input": {
+        "classroom": {
+          "cycleCode": "SEC",
+          "levelCode": "7EB",
+          "rhythm": "SEMESTER",
+          "catalogLevelCode": "CTEB7"
+        },
+        "from": "2026-11-14",
+        "to": "2026-11-17",
+        "elements": [
+          {
+            "id": "proclamation-p1",
+            "source": "NATIONAL",
+            "nature": "SCHOOL_LIFE",
+            "startDate": "2026-11-14",
+            "endDate": "2026-11-14",
+            "scope": "RHYTHM:TRIMESTER"
+          },
+          {
+            "id": "proclamation-ecole",
+            "source": "SCHOOL",
+            "nature": "SCHOOL_LIFE",
+            "startDate": "2026-11-17",
+            "endDate": "2026-11-17",
+            "scope": "RHYTHM:TRIMESTER",
+            "replaces": "proclamation-p1"
+          },
+          {
+            "id": "detente",
+            "source": "NATIONAL",
+            "nature": "BREAK",
+            "startDate": "2026-11-05",
+            "endDate": "2026-11-07",
+            "scope": "RHYTHM:TRIMESTER"
+          },
+          {
+            "id": "detente-ecole",
+            "source": "SCHOOL",
+            "nature": "BREAK",
+            "startDate": "2026-11-05",
+            "endDate": "2026-11-06",
+            "scope": "RHYTHM:TRIMESTER",
+            "replaces": "detente"
+          }
+        ]
+      },
+      "expected": [
+        {
+          "date": "2026-11-14",
+          "elementIds": [],
+          "topNature": null,
+          "noClasses": false
+        },
+        {
+          "date": "2026-11-15",
+          "elementIds": [],
+          "topNature": null,
+          "noClasses": false
+        },
+        {
+          "date": "2026-11-16",
+          "elementIds": [],
+          "topNature": null,
+          "noClasses": false
+        },
+        {
+          "date": "2026-11-17",
+          "elementIds": [],
+          "topNature": null,
+          "noClasses": false
+        }
+      ]
+    },
+    {
+      "name": "remplacement orphelin : sa cible n'est pas dans la liste, il est écarté",
+      "input": {
+        "classroom": {
+          "cycleCode": "PRI",
+          "levelCode": "6P",
+          "rhythm": "TRIMESTER",
+          "catalogLevelCode": "P6"
+        },
+        "from": "2026-11-20",
+        "to": "2026-11-20",
+        "elements": [
+          {
+            "id": "orphelin",
+            "source": "SCHOOL",
+            "nature": "SCHOOL_LIFE",
+            "startDate": "2026-11-20",
+            "endDate": "2026-11-20",
+            "scope": "RHYTHM:TRIMESTER",
+            "replaces": "retire-du-cadre"
+          }
+        ]
+      },
+      "expected": [
+        {
+          "date": "2026-11-20",
+          "elementIds": [],
+          "topNature": null,
+          "noClasses": false
+        }
+      ]
+    },
+    {
+      "name": "chaîne N <- A <- B (impossible côté serveur) : N et A s'effacent, B reste",
+      "input": {
+        "classroom": {
+          "cycleCode": "PRI",
+          "levelCode": "6P",
+          "rhythm": "TRIMESTER",
+          "catalogLevelCode": "P6"
+        },
+        "from": "2026-11-23",
+        "to": "2026-11-25",
+        "elements": [
+          {
+            "id": "n",
+            "source": "NATIONAL",
+            "nature": "SCHOOL_LIFE",
+            "startDate": "2026-11-23",
+            "endDate": "2026-11-23",
+            "scope": "SCHOOL"
+          },
+          {
+            "id": "a",
+            "source": "SCHOOL",
+            "nature": "SCHOOL_LIFE",
+            "startDate": "2026-11-24",
+            "endDate": "2026-11-24",
+            "scope": "SCHOOL",
+            "replaces": "n"
+          },
+          {
+            "id": "b",
+            "source": "SCHOOL",
+            "nature": "SCHOOL_LIFE",
+            "startDate": "2026-11-25",
+            "endDate": "2026-11-25",
+            "scope": "SCHOOL",
+            "replaces": "a"
+          }
+        ]
+      },
+      "expected": [
+        {
+          "date": "2026-11-23",
+          "elementIds": [],
+          "topNature": null,
+          "noClasses": false
+        },
+        {
+          "date": "2026-11-24",
+          "elementIds": [],
+          "topNature": null,
+          "noClasses": false
+        },
+        {
+          "date": "2026-11-25",
+          "elementIds": [
+            "b"
           ],
           "topNature": "SCHOOL_LIFE",
           "noClasses": false

@@ -38,6 +38,10 @@ class CalendarDay extends Equatable {
 /// `CalendarPort.daysBetween` côté serveur (A15), tenue identique par les
 /// vecteurs partagés `calendar/days-between-vectors.json` (lot V0).
 ///
+/// [compute] reçoit une liste **déjà résolue** par
+/// `CalendarReplacements.resolve` (une seule fois, sur la liste brute) : le
+/// serveur applique les deux à la suite.
+///
 /// Règles :
 /// - un élément concerne la classe selon sa portée (K7, A2) ; sans [classroom],
 ///   tous les éléments comptent (vue de toute l'école) ;

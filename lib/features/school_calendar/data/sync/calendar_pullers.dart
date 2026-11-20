@@ -10,6 +10,7 @@ import 'package:school_app_flutter/core/offline/pull_handler.dart';
 import 'package:school_app_flutter/features/school_calendar/data/local/calendar_event_dao.dart';
 import 'package:school_app_flutter/features/school_calendar/data/local/calendar_reference_dao.dart';
 import 'package:school_app_flutter/features/school_calendar/data/wire/calendar_wire.dart';
+import 'package:school_app_flutter/features/school_calendar/domain/entities/calendar_enums.dart';
 
 /// Clés de routage des trois flux du calendrier côté client.
 const String kCalendarFrameworkResource = 'calendar_framework';
@@ -69,12 +70,32 @@ class CalendarFeed<T> {
             dao.applyCalendars(items.cast(), schoolId: schoolId, nowMs: nowMs),
       );
 
-  static CalendarFeed<Object> events(CalendarEventDao dao) => CalendarFeed(
+  /// [onPeriodsMoved] : un remplacement de période descendu (posé, modifié
+  /// ou retiré par un autre appareil) a pu réécrire les dates des périodes,
+  /// qui descendent par le référentiel des notes.
+  static CalendarFeed<Object> events(
+    CalendarEventDao dao, {
+    void Function()? onPeriodsMoved,
+  }) => CalendarFeed(
     resource: kCalendarEventsResource,
     endpoint: AppConstants.syncCalendarEventsEndpoint,
     read: CalendarWire.eventFromJson,
-    apply: (items, schoolId, nowMs) =>
-        dao.applyPulled(items.cast(), schoolId: schoolId, nowMs: nowMs),
+    apply: (items, schoolId, nowMs) async {
+      final rows = items.cast<PulledEvent>();
+      final applied = await dao.applyPulled(
+        rows,
+        schoolId: schoolId,
+        nowMs: nowMs,
+      );
+      if (rows.any(
+        (r) =>
+            r.record.element.nature == CalendarNature.period &&
+            r.record.element.isReplacement,
+      )) {
+        onPeriodsMoved?.call();
+      }
+      return applied;
+    },
   );
 }
 

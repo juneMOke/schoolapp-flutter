@@ -907,7 +907,11 @@ class AppConstants {
   // v85 (2026-11-19) : l'emploi du temps par classe — `tt_programmes`,
   // `tt_class_timetables`, `tt_cells` — et `ref_classrooms.room`. Palier
   // d'école.
-  static const int offlineDbSchemaVersion = 85;
+  // v86 (2026-11-20) : les remplacements nationaux du calendrier —
+  // `cal_framework_items.replaceable`, `cal_frameworks.document_*`,
+  // `school_calendar_events.replaces_item_id`. Re-tirage du cadre. Palier
+  // d'école.
+  static const int offlineDbSchemaVersion = 86;
 
   /// Dernière version de la base unique HÉRITÉE : là où l'escalier
   /// `migrateOfflineDatabase` s'arrête pour toujours.
@@ -1859,6 +1863,12 @@ class AppConstants {
   /// **POST** `{revision}` = publier.
   static String calendarPublishEndpoint(String id) =>
       '$calendarCalendarsEndpoint/$id/publish';
+
+  /// **GET** = le document officiel du ministère joint au cadre publié de
+  /// l'année (`application/pdf`, servi tel quel, `calendar.read`) ; 404 sans
+  /// document ou sans cadre publié.
+  static String calendarFrameworkDocumentEndpoint(String yearLabel) =>
+      '/api/v1/calendar/frameworks/${Uri.encodeComponent(yearLabel)}/document';
 
   /// **GET** (web, même hôte que l'application) = la version déployée,
   /// écrite par `flutter build web` : `{version, build_number, …}`.
