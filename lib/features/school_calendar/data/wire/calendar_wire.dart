@@ -61,8 +61,22 @@ class CalendarWire {
           for (final item in (j['items'] as List?) ?? const [])
             _nationalItem(item as Map<String, dynamic>),
         ],
+        document: _document(j['document']),
       ),
       EpochIsoHelper.tryToEpochMs(j['serverUpdatedAt']),
+    );
+  }
+
+  /// `{fileName, sizeBytes, uploadedAt}` ou `null` ; sans nom, pas de
+  /// document (rien à ouvrir).
+  static FrameworkDocument? _document(Object? raw) {
+    if (raw is! Map) return null;
+    final name = raw['fileName'];
+    if (name is! String || name.isEmpty) return null;
+    return FrameworkDocument(
+      fileName: name,
+      sizeBytes: _int(raw['sizeBytes']),
+      uploadedAt: _instant(raw['uploadedAt']),
     );
   }
 
@@ -78,6 +92,7 @@ class CalendarWire {
         rhythm: PeriodRhythm.fromWire(j['rhythm'] as String?),
         periodOrder: _int(j['periodOrder']),
         subPeriodOrder: _int(j['subPeriodOrder']),
+        replaceable: j['replaceable'] == true,
       );
 
   static Pulled<SchoolCalendar> calendarFromJson(Object? raw) {
@@ -113,6 +128,10 @@ class CalendarWire {
       note: j['note'] as String?,
       toVerify: j['toVerify'] == true,
       createdBy: CalendarActor.fromJson(j['createdBy']),
+      replaces: switch (j['replacesItemId']) {
+        final String id when id.isNotEmpty => id,
+        _ => null,
+      },
     );
     return PulledEvent(
       SchoolEventRecord(
@@ -140,6 +159,7 @@ class CalendarWire {
       'scope': e.scope.wire,
       'note': e.note,
       'toVerify': e.toVerify,
+      'replacesItemId': e.replaces,
       'deleted': record.deleted,
       'clientUpdatedAt': EpochIsoHelper.toIso(record.clientUpdatedAtMs),
     };

@@ -1,4 +1,5 @@
 import 'package:dartz/dartz.dart';
+import 'package:school_app_flutter/core/components/documents/printable_document.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/features/school_calendar/domain/entities/calendar_element.dart';
@@ -113,6 +114,13 @@ class SchoolCalendarCubit extends Cubit<SchoolCalendarState>
     if (changedYear) await _reloadEvents();
   }
 
+  /// Le document officiel du ministère joint au cadre de l'année ouverte.
+  Future<Either<Failure, PrintableDocument>> frameworkDocument() async {
+    final calendar = state.calendar;
+    if (calendar == null) return const Left(StorageFailure());
+    return _repository.frameworkDocument(calendar.yearLabel);
+  }
+
   // ── Gestes sur les événements (lot de synchro) ──
 
   String newEventId() => _repository.newEventId();
@@ -126,6 +134,12 @@ class SchoolCalendarCubit extends Cubit<SchoolCalendarState>
 
   Future<Either<Failure, Unit>> deleteEvent(CalendarElement element) =>
       _write((id) => _repository.deleteEvent(calendarId: id, element: element));
+
+  /// Plusieurs suppressions dans un même lot.
+  Future<Either<Failure, Unit>> deleteEvents(List<CalendarElement> elements) =>
+      _write(
+        (id) => _repository.deleteEvents(calendarId: id, elements: elements),
+      );
 
   Future<Either<Failure, Unit>> _write(
     Future<Either<Failure, Unit>> Function(String calendarId) write,

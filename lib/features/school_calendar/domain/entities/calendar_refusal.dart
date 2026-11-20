@@ -15,7 +15,10 @@ enum CalendarRefusal {
   frameworkMissing('CALENDAR_FRAMEWORK_MISSING'),
   changed('CALENDAR_CHANGED'),
   yearTaken('CALENDAR_YEAR_TAKEN'),
-  yearNotCreatable('CALENDAR_YEAR_NOT_CREATABLE');
+  yearNotCreatable('CALENDAR_YEAR_NOT_CREATABLE'),
+  replacementInvalid('CALENDAR_REPLACEMENT_INVALID'),
+  alreadyReplaced('CALENDAR_ALREADY_REPLACED'),
+  periodsInvalid('CALENDAR_PERIODS_INVALID');
 
   const CalendarRefusal(this.detailCode);
 

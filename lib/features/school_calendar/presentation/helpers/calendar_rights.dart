@@ -6,7 +6,8 @@ import 'package:school_app_flutter/features/school_calendar/domain/entities/cale
 /// Ce que le compte courant peut faire sur le calendrier (K10, contrat du
 /// 2026-11-19) : `calendar.assessment.write` pour les interrogations et les
 /// examens, `calendar.holiday.write` pour les congés, `calendar.life.write`
-/// pour la vie de l'école, `calendar.publish` pour créer, dupliquer, publier.
+/// pour la vie de l'école, `calendar.publish` pour créer, dupliquer, publier
+/// et remplacer une période nationale.
 /// Le serveur refuse de toute façon une nature hors du droit.
 class CalendarRights {
   final Set<CalendarNature> writableNatures;
@@ -35,6 +36,14 @@ class CalendarRights {
   bool get canWrite => writableNatures.isNotEmpty;
 
   /// Changer la nature exige le droit de l'ancienne et de la nouvelle : on ne
-  /// modifie donc qu'un élément dont on tient la nature.
-  bool canEdit(CalendarNature nature) => writableNatures.contains(nature);
+  /// modifie donc qu'un élément dont on tient la nature. Une période n'est
+  /// jamais saisie par l'école : seul son remplacement existe, sous
+  /// `calendar.publish` (contrat du 2026-11-20).
+  bool canEdit(CalendarNature nature) => nature == CalendarNature.period
+      ? canPublish
+      : writableNatures.contains(nature);
+
+  /// Remplacer un élément national de cette nature : le droit de la nature,
+  /// `calendar.publish` pour une période.
+  bool canReplace(CalendarNature nature) => canEdit(nature);
 }

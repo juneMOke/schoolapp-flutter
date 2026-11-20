@@ -15,6 +15,7 @@ import 'package:school_app_flutter/core/offline/sync_engine.dart'
 import 'package:school_app_flutter/core/offline/sync_state.dart';
 import 'package:school_app_flutter/features/school_calendar/data/local/calendar_event_dao.dart';
 import 'package:school_app_flutter/features/school_calendar/data/wire/calendar_wire.dart';
+import 'package:school_app_flutter/features/school_calendar/domain/entities/calendar_enums.dart';
 
 /// Type d'agrégat d'outbox des gestes sur les événements du calendrier.
 const String kCalendarEventsBatchAggregateType = 'CALENDAR_EVENTS_BATCH';
@@ -64,17 +65,24 @@ class CalendarEventsOutboxHandler
   final Map<String, dynamic> _requiredAuth;
   final Clock _now;
 
+  /// Un remplacement de période accepté : sur un calendrier publié, le
+  /// serveur a réécrit les dates des périodes de l'année, qui descendent par
+  /// le référentiel des notes (ETag) — à relire sans attendre.
+  final void Function()? _onPeriodsMoved;
+
   const CalendarEventsOutboxHandler({
     required Dio dio,
     required CalendarEventDao dao,
     required OutboxDao outbox,
     required Map<String, dynamic> requiredAuth,
     Clock now = systemClock,
+    void Function()? onPeriodsMoved,
   }) : _dio = dio,
        _dao = dao,
        _outbox = outbox,
        _requiredAuth = requiredAuth,
-       _now = now;
+       _now = now,
+       _onPeriodsMoved = onPeriodsMoved;
 
   @override
   String get aggregateType => kCalendarEventsBatchAggregateType;
@@ -114,12 +122,18 @@ class CalendarEventsOutboxHandler
       };
       final nowMs = _now();
       var unresolved = 0;
+      var periodsMoved = false;
       for (final line in lines) {
         final result = results[line.element.id];
         final outcome = CalendarEventOutcome.tryParse(result?['outcome']);
         if (result == null || outcome == null) {
           unresolved++;
           continue;
+        }
+        if (outcome == CalendarEventOutcome.applied &&
+            line.element.nature == CalendarNature.period &&
+            line.element.isReplacement) {
+          periodsMoved = true;
         }
         await _reconcile(
           line.element.id,
@@ -130,6 +144,7 @@ class CalendarEventsOutboxHandler
           nowMs,
         );
       }
+      if (periodsMoved) _onPeriodsMoved?.call();
       if (unresolved > 0) {
         return const OutboxDispatchResult.retry(
           'Réponse serveur incomplète — le lot sera rejoué',

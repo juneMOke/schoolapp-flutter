@@ -15,6 +15,9 @@ class CalendarActions {
   final VoidCallback? publish;
   final VoidCallback? duplicate;
   final VoidCallback? print;
+
+  /// Le document officiel du ministère, joint au cadre (en ligne).
+  final VoidCallback? officialDocument;
   final VoidCallback back;
 
   const CalendarActions({
@@ -24,6 +27,7 @@ class CalendarActions {
     this.publish,
     this.duplicate,
     this.print,
+    this.officialDocument,
   });
 }
 
@@ -50,6 +54,7 @@ class CalendarActionsRow extends StatelessWidget {
     final print = actions.print;
     final duplicate = actions.duplicate;
     final publish = actions.publish;
+    final document = actions.officialDocument;
     return Wrap(
       spacing: AppSpacing.sm,
       runSpacing: AppSpacing.sm,
@@ -62,6 +67,13 @@ class CalendarActionsRow extends StatelessWidget {
             icon: Icons.print_outlined,
             fullWidth: false,
             onPressed: print,
+          ),
+        if (document != null)
+          SecondaryButton(
+            label: l10n.schoolCalendarOfficialDocument,
+            icon: Icons.description_outlined,
+            fullWidth: false,
+            onPressed: document,
           ),
         if (duplicate != null)
           SecondaryButton(

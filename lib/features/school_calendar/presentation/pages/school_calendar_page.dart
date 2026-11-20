@@ -159,6 +159,12 @@ class _Screen extends StatelessWidget {
             print: calendar.isPublished
                 ? () => unawaited(printSchoolCalendar(context, state))
                 : null,
+            officialDocument:
+                online &&
+                    state.library.frameworkOf(calendar.yearLabel)?.document !=
+                        null
+                ? () => unawaited(openFrameworkDocument(context, cubit))
+                : null,
             publish: rights.canPublish && phase == CalendarPhase.draft
                 ? () => unawaited(actions.publish(online: online))
                 : null,

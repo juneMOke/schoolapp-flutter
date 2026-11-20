@@ -62,10 +62,15 @@ class CalendarEventDao {
   }) async {
     final rows = await txn.query(
       _table,
-      columns: ['client_updated_at', 'server_updated_at'],
+      columns: ['client_updated_at', 'server_updated_at', 'replaces_item_id'],
       where: 'id = ?',
       whereArgs: [record.element.id],
     );
+    // `replacesItemId` ne change jamais sur un événement existant : le
+    // serveur refuserait la ligne. Le geste garde celui déjà connu.
+    final kept = rows.isEmpty
+        ? null
+        : rows.first['replaces_item_id'] as String?;
     final last = rows.isEmpty
         ? 0
         : math.max(
@@ -75,7 +80,9 @@ class CalendarEventDao {
     final at = math.max(nowMs, last + 1);
     final values = _row(
       SchoolEventRecord(
-        element: record.element,
+        element: kept == null
+            ? record.element
+            : record.element.withReplaces(kept),
         calendarId: record.calendarId,
         clientUpdatedAtMs: at,
         deleted: record.deleted,
@@ -83,6 +90,11 @@ class CalendarEventDao {
       schoolId: schoolId,
       nowMs: nowMs,
     )..['sync_status'] = RecordSyncState.pending.dbValue;
+    // L'horloge serveur reste : elle dit qu'une version a été acceptée, ce
+    // qui décide de ce qu'un refus laisse vivant.
+    if (rows.isNotEmpty) {
+      values['server_updated_at'] = rows.first['server_updated_at'];
+    }
     await txn.insert(
       _table,
       values,
@@ -215,6 +227,7 @@ class CalendarEventDao {
       'to_verify': e.toVerify ? 1 : 0,
       'created_by_name': e.createdBy?.name,
       'created_by_role': e.createdBy?.role,
+      'replaces_item_id': e.replaces,
       'client_updated_at': record.clientUpdatedAtMs,
       'deleted': record.deleted ? 1 : 0,
       'synced_at': nowMs,
@@ -240,6 +253,7 @@ class CalendarEventDao {
                   name: r['created_by_name'] as String?,
                   role: r['created_by_role'] as String?,
                 ),
+          replaces: r['replaces_item_id'] as String?,
         ),
         calendarId: r['calendar_id']! as String,
         clientUpdatedAtMs: (r['client_updated_at'] as int?) ?? 0,
@@ -247,5 +261,6 @@ class CalendarEventDao {
         syncState: RecordSyncState.fromDb(r['sync_status'] as String?),
         errorCode: r['sync_error_code'] as String?,
         superseded: r['superseded_at'] != null,
+        knownToServer: r['server_updated_at'] != null,
       );
 }

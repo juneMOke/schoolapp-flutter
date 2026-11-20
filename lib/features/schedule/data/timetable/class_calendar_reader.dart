@@ -4,6 +4,7 @@ import 'package:school_app_flutter/features/school_calendar/data/local/calendar_
 import 'package:school_app_flutter/features/school_calendar/domain/entities/calendar_enums.dart';
 import 'package:school_app_flutter/features/school_calendar/domain/entities/calendar_scope.dart';
 import 'package:school_app_flutter/features/school_calendar/domain/entities/school_calendar.dart';
+import 'package:school_app_flutter/features/school_calendar/domain/services/calendar_replacements.dart';
 import 'package:school_app_flutter/features/school_calendar/domain/services/days_between.dart';
 import 'package:sqflite_common/sqlite_api.dart';
 
@@ -69,13 +70,14 @@ class ClassCalendarReader {
         rhythm: PeriodRhythm.fromWire(classroom.periodType),
         catalogLevelCode: classroom.catalogLevelCode,
       ),
-      // Un événement refusé par le serveur n'a pas cours (il est montré en
-      // erreur dans le calendrier, jamais compté dans une semaine de classe).
-      elements: [
+      // Un événement refusé à sa création n'a pas cours (montré en erreur
+      // dans le calendrier, jamais compté dans une semaine de classe) ; une
+      // modification refusée laisse la version acceptée vivante côté serveur.
+      elements: CalendarReplacements.resolveForDisplay([
         ...?framework?.items,
         for (final e in events)
-          if (!e.isRejected) e.element,
-      ],
+          if (!e.isRejectedCreation) e.element,
+      ]),
     );
     return ClassCalendarWeek(
       days: days,

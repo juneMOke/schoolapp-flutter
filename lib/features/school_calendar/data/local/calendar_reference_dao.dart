@@ -51,6 +51,11 @@ class CalendarReferenceDao {
         'version': f.version,
         'start_date': CalendarDays.format(f.startDate),
         'end_date': CalendarDays.format(f.endDate),
+        'document_file_name': f.document?.fileName,
+        'document_size_bytes': f.document?.sizeBytes,
+        'document_uploaded_at': f.document?.uploadedAt
+            ?.toUtc()
+            .toIso8601String(),
         'server_updated_at': row.serverUpdatedAtMs,
         'synced_at': nowMs,
       }, conflictAlgorithm: ConflictAlgorithm.replace);
@@ -66,6 +71,7 @@ class CalendarReferenceDao {
           'rhythm': item.rhythm?.wire,
           'period_order': item.periodOrder,
           'sub_period_order': item.subPeriodOrder,
+          'replaceable': item.replaceable ? 1 : 0,
         }, conflictAlgorithm: ConflictAlgorithm.replace);
       }
     }
@@ -147,6 +153,16 @@ class CalendarReferenceDao {
           startDate: CalendarDays.tryParse(h['start_date'] as String?)!,
           endDate: CalendarDays.tryParse(h['end_date'] as String?)!,
           items: [for (final i in items) _itemOf(i)],
+          document: switch (h['document_file_name']) {
+            final String name => FrameworkDocument(
+              fileName: name,
+              sizeBytes: h['document_size_bytes'] as int?,
+              uploadedAt: DateTime.tryParse(
+                (h['document_uploaded_at'] as String?) ?? '',
+              ),
+            ),
+            _ => null,
+          },
         ),
       );
     }
@@ -184,5 +200,6 @@ class CalendarReferenceDao {
     rhythm: PeriodRhythm.fromWire(r['rhythm'] as String?),
     periodOrder: r['period_order'] as int?,
     subPeriodOrder: r['sub_period_order'] as int?,
+    replaceable: r['replaceable'] == 1,
   );
 }

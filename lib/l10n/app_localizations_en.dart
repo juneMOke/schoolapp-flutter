@@ -23973,6 +23973,68 @@ class AppLocalizationsEn extends AppLocalizations {
   String get schoolCalendarSnackEdited => 'Event updated';
 
   @override
+  String get schoolCalendarFormReplaceTitle => 'Replace a national element';
+
+  @override
+  String get schoolCalendarReplace => 'Replace';
+
+  @override
+  String get schoolCalendarReplaceNotice =>
+      'This replacement applies to your school only. It keeps the national element\'s kind and scope; change the title, the dates or the note.';
+
+  @override
+  String get schoolCalendarReplacesLabel => 'Replaces the national element';
+
+  @override
+  String get schoolCalendarNationalReplaceable =>
+      'National framework element: it cannot be changed, but your school can replace it in its calendar (for instance to move it).';
+
+  @override
+  String get schoolCalendarReplaceAction => 'Replace…';
+
+  @override
+  String get schoolCalendarRestoreNational => 'Restore the national date';
+
+  @override
+  String schoolCalendarSnackReplaced(String dates) {
+    return 'Replacement saved: $dates';
+  }
+
+  @override
+  String get schoolCalendarRestoreTitle => 'Restore the national element?';
+
+  @override
+  String schoolCalendarRestoreBody(String title, String dates) {
+    return 'The replacement is removed: “$title” goes back to its national framework dates ($dates).';
+  }
+
+  @override
+  String schoolCalendarRestoreLinked(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count other replacements',
+      one: '1 other replacement',
+    );
+    return 'The $_temp0 of this period are restored with it, in the same batch.';
+  }
+
+  @override
+  String get schoolCalendarSnackRestored => 'National element restored';
+
+  @override
+  String get schoolCalendarOfficialDocument => 'Ministry document';
+
+  @override
+  String get schoolCalendarOfficialDocumentFailed =>
+      'The ministry document could not be opened.';
+
+  @override
+  String schoolCalendarOfficialDocumentTitle(String year) {
+    return 'Official calendar $year';
+  }
+
+  @override
   String get schoolCalendarSnackDeleted => 'Event deleted';
 
   @override
@@ -24034,6 +24096,12 @@ class AppLocalizationsEn extends AppLocalizations {
           'The calendar changed since you read it: it was reloaded.',
       'CALENDAR_YEAR_TAKEN': 'This year already has a calendar.',
       'CALENDAR_YEAR_NOT_CREATABLE': 'This year cannot be prepared yet.',
+      'CALENDAR_REPLACEMENT_INVALID':
+          'This replacement does not match the national element: same kind and scope, on an element of this year\'s framework.',
+      'CALENDAR_ALREADY_REPLACED':
+          'The school already replaces this national element.',
+      'CALENDAR_PERIODS_INVALID':
+          'The year\'s periods would no longer be complete: a sub-period must stay within its period, with no overlap.',
       'other': 'The server refused this action.',
     });
     return '$_temp0';

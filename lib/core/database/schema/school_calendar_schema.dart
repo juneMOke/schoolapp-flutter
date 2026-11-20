@@ -15,6 +15,9 @@ const TableSchema calFrameworksTable = TableSchema(
       start_date TEXT NOT NULL,
       end_date TEXT NOT NULL,
       published_at TEXT,
+      document_file_name TEXT,
+      document_size_bytes INTEGER,
+      document_uploaded_at TEXT,
       server_updated_at INTEGER,
       synced_at INTEGER NOT NULL
     )
@@ -25,7 +28,8 @@ const TableSchema calFrameworksTable = TableSchema(
 );
 
 /// `cal_framework_items` — les éléments d'un cadre national (périodes,
-/// examens nationaux, congés, jours fériés), verrouillés (CAL-R2).
+/// examens nationaux, congés, jours fériés, vie de l'école). `replaceable` :
+/// l'école peut le remplacer (lu tel quel du cadre, v86).
 const TableSchema calFrameworkItemsTable = TableSchema(
   name: 'cal_framework_items',
   createTableSql: '''
@@ -40,6 +44,7 @@ const TableSchema calFrameworkItemsTable = TableSchema(
       rhythm TEXT,
       period_order INTEGER,
       sub_period_order INTEGER,
+      replaceable INTEGER NOT NULL DEFAULT 0,
       PRIMARY KEY (framework_id, id)
     )
   ''',
@@ -82,7 +87,8 @@ const TableSchema schoolCalendarsTable = TableSchema(
 ///
 /// - `deleted` : une suppression, envoyée puis gardée comme pierre tombale ;
 /// - `sync_status` / `sync_error_code` : en attente, ou refusé avec son code ;
-/// - `superseded_at` : un autre appareil a gagné, l'écran le signale une fois.
+/// - `superseded_at` : un autre appareil a gagné, l'écran le signale une fois ;
+/// - `replaces_item_id` : l'élément national que l'événement remplace (v86).
 const TableSchema schoolCalendarEventsTable = TableSchema(
   name: 'school_calendar_events',
   createTableSql: '''
@@ -99,6 +105,7 @@ const TableSchema schoolCalendarEventsTable = TableSchema(
       to_verify INTEGER NOT NULL DEFAULT 0,
       created_by_name TEXT,
       created_by_role TEXT,
+      replaces_item_id TEXT,
       client_updated_at INTEGER NOT NULL,
       server_updated_at INTEGER,
       deleted INTEGER NOT NULL DEFAULT 0,

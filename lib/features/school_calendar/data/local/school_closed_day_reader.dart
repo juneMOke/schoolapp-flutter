@@ -3,6 +3,7 @@ import 'package:school_app_flutter/features/school_calendar/data/local/calendar_
 import 'package:school_app_flutter/features/school_calendar/domain/entities/calendar_element.dart';
 import 'package:school_app_flutter/features/school_calendar/domain/entities/calendar_enums.dart';
 import 'package:school_app_flutter/features/school_calendar/domain/entities/calendar_scope.dart';
+import 'package:school_app_flutter/features/school_calendar/domain/services/calendar_replacements.dart';
 import 'package:sqflite_common/sqlite_api.dart';
 
 /// Le jour fermé pour **toute l'école** (E13) : un jour férié ou des
@@ -39,11 +40,11 @@ class SchoolClosedDayReader {
     final framework = (await reference.frameworks(
       schoolId,
     )).where((f) => f.yearLabel == calendar.yearLabel).firstOrNull;
-    final elements = [
+    final elements = CalendarReplacements.resolveForDisplay([
       ...?framework?.items,
       for (final e in await CalendarEventDao(_db).eventsOf(calendar.id))
-        if (!e.isRejected) e.element,
-    ];
+        if (!e.isRejectedCreation) e.element,
+    ]);
     for (final nature in _closing) {
       for (final e in elements) {
         if (e.nature == nature && e.scope is SchoolScope && e.covers(date)) {

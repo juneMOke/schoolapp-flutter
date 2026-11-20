@@ -1,4 +1,7 @@
+import 'dart:async';
+
 import 'package:dio/dio.dart';
+import 'package:school_app_flutter/core/offline/plan/sync_plan_keys.dart';
 import 'package:get_it/get_it.dart';
 import 'package:school_app_flutter/core/helpers/school_time.dart';
 import 'package:school_app_flutter/features/school_calendar/presentation/bloc/school_calendar_cubit.dart';
@@ -25,10 +28,17 @@ void registerSchoolCalendar(GetIt getIt) {
   final db = getIt<Database>();
   final reference = CalendarReferenceDao(db);
   final events = CalendarEventDao(db);
+  // Un remplacement de période accepté réécrit les dates des périodes, qui
+  // descendent par le référentiel des notes (ETag) : le relire sans attendre.
+  void periodsMoved() => unawaited(
+    getIt<PullCoordinator>().pullSubset({
+      ...resourcesOf(SyncPlanKeys.academicsGradesReferential),
+    }),
+  );
   for (final feed in [
     CalendarFeed.framework(reference),
     CalendarFeed.calendars(reference),
-    CalendarFeed.events(events),
+    CalendarFeed.events(events, onPeriodsMoved: periodsMoved),
   ]) {
     getIt<PullCoordinator>().registerHandler(
       CalendarPullHandler(
@@ -46,6 +56,7 @@ void registerSchoolCalendar(GetIt getIt) {
       dao: events,
       outbox: OutboxDao(db),
       requiredAuth: getIt<Map<String, dynamic>>(),
+      onPeriodsMoved: periodsMoved,
     ),
   );
   getIt.registerLazySingleton<SchoolCalendarRepository>(

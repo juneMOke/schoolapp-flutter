@@ -1,9 +1,12 @@
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
+import 'package:school_app_flutter/core/components/documents/printable_document.dart';
 import 'package:school_app_flutter/core/constants/app_constants.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/core/network/api_error_parser.dart';
 import 'package:school_app_flutter/core/network/online_guard.dart';
+import 'package:school_app_flutter/features/documents/data/utils/editique_failure_mapper.dart';
+import 'package:school_app_flutter/features/documents/data/utils/pdf_response_reader.dart';
 import 'package:school_app_flutter/features/school_calendar/data/wire/calendar_wire.dart';
 import 'package:school_app_flutter/features/school_calendar/domain/entities/calendar_enums.dart';
 import 'package:school_app_flutter/features/school_calendar/domain/entities/calendar_refusal.dart';
@@ -18,7 +21,8 @@ class CreatableYear {
 }
 
 /// Les seuls gestes **en ligne** du calendrier (A18) : créer, dupliquer,
-/// publier — et la liste des années créables. Tout le reste passe par le lot.
+/// publier — la liste des années créables, et le document du ministère.
+/// Tout le reste passe par le lot.
 class CalendarOnlineApi {
   final Dio _dio;
   final Map<String, dynamic> _requiredAuth;
@@ -85,6 +89,31 @@ class CalendarOnlineApi {
     ),
     key: 'calendar',
   );
+
+  /// Le document officiel du ministère pour [yearLabel], tel que servi.
+  Future<Either<Failure, PrintableDocument>> frameworkDocument(
+    String yearLabel,
+  ) async {
+    try {
+      final response = await _dio.get<List<int>>(
+        AppConstants.calendarFrameworkDocumentEndpoint(yearLabel),
+        options: Options(
+          extra: _requiredAuth,
+          responseType: ResponseType.bytes,
+          headers: {'Accept': AppConstants.pdfAcceptHeader},
+          receiveTimeout: AppConstants.timetablePdfTimeout,
+        ),
+      );
+      return PdfResponseReader.read(
+        response,
+        fallbackFileName: 'calendrier-scolaire-$yearLabel.pdf',
+      );
+    } on DioException catch (e) {
+      return Left(EditiqueFailureMapper.fromDioException(e));
+    } catch (_) {
+      return const Left(ServerFailure('Unexpected error occurred'));
+    }
+  }
 
   Future<Either<Failure, SchoolCalendar>> _calendar(
     Future<Response<Map<String, dynamic>>> Function() call, {

@@ -68,7 +68,10 @@ class SchoolCalendarPdf {
     ];
     final keyDates = [
       for (final e in elements)
-        if (e.isNational && e.nature != CalendarNature.schoolLife) e,
+        // Un élément national remplacé y paraît à ses dates de l'école.
+        if ((e.isNational || e.isReplacement) &&
+            e.nature != CalendarNature.schoolLife)
+          e,
     ]..sort((a, b) => a.startDate.compareTo(b.startDate));
     final document = pw.Document(theme: theme);
     document.addPage(

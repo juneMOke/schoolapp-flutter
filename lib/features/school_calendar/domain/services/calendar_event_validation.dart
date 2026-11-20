@@ -73,11 +73,16 @@ class CalendarEventValidation {
     }
 
     final warnings = <CalendarEventWarning>[];
-    if (!end.isBefore(start)) {
+    // Une période contient forcément des congés : rien à avertir.
+    if (!end.isBefore(start) && nature != CalendarNature.period) {
       final isAssessment =
           nature == CalendarNature.assessment || nature == CalendarNature.exam;
       for (final national in nationalElements) {
-        if (!national.isNational || !national.overlaps(start, end)) continue;
+        // Un remplacement tient la place de l'élément national (ses dates).
+        if (!(national.isNational || national.isReplacement) ||
+            !national.overlaps(start, end)) {
+          continue;
+        }
         final isBreak =
             national.nature == CalendarNature.holidayBreak ||
             national.nature == CalendarNature.publicHoliday;

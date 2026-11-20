@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:dartz/dartz.dart';
+import 'package:school_app_flutter/core/components/documents/printable_document.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/core/offline/current_user_context.dart';
 import 'package:school_app_flutter/core/offline/id_generator.dart';
@@ -80,30 +81,38 @@ class SchoolCalendarRepositoryImpl implements SchoolCalendarRepository {
   Future<Either<Failure, Unit>> saveEvent({
     required String calendarId,
     required CalendarElement element,
-  }) => _write(
+  }) => _write([
     SchoolEventRecord(
       element: element,
       calendarId: calendarId,
       clientUpdatedAtMs: 0,
     ),
-  );
+  ]);
 
   @override
   Future<Either<Failure, Unit>> deleteEvent({
     required String calendarId,
     required CalendarElement element,
-  }) => _write(
-    SchoolEventRecord(
-      element: element,
-      calendarId: calendarId,
-      clientUpdatedAtMs: 0,
-      deleted: true,
-    ),
-  );
+  }) => deleteEvents(calendarId: calendarId, elements: [element]);
+
+  @override
+  Future<Either<Failure, Unit>> deleteEvents({
+    required String calendarId,
+    required List<CalendarElement> elements,
+  }) => _write([
+    for (final element in elements)
+      SchoolEventRecord(
+        element: element,
+        calendarId: calendarId,
+        clientUpdatedAtMs: 0,
+        deleted: true,
+      ),
+  ]);
 
   /// Le geste et son envoi dans **une** transaction : un geste gardé part
-  /// toujours, un envoi ne part jamais sans son geste.
-  Future<Either<Failure, Unit>> _write(SchoolEventRecord record) async {
+  /// toujours, un envoi ne part jamais sans son geste. Plusieurs lignes
+  /// posées ensemble partent dans le même lot.
+  Future<Either<Failure, Unit>> _write(List<SchoolEventRecord> records) async {
     final schoolId = _schoolId;
     if (schoolId.isEmpty) {
       return const Left(StorageFailure('Aucune école courante'));
@@ -111,12 +120,14 @@ class SchoolCalendarRepositoryImpl implements SchoolCalendarRepository {
     try {
       final nowMs = _now().millisecondsSinceEpoch;
       await _db.transaction((txn) async {
-        await CalendarEventDao.saveLocal(
-          txn,
-          record,
-          schoolId: schoolId,
-          nowMs: nowMs,
-        );
+        for (final record in records) {
+          await CalendarEventDao.saveLocal(
+            txn,
+            record,
+            schoolId: schoolId,
+            nowMs: nowMs,
+          );
+        }
         await OutboxDao(txn).enqueue(
           calendarEventsOutboxEntry(schoolId: schoolId, createdAt: nowMs),
         );
@@ -186,6 +197,11 @@ class SchoolCalendarRepositoryImpl implements SchoolCalendarRepository {
     }
     return result;
   }
+
+  @override
+  Future<Either<Failure, PrintableDocument>> frameworkDocument(
+    String yearLabel,
+  ) => _online.frameworkDocument(yearLabel);
 
   /// Recopie l'en-tête rendu sans attendre le tirage, puis tire les flux :
   /// les événements dupliqués et les périodes changées descendent par eux.

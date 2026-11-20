@@ -208,6 +208,43 @@ Future<void> migrateTenantDatabase(
     await _addColumnIfTable(db, 'ref_classrooms', 'room');
     await _repullClassrooms(db);
   }
+  if (upTo(86)) {
+    // Les remplacements nationaux du calendrier (contrat du 2026-11-20).
+    await _addColumnIfTable(
+      db,
+      'cal_framework_items',
+      'replaceable',
+      type: 'INTEGER NOT NULL DEFAULT 0',
+    );
+    await _addColumnIfTable(db, 'cal_frameworks', 'document_file_name');
+    await _addColumnIfTable(
+      db,
+      'cal_frameworks',
+      'document_size_bytes',
+      type: 'INTEGER',
+    );
+    await _addColumnIfTable(db, 'cal_frameworks', 'document_uploaded_at');
+    await _addColumnIfTable(db, 'school_calendar_events', 'replaces_item_id');
+    await _repullCalendarFramework(db);
+  }
+}
+
+/// v86 — les cadres déjà connus n'ont ni `replaceable` ni document, et un
+/// remplacement posé par un poste déjà à jour a pu descendre ici sans sa
+/// cible (colonne absente) : les flux `calendar_framework` et
+/// `calendar_events` (exacts ou scopés `…@école`) repartent de zéro ; les
+/// lignes en attente ne sont pas touchées par le re-tirage.
+Future<void> _repullCalendarFramework(DatabaseExecutor db) async {
+  final hasMeta = await db.rawQuery(
+    "SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'sync_meta'",
+  );
+  if (hasMeta.isEmpty) return;
+  await db.execute(
+    'DELETE FROM sync_meta WHERE resource IN '
+    "('calendar_framework', 'calendar_events') "
+    "OR resource LIKE 'calendar\\_framework@%' ESCAPE '\\' "
+    "OR resource LIKE 'calendar\\_events@%' ESCAPE '\\'",
+  );
 }
 
 /// v85 — les classes déjà connues n'ont pas de salle : le flux des classes est
