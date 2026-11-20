@@ -61,19 +61,37 @@ class ConsultationActions extends StatelessWidget {
             fullWidth: false,
             onPressed: edit,
           ),
-        SegmentedTabFilter<ClassTimetableMode>(
-          selected: mode,
-          onSelected: onMode,
-          options: [
-            SegmentedTabOption(
-              label: l10n.classTimetableWeek,
-              value: ClassTimetableMode.week,
-            ),
-            SegmentedTabOption(
-              label: l10n.classTimetableDay,
-              value: ClassTimetableMode.day,
-            ),
-          ],
+        ClassTimetableModeSwitch(mode: mode, onMode: onMode),
+      ],
+    );
+  }
+}
+
+/// La bascule Semaine | Jour, en consultation et dans le brouillon.
+class ClassTimetableModeSwitch extends StatelessWidget {
+  final ClassTimetableMode mode;
+  final ValueChanged<ClassTimetableMode> onMode;
+
+  const ClassTimetableModeSwitch({
+    super.key,
+    required this.mode,
+    required this.onMode,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    return SegmentedTabFilter<ClassTimetableMode>(
+      selected: mode,
+      onSelected: onMode,
+      options: [
+        SegmentedTabOption(
+          label: l10n.classTimetableWeek,
+          value: ClassTimetableMode.week,
+        ),
+        SegmentedTabOption(
+          label: l10n.classTimetableDay,
+          value: ClassTimetableMode.day,
         ),
       ],
     );

@@ -22,6 +22,10 @@ class ClassTimetableDistribution extends StatelessWidget {
   final String? linkedCoursId;
   final ValueChanged<String?>? onHoverCours;
 
+  /// L'aide au-dessus des lignes (« Survolez » à la souris, « Touchez » au
+  /// doigt) ; `null` : aucune, en vue Jour où il n'y a pas de grille.
+  final String? hint;
+
   /// Le domaine filtré (`null` : tous), et le toucher d'un domaine.
   final String? domainFilter;
   final ValueChanged<String?>? onDomainFilter;
@@ -32,6 +36,7 @@ class ClassTimetableDistribution extends StatelessWidget {
     required this.cells,
     this.linkedCoursId,
     this.onHoverCours,
+    this.hint,
     this.domainFilter,
     this.onDomainFilter,
   });
@@ -56,13 +61,10 @@ class ClassTimetableDistribution extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          if (hover != null)
+          if (hint case final hint?)
             Padding(
               padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-              child: Text(
-                l10n.classTimetableHoverHint,
-                style: AppTypography.bodySmall,
-              ),
+              child: Text(hint, style: AppTypography.bodySmall),
             ),
           for (final course in view.programme)
             if (domainFilter == null || course.domainId == domainFilter)

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/components/controls/eteelo_filter_chip.dart';
 import 'package:school_app_flutter/core/components/controls/segmented_tab_filter.dart';
+import 'package:school_app_flutter/features/school_calendar/presentation/widgets/calendar/calendar_filters.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/features/school_calendar/domain/entities/calendar_element.dart';
@@ -14,11 +15,19 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 /// La barre d'outils (spec §4.6 T) : la vue, le mois avec « Mois en cours »,
 /// la source, et — si l'école a les deux rythmes — Semestres | Trimestres
 /// (A1). Puis la légende-filtre (L), une puce à compteur par nature (I8).
+/// En [compact], la source et le rythme passent derrière « Filtres » : sur
+/// un téléphone, ils empilaient deux rangées de plus avant la grille.
 class CalendarToolbar extends StatelessWidget {
   final SchoolCalendarState state;
   final SchoolCalendarCubit cubit;
+  final bool compact;
 
-  const CalendarToolbar({super.key, required this.state, required this.cubit});
+  const CalendarToolbar({
+    super.key,
+    required this.state,
+    required this.cubit,
+    this.compact = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -75,41 +84,13 @@ class CalendarToolbar extends StatelessWidget {
                 ),
             ],
           ),
-        SegmentedTabFilter<CalendarSourceFilter>(
-          semanticsLabel: l10n.schoolCalendarSource,
-          selected: state.source,
-          onSelected: cubit.setSource,
-          options: [
-            SegmentedTabOption(
-              label: l10n.schoolCalendarSourceAll,
-              value: CalendarSourceFilter.all,
-            ),
-            SegmentedTabOption(
-              label: l10n.schoolCalendarSourceNational,
-              value: CalendarSourceFilter.national,
-            ),
-            SegmentedTabOption(
-              label: l10n.schoolCalendarSourceSchool,
-              value: CalendarSourceFilter.school,
-            ),
-          ],
-        ),
-        if (rhythms.length > 1)
-          SegmentedTabFilter<PeriodRhythm>(
-            semanticsLabel: l10n.schoolCalendarPeriod,
-            selected: state.effectiveRhythm ?? rhythms.first,
-            onSelected: cubit.setRhythm,
-            options: [
-              SegmentedTabOption(
-                label: l10n.schoolCalendarRhythmSemesters,
-                value: PeriodRhythm.semester,
-              ),
-              SegmentedTabOption(
-                label: l10n.schoolCalendarRhythmTrimesters,
-                value: PeriodRhythm.trimester,
-              ),
-            ],
-          ),
+        if (compact)
+          CalendarFiltersButton(state: state, cubit: cubit)
+        else ...[
+          CalendarSourceFilterControl(state: state, cubit: cubit),
+          if (rhythms.length > 1)
+            CalendarRhythmFilterControl(state: state, cubit: cubit),
+        ],
       ],
     );
   }

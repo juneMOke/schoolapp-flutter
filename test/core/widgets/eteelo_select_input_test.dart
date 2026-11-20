@@ -42,6 +42,8 @@ void main() {
       await tester.tap(find.text('Primaire'));
       await tester.pumpAndSettle();
       expect(changed, isFalse);
+      // Pas de chevron : il promettrait un choix qui n'existe pas.
+      expect(find.byIcon(Icons.keyboard_arrow_down_rounded), findsNothing);
     });
 
     testWidgets('desactive sans readOnly : garde le grise (repere cascade)', (
@@ -68,6 +70,8 @@ void main() {
         (container.decoration! as BoxDecoration).color,
         equals(AppColors.surfaceAlt),
       );
+      // Désactivé, le chevron reste (grisé) : le choix viendra.
+      expect(find.byIcon(Icons.keyboard_arrow_down_rounded), findsOneWidget);
     });
 
     testWidgets('affiche label et placeholder', (tester) async {

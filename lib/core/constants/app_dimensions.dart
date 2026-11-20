@@ -1515,6 +1515,15 @@ class AppDimensions {
   /// La réserve « Cours à placer » à côté de la grille (≥ 976, EDT A11), et
   /// la hauteur d'une de ses lignes (cible ≥ 48 dp).
   static const timetableReserveWidth = 280.0;
+
+  /// La répartition d'une classe à côté de sa grille, sur un grand écran
+  /// (≥ [AppBreakpoints.expanded] reçus) : seule dessous, elle s'étirait sur
+  /// toute la largeur, les heures loin des noms.
+  static const timetableSideDistributionWidth = 380.0;
+
+  /// Bouton d'un jour (vue Jour) au-delà duquel les jours gardent leur écart
+  /// normal ; en deçà, l'écart se resserre pour tenir sur une rangée.
+  static const scheduleDayButtonRoomyWidth = 72.0;
   static const timetableReserveLineMinHeight = 48.0;
 
   /// Un élément passé, estompé dans les listes (§4.3).

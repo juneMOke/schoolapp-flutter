@@ -35,6 +35,11 @@ class AppBreakpoints {
   /// initiales des jours) sous cette largeur **reçue** (spec Calendrier §4.1).
   static const double calendarMonthCompactMax = dataTableCardsMax;
 
+  /// Hauteur de fenêtre sous laquelle le bandeau d'une année du calendrier
+  /// passe en compact, comme sous [calendarMonthCompactMax] de large : sur un
+  /// téléphone en paysage (360 dp), le bandeau complet remplissait l'écran.
+  static const double calendarBannerCompactMaxHeight = 480.0;
+
   /// Fenêtre sous laquelle une modale de saisie (`EteeloFormDialog`) prend
   /// tout l'écran : centrée, elle gardait 40 dp de marge par côté, soit
   /// ~230 dp de champ sur un téléphone.

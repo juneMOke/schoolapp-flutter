@@ -23895,6 +23895,20 @@ class AppLocalizationsFr extends AppLocalizations {
       'Calendrier archivé : consultation seule.';
 
   @override
+  String get schoolCalendarHelpTouchWide =>
+      'Touchez un jour libre pour y ajouter un événement, ou un élément pour son détail.';
+
+  @override
+  String get schoolCalendarHelpReadTouch =>
+      'Touchez un élément pour voir son détail.';
+
+  @override
+  String get schoolCalendarMoreActions => 'Plus d\'actions';
+
+  @override
+  String get schoolCalendarFilters => 'Filtres';
+
+  @override
   String schoolCalendarVerifyNotice(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
@@ -24553,6 +24567,13 @@ class AppLocalizationsFr extends AppLocalizations {
       'Touchez un créneau de la grille pour y placer un cours.';
 
   @override
+  String get classTimetableHelpDraftDay =>
+      'Touchez un créneau de la journée pour y placer un cours.';
+
+  @override
+  String get classTimetableFreeSlot => 'Créneau libre';
+
+  @override
   String get classTimetableReserveTitle => 'Cours à placer';
 
   @override
@@ -24983,6 +25004,13 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get classTimetableHoverHint =>
       'Survolez un cours pour le repérer dans la grille';
+
+  @override
+  String get classTimetableTapHint =>
+      'Touchez un cours pour le repérer dans la grille';
+
+  @override
+  String get classTimetableChangeClass => 'Changer de classe';
 
   @override
   String get classTimetableAllDomains => 'Tous les domaines';

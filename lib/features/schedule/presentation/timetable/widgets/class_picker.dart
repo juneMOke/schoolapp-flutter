@@ -2,12 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/components/cards/eteelo_panel_card.dart';
 import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_select_input.dart';
 import 'package:school_app_flutter/features/schedule/domain/entities/timetable/class_timetable_view.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Le choix de la classe (EDT §4.6 A) : Cycle → Niveau → Classe, en grille de
-/// champs d'une, deux ou trois colonnes selon la largeur de la carte.
+/// champs d'une, deux ou trois colonnes selon la largeur de la carte. Sur
+/// un téléphone, une classe choisie se résume en une ligne (« 6e A · 1er
+/// cycle · 6e ») avec « Changer de classe » : les trois listes empilées
+/// repoussaient l'emploi du temps de près de 300 dp.
 class ClassPicker extends StatefulWidget {
   final List<TimetableClassOption> options;
   final String? selectedId;
@@ -27,6 +31,7 @@ class ClassPicker extends StatefulWidget {
 class _ClassPickerState extends State<ClassPicker> {
   String? _cycle;
   String? _level;
+  bool _changing = false;
 
   @override
   void initState() {
@@ -99,17 +104,47 @@ class _ClassPickerState extends State<ClassPicker> {
             : null,
         minWidth: 0,
         enabled: _level != null,
-        onChanged: widget.onSelected,
+        onChanged: (v) {
+          setState(() => _changing = false);
+          widget.onSelected(v);
+        },
         items: [
           for (final c in classes)
             EteeloSelectItem(value: c.classroomId, label: c.name),
         ],
       ),
     ];
+    final selected = widget.options
+        .where((o) => o.classroomId == widget.selectedId)
+        .firstOrNull;
+    // Pas de titre : la page porte déjà « Emplois du temps par classe ».
     return EteeloPanelCard(
-      title: l10n.classTimetableTitle,
       child: LayoutBuilder(
         builder: (context, constraints) {
+          final phone = constraints.maxWidth < AppBreakpoints.formGridTwoColMin;
+          if (phone && selected != null && !_changing) {
+            return Wrap(
+              alignment: WrapAlignment.spaceBetween,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              spacing: AppSpacing.sm,
+              children: [
+                Text(
+                  [
+                    selected.name,
+                    selected.cycleName,
+                    selected.levelName,
+                  ].join(' · '),
+                  style: AppTypography.bodyMedium.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                TextButton(
+                  onPressed: () => setState(() => _changing = true),
+                  child: Text(l10n.classTimetableChangeClass),
+                ),
+              ],
+            );
+          }
           final columns =
               constraints.maxWidth >= AppBreakpoints.formGridThreeColMin
               ? 3

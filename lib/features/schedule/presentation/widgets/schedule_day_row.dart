@@ -28,6 +28,9 @@ class ScheduleDayRow extends StatelessWidget {
   /// Estompée (filtre de domaine) ou normale.
   final SessionEmphasis emphasis;
 
+  /// Brouillon : conflit, hors programme, refus.
+  final String? alert;
+
   const ScheduleDayRow({
     super.key,
     required this.slot,
@@ -37,14 +40,17 @@ class ScheduleDayRow extends StatelessWidget {
     this.struck = false,
     this.badge,
     this.emphasis = SessionEmphasis.normal,
+    this.alert,
   });
 
   @override
   Widget build(BuildContext context) {
-    final room = cell.room?.trim();
-    final subtitle = room != null && room.isNotEmpty
-        ? '${cell.classroomLabel} · $room'
-        : cell.classroomLabel;
+    // Une séance sans enseignant ni salle n'a pas de sous-titre ; jamais de
+    // séparateur en tête (« · Salle 12 »).
+    final subtitle = [
+      cell.classroomLabel.trim(),
+      ?cell.room?.trim(),
+    ].where((part) => part.isNotEmpty).join(' · ');
     final start = ScheduleTimeFormat.hourMinute(slot.startTime);
     final end = ScheduleTimeFormat.hourMinute(slot.endTime);
 
@@ -64,8 +70,10 @@ class ScheduleDayRow extends StatelessWidget {
         // (cf. SegmentedTabFilter). onTap est reporté ici pour rester activable.
         excludeSemantics: true,
         label: [
-          '$start – $end · ${cell.subjectLabel} · $subtitle',
+          '$start – $end · ${cell.subjectLabel}',
+          if (subtitle.isNotEmpty) subtitle,
           ?badge,
+          ?alert,
         ].join(' · '),
         child: InkWell(
           onTap: onTap,
@@ -78,7 +86,7 @@ class ScheduleDayRow extends StatelessWidget {
             child: IntrinsicHeight(
               child: Row(
                 children: [
-                  _TimeColumn(slot: slot),
+                  ScheduleDayTimeColumn(slot: slot),
                   const SizedBox(width: AppSpacing.md),
                   Container(
                     width: 4,
@@ -95,7 +103,7 @@ class ScheduleDayRow extends StatelessWidget {
                       children: [
                         Text(
                           cell.subjectLabel,
-                          maxLines: 1,
+                          maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: AppTypography.bodyMedium
                               .copyWith(
@@ -104,15 +112,25 @@ class ScheduleDayRow extends StatelessWidget {
                               )
                               .merge(strike),
                         ),
-                        const SizedBox(height: 1),
-                        Text(
-                          subtitle,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: AppTypography.bodySmall
-                              .copyWith(color: AppColors.textSecondary)
-                              .merge(strike),
-                        ),
+                        if (subtitle.isNotEmpty) ...[
+                          const SizedBox(height: 1),
+                          Text(
+                            subtitle,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: AppTypography.bodySmall
+                                .copyWith(color: AppColors.textSecondary)
+                                .merge(strike),
+                          ),
+                        ],
+                        if (alert case final alert?)
+                          Text(
+                            alert,
+                            style: AppTypography.labelSmall.copyWith(
+                              color: AppColors.error,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
                         if (badge != null)
                           Text(
                             badge,
@@ -144,10 +162,10 @@ class ScheduleDayRow extends StatelessWidget {
   }
 }
 
-class _TimeColumn extends StatelessWidget {
+class ScheduleDayTimeColumn extends StatelessWidget {
   final TimeSlot slot;
 
-  const _TimeColumn({required this.slot});
+  const ScheduleDayTimeColumn({super.key, required this.slot});
 
   @override
   Widget build(BuildContext context) {

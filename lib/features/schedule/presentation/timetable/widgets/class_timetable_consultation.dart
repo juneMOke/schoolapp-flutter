@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:school_app_flutter/features/schedule/presentation/timetable/widgets/consultation_actions.dart';
 import 'package:school_app_flutter/features/schedule/presentation/timetable/print_action.dart';
 import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
+import 'package:school_app_flutter/core/constants/app_dimensions.dart';
+import 'package:school_app_flutter/core/device/desktop_platform.dart';
 import 'package:school_app_flutter/core/components/keyboard/page_action_shortcut.dart';
 import 'package:school_app_flutter/core/components/dialogs/eteelo_adaptive_sheet.dart';
 import 'package:school_app_flutter/core/helpers/school_time.dart';
@@ -120,6 +122,46 @@ class _ClassTimetableConsultationState
                 ? ClassTimetableMode.day
                 : ClassTimetableMode.week);
         final narrow = constraints.maxWidth < AppBreakpoints.dataTableCardsMax;
+        // Grand écran : la répartition à côté de la grille, à hauteur des
+        // cours qu'elle repère, au lieu d'une bande étirée dessous.
+        final side =
+            mode == ClassTimetableMode.week &&
+            constraints.maxWidth >= AppBreakpoints.expanded;
+        final body = mode == ClassTimetableMode.week
+            ? ScheduleWeekGrid(
+                timetable: week,
+                palette: palette,
+                today: today,
+                keepSaturday: true,
+                marks: marks,
+                onOpenCell: open,
+              )
+            : ScheduleDayView(
+                timetable: week,
+                palette: palette,
+                today: today,
+                selectedDay: state.day ?? weekday ?? Weekday.mon,
+                onDaySelected: cubit.setDay,
+                marks: marks,
+                onOpenCell: open,
+                dates: {
+                  for (final day in Weekday.values)
+                    day: CalendarDays.addDays(monday, day.index),
+                },
+              );
+        final distribution = ClassTimetableDistribution(
+          view: view,
+          cells: view.published,
+          linkedCoursId: _linked,
+          onHoverCours: _hover,
+          hint: mode == ClassTimetableMode.week
+              ? expectsPhysicalKeyboard
+                    ? l10n.classTimetableHoverHint
+                    : l10n.classTimetableTapHint
+              : null,
+          domainFilter: _domain,
+          onDomainFilter: (d) => setState(() => _domain = d),
+        );
         return PageActionShortcut(
           action: PageAction.print,
           onInvoke: print,
@@ -152,34 +194,23 @@ class _ClassTimetableConsultationState
               ),
               if (calendar != null) PeriodBanners(week: calendar),
               const SizedBox(height: AppSpacing.md),
-              if (mode == ClassTimetableMode.week)
-                ScheduleWeekGrid(
-                  timetable: week,
-                  palette: palette,
-                  today: today,
-                  keepSaturday: true,
-                  marks: marks,
-                  onOpenCell: open,
+              if (side)
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(child: body),
+                    const SizedBox(width: AppSpacing.lg),
+                    SizedBox(
+                      width: AppDimensions.timetableSideDistributionWidth,
+                      child: distribution,
+                    ),
+                  ],
                 )
-              else
-                ScheduleDayView(
-                  timetable: week,
-                  palette: palette,
-                  today: today,
-                  selectedDay: state.day ?? weekday ?? Weekday.mon,
-                  onDaySelected: cubit.setDay,
-                  marks: marks,
-                  onOpenCell: open,
-                ),
-              const SizedBox(height: AppSpacing.lg),
-              ClassTimetableDistribution(
-                view: view,
-                cells: view.published,
-                linkedCoursId: _linked,
-                onHoverCours: _hover,
-                domainFilter: _domain,
-                onDomainFilter: (d) => setState(() => _domain = d),
-              ),
+              else ...[
+                body,
+                const SizedBox(height: AppSpacing.lg),
+                distribution,
+              ],
             ],
           ),
         );

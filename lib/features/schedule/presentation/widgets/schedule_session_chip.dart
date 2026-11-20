@@ -74,7 +74,18 @@ class ScheduleSessionChip extends StatelessWidget {
           : 1,
       child: framed,
     );
-    return alert == null ? faded : Tooltip(message: alert, child: faded);
+    // Le nom entier au survol (ou à l'appui long) : dans une case de la
+    // grille, il est souvent tronqué (« Éducation phy… »). Le lecteur d'écran
+    // a déjà le libellé composé.
+    return Tooltip(
+      message: [
+        cell.subjectLabel,
+        if (cell.classroomLabel.trim().isNotEmpty) cell.classroomLabel,
+        ?alert,
+      ].join(' · '),
+      excludeFromSemantics: true,
+      child: faded,
+    );
   }
 
   Widget _chip(BuildContext context) {
