@@ -23,6 +23,7 @@ import 'package:school_app_flutter/features/treasury/presentation/widgets/states
 import 'package:school_app_flutter/features/treasury/presentation/widgets/common/treasury_location_sync.dart';
 import 'package:school_app_flutter/features/treasury/presentation/widgets/common/treasury_panel.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
+import 'package:school_app_flutter/features/treasury/presentation/widgets/common/treasury_refresh_button.dart';
 
 /// Trésorerie ▸ Tableau de bord (A1-A4) : combien chaque caisse détient,
 /// puis leur évolution. Chaque caisse dans sa devise, jamais additionnées.
@@ -66,6 +67,7 @@ class _TreasuryDashboardScreenState extends State<TreasuryDashboardScreen> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             EteeloPageHeader(
+              actions: TreasuryRefreshButton.headerActions(context),
               eyebrow: overview == null
                   ? l10n.menuTreasury
                   : l10n.treasuryEyebrowYear(overview.academicYear.name),

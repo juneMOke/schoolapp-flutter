@@ -10,8 +10,8 @@ import 'package:school_app_flutter/core/widgets/eteelo_page_header.dart';
 import 'package:school_app_flutter/features/treasury/domain/services/cash_closing_rules.dart';
 import 'package:school_app_flutter/features/treasury/presentation/bloc/cash_closing_cubit.dart';
 import 'package:school_app_flutter/features/treasury/presentation/widgets/closing/closing_day_pane.dart';
+import 'package:school_app_flutter/features/treasury/presentation/widgets/closing/closing_period_split.dart';
 import 'package:school_app_flutter/features/treasury/presentation/widgets/closing/closing_day_view.dart';
-import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
 import 'package:school_app_flutter/features/treasury/presentation/widgets/common/treasury_panel.dart';
 import 'package:school_app_flutter/features/treasury/presentation/widgets/common/treasury_location_sync.dart';
 import 'package:school_app_flutter/features/treasury/presentation/widgets/common/treasury_refresh_scope.dart';
@@ -19,6 +19,7 @@ import 'package:school_app_flutter/core/navigation/location_params_sync.dart';
 import 'package:school_app_flutter/core/navigation/screen_back_scope.dart';
 import 'package:school_app_flutter/features/treasury/presentation/helpers/treasury_location.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
+import 'package:school_app_flutter/features/treasury/presentation/widgets/common/treasury_refresh_button.dart';
 
 export 'closing_day_view.dart' show ClosingCallbacks;
 
@@ -165,6 +166,7 @@ class ClosingScreenState extends State<ClosingScreen> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             EteeloPageHeader(
+              actions: TreasuryRefreshButton.headerActions(context),
               titleStyle: TreasuryTitle.style(context),
               eyebrow: l10n.menuTreasury,
               title: l10n.treasuryClosingTitle,
@@ -200,37 +202,28 @@ class ClosingScreenState extends State<ClosingScreen> {
     DateTime businessDate,
   ) {
     final cubit = context.read<CashClosingCubit>();
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final sideBySide = constraints.maxWidth >= AppBreakpoints.sideBySideMin;
-        // La période garde son état quand l'écran change de forme.
-        final period = KeyedSubtree(
-          key: _periodKey,
-          child: _periodProvider(
-            businessDate,
-            state,
-            onOpenDay: sideBySide ? cubit.load : _openDay,
-            selectedDay: sideBySide ? state.date : null,
-          ),
-        );
-        if (!sideBySide) return period;
-        return Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(flex: 5, child: period),
-            const SizedBox(width: AppSpacing.lg),
-            Expanded(
-              flex: 4,
-              child: ClosingDayPane(
-                state: state,
-                callbacks: callbacks,
-                online: online,
-                standalone: false,
-              ),
-            ),
-          ],
-        );
-      },
+    return ClosingPeriodSplit(
+      // La période garde son état quand l'écran change de forme.
+      period: (sideBySide, reveal) => KeyedSubtree(
+        key: _periodKey,
+        child: _periodProvider(
+          businessDate,
+          state,
+          onOpenDay: sideBySide
+              ? (day) {
+                  cubit.load(day);
+                  reveal();
+                }
+              : _openDay,
+          selectedDay: sideBySide ? state.date : null,
+        ),
+      ),
+      pane: ClosingDayPane(
+        state: state,
+        callbacks: callbacks,
+        online: online,
+        standalone: false,
+      ),
     );
   }
 

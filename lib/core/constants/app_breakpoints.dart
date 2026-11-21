@@ -108,6 +108,15 @@ class AppBreakpoints {
   /// temps se replie en une ligne + « Changer » (EDT §4.6 A, même seuil).
   static const double timetablePickerCollapseMaxHeight =
       treasuryChartLowHeightMax;
+
+  /// Trésorerie ▸ Clôture, semaine ou mois (largeur reçue) : au-delà, la
+  /// journée touchée s'ouvre à côté de la période. Le volet de la journée
+  /// (`AppDimensions.treasuryDayPaneWidth`, 420), 16 d'écart
+  /// (`AppSpacing.lg`), et le tableau « Jour par jour » entier pour deux
+  /// caisses (`PeriodDayColumns.minWidth`, 696) : 1 132, arrondi à 1 140.
+  /// Un test pose 1 140 tout juste. En deçà — un portable de 1 366, barre dépliée, laisse
+  /// 1 038 — la journée remplace la période, comme sur tablette.
+  static const double treasuryPeriodSideBySideMin = 1140.0;
   static const double formGridThreeColMin = 880.0;
 
   /// En-tête de page à chiffres (Classes) : en deçà, le titre passe au-dessus

@@ -1376,6 +1376,10 @@ class AppDimensions {
   /// s'étire pas.
   static const treasuryDayNavMaxWidth = 420.0;
 
+  /// Volet de la journée à côté de la semaine ou du mois (Clôture) : une
+  /// carte de caisse (340 au moins) et la barre de navigation du jour.
+  static const treasuryDayPaneWidth = 420.0;
+
   /// Case chiffrée d'une carte du jour (Ouverture, Entrées, Sorties).
   static const treasuryFigureMinWidth = 120.0;
 
@@ -1441,6 +1445,7 @@ class AppDimensions {
   /// Les panneaux blancs (A3, A5) : rayon 16, pad 20.
   static const treasuryPanelRadius = 16.0;
   static const treasuryPanelPadding = 20.0;
+  static const treasuryPanelPaddingCompact = 16.0;
 
   /// Les pastilles chiffrées du graphique (A4) : pad 6 × 12, rayon 10.
   static const treasuryFigurePadV = 6.0;

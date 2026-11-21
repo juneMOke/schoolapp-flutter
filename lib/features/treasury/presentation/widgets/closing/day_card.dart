@@ -16,6 +16,7 @@ import 'package:school_app_flutter/features/treasury/presentation/helpers/treasu
 import 'package:school_app_flutter/features/treasury/presentation/widgets/closing/day_card_figures.dart';
 import 'package:school_app_flutter/features/treasury/presentation/widgets/closing/day_card_footer.dart';
 import 'package:school_app_flutter/features/treasury/presentation/widgets/closing/day_card_header.dart';
+import 'package:school_app_flutter/features/treasury/presentation/widgets/closing/movement_row.dart';
 import 'package:school_app_flutter/features/treasury/presentation/widgets/closing/movements_list.dart';
 import 'package:school_app_flutter/features/treasury/presentation/helpers/treasury_tones.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
@@ -45,6 +46,14 @@ class DayCard extends StatefulWidget {
     this.onReopen,
     this.onAnswer,
   });
+
+  /// La largeur sous laquelle le registre déplié passe sur deux lignes :
+  /// [MovementColumns.wideMin], plus le rembourrage de la carte et le filet
+  /// (1 dp par côté) de la liste.
+  static const double ledgerColumnsMinWidth =
+      MovementColumns.wideMin + 2 * _padding + 2;
+
+  static const double _padding = AppSpacing.lg;
 
   @override
   State<DayCard> createState() => _DayCardState();
@@ -76,7 +85,7 @@ class _DayCardState extends State<DayCard> {
               isToday: widget.isToday,
             ),
             Padding(
-              padding: const EdgeInsets.all(AppSpacing.lg),
+              padding: const EdgeInsets.all(DayCard._padding),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [

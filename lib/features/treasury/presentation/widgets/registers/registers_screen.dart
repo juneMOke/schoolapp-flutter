@@ -20,6 +20,7 @@ import 'package:school_app_flutter/features/treasury/presentation/widgets/regist
 import 'package:school_app_flutter/features/treasury/presentation/widgets/states/treasury_results_error_state.dart';
 import 'package:school_app_flutter/features/treasury/presentation/widgets/common/treasury_panel.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
+import 'package:school_app_flutter/features/treasury/presentation/widgets/common/treasury_refresh_button.dart';
 
 /// Trésorerie ▸ Configuration des caisses : une carte par caisse, dans l'ordre
 /// de création, puis la tuile « + » (promoteur), puis la note « Bon à savoir ».
@@ -66,6 +67,7 @@ class RegistersScreen extends StatelessWidget {
                 title: l10n.treasuryConfigTitle,
                 subtitle: l10n.treasuryConfigSubtitle,
                 actions: [
+                  ...TreasuryRefreshButton.headerActions(context),
                   if (create != null)
                     EteeloButton.primary(
                       label: l10n.treasuryNewRegister,

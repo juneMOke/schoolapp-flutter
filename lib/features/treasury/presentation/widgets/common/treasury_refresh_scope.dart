@@ -5,6 +5,7 @@ import 'package:school_app_flutter/core/components/keyboard/page_action_shortcut
 import 'package:school_app_flutter/core/components/status/sync_indicator.dart';
 import 'package:school_app_flutter/core/components/status/sync_status_cubit.dart';
 import 'package:school_app_flutter/core/components/status/sync_status_state.dart';
+import 'package:school_app_flutter/core/device/desktop_platform.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 
 /// Relire un écran de la trésorerie. Les écrans lisent en ligne — rien ne se
@@ -39,11 +40,19 @@ class TreasuryRefreshScope extends StatefulWidget {
     required this.child,
   });
 
-  /// Le tactile natif : à la souris, rien ne se « tire ».
-  static bool get isTouchApp =>
-      !kIsWeb &&
-      (defaultTargetPlatform == TargetPlatform.android ||
-          defaultTargetPlatform == TargetPlatform.iOS);
+  /// Où la page se tire : la tablette et le téléphone, natifs ou dans un
+  /// navigateur. Le navigateur d'un ordinateur garde F5 et le bouton
+  /// « Actualiser » : à la souris, rien ne se « tire ».
+  static bool get pullsToRefresh => kIsWeb
+      ? !expectsPhysicalKeyboard
+      : defaultTargetPlatform == TargetPlatform.android ||
+            defaultTargetPlatform == TargetPlatform.iOS;
+
+  /// La relecture de l'écran qui englobe [context], pour un bouton
+  /// « Actualiser » ; `null` hors d'un [TreasuryRefreshScope].
+  static Future<void> Function()? maybeOf(BuildContext context) => context
+      .dependOnInheritedWidgetOfExactType<_TreasuryRefreshInherited>()
+      ?.onRefresh;
 
   @override
   State<TreasuryRefreshScope> createState() => _TreasuryRefreshScopeState();
@@ -64,7 +73,8 @@ class _TreasuryRefreshScopeState extends State<TreasuryRefreshScope> {
   }
 
   Future<void> _pulled() async {
-    final sync = _sync();
+    // Le web n'a pas de base locale à resynchroniser : il relit seulement.
+    final sync = kIsWeb ? null : _sync();
     if (sync == null || !widget.refreshOnSynced) {
       await Future.wait([widget.onRefresh(), ?sync?.syncNow()]);
       return;
@@ -81,7 +91,7 @@ class _TreasuryRefreshScopeState extends State<TreasuryRefreshScope> {
   @override
   Widget build(BuildContext context) {
     var screen = widget.child;
-    if (widget.pull && TreasuryRefreshScope.isTouchApp) {
+    if (widget.pull && TreasuryRefreshScope.pullsToRefresh) {
       screen = NotificationListener<ScrollNotification>(
         // Le défilement de la page s'arrête ici : la coquille ne relance
         // pas une deuxième fois la synchronisation.
@@ -106,6 +116,10 @@ class _TreasuryRefreshScopeState extends State<TreasuryRefreshScope> {
         child: screen,
       );
     }
+    screen = _TreasuryRefreshInherited(
+      onRefresh: widget.onRefresh,
+      child: screen,
+    );
     if (!widget.keyboard) return screen;
     return PageActionShortcut(
       action: PageAction.refresh,
@@ -113,4 +127,17 @@ class _TreasuryRefreshScopeState extends State<TreasuryRefreshScope> {
       child: screen,
     );
   }
+}
+
+class _TreasuryRefreshInherited extends InheritedWidget {
+  final Future<void> Function() onRefresh;
+
+  const _TreasuryRefreshInherited({
+    required this.onRefresh,
+    required super.child,
+  });
+
+  @override
+  bool updateShouldNotify(_TreasuryRefreshInherited oldWidget) =>
+      onRefresh != oldWidget.onRefresh;
 }
