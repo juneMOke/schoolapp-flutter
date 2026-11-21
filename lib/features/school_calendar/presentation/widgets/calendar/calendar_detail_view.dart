@@ -4,6 +4,7 @@ import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/features/school_calendar/domain/entities/calendar_enums.dart';
 import 'package:school_app_flutter/features/school_calendar/domain/entities/school_calendar.dart';
+import 'package:school_app_flutter/features/school_calendar/domain/services/calendar_periods.dart';
 import 'package:school_app_flutter/features/school_calendar/presentation/bloc/school_calendar_cubit.dart';
 import 'package:school_app_flutter/features/school_calendar/presentation/bloc/school_calendar_state.dart';
 import 'package:school_app_flutter/features/school_calendar/presentation/helpers/calendar_rights.dart';
@@ -103,7 +104,7 @@ class CalendarDetailView extends StatelessWidget {
             CalendarToolbar(state: state, cubit: cubit, compact: compact),
             const SizedBox(height: AppSpacing.sm),
             CalendarLegend(
-              elements: state.sourcedElements,
+              elements: CalendarPeriods.finest(state.sourcedElements),
               hidden: state.hiddenNatures,
               onToggle: cubit.toggleNature,
               compact: compact,

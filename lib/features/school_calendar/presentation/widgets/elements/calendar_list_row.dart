@@ -100,7 +100,7 @@ class CalendarListRow extends StatelessWidget {
                     crossAxisAlignment: WrapCrossAlignment.center,
                     children: [
                       Text(
-                        element.title,
+                        CalendarLabels.title(l10n, element),
                         style: AppTypography.calendarRowTitle.copyWith(
                           color: AppColors.textPrimary,
                         ),

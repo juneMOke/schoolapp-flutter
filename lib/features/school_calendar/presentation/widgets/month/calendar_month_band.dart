@@ -6,9 +6,11 @@ import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/features/school_calendar/domain/entities/calendar_enums.dart';
+import 'package:school_app_flutter/features/school_calendar/presentation/helpers/calendar_labels.dart';
 import 'package:school_app_flutter/features/school_calendar/presentation/helpers/calendar_nature_style.dart';
 import 'package:school_app_flutter/features/school_calendar/presentation/helpers/month_layout.dart';
 import 'package:school_app_flutter/features/school_calendar/presentation/widgets/month/calendar_dashed_bar.dart';
+import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Une bande d'élément sur une semaine du mois (CAL-R4, maquette `CalBand`) :
 /// un élément national prend un fond doux de sa teinte, un liseré à gauche
@@ -89,7 +91,7 @@ class CalendarMonthBand extends StatelessWidget {
         ],
         Expanded(
           child: Text(
-            element.title,
+            CalendarLabels.title(AppLocalizations.of(context)!, element),
             maxLines: 1,
             softWrap: false,
             overflow: TextOverflow.ellipsis,
@@ -165,7 +167,7 @@ class CalendarMonthBand extends StatelessWidget {
     final tap = onTap;
     return ExcludeSemantics(
       child: Tooltip(
-        message: element.title,
+        message: CalendarLabels.tooltip(context, element),
         child: tap == null
             ? body
             : MouseRegion(
