@@ -6,6 +6,7 @@ import 'package:school_app_flutter/features/school_calendar/domain/entities/cale
 import 'package:school_app_flutter/features/school_calendar/domain/entities/calendar_scope_options.dart';
 import 'package:school_app_flutter/features/school_calendar/domain/entities/school_calendar.dart';
 import 'package:school_app_flutter/features/school_calendar/domain/repositories/school_calendar_repository.dart';
+import 'package:school_app_flutter/features/school_calendar/domain/services/calendar_days.dart';
 import 'package:school_app_flutter/features/school_calendar/domain/services/calendar_phase_rule.dart';
 import 'package:school_app_flutter/features/school_calendar/presentation/bloc/calendar_summary.dart';
 
@@ -90,6 +91,20 @@ class SchoolCalendarState extends Equatable {
   SchoolCalendar? get inForce {
     for (final c in library.calendars) {
       if (phaseOf(c) == CalendarPhase.inForce) return c;
+    }
+    return null;
+  }
+
+  /// Sans calendrier en vigueur, le brouillon dont l'année couvre aujourd'hui
+  /// (décision B du 2026-11-21 : une école qui arrive en cours d'année) ; il
+  /// prend le bandeau de la liste.
+  SchoolCalendar? get currentDraft {
+    if (inForce != null) return null;
+    for (final c in library.calendars) {
+      if (phaseOf(c) == CalendarPhase.draft &&
+          CalendarDays.within(today, c.startDate, c.endDate)) {
+        return c;
+      }
     }
     return null;
   }

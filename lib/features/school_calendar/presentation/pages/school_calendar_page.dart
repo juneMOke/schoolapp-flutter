@@ -163,6 +163,11 @@ class _Screen extends StatelessWidget {
             onCreate: () => unawaited(actions.create()),
             onOpen: (year) => unawaited(cubit.open(year)),
             onDuplicate: (c) => unawaited(actions.duplicate(source: c)),
+            // Un brouillon n'est servi qu'avec un droit d'écriture (K10).
+            canSeeDrafts: rights.canWrite || rights.canPublish,
+            canPublish: canCreate,
+            onPublish: (c) =>
+                unawaited(actions.publish(online: online, source: c)),
           );
         }
         final phase = state.phaseOf(calendar);

@@ -55,3 +55,66 @@ class HeroOpenButton extends StatelessWidget {
     ),
   );
 }
+
+/// « Publier » sur le bandeau d'un brouillon : pilule voilée, bord clair, à
+/// côté de « Ouvrir le calendrier ». Il ouvre la confirmation O5.
+class HeroPublishButton extends StatelessWidget {
+  final VoidCallback onPressed;
+
+  const HeroPublishButton(this.onPressed, {super.key});
+
+  @override
+  Widget build(BuildContext context) => OutlinedButton.icon(
+    onPressed: onPressed,
+    icon: const Icon(Icons.campaign_outlined),
+    label: Text(AppLocalizations.of(context)!.schoolCalendarPublish),
+    style: OutlinedButton.styleFrom(
+      backgroundColor: AppColors.calendarBannerVeil,
+      foregroundColor: AppColors.textOnDark,
+      side: const BorderSide(color: AppColors.calendarBannerVeilBorder),
+      minimumSize: const Size(0, AppDimensions.minTouchTarget),
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+      shape: const StadiumBorder(),
+      textStyle: AppTypography.labelLarge.copyWith(fontWeight: FontWeight.w600),
+    ),
+  );
+}
+
+/// L'avis d'un brouillon sur le bandeau : personne d'autre ne le voit encore.
+class HeroDraftNotice extends StatelessWidget {
+  final String message;
+
+  const HeroDraftNotice(this.message, {super.key});
+
+  @override
+  Widget build(BuildContext context) => Container(
+    padding: const EdgeInsets.symmetric(
+      horizontal: AppSpacing.md,
+      vertical: AppSpacing.sm,
+    ),
+    decoration: BoxDecoration(
+      color: AppColors.calendarBannerVeil,
+      borderRadius: AppRadius.brMd,
+      border: Border.all(color: AppColors.calendarBannerVeilBorder),
+    ),
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Icon(
+          Icons.visibility_off_outlined,
+          size: AppDimensions.detailMiniIconSize,
+          color: AppColors.calendarBannerIcon,
+        ),
+        const SizedBox(width: AppSpacing.sm),
+        Expanded(
+          child: Text(
+            message,
+            style: AppTypography.bodySmall.copyWith(
+              color: AppColors.textOnDark,
+            ),
+          ),
+        ),
+      ],
+    ),
+  );
+}

@@ -23804,6 +23804,22 @@ class AppLocalizationsFr extends AppLocalizations {
   String get schoolCalendarUpcomingSection => 'Prochains rendez-vous';
 
   @override
+  String get schoolCalendarDraftNotPublished =>
+      'Pas encore publié : les enseignants, les élèves et les parents ne le voient pas.';
+
+  @override
+  String schoolCalendarModifiedLine(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'modifié il y a $count jours',
+      one: 'modifié hier',
+      zero: 'modifié aujourd\'hui',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get schoolCalendarFutureSection => 'À venir';
 
   @override

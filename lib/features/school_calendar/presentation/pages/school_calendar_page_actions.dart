@@ -222,11 +222,12 @@ class SchoolCalendarPageActions {
   }
 
   /// O5 : un seul envoi, même sur un double appui (le dialogue se ferme).
-  Future<void> publish({required bool online}) async {
+  Future<void> publish({required bool online, SchoolCalendar? source}) async {
     final state = cubit.state;
-    final calendar = state.calendar;
+    final calendar = source ?? state.calendar;
     if (calendar == null) return;
-    final all = state.allElements;
+    final summary = state.summaryOf(calendar);
+    final all = summary.elements;
     final current = state.inForce;
     final ok = await PublishCalendarDialog.show(
       context,
@@ -241,14 +242,14 @@ class SchoolCalendarPageActions {
         year: calendar.yearLabel,
         total: all.length,
         schoolCount: all.where((e) => !e.isNational).length,
-        toVerify: state.toVerifyCount,
+        toVerify: summary.toVerifyCount,
         hasFramework: calendar.hasFramework,
         online: online,
-        pending: state.pendingCount > 0,
+        pending: summary.pendingCount > 0,
       ),
     );
     if (!context.mounted || !ok) return;
-    final result = await cubit.publish();
+    final result = await cubit.publish(source: source);
     if (!context.mounted) return;
     result.fold(
       (f) => AppSnackBar.showError(context, CalendarLabels.failure(_l10n, f)),

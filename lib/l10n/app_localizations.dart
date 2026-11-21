@@ -36304,6 +36304,18 @@ abstract class AppLocalizations {
   /// **'Coming up'**
   String get schoolCalendarUpcomingSection;
 
+  /// No description provided for @schoolCalendarDraftNotPublished.
+  ///
+  /// In en, this message translates to:
+  /// **'Not published yet: teachers, students and parents cannot see it.'**
+  String get schoolCalendarDraftNotPublished;
+
+  /// No description provided for @schoolCalendarModifiedLine.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{modified today} =1{modified yesterday} other{modified {count} days ago}}'**
+  String schoolCalendarModifiedLine(int count);
+
   /// No description provided for @schoolCalendarFutureSection.
   ///
   /// In en, this message translates to:

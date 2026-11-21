@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/components/banners/kuba_banner.dart';
-import 'package:school_app_flutter/core/components/banners/kuba_banner_tile.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
@@ -8,10 +7,12 @@ import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/features/school_calendar/domain/entities/calendar_element.dart';
 import 'package:school_app_flutter/features/school_calendar/domain/entities/calendar_enums.dart';
 import 'package:school_app_flutter/features/school_calendar/domain/entities/school_calendar.dart';
+import 'package:school_app_flutter/features/school_calendar/domain/services/calendar_days.dart';
 import 'package:school_app_flutter/features/school_calendar/domain/services/school_year_progress.dart';
 import 'package:school_app_flutter/features/school_calendar/presentation/helpers/calendar_labels.dart';
+import 'package:school_app_flutter/features/school_calendar/presentation/widgets/banner/calendar_banner_parts.dart';
 import 'package:school_app_flutter/features/school_calendar/presentation/widgets/list/current_year_hero_parts.dart';
-import 'package:school_app_flutter/features/school_calendar/presentation/widgets/list/hero_tiles_wrap.dart';
+import 'package:school_app_flutter/features/school_calendar/presentation/widgets/list/current_year_hero_tiles.dart';
 import 'package:school_app_flutter/features/school_calendar/presentation/widgets/list/year_progress_bar.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
@@ -28,6 +29,14 @@ class CurrentYearHero extends StatelessWidget {
   final PeriodRhythm? rhythm;
   final VoidCallback onOpen;
 
+  /// [CalendarPhase.inForce] ou, sans année en vigueur, [CalendarPhase.draft]
+  /// (décision B : le brouillon de l'année en cours prend le bandeau, en
+  /// terre cuite, avec l'avis « pas encore publié »).
+  final CalendarPhase phase;
+
+  /// « Publier » (brouillon, droit de publier, en ligne) ; `null` : absent.
+  final VoidCallback? onPublish;
+
   const CurrentYearHero({
     super.key,
     required this.calendar,
@@ -35,7 +44,11 @@ class CurrentYearHero extends StatelessWidget {
     required this.today,
     required this.rhythm,
     required this.onOpen,
+    this.phase = CalendarPhase.inForce,
+    this.onPublish,
   });
+
+  bool get _draft => phase == CalendarPhase.draft;
 
   static const _twoColumnsMin =
       AppDimensions.calendarHeroInfoMinWidth +
@@ -52,14 +65,18 @@ class CurrentYearHero extends StatelessWidget {
       rhythm: rhythm,
     );
     final info = _info(context, progress);
-    final tiles = progress == null ? null : _tiles(context, progress);
+    final tiles = progress == null
+        ? null
+        : CurrentYearHeroTiles(progress: progress);
     return KubaBanner(
       stripe: false,
-      colors: const [
-        AppColors.kubaBannerStart,
-        AppColors.kubaBannerMid,
-        AppColors.calendarHeroEnd,
-      ],
+      colors: _draft
+          ? calendarBannerColors(CalendarPhase.draft)
+          : const [
+              AppColors.kubaBannerStart,
+              AppColors.kubaBannerMid,
+              AppColors.calendarHeroEnd,
+            ],
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -89,7 +106,15 @@ class CurrentYearHero extends StatelessWidget {
           const SizedBox(height: AppSpacing.lg),
           Align(
             alignment: Alignment.centerRight,
-            child: HeroOpenButton(onOpen),
+            child: Wrap(
+              spacing: AppSpacing.sm,
+              runSpacing: AppSpacing.sm,
+              alignment: WrapAlignment.end,
+              children: [
+                if (onPublish case final publish?) HeroPublishButton(publish),
+                HeroOpenButton(onOpen),
+              ],
+            ),
           ),
         ],
       ),
@@ -108,9 +133,17 @@ class CurrentYearHero extends StatelessWidget {
         : role.isEmpty
         ? by!.name!
         : '${by!.name!} ($role)';
+    final updated = calendar.updatedAt;
     final dates = [
       CalendarLabels.yearRange(context, calendar.startDate, calendar.endDate),
-      if (published != null)
+      if (_draft && updated != null)
+        l10n.schoolCalendarModifiedLine(
+          CalendarDays.between(
+            CalendarDays.of(updated.toLocal()),
+            today,
+          ).clamp(0, 1 << 20),
+        )
+      else if (!_draft && published != null)
         name == null
             ? l10n.schoolCalendarPublishedLine(
                 CalendarLabels.dayWithYear(context, published),
@@ -142,7 +175,10 @@ class CurrentYearHero extends StatelessWidget {
                 color: AppColors.textOnDark,
               ),
             ),
-            HeroLivePill(CalendarLabels.phase(l10n, CalendarPhase.inForce)),
+            if (_draft)
+              const CalendarStatusPill(CalendarPhase.draft)
+            else
+              HeroLivePill(CalendarLabels.phase(l10n, CalendarPhase.inForce)),
           ],
         ),
         const SizedBox(height: AppSpacing.sm),
@@ -152,6 +188,10 @@ class CurrentYearHero extends StatelessWidget {
             color: AppColors.calendarHeroMuted,
           ),
         ),
+        if (_draft) ...[
+          const SizedBox(height: AppSpacing.sm),
+          HeroDraftNotice(l10n.schoolCalendarDraftNotPublished),
+        ],
         if (progress != null) ...[
           const SizedBox(height: AppSpacing.md + AppSpacing.xs / 2),
           YearProgressBar(
@@ -173,53 +213,5 @@ class CurrentYearHero extends StatelessWidget {
     ];
     final subs = periods.where((e) => e.subPeriodOrder != null).toList();
     return [for (final p in subs.isEmpty ? periods : subs) p.startDate];
-  }
-
-  Widget _tiles(BuildContext context, SchoolYearProgress progress) {
-    final l10n = AppLocalizations.of(context)!;
-    final period = progress.currentPeriod;
-    final now = progress.happeningNow;
-    final next = progress.nextDeadline;
-    final days = progress.daysUntilNextDeadline;
-    return HeroTilesWrap(
-      children: [
-        KubaBannerTile(
-          dense: true,
-          label: l10n.schoolCalendarPeriod,
-          values: [
-            CalendarLabels.period(l10n, period) ??
-                l10n.schoolCalendarOutOfPeriod,
-          ],
-          detail: period == null
-              ? '—'
-              : l10n.schoolCalendarUntil(
-                  CalendarLabels.shortDay(context, period.endDate),
-                ),
-        ),
-        KubaBannerTile(
-          dense: true,
-          label: l10n.schoolCalendarNow,
-          values: [
-            now.isEmpty ? l10n.schoolCalendarNormalClasses : now.first.title,
-          ],
-          detail: now.length > 1
-              ? l10n.schoolCalendarMoreOthers(now.length - 1)
-              : now.isEmpty
-              ? null
-              : CalendarLabels.dates(context, now.first),
-        ),
-        KubaBannerTile(
-          dense: true,
-          label: l10n.schoolCalendarNextDeadline,
-          values: [next?.title ?? '—'],
-          detail: next == null || days == null
-              ? null
-              : [
-                  l10n.schoolCalendarInDays(days),
-                  CalendarLabels.shortDay(context, next.startDate),
-                ].join(' · '),
-        ),
-      ],
-    );
   }
 }

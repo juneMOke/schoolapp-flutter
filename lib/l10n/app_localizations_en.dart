@@ -23640,6 +23640,22 @@ class AppLocalizationsEn extends AppLocalizations {
   String get schoolCalendarUpcomingSection => 'Coming up';
 
   @override
+  String get schoolCalendarDraftNotPublished =>
+      'Not published yet: teachers, students and parents cannot see it.';
+
+  @override
+  String schoolCalendarModifiedLine(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'modified $count days ago',
+      one: 'modified yesterday',
+      zero: 'modified today',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get schoolCalendarFutureSection => 'Upcoming';
 
   @override

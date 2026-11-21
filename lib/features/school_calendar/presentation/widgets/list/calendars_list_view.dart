@@ -31,6 +31,14 @@ class CalendarsListView extends StatefulWidget {
   final ValueChanged<String> onOpen;
   final ValueChanged<SchoolCalendar>? onDuplicate;
 
+  /// Le compte voit les brouillons (un droit d'écriture, K10) : sans lui, le
+  /// brouillon de l'année en cours ne prend pas le bandeau.
+  final bool canSeeDrafts;
+
+  /// « Publier » sur le bandeau du brouillon : droit de publier, en ligne.
+  final bool canPublish;
+  final ValueChanged<SchoolCalendar>? onPublish;
+
   const CalendarsListView({
     super.key,
     required this.state,
@@ -40,6 +48,9 @@ class CalendarsListView extends StatefulWidget {
     this.canDuplicate = false,
     this.online = true,
     this.onDuplicate,
+    this.canSeeDrafts = false,
+    this.canPublish = false,
+    this.onPublish,
   });
 
   @override
@@ -56,17 +67,21 @@ class _CalendarsListViewState extends State<CalendarsListView> {
     final l10n = AppLocalizations.of(context)!;
     final calendars = _state.library.calendars;
     final inForce = _state.inForce;
+    // Sans année en vigueur, le brouillon de l'année en cours prend le
+    // bandeau (décision B), pour qui voit les brouillons.
+    final current =
+        inForce ?? (widget.canSeeDrafts ? _state.currentDraft : null);
     bool isArchive(SchoolCalendar c) =>
         _state.phaseOf(c) == CalendarPhase.archived ||
         _state.phaseOf(c) == CalendarPhase.ended;
-    // Le calendrier en vigueur a son bandeau : il ne revient pas en carte.
+    // Le calendrier du bandeau ne revient pas en carte.
     final upcoming = [
       for (final c in calendars)
-        if (c != inForce && !isArchive(c)) c,
+        if (c != current && !isArchive(c)) c,
     ]..sort((a, b) => a.yearLabel.compareTo(b.yearLabel));
     final archived = [
       for (final c in calendars)
-        if (c != inForce && isArchive(c)) c,
+        if (c != current && isArchive(c)) c,
     ]..sort((a, b) => b.yearLabel.compareTo(a.yearLabel));
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -81,7 +96,7 @@ class _CalendarsListViewState extends State<CalendarsListView> {
         if (calendars.isEmpty)
           _empty(l10n)
         else ...[
-          if (inForce != null) ..._current(inForce),
+          if (current != null) ..._current(current),
           if (upcoming.isNotEmpty) ...[
             CalendarsSectionTitle(
               title: l10n.schoolCalendarFutureSection,
@@ -120,21 +135,28 @@ class _CalendarsListViewState extends State<CalendarsListView> {
     );
   }
 
-  List<Widget> _current(SchoolCalendar inForce) {
-    final elements = _state.summaryOf(inForce).elements;
-    void open() => widget.onOpen(inForce.yearLabel);
+  List<Widget> _current(SchoolCalendar current) {
+    final elements = _state.summaryOf(current).elements;
+    final phase = _state.phaseOf(current);
+    final publish = widget.onPublish;
+    void open() => widget.onOpen(current.yearLabel);
     return [
       CurrentYearHero(
-        calendar: inForce,
+        calendar: current,
         elements: elements,
         today: _state.today,
         rhythm: _state.effectiveRhythm,
         onOpen: open,
+        phase: phase,
+        onPublish:
+            phase == CalendarPhase.draft && widget.canPublish && publish != null
+            ? () => publish(current)
+            : null,
       ),
       const SizedBox(height: AppSpacing.lg),
       if (UpcomingAppointments.pick(elements, _state.today).isNotEmpty) ...[
         UpcomingAppointments(
-          yearLabel: inForce.yearLabel,
+          yearLabel: current.yearLabel,
           elements: elements,
           today: _state.today,
           onOpen: open,

@@ -195,10 +195,15 @@ class SchoolCalendarCubit extends Cubit<SchoolCalendarState>
     );
   }
 
-  Future<Either<Failure, SchoolCalendar>> publish() {
-    final calendar = state.calendar;
+  /// Publie le calendrier ouvert, ou [source] (le bandeau de la liste) :
+  /// depuis la liste, on y reste, et le bandeau passe « En vigueur ».
+  Future<Either<Failure, SchoolCalendar>> publish({SchoolCalendar? source}) {
+    final calendar = source ?? state.calendar;
     if (calendar == null) return Future.value(const Left(StorageFailure()));
-    return _online(() => _repository.publish(calendar));
+    return _online(
+      () => _repository.publish(calendar),
+      openAfter: source == null,
+    );
   }
 
   /// Un geste en ligne réussi rouvre la bibliothèque, puis le calendrier rendu.
@@ -206,8 +211,9 @@ class SchoolCalendarCubit extends Cubit<SchoolCalendarState>
   bool _inFlight = false;
 
   Future<Either<Failure, SchoolCalendar>> _online(
-    Future<Either<Failure, SchoolCalendar>> Function() call,
-  ) async {
+    Future<Either<Failure, SchoolCalendar>> Function() call, {
+    bool openAfter = true,
+  }) async {
     if (_inFlight) return const Left(StorageFailure());
     _inFlight = true;
     final Either<Failure, SchoolCalendar> result;
@@ -219,7 +225,7 @@ class SchoolCalendarCubit extends Cubit<SchoolCalendarState>
     final calendar = result.toOption().toNullable();
     if (calendar != null && !isClosed) {
       await load();
-      await open(calendar.yearLabel);
+      if (openAfter) await open(calendar.yearLabel);
     }
     return result;
   }
