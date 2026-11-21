@@ -78,6 +78,8 @@ class ClassTimetableContent extends StatelessWidget {
             cubit: cubit,
             online: online,
             busy: state.busy,
+            mode: state.mode,
+            day: state.day,
           ),
         ],
       );

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/components/buttons/primary_button.dart';
 import 'package:school_app_flutter/core/components/buttons/secondary_button.dart';
+import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
+import 'package:school_app_flutter/core/device/desktop_platform.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/features/school_calendar/domain/entities/calendar_element.dart';
@@ -31,72 +33,154 @@ class CalendarActions {
   });
 }
 
+/// L'aide et les gestes d'un calendrier. L'aide suit le geste réel : au
+/// doigt « Touchez », à la souris « Cliquez » ; en [compact], toucher un jour
+/// le sélectionne (I7). En [compact], Imprimer, Document du ministère et
+/// Dupliquer passent dans un menu « ⋯ » ; « Ajouter » devient le bouton
+/// flottant de la page sous [addAsFab].
 class CalendarActionsRow extends StatelessWidget {
   final CalendarPhase phase;
   final bool canWrite;
   final CalendarActions actions;
+  final bool compact;
 
   const CalendarActionsRow({
     super.key,
     required this.phase,
     required this.canWrite,
     required this.actions,
+    this.compact = false,
   });
+
+  /// Fenêtre de téléphone : « Ajouter » est le bouton flottant de la page.
+  static bool addAsFab(BuildContext context) =>
+      MediaQuery.sizeOf(context).width < AppBreakpoints.fabExtendedMinWidth;
+
+  String _help(AppLocalizations l10n) {
+    if (phase.isReadOnly) return l10n.schoolCalendarHelpArchived;
+    final pointer = expectsPhysicalKeyboard;
+    if (!canWrite) {
+      return pointer
+          ? l10n.schoolCalendarHelpRead
+          : l10n.schoolCalendarHelpReadTouch;
+    }
+    if (compact) return l10n.schoolCalendarHelpTouch;
+    return pointer
+        ? l10n.schoolCalendarHelpDesktop
+        : l10n.schoolCalendarHelpTouchWide;
+  }
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final help = phase.isReadOnly
-        ? l10n.schoolCalendarHelpArchived
-        : canWrite
-        ? l10n.schoolCalendarHelpDesktop
-        : l10n.schoolCalendarHelpRead;
-    final print = actions.print;
-    final duplicate = actions.duplicate;
-    final publish = actions.publish;
-    final document = actions.officialDocument;
+    final help = Text(_help(l10n), style: AppTypography.bodySmall);
+    final publish = phase == CalendarPhase.draft ? actions.publish : null;
+    final add = canWrite && !addAsFab(context)
+        ? () => actions.addOn(null)
+        : null;
+    final secondary = <_Secondary>[
+      if (actions.print case final print?)
+        _Secondary(l10n.schoolCalendarPrint, Icons.print_outlined, print),
+      if (actions.officialDocument case final document?)
+        _Secondary(
+          l10n.schoolCalendarOfficialDocument,
+          Icons.description_outlined,
+          document,
+        ),
+      if (actions.duplicate case final duplicate?)
+        _Secondary(
+          l10n.schoolCalendarDuplicate,
+          Icons.copy_all_outlined,
+          duplicate,
+        ),
+    ];
+    final addButton = add == null
+        ? null
+        : SecondaryButton(
+            label: l10n.schoolCalendarAdd,
+            icon: Icons.add_rounded,
+            fullWidth: false,
+            onPressed: add,
+          );
+    final publishButton = publish == null
+        ? null
+        : PrimaryButton(
+            label: l10n.schoolCalendarPublish,
+            icon: Icons.publish_outlined,
+            fullWidth: false,
+            onPressed: publish,
+          );
+    if (compact) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              Expanded(child: help),
+              if (secondary.isNotEmpty) _MoreMenu(items: secondary),
+            ],
+          ),
+          if (addButton != null || publishButton != null) ...[
+            const SizedBox(height: AppSpacing.sm),
+            Wrap(
+              spacing: AppSpacing.sm,
+              runSpacing: AppSpacing.sm,
+              children: [?addButton, ?publishButton],
+            ),
+          ],
+        ],
+      );
+    }
     return Wrap(
       spacing: AppSpacing.sm,
       runSpacing: AppSpacing.sm,
       crossAxisAlignment: WrapCrossAlignment.center,
       children: [
-        Text(help, style: AppTypography.bodySmall),
-        if (print != null)
+        help,
+        for (final item in secondary)
           SecondaryButton(
-            label: l10n.schoolCalendarPrint,
-            icon: Icons.print_outlined,
+            label: item.label,
+            icon: item.icon,
             fullWidth: false,
-            onPressed: print,
+            onPressed: item.onPressed,
           ),
-        if (document != null)
-          SecondaryButton(
-            label: l10n.schoolCalendarOfficialDocument,
-            icon: Icons.description_outlined,
-            fullWidth: false,
-            onPressed: document,
-          ),
-        if (duplicate != null)
-          SecondaryButton(
-            label: l10n.schoolCalendarDuplicate,
-            icon: Icons.copy_all_outlined,
-            fullWidth: false,
-            onPressed: duplicate,
-          ),
-        if (canWrite)
-          SecondaryButton(
-            label: l10n.schoolCalendarAdd,
-            icon: Icons.add_rounded,
-            fullWidth: false,
-            onPressed: () => actions.addOn(null),
-          ),
-        if (phase == CalendarPhase.draft && publish != null)
-          PrimaryButton(
-            label: l10n.schoolCalendarPublish,
-            icon: Icons.publish_outlined,
-            fullWidth: false,
-            onPressed: publish,
-          ),
+        ?addButton,
+        ?publishButton,
       ],
     );
   }
+}
+
+class _Secondary {
+  final String label;
+  final IconData icon;
+  final VoidCallback onPressed;
+
+  const _Secondary(this.label, this.icon, this.onPressed);
+}
+
+class _MoreMenu extends StatelessWidget {
+  final List<_Secondary> items;
+
+  const _MoreMenu({required this.items});
+
+  @override
+  Widget build(BuildContext context) => PopupMenuButton<_Secondary>(
+    tooltip: AppLocalizations.of(context)!.schoolCalendarMoreActions,
+    icon: const Icon(Icons.more_horiz),
+    onSelected: (item) => item.onPressed(),
+    itemBuilder: (_) => [
+      for (final item in items)
+        PopupMenuItem(
+          value: item,
+          child: Row(
+            children: [
+              Icon(item.icon),
+              const SizedBox(width: AppSpacing.md),
+              Flexible(child: Text(item.label)),
+            ],
+          ),
+        ),
+    ],
+  );
 }

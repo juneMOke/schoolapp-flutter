@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/components/cards/eteelo_panel_card.dart';
 import 'package:school_app_flutter/core/components/status/eteelo_notice.dart';
+import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_empty_result.dart';
 import 'package:school_app_flutter/features/school_calendar/domain/entities/calendar_enums.dart';
@@ -44,61 +45,82 @@ class CalendarDetailView extends StatelessWidget {
     final all = state.allElements;
     final canWrite = rights.canWrite && !phase.isReadOnly;
     final verify = state.toVerifyCount;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Align(
-          alignment: Alignment.centerLeft,
-          child: TextButton.icon(
-            onPressed: actions.back,
-            icon: const Icon(Icons.arrow_back),
-            label: Text(l10n.schoolCalendarAll),
-          ),
-        ),
-        const SizedBox(height: AppSpacing.sm),
-        CalendarYearBanner(
-          calendar: calendar,
-          phase: phase,
-          elements: all,
-          today: state.today,
-          rhythm: state.effectiveRhythm,
-          eyebrow: l10n.schoolCalendarEyebrow,
-          nationalCount: all.where((e) => e.isNational).length,
-          schoolCount: all.where((e) => !e.isNational).length,
-        ),
-        const SizedBox(height: AppSpacing.md),
-        if (!online) EteeloNotice.warning(l10n.schoolCalendarOffline),
-        CalendarActionsRow(phase: phase, canWrite: canWrite, actions: actions),
-        if (verify > 0 && !state.verifyOnly) ...[
-          const SizedBox(height: AppSpacing.sm),
-          EteeloNotice.warning(l10n.schoolCalendarVerifyNotice(verify)),
-          Align(
-            alignment: Alignment.centerLeft,
-            child: TextButton(
-              onPressed: () => cubit.setVerifyOnly(true),
-              child: Text(l10n.schoolCalendarReview),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final compact =
+            constraints.maxWidth < AppBreakpoints.calendarMonthCompactMax;
+        final lowWindow =
+            MediaQuery.sizeOf(context).height <
+            AppBreakpoints.calendarBannerCompactMaxHeight;
+        final compactBanner = compact || lowWindow;
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Align(
+              alignment: Alignment.centerLeft,
+              child: TextButton.icon(
+                onPressed: actions.back,
+                icon: const Icon(Icons.arrow_back),
+                label: Text(l10n.schoolCalendarAll),
+              ),
             ),
-          ),
-        ],
-        if (state.verifyOnly)
-          Align(
-            alignment: Alignment.centerLeft,
-            child: TextButton(
-              onPressed: () => cubit.setVerifyOnly(false),
-              child: Text(l10n.schoolCalendarShowAll),
+            const SizedBox(height: AppSpacing.sm),
+            CalendarYearBanner(
+              calendar: calendar,
+              phase: phase,
+              elements: all,
+              today: state.today,
+              rhythm: state.effectiveRhythm,
+              eyebrow: l10n.schoolCalendarEyebrow,
+              nationalCount: all.where((e) => e.isNational).length,
+              schoolCount: all.where((e) => !e.isNational).length,
+              compact: compactBanner,
             ),
-          ),
-        const SizedBox(height: AppSpacing.md),
-        CalendarToolbar(state: state, cubit: cubit),
-        const SizedBox(height: AppSpacing.sm),
-        CalendarLegend(
-          elements: all,
-          hidden: state.hiddenNatures,
-          onToggle: cubit.toggleNature,
-        ),
-        const SizedBox(height: AppSpacing.md),
-        _Body(state: state, cubit: cubit, canWrite: canWrite, actions: actions),
-      ],
+            const SizedBox(height: AppSpacing.md),
+            if (!online) EteeloNotice.warning(l10n.schoolCalendarOffline),
+            CalendarActionsRow(
+              phase: phase,
+              canWrite: canWrite,
+              actions: actions,
+              compact: compact,
+            ),
+            if (verify > 0 && !state.verifyOnly) ...[
+              const SizedBox(height: AppSpacing.sm),
+              EteeloNotice.warning(l10n.schoolCalendarVerifyNotice(verify)),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: TextButton(
+                  onPressed: () => cubit.setVerifyOnly(true),
+                  child: Text(l10n.schoolCalendarReview),
+                ),
+              ),
+            ],
+            if (state.verifyOnly)
+              Align(
+                alignment: Alignment.centerLeft,
+                child: TextButton(
+                  onPressed: () => cubit.setVerifyOnly(false),
+                  child: Text(l10n.schoolCalendarShowAll),
+                ),
+              ),
+            const SizedBox(height: AppSpacing.md),
+            CalendarToolbar(state: state, cubit: cubit, compact: compact),
+            const SizedBox(height: AppSpacing.sm),
+            CalendarLegend(
+              elements: all,
+              hidden: state.hiddenNatures,
+              onToggle: cubit.toggleNature,
+            ),
+            const SizedBox(height: AppSpacing.md),
+            _Body(
+              state: state,
+              cubit: cubit,
+              canWrite: canWrite,
+              actions: actions,
+            ),
+          ],
+        );
+      },
     );
   }
 }

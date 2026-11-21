@@ -278,6 +278,7 @@ class _EteeloSelectInputState<T> extends State<EteeloSelectInput<T>> {
           density: widget.density,
           placeholderTone: widget.placeholderTone,
           onTap: _interactive ? () => _openPanel(state) : null,
+          showChevron: !widget.readOnly,
         ),
       ),
     );

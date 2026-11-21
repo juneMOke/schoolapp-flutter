@@ -112,7 +112,7 @@ class ScheduleWeekGrid extends StatelessWidget {
                     l10n: l10n,
                   ),
                   for (final (index, row) in rows.indexed)
-                    _isBreak(row)
+                    isBreakRow(row)
                         ? _BreakBand(row: row, l10n: l10n)
                         : _SlotRow(
                             row: row,
@@ -128,7 +128,7 @@ class ScheduleWeekGrid extends StatelessWidget {
                             marks: marks,
                             drag: drag,
                             firstRow:
-                                index == rows.indexWhere((r) => !_isBreak(r)),
+                                index == rows.indexWhere((r) => !isBreakRow(r)),
                           ),
                 ],
               ),
@@ -153,7 +153,7 @@ class ScheduleWeekGrid extends StatelessWidget {
   /// **toute** la semaine (propriété structurelle des données, indépendante des
   /// colonnes affichées — donc évaluée sur `row.cells`, pas sur les jours
   /// visibles).
-  static bool _isBreak(TimetableRow row) {
+  static bool isBreakRow(TimetableRow row) {
     if (row.timeSlot.isBreak) return true;
     final label = row.timeSlot.label?.trim();
     if (label == null || label.isEmpty) {

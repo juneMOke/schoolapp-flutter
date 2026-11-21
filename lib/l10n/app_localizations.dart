@@ -36430,6 +36430,30 @@ abstract class AppLocalizations {
   /// **'Archived calendar: read only.'**
   String get schoolCalendarHelpArchived;
 
+  /// No description provided for @schoolCalendarHelpTouchWide.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap a free day to add an event there, or an element for its details.'**
+  String get schoolCalendarHelpTouchWide;
+
+  /// No description provided for @schoolCalendarHelpReadTouch.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap an element to see its details.'**
+  String get schoolCalendarHelpReadTouch;
+
+  /// No description provided for @schoolCalendarMoreActions.
+  ///
+  /// In en, this message translates to:
+  /// **'More actions'**
+  String get schoolCalendarMoreActions;
+
+  /// No description provided for @schoolCalendarFilters.
+  ///
+  /// In en, this message translates to:
+  /// **'Filters'**
+  String get schoolCalendarFilters;
+
   /// No description provided for @schoolCalendarVerifyNotice.
   ///
   /// In en, this message translates to:
@@ -37354,6 +37378,18 @@ abstract class AppLocalizations {
   /// **'Tap a slot in the grid to place a course.'**
   String get classTimetableHelpDraft;
 
+  /// No description provided for @classTimetableHelpDraftDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap a slot of the day to place a course there.'**
+  String get classTimetableHelpDraftDay;
+
+  /// No description provided for @classTimetableFreeSlot.
+  ///
+  /// In en, this message translates to:
+  /// **'Free slot'**
+  String get classTimetableFreeSlot;
+
   /// No description provided for @classTimetableReserveTitle.
   ///
   /// In en, this message translates to:
@@ -37893,6 +37929,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Hover over a course to find it in the grid'**
   String get classTimetableHoverHint;
+
+  /// No description provided for @classTimetableTapHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap a course to find it in the grid'**
+  String get classTimetableTapHint;
+
+  /// No description provided for @classTimetableChangeClass.
+  ///
+  /// In en, this message translates to:
+  /// **'Change class'**
+  String get classTimetableChangeClass;
 
   /// No description provided for @classTimetableAllDomains.
   ///

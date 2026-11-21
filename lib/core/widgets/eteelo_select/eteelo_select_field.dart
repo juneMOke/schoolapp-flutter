@@ -28,6 +28,9 @@ class EteeloSelectField extends StatelessWidget {
   final EteeloSelectPlaceholderTone placeholderTone;
   final VoidCallback? onTap;
 
+  /// Lecture seule : pas de chevron, qui promettrait un choix.
+  final bool showChevron;
+
   const EteeloSelectField({
     super.key,
     required this.selectedLabel,
@@ -40,6 +43,7 @@ class EteeloSelectField extends StatelessWidget {
     required this.placeholderTone,
     required this.onTap,
     this.selectedContent,
+    this.showChevron = true,
   });
 
   bool get _isCompact => density == EteeloSelectDensity.compact;
@@ -134,20 +138,24 @@ class EteeloSelectField extends StatelessWidget {
                               ),
                     ),
               ),
-              SizedBox(width: _isCompact ? AppSpacing.xs : AppSpacing.sm),
-              // Le chevron se retourne quand le panneau est ouvert : le champ
-              // dit son propre état, même quand le panneau s'affiche ailleurs
-              // (feuille modale en bas d'écran).
-              AnimatedRotation(
-                turns: isOpen ? 0.5 : 0,
-                duration: AppMotion.fast,
-                curve: AppMotion.outCurve,
-                child: Icon(
-                  Icons.keyboard_arrow_down_rounded,
-                  size: EteeloSelectConstants.chevronSize,
-                  color: dimmed ? AppColors.stateDisabled : AppColors.textMuted,
+              if (showChevron) ...[
+                SizedBox(width: _isCompact ? AppSpacing.xs : AppSpacing.sm),
+                // Le chevron se retourne quand le panneau est ouvert : le champ
+                // dit son propre état, même quand le panneau s'affiche ailleurs
+                // (feuille modale en bas d'écran).
+                AnimatedRotation(
+                  turns: isOpen ? 0.5 : 0,
+                  duration: AppMotion.fast,
+                  curve: AppMotion.outCurve,
+                  child: Icon(
+                    Icons.keyboard_arrow_down_rounded,
+                    size: EteeloSelectConstants.chevronSize,
+                    color: dimmed
+                        ? AppColors.stateDisabled
+                        : AppColors.textMuted,
+                  ),
                 ),
-              ),
+              ],
             ],
           ),
         ),

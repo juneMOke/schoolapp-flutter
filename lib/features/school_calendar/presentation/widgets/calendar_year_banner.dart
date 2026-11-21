@@ -15,6 +15,10 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 /// Le bandeau d'une année (spec Calendrier §4.6 B) : titre, statut, dates,
 /// cadre, l'avancement « Semaine n / N », puis Période, En ce moment et
 /// Prochaine échéance (CAL-R14). Hors de l'année, ni avancement ni tuiles.
+///
+/// [compact] (téléphone, ou fenêtre basse) : ni ligne du cadre ni tuiles ;
+/// sous l'avancement, la seule prochaine échéance, sur une ligne. Le bandeau
+/// complet repoussait le calendrier à plus d'un écran plus bas.
 class CalendarYearBanner extends StatelessWidget {
   final SchoolCalendar calendar;
   final CalendarPhase phase;
@@ -25,6 +29,7 @@ class CalendarYearBanner extends StatelessWidget {
   final int nationalCount;
   final int schoolCount;
   final Widget? trailing;
+  final bool compact;
 
   const CalendarYearBanner({
     super.key,
@@ -37,6 +42,7 @@ class CalendarYearBanner extends StatelessWidget {
     required this.nationalCount,
     required this.schoolCount,
     this.trailing,
+    this.compact = false,
   });
 
   @override
@@ -82,15 +88,16 @@ class CalendarYearBanner extends StatelessWidget {
             CalendarLabels.range(context, calendar.startDate, calendar.endDate),
             style: onDark,
           ),
-          Text(
-            [
-              calendar.hasFramework
-                  ? l10n.schoolCalendarFrameworkIntegrated
-                  : l10n.schoolCalendarFrameworkAwaited,
-              l10n.schoolCalendarCounts(nationalCount, schoolCount),
-            ].join(' · '),
-            style: onDark,
-          ),
+          if (!compact)
+            Text(
+              [
+                calendar.hasFramework
+                    ? l10n.schoolCalendarFrameworkIntegrated
+                    : l10n.schoolCalendarFrameworkAwaited,
+                l10n.schoolCalendarCounts(nationalCount, schoolCount),
+              ].join(' · '),
+              style: onDark,
+            ),
           if (progress != null) ...[
             const SizedBox(height: AppSpacing.md),
             Text(
@@ -109,38 +116,42 @@ class CalendarYearBanner extends StatelessWidget {
                 backgroundColor: AppColors.kubaBannerOn.withValues(alpha: 0.2),
               ),
             ),
-            const SizedBox(height: AppSpacing.md),
-            Wrap(
-              spacing: AppSpacing.md,
-              runSpacing: AppSpacing.sm,
-              children: [
-                KubaBannerTile(
-                  label: l10n.schoolCalendarPeriod,
-                  values: [
-                    CalendarLabels.period(l10n, progress.currentPeriod) ??
-                        l10n.schoolCalendarOutOfPeriod,
-                  ],
-                ),
-                KubaBannerTile(
-                  label: l10n.schoolCalendarNow,
-                  values: [
-                    if (progress.happeningNow.isEmpty)
-                      l10n.schoolCalendarNormalClasses
-                    else
-                      for (final e in progress.happeningNow.take(2)) e.title,
-                  ],
-                ),
-                KubaBannerTile(
-                  label: l10n.schoolCalendarNextDeadline,
-                  values: [progress.nextDeadline?.title ?? '—'],
-                  detail: progress.daysUntilNextDeadline == null
-                      ? null
-                      : l10n.schoolCalendarInDays(
-                          progress.daysUntilNextDeadline!,
-                        ),
-                ),
-              ],
-            ),
+            if (compact)
+              _NextDeadlineLine(progress: progress)
+            else ...[
+              const SizedBox(height: AppSpacing.md),
+              Wrap(
+                spacing: AppSpacing.md,
+                runSpacing: AppSpacing.sm,
+                children: [
+                  KubaBannerTile(
+                    label: l10n.schoolCalendarPeriod,
+                    values: [
+                      CalendarLabels.period(l10n, progress.currentPeriod) ??
+                          l10n.schoolCalendarOutOfPeriod,
+                    ],
+                  ),
+                  KubaBannerTile(
+                    label: l10n.schoolCalendarNow,
+                    values: [
+                      if (progress.happeningNow.isEmpty)
+                        l10n.schoolCalendarNormalClasses
+                      else
+                        for (final e in progress.happeningNow.take(2)) e.title,
+                    ],
+                  ),
+                  KubaBannerTile(
+                    label: l10n.schoolCalendarNextDeadline,
+                    values: [progress.nextDeadline?.title ?? '—'],
+                    detail: progress.daysUntilNextDeadline == null
+                        ? null
+                        : l10n.schoolCalendarInDays(
+                            progress.daysUntilNextDeadline!,
+                          ),
+                  ),
+                ],
+              ),
+            ],
           ],
           if (trailing != null) ...[
             const SizedBox(height: AppSpacing.md),
@@ -172,4 +183,33 @@ class _Pill extends StatelessWidget {
       style: AppTypography.labelSmall.copyWith(color: AppColors.kubaBannerOn),
     ),
   );
+}
+
+/// En compact, la prochaine échéance seule : « Prochaine échéance · Titre ·
+/// dans n jours ».
+class _NextDeadlineLine extends StatelessWidget {
+  final SchoolYearProgress progress;
+
+  const _NextDeadlineLine({required this.progress});
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final next = progress.nextDeadline;
+    final days = progress.daysUntilNextDeadline;
+    if (next == null) return const SizedBox.shrink();
+    return Padding(
+      padding: const EdgeInsets.only(top: AppSpacing.sm),
+      child: Text(
+        [
+          l10n.schoolCalendarNextDeadline,
+          next.title,
+          if (days != null) l10n.schoolCalendarInDays(days),
+        ].join(' · '),
+        maxLines: 2,
+        overflow: TextOverflow.ellipsis,
+        style: AppTypography.bodySmall.copyWith(color: AppColors.textOnDark),
+      ),
+    );
+  }
 }
