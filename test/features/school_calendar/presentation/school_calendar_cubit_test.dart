@@ -91,4 +91,25 @@ void main() {
     expect(result.isRight(), isTrue);
     expect(cubit.state.openYear, '2027-2028');
   });
+
+  test(
+    'la liste compte chaque calendrier sans l’ouvrir, au rythme effectif',
+    () {
+      final state = cubit.state;
+      final current = state.summaryOf(state.inForce!);
+      // Le cadre porte un jeu de périodes par rythme : un seul est compté.
+      expect(current.nationalCount, 2);
+      expect(current.schoolCount, 1);
+      expect(current.toVerifyCount, 1);
+      expect(current.countOf(CalendarNature.schoolLife), 1);
+      final draft = state.summaryOf(state.library.calendars[1]);
+      expect(draft.elements, isEmpty);
+    },
+  );
+
+  test('fermer un calendrier garde les comptes de la liste', () async {
+    await cubit.open('2025-2026');
+    cubit.closeCalendar();
+    expect(cubit.state.summaryOf(cubit.state.inForce!).schoolCount, 1);
+  });
 }

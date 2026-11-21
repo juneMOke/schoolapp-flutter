@@ -1,3 +1,4 @@
+import 'package:school_app_flutter/features/school_calendar/domain/entities/school_calendar.dart';
 import 'package:school_app_flutter/features/school_calendar/presentation/widgets/overlays/publish_calendar_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/components/dialogs/eteelo_adaptive_sheet.dart';
@@ -164,31 +165,35 @@ class SchoolCalendarPageActions {
     );
   }
 
-  /// O3 : vers l'année suivante.
-  Future<void> duplicate() async {
+  /// O3 : vers l'année suivante — du calendrier ouvert, ou de la carte
+  /// [source] de la liste (menu « ⋮ »).
+  Future<void> duplicate({SchoolCalendar? source}) async {
     final state = cubit.state;
-    final calendar = state.calendar;
+    final calendar = source ?? state.calendar;
     final target = calendar?.nextYearLabel;
     if (calendar == null || target == null) return;
+    final events = source == null
+        ? state.events
+        : (state.libraryEvents[source.id] ?? const []);
     final natures = await EteeloFormDialog.show<List<CalendarNature>>(
       context,
       DuplicateCalendarDialog(
         sourceYear: calendar.yearLabel,
         targetYear: target,
-        eventCount: state.events
+        eventCount: events
             .where(
               (r) => DuplicateCalendarDialog.eventNatures.contains(
                 r.element.nature,
               ),
             )
             .length,
-        windowCount: state.events
+        windowCount: events
             .where((r) => r.element.nature == CalendarNature.assessment)
             .length,
       ),
     );
     if (!context.mounted || natures == null || natures.isEmpty) return;
-    final result = await cubit.duplicate(natures);
+    final result = await cubit.duplicate(natures, source: source);
     if (!context.mounted) return;
     result.fold(
       (f) => AppSnackBar.showError(context, CalendarLabels.failure(_l10n, f)),
