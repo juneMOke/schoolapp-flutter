@@ -8,6 +8,7 @@ import 'package:school_app_flutter/core/components/documents/printable_document.
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
@@ -40,6 +41,8 @@ Future<void> showEteeloDocumentViewer(
   BuildContext context, {
   required String title,
   required PrintableDocument document,
+  String? eyebrow,
+  String? description,
   Future<void> Function()? onPrint,
   bool canShare = true,
   bool canPrint = true,
@@ -56,6 +59,8 @@ Future<void> showEteeloDocumentViewer(
     builder: (_) => EteeloDocumentViewerView(
       title: title,
       document: document,
+      eyebrow: eyebrow,
+      description: description,
       onPrint: onPrint,
       canShare: canShare,
       canPrint: canPrint,
@@ -74,6 +79,11 @@ class EteeloDocumentViewerView extends StatelessWidget {
   final String title;
 
   final PrintableDocument document;
+
+  /// Un sur-titre au-dessus de [title] (« Calendrier 2025-2026 · version
+  /// publiée »), et une phrase sur le contenu sous l'en-tête. `null` : rien.
+  final String? eyebrow;
+  final String? description;
 
   /// Le geste d'impression. `null` ⇒ remise au spouleur système.
   final Future<void> Function()? onPrint;
@@ -120,6 +130,8 @@ class EteeloDocumentViewerView extends StatelessWidget {
     super.key,
     required this.title,
     required this.document,
+    this.eyebrow,
+    this.description,
     this.onPrint,
     this.canShare = true,
     this.canPrint = true,
@@ -235,9 +247,25 @@ class EteeloDocumentViewerView extends StatelessWidget {
           children: [
             DocumentViewerHeader(
               title: title,
+              eyebrow: eyebrow,
               subtitle: document.reference,
               onClose: () => _close(context),
             ),
+            if (description case final text?)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(
+                  AppDimensions.spacingM,
+                  0,
+                  AppDimensions.spacingM,
+                  AppDimensions.spacingM,
+                ),
+                child: Text(
+                  text,
+                  style: AppTextStyles.caption.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+              ),
             const Divider(height: 1, color: AppColors.border),
             Flexible(
               child: preview == null
@@ -274,12 +302,14 @@ class EteeloDocumentViewerView extends StatelessWidget {
 /// Ce qu'on regarde, et sous quelle référence.
 class DocumentViewerHeader extends StatelessWidget {
   final String title;
+  final String? eyebrow;
   final String? subtitle;
   final VoidCallback onClose;
 
   const DocumentViewerHeader({
     super.key,
     required this.title,
+    this.eyebrow,
     this.subtitle,
     required this.onClose,
   });
@@ -297,6 +327,17 @@ class DocumentViewerHeader extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
+                if (eyebrow case final over?) ...[
+                  Text(
+                    over.toUpperCase(),
+                    style: AppTypography.labelSmall.copyWith(
+                      color: AppColors.terreCuite,
+                      letterSpacing: 1.2,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: AppDimensions.spacingXS),
+                ],
                 Text(
                   title,
                   style: AppTextStyles.bodyStrong.copyWith(

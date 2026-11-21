@@ -95,6 +95,21 @@ class AppDimensions {
   // Sans plafond, `AlertDialog` (largeur intrinsèque) étale un long message
   // sur une seule ligne de ~1000 dp sur desktop.
   static const confirmationDialogMaxWidth = 480.0;
+
+  /// Sur-couches du calendrier scolaire (maquette CalItemModal / CalEditModal).
+  static const calendarDetailMaxWidth = 480.0;
+  static const calendarFormMaxWidth = 560.0;
+
+  /// Le liseré de la nature, à gauche de la carte de dates du détail.
+  static const calendarDetailAccentWidth = 3.0;
+
+  /// La poignée d'une feuille du bas posée sur un en-tête sombre.
+  static const sheetHandleWidth = 40.0;
+  static const sheetHandleHeight = 4.0;
+
+  /// Le médaillon rond qui porte l'icône d'une puce de choix.
+  static const chipIconMedallionSize = 26.0;
+  static const chipIconMedallionIconSize = 13.0;
   // Formulaire de paramétrage (tarif) : deux selects et un montant.
   static const settingsFormDialogMaxWidth = 560.0;
   // Largeurs de modales jusque-là écrites en littéral dans leur fichier.
