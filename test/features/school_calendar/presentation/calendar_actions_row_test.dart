@@ -69,9 +69,7 @@ void main() {
     phone(tester);
     var printed = 0;
     await tester.pumpWidget(
-      _app(
-        _row(compact: true, print: () => printed++, duplicate: () {}),
-      ),
+      _app(_row(compact: true, print: () => printed++, duplicate: () {})),
     );
     expect(find.text('Imprimer'), findsNothing);
     expect(find.text('Ajouter'), findsNothing);

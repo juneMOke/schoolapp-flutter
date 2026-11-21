@@ -65,7 +65,9 @@ Widget _host(Widget child, {double width = 328}) => MaterialApp(
   supportedLocales: AppLocalizations.supportedLocales,
   home: Scaffold(
     body: SingleChildScrollView(
-      child: Center(child: SizedBox(width: width, child: child)),
+      child: Center(
+        child: SizedBox(width: width, child: child),
+      ),
     ),
   ),
 );
