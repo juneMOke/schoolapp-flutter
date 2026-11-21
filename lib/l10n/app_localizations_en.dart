@@ -23827,6 +23827,104 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String schoolCalendarDetailInDays(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'In $count days',
+      one: 'Tomorrow',
+      zero: 'Today',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String schoolCalendarFormEyebrow(String year) {
+    return 'Calendar $year';
+  }
+
+  @override
+  String get schoolCalendarFormNoteLabel => 'Note';
+
+  @override
+  String get schoolCalendarFormOptional => '(optional)';
+
+  @override
+  String schoolCalendarFormTitleHint(String nature) {
+    String _temp0 = intl.Intl.selectLogic(nature, {
+      'ASSESSMENT': 'P2 tests',
+      'EXAM': 'Mock exams',
+      'other': 'Parents\' meeting',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String get schoolCalendarNewEyebrow => 'School calendar';
+
+  @override
+  String schoolCalendarPrintEyebrow(String year) {
+    return 'Calendar $year · published version';
+  }
+
+  @override
+  String get schoolCalendarPrintIntro =>
+      'One landscape A4 page: the eleven months of the year, the legend of the kinds and the key dates.';
+
+  @override
+  String schoolCalendarPublishFramework(String state) {
+    String _temp0 = intl.Intl.selectLogic(state, {
+      'yes': 'national framework included',
+      'other': 'no national framework',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String get schoolCalendarPublishAudience =>
+      'Teachers, students and parents will see this calendar.';
+
+  @override
+  String schoolCalendarPublishRelay(
+    String current,
+    String end,
+    String year,
+    String start,
+  ) {
+    return '$current stays in force until $end; $year takes over on $start.';
+  }
+
+  @override
+  String get schoolCalendarPublishReference =>
+      'Its periods, tests and exams become the reference for assessments, report cards and the timetable.';
+
+  @override
+  String get schoolCalendarDuplicateShift =>
+      'Dates move 52 weeks: a Friday event stays on a Friday. Each carried-over element is marked to check.';
+
+  @override
+  String schoolCalendarDuplicateFramework(String state, String year) {
+    String _temp0 = intl.Intl.selectLogic(state, {
+      'integrated':
+          'The $year national framework is not copied: the official version published by ETEELO is included.',
+      'awaited':
+          'The $year national framework is not published yet. It will be added automatically once published.',
+      'other':
+          'The $year national framework is not copied: the official version is included once published.',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String schoolCalendarDuplicateDraft(String state, String year) {
+    String _temp0 = intl.Intl.selectLogic(state, {
+      'inForce': 'The result is a draft: $year stays in force.',
+      'other': 'The result is a draft: $year is not changed.',
+    });
+    return '$_temp0';
+  }
+
+  @override
   String get schoolCalendarToVerify => 'To check';
 
   @override
@@ -24175,11 +24273,6 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String schoolCalendarDuplicateRule(String year) {
-    return 'Dates move 52 weeks: a Friday event stays on a Friday. Each carried-over element is marked to check. The new year\'s national framework is not copied: the official version is included once published. The result is a draft: $year stays in force.';
-  }
-
-  @override
   String get schoolCalendarNewYear => 'School year';
 
   @override
@@ -24235,10 +24328,6 @@ class AppLocalizationsEn extends AppLocalizations {
     );
     return '$_temp0';
   }
-
-  @override
-  String get schoolCalendarPublishConsequence =>
-      'The whole school will see this calendar. Its periods, tests and exams become the reference for assessments, report cards and the timetable.';
 
   @override
   String get accueilModuleAgendaDescription =>

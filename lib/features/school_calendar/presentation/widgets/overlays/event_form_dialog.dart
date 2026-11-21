@@ -1,16 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:school_app_flutter/core/components/buttons/primary_button.dart';
-import 'package:school_app_flutter/core/components/buttons/secondary_button.dart';
-import 'package:school_app_flutter/core/components/dialogs/eteelo_form_dialog.dart';
+import 'package:school_app_flutter/core/components/dialogs/eteelo_adaptive_dialog.dart';
+import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/widgets/app_confirmation_dialog.dart';
+import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_text_input.dart';
 import 'package:school_app_flutter/features/school_calendar/domain/entities/calendar_element.dart';
 import 'package:school_app_flutter/features/school_calendar/domain/entities/calendar_enums.dart';
 import 'package:school_app_flutter/features/school_calendar/domain/entities/calendar_scope.dart';
 import 'package:school_app_flutter/features/school_calendar/domain/entities/calendar_scope_options.dart';
 import 'package:school_app_flutter/features/school_calendar/domain/services/calendar_event_validation.dart';
+import 'package:school_app_flutter/features/school_calendar/presentation/widgets/overlays/calendar_overlay_frame.dart';
+import 'package:school_app_flutter/features/school_calendar/presentation/widgets/overlays/event_form_dates.dart';
 import 'package:school_app_flutter/features/school_calendar/presentation/widgets/overlays/event_form_parts.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
@@ -23,6 +24,9 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 /// seuls l'intitulé, les dates et la note changent.
 class EventFormDialog extends StatefulWidget {
   final String newId;
+
+  /// L'année du calendrier, en sur-titre (« Calendrier 2025-2026 »).
+  final String yearLabel;
   final CalendarElement? initial;
   final DateTime? initialDay;
   final Set<CalendarNature> natures;
@@ -37,6 +41,7 @@ class EventFormDialog extends StatefulWidget {
   const EventFormDialog({
     super.key,
     required this.newId,
+    required this.yearLabel,
     required this.natures,
     required this.scopes,
     required this.yearStart,
@@ -50,7 +55,10 @@ class EventFormDialog extends StatefulWidget {
   static Future<CalendarElement?> show(
     BuildContext context,
     EventFormDialog dialog,
-  ) => EteeloFormDialog.show<CalendarElement>(context, dialog);
+  ) => showEteeloAdaptiveDialog<CalendarElement>(
+    context: context,
+    builder: (_) => dialog,
+  );
 
   @override
   State<EventFormDialog> createState() => _EventFormDialogState();
@@ -77,11 +85,13 @@ class _EventFormDialogState extends State<EventFormDialog> {
     final initial = _base;
     _title = TextEditingController(text: initial?.title ?? '');
     _note = TextEditingController(text: initial?.note ?? '');
+    // La première nature permise, dans l'ordre de la légende (maquette).
     _nature =
         initial?.nature ??
-        (widget.natures.contains(CalendarNature.schoolLife)
-            ? CalendarNature.schoolLife
-            : widget.natures.first);
+        CalendarNature.values.firstWhere(
+          widget.natures.contains,
+          orElse: () => widget.natures.first,
+        );
     _initialNature = _nature;
     _start = initial?.startDate ?? widget.initialDay;
     _end = initial?.endDate ?? widget.initialDay;
@@ -170,13 +180,16 @@ class _EventFormDialogState extends State<EventFormDialog> {
       onPopInvokedWithResult: (didPop, _) {
         if (!didPop) _cancel();
       },
-      child: EteeloFormDialog(
+      child: CalendarOverlayDialog(
+        maxWidth: AppDimensions.calendarFormMaxWidth,
+        eyebrow: l10n.schoolCalendarFormEyebrow(widget.yearLabel),
         title: widget.replacing != null
             ? l10n.schoolCalendarFormReplaceTitle
             : widget.initial == null
             ? l10n.schoolCalendarFormAddTitle
             : l10n.schoolCalendarFormEditTitle,
         onSubmit: canSave ? _submit : null,
+        onClose: _cancel,
         body: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -190,12 +203,14 @@ class _EventFormDialogState extends State<EventFormDialog> {
             EteeloTextInput(
               controller: _title,
               label: l10n.schoolCalendarFormTitle,
+              placeholder: l10n.schoolCalendarFormTitleHint(_nature.wire),
               required: true,
               capitalization: EteeloTextCapitalization.sentence,
               onChanged: (_) => setState(() {}),
             ),
             const SizedBox(height: AppSpacing.md),
-            EventDatesRow(
+            EventDatesBlock(
+              nature: _nature,
               start: _start,
               end: _end,
               yearStart: widget.yearStart,
@@ -215,18 +230,7 @@ class _EventFormDialogState extends State<EventFormDialog> {
                   : null,
             ),
             const SizedBox(height: AppSpacing.md),
-            EteeloTextInput(
-              controller: _note,
-              label: l10n.schoolCalendarFormNote,
-              keyboardType: EteeloTextInputType.multiline,
-              minLines: 2,
-              maxLines: 4,
-              inputFormatters: [
-                LengthLimitingTextInputFormatter(
-                  CalendarEventValidation.noteMaxLength,
-                ),
-              ],
-            ),
+            EventNoteField(controller: _note),
             const SizedBox(height: AppSpacing.md),
             EventFormMessages(
               check: check,
@@ -236,18 +240,21 @@ class _EventFormDialogState extends State<EventFormDialog> {
           ],
         ),
         actions: [
-          SecondaryButton(
+          EteeloButton.ghost(
             label: l10n.schoolCalendarFormCancel,
             fullWidth: false,
+            size: EteeloButtonSize.regular,
             onPressed: _cancel,
           ),
-          PrimaryButton(
+          EteeloButton.primary(
             label: widget.replacing != null
                 ? l10n.schoolCalendarReplace
                 : widget.initial == null
                 ? l10n.schoolCalendarAdd
                 : l10n.schoolCalendarFormSave,
+            icon: Icons.check_rounded,
             fullWidth: false,
+            size: EteeloButtonSize.regular,
             onPressed: canSave ? _submit : null,
           ),
         ],
