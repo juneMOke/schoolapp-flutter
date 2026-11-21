@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_empty_result.dart';
+import 'package:school_app_flutter/features/school_calendar/domain/services/calendar_periods.dart';
 import 'package:school_app_flutter/features/school_calendar/presentation/bloc/school_calendar_cubit.dart';
 import 'package:school_app_flutter/features/school_calendar/presentation/bloc/school_calendar_state.dart';
 import 'package:school_app_flutter/features/school_calendar/presentation/widgets/calendar/calendar_actions_row.dart';
@@ -30,7 +31,8 @@ class CalendarDetailBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final visible = state.visibleElements;
+    // Le niveau le plus fin des périodes, dans les trois vues.
+    final visible = CalendarPeriods.finest(state.visibleElements);
     if (visible.isEmpty && state.allElements.isNotEmpty) {
       return EteeloEmptyResult(
         label: l10n.schoolCalendarEmptyFiltered,

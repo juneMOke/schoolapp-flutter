@@ -92,6 +92,16 @@ class CalendarLabels {
     );
   }
 
+  /// Le nom d'un élément tel que le calendrier le montre : « P1 · 1er
+  /// semestre » pour une sous-période, sinon son intitulé.
+  static String title(AppLocalizations l10n, CalendarElement element) =>
+      period(l10n, element) ?? element.title;
+
+  /// L'infobulle d'un élément : « P1 · 1er semestre · 7 sept. → 6 nov. ».
+  static String tooltip(BuildContext context, CalendarElement element) =>
+      '${title(AppLocalizations.of(context)!, element)} · '
+      '${dates(context, element)}';
+
   /// Le texte d'un refus, par son code ; sinon la raison générique.
   static String failure(AppLocalizations l10n, Failure failure) =>
       failure is CalendarRefusalFailure

@@ -69,7 +69,7 @@ class CalendarSideRow extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  element.title,
+                  CalendarLabels.title(l10n, element),
                   style: AppTypography.calendarRowTitleSmall.copyWith(
                     color: AppColors.textPrimary,
                   ),
@@ -132,7 +132,8 @@ class CalendarRowShell extends StatelessWidget {
     return EteeloActivatable(
       onActivate: onTap,
       semanticLabel:
-          '${element.title}, ${CalendarLabels.dates(context, element)}',
+          '${CalendarLabels.title(AppLocalizations.of(context)!, element)}, '
+          '${CalendarLabels.dates(context, element)}',
       builder: (context, highlight) => ConstrainedBox(
         constraints: const BoxConstraints(
           minHeight: AppDimensions.minTouchTarget,
