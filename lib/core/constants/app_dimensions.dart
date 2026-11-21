@@ -1757,6 +1757,10 @@ class AppDimensions {
   static const calendarTodayDot = 22.0;
   static const calendarSelectedRing = 2.0;
 
+  /// Opacité du fond d'une bande du mois : le trait entre les jours se
+  /// devine dessous.
+  static const calendarBandSurfaceOpacity = 0.9;
+
   /// Les hachures d'un jour hors du mois : pas et épaisseur.
   static const calendarHatchStep = 10.0;
   static const calendarHatchStroke = 5.0;

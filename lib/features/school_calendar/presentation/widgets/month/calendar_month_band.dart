@@ -117,8 +117,12 @@ class CalendarMonthBand extends StatelessWidget {
                       AppColors.surfaceRaised,
                       tone.tone,
                       AppDimensions.calendarBandNationalMix,
-                    )!,
-                    tone.soft,
+                    )!.withValues(
+                      alpha: AppDimensions.calendarBandSurfaceOpacity,
+                    ),
+                    tone.soft.withValues(
+                      alpha: AppDimensions.calendarBandSurfaceOpacity,
+                    ),
                   ],
                 ),
                 borderRadius: radius,
@@ -147,7 +151,9 @@ class CalendarMonthBand extends StatelessWidget {
           )
         : DecoratedBox(
             decoration: BoxDecoration(
-              color: AppColors.surfaceRaised,
+              color: AppColors.surfaceRaised.withValues(
+                alpha: AppDimensions.calendarBandSurfaceOpacity,
+              ),
               borderRadius: radius,
             ),
             child: CustomPaint(

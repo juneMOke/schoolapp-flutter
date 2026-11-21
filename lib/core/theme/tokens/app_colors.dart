@@ -863,6 +863,15 @@ class AppColors {
   static const calendarOutOfMonthHatch = Color(0x0D8C8478);
   static const calendarTodaySurface = Color(0x1FD9A24E);
   static const calendarTodayRing = Color(0x80B85C2C);
+
+  /// Grille du mois renforcée (recette du 2026-11-21) : le trait entre deux
+  /// jours, et le même trait redessiné par-dessus les bandes, voilé, pour
+  /// que chaque jour reste une case distincte sous une période.
+  static const calendarMonthGridLine = borderStrong;
+  static const calendarMonthGridLineOverBand = Color(0x8CC9C3B0);
+
+  /// Le cadre d'aujourd'hui, dessiné au-dessus des bandes.
+  static const calendarTodayRingStrong = terreCuite;
   static const calendarSelectedSurface = Color(0x141B4D6B);
   static const calendarHover = Color(0x0FB85C2C);
 

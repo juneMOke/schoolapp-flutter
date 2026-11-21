@@ -28,24 +28,44 @@ class CalendarHatchPainter extends CustomPainter {
   bool shouldRepaint(CalendarHatchPainter old) => false;
 }
 
-/// Le cadre intérieur d'aujourd'hui (terre cuite voilée) ou du jour touché.
-class CalendarRingPainter extends CustomPainter {
-  final Color color;
+/// Le dessus d'une semaine du mois, posé PAR-DESSUS les bandes : les traits
+/// entre les jours, voilés, et le cadre d'aujourd'hui ([todayCol]) ou du
+/// jour touché ([selectedCol]) sur toute la hauteur de la case. Sans lui,
+/// une période qui traverse la semaine masquait les deux.
+class CalendarWeekOverlayPainter extends CustomPainter {
+  final int? todayCol;
+  final int? selectedCol;
 
-  const CalendarRingPainter(this.color);
+  const CalendarWeekOverlayPainter({this.todayCol, this.selectedCol});
 
   @override
   void paint(Canvas canvas, Size size) {
-    const w = AppDimensions.calendarSelectedRing;
-    canvas.drawRect(
-      (Offset.zero & size).deflate(w / 2),
-      Paint()
-        ..color = color
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = w,
-    );
+    final col = size.width / 7;
+    final line = Paint()
+      ..color = AppColors.calendarMonthGridLineOverBand
+      ..strokeWidth = 1;
+    for (var i = 1; i < 7; i++) {
+      final x = (col * i).roundToDouble() + 0.5;
+      canvas.drawLine(Offset(x, 0), Offset(x, size.height), line);
+    }
+    void ring(int c, Color color) {
+      const w = AppDimensions.calendarSelectedRing;
+      canvas.drawRect(
+        Rect.fromLTWH(c * col, 0, col, size.height).deflate(w / 2),
+        Paint()
+          ..color = color
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = w,
+      );
+    }
+
+    if (todayCol case final c? when c != selectedCol) {
+      ring(c, AppColors.calendarTodayRingStrong);
+    }
+    if (selectedCol case final c?) ring(c, AppColors.bleuArdoise);
   }
 
   @override
-  bool shouldRepaint(CalendarRingPainter old) => old.color != color;
+  bool shouldRepaint(CalendarWeekOverlayPainter old) =>
+      old.todayCol != todayCol || old.selectedCol != selectedCol;
 }

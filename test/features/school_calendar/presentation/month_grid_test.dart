@@ -5,6 +5,7 @@ import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
 import 'package:school_app_flutter/features/school_calendar/domain/entities/calendar_element.dart';
 import 'package:school_app_flutter/features/school_calendar/domain/entities/calendar_enums.dart';
 import 'package:school_app_flutter/features/school_calendar/presentation/helpers/month_layout.dart';
+import 'package:school_app_flutter/features/school_calendar/presentation/widgets/month/calendar_month_painters.dart';
 import 'package:school_app_flutter/features/school_calendar/presentation/widgets/month/school_calendar_month_grid.dart';
 import 'package:school_app_flutter/features/school_calendar/presentation/widgets/year/school_calendar_year_grid.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
@@ -158,5 +159,41 @@ void main() {
       find.bySemanticsLabel(RegExp('10 juin 2026')).first,
     );
     expect(cell.height, greaterThanOrEqualTo(48));
+  });
+
+  testWidgets('le cadre du jour et les traits passent au-dessus des bandes', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      host(
+        SchoolCalendarMonthGrid(
+          year: 2026,
+          month: 6,
+          elements: _june,
+          today: d(6, 10),
+          compact: false,
+        ),
+      ),
+    );
+    final overlays = tester
+        .widgetList<CustomPaint>(find.byType(CustomPaint))
+        .map((p) => p.painter)
+        .whereType<CalendarWeekOverlayPainter>()
+        .toList();
+    // Une couche par semaine ; seule la 2e (8-14 juin) porte aujourd'hui,
+    // le mercredi (colonne 2).
+    expect(overlays, hasLength(5));
+    expect([for (final o in overlays) o.todayCol], [null, 2, null, null, null]);
+    // La couche est peinte après les bandes : dernière du Stack de semaine.
+    final stack = find
+        .ancestor(
+          of: find.byWidgetPredicate(
+            (w) => w is CustomPaint && w.painter is CalendarWeekOverlayPainter,
+          ),
+          matching: find.byType(Stack),
+        )
+        .first;
+    final children = tester.widget<Stack>(stack).children;
+    expect(children.last, isA<Positioned>());
   });
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/features/school_calendar/presentation/widgets/month/calendar_month_painters.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_elevation.dart';
@@ -168,7 +169,9 @@ class _WeekRow extends StatelessWidget {
       decoration: BoxDecoration(
         border: first
             ? null
-            : const Border(top: BorderSide(color: AppColors.border)),
+            : const Border(
+                top: BorderSide(color: AppColors.calendarMonthGridLine),
+              ),
       ),
       child: LayoutBuilder(
         builder: (context, constraints) {
@@ -224,11 +227,29 @@ class _WeekRow extends StatelessWidget {
                           : () => grid.onElementTap!(band.element),
                     ),
                   ),
+                // Les traits entre les jours et le cadre du jour, au-dessus
+                // des bandes : chaque jour reste une case distincte.
+                Positioned.fill(
+                  child: IgnorePointer(
+                    child: CustomPaint(
+                      painter: CalendarWeekOverlayPainter(
+                        todayCol: _col(week, grid.today),
+                        selectedCol: _col(week, grid.selectedDay),
+                      ),
+                    ),
+                  ),
+                ),
               ],
             ),
           );
         },
       ),
     );
+  }
+
+  static int? _col(MonthWeek week, DateTime? day) {
+    if (day == null) return null;
+    final i = week.days.indexOf(day);
+    return i < 0 ? null : i;
   }
 }

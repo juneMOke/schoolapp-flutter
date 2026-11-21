@@ -60,11 +60,6 @@ class CalendarMonthDayCell extends StatelessWidget {
         : weekend
         ? AppColors.calendarWeekendSurface
         : AppColors.surfaceRaised;
-    final ring = isSelected
-        ? AppColors.bleuArdoise
-        : isToday
-        ? AppColors.calendarTodayRing
-        : null;
     final shortMonth = MaterialLocalizations.of(
       context,
     ).formatShortMonthDay(day).replaceAll(RegExp(r'\d'), '').trim();
@@ -78,11 +73,12 @@ class CalendarMonthDayCell extends StatelessWidget {
               : background,
           border: first
               ? null
-              : const Border(left: BorderSide(color: AppColors.border)),
+              : const Border(
+                  left: BorderSide(color: AppColors.calendarMonthGridLine),
+                ),
         ),
         child: CustomPaint(
           painter: inMonth || isSelected ? null : const CalendarHatchPainter(),
-          foregroundPainter: ring == null ? null : CalendarRingPainter(ring),
           child: Padding(
             padding: EdgeInsets.fromLTRB(
               compact ? AppSpacing.xs / 2 : AppSpacing.sm,
