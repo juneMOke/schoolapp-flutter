@@ -24081,6 +24081,103 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String schoolCalendarPublishedLine(String date) {
+    return 'published on $date';
+  }
+
+  @override
+  String schoolCalendarPublishedBy(String date, String name) {
+    return 'published on $date by $name';
+  }
+
+  @override
+  String schoolCalendarActorRole(String role) {
+    String _temp0 = intl.Intl.selectLogic(role, {
+      'DIRECTOR': 'Principal',
+      'ACADEMIC_ADMIN': 'Academic advisor',
+      'SUPER_ADMIN': 'Administrator',
+      'other': '',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String get schoolCalendarProgressMarkers => 'marks: start of each period';
+
+  @override
+  String schoolCalendarUntil(String date) {
+    return 'until $date';
+  }
+
+  @override
+  String schoolCalendarMoreOthers(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '+ $count others',
+      one: '+ 1 other',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String schoolCalendarItemDays(String nature, int count) {
+    return '$nature · $count d';
+  }
+
+  @override
+  String schoolCalendarDueIn(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'In $count days',
+      one: 'Tomorrow',
+      zero: 'Today',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get schoolCalendarShow => 'Show';
+
+  @override
+  String get schoolCalendarHide => 'Hide';
+
+  @override
+  String schoolCalendarModifiedAgo(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Modified $count days ago',
+      one: 'Modified yesterday',
+      zero: 'Modified today',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String schoolCalendarSchoolItems(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count school items',
+      one: '1 school item',
+      zero: 'no school item',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String schoolCalendarTip(String year) {
+    return 'Tip: duplicate $year to prepare the next year.';
+  }
+
+  @override
+  String schoolCalendarPercent(int percent) {
+    return '$percent%';
+  }
+
+  @override
   String get schoolCalendarLoading => 'Loading the school calendar';
 
   @override

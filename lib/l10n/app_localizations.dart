@@ -36946,6 +36946,90 @@ abstract class AppLocalizations {
   /// **'Create the {year} calendar'**
   String schoolCalendarEmptyCreate(String year);
 
+  /// No description provided for @schoolCalendarPublishedLine.
+  ///
+  /// In en, this message translates to:
+  /// **'published on {date}'**
+  String schoolCalendarPublishedLine(String date);
+
+  /// No description provided for @schoolCalendarPublishedBy.
+  ///
+  /// In en, this message translates to:
+  /// **'published on {date} by {name}'**
+  String schoolCalendarPublishedBy(String date, String name);
+
+  /// No description provided for @schoolCalendarActorRole.
+  ///
+  /// In en, this message translates to:
+  /// **'{role, select, DIRECTOR{Principal} ACADEMIC_ADMIN{Academic advisor} SUPER_ADMIN{Administrator} other{}}'**
+  String schoolCalendarActorRole(String role);
+
+  /// No description provided for @schoolCalendarProgressMarkers.
+  ///
+  /// In en, this message translates to:
+  /// **'marks: start of each period'**
+  String get schoolCalendarProgressMarkers;
+
+  /// No description provided for @schoolCalendarUntil.
+  ///
+  /// In en, this message translates to:
+  /// **'until {date}'**
+  String schoolCalendarUntil(String date);
+
+  /// No description provided for @schoolCalendarMoreOthers.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{+ 1 other} other{+ {count} others}}'**
+  String schoolCalendarMoreOthers(int count);
+
+  /// No description provided for @schoolCalendarItemDays.
+  ///
+  /// In en, this message translates to:
+  /// **'{nature} · {count} d'**
+  String schoolCalendarItemDays(String nature, int count);
+
+  /// No description provided for @schoolCalendarDueIn.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{Today} =1{Tomorrow} other{In {count} days}}'**
+  String schoolCalendarDueIn(int count);
+
+  /// No description provided for @schoolCalendarShow.
+  ///
+  /// In en, this message translates to:
+  /// **'Show'**
+  String get schoolCalendarShow;
+
+  /// No description provided for @schoolCalendarHide.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide'**
+  String get schoolCalendarHide;
+
+  /// No description provided for @schoolCalendarModifiedAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{Modified today} =1{Modified yesterday} other{Modified {count} days ago}}'**
+  String schoolCalendarModifiedAgo(int count);
+
+  /// No description provided for @schoolCalendarSchoolItems.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{no school item} =1{1 school item} other{{count} school items}}'**
+  String schoolCalendarSchoolItems(int count);
+
+  /// No description provided for @schoolCalendarTip.
+  ///
+  /// In en, this message translates to:
+  /// **'Tip: duplicate {year} to prepare the next year.'**
+  String schoolCalendarTip(String year);
+
+  /// No description provided for @schoolCalendarPercent.
+  ///
+  /// In en, this message translates to:
+  /// **'{percent}%'**
+  String schoolCalendarPercent(int percent);
+
   /// No description provided for @schoolCalendarLoading.
   ///
   /// In en, this message translates to:

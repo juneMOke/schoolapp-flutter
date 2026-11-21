@@ -164,6 +164,22 @@ class AppTypography {
   );
 
   // Numéro de pastille du stepper — chiffres tabulaires (largeur stable).
+  /// L'année du bandeau « Année en cours » (maquette : serif 600 30).
+  static const calendarHeroYear = TextStyle(
+    fontFamily: 'Lora',
+    fontSize: 30,
+    fontWeight: FontWeight.w600,
+    height: 1,
+  );
+
+  /// L'année d'une carte de calendrier (maquette : serif 600 18).
+  static const calendarCardYear = TextStyle(
+    fontFamily: 'Lora',
+    fontSize: 18,
+    fontWeight: FontWeight.w600,
+    height: 1.1,
+  );
+
   static const stepNumber = TextStyle(
     fontFamily: 'Inter',
     fontSize: 14,

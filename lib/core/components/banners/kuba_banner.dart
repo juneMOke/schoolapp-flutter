@@ -11,19 +11,34 @@ import 'package:school_app_flutter/core/widgets/kuba_pattern_layer.dart';
 class KubaBanner extends StatelessWidget {
   final Widget child;
 
-  const KubaBanner({super.key, required this.child});
+  /// Le dégradé du fond ; `null` (le défaut) : celui des registres RH. Le
+  /// calendrier scolaire y passe sa teinte (liste : finit en brun ; brouillon,
+  /// archivé).
+  final List<Color>? colors;
+
+  /// Le liseré tricolore en pied ; vrai par défaut.
+  final bool stripe;
+
+  const KubaBanner({
+    super.key,
+    required this.child,
+    this.colors,
+    this.stripe = true,
+  });
 
   @override
   Widget build(BuildContext context) => ClipRRect(
     borderRadius: AppRadius.brCard,
     child: DecoratedBox(
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [
-            AppColors.kubaBannerStart,
-            AppColors.kubaBannerMid,
-            AppColors.kubaBannerEnd,
-          ],
+          colors:
+              colors ??
+              const [
+                AppColors.kubaBannerStart,
+                AppColors.kubaBannerMid,
+                AppColors.kubaBannerEnd,
+              ],
         ),
       ),
       // Passthrough : le contenu reçoit toute la largeur du bandeau, et une
@@ -33,31 +48,32 @@ class KubaBanner extends StatelessWidget {
         children: [
           const KubaPatternLayer(),
           Padding(
-            padding: const EdgeInsets.fromLTRB(
+            padding: EdgeInsets.fromLTRB(
               AppSpacing.lg,
               AppSpacing.lg,
               AppSpacing.lg,
-              AppSpacing.lg + AppDimensions.kubaBannerStripe,
+              AppSpacing.lg + (stripe ? AppDimensions.kubaBannerStripe : 0),
             ),
             child: child,
           ),
-          const Positioned(
-            left: 0,
-            right: 0,
-            bottom: 0,
-            height: AppDimensions.kubaBannerStripe,
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    AppColors.kubaBannerStripeStart,
-                    AppColors.kubaBannerStripeMid,
-                    AppColors.kubaBannerStripeEnd,
-                  ],
+          if (stripe)
+            const Positioned(
+              left: 0,
+              right: 0,
+              bottom: 0,
+              height: AppDimensions.kubaBannerStripe,
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      AppColors.kubaBannerStripeStart,
+                      AppColors.kubaBannerStripeMid,
+                      AppColors.kubaBannerStripeEnd,
+                    ],
+                  ),
                 ),
               ),
             ),
-          ),
         ],
       ),
     ),

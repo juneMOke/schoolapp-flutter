@@ -1533,4 +1533,51 @@ class AppDimensions {
   static const calendarDateChipSmall = 34.0;
   static const calendarDateChipMedium = 40.0;
   static const calendarDateChipLarge = 44.0;
+
+  // La liste des calendriers (maquette CalList / CalCard / CalCurrentHero).
+  /// Une carte de calendrier : largeur minimale de la grille.
+  static const calendarCardMinWidth = 280.0;
+
+  /// Le médaillon d'une carte de calendrier.
+  static const calendarCardMedallion = 42.0;
+  static const calendarCardMedallionIcon = 20.0;
+
+  /// Le filet coloré du haut d'une carte, le liseré d'un rendez-vous.
+  static const calendarCardAccent = 3.0;
+
+  /// La fine barre de répartition par nature.
+  static const calendarNatureBarHeight = 6.0;
+
+  /// L'écart entre les pastilles d'une carte.
+  static const calendarPillGap = 6.0;
+
+  /// Le squelette de la liste : la hauteur du bandeau en attente.
+  static const calendarHeroSkeletonHeight = 210.0;
+
+  /// L'opacité de cette barre sur une carte archivée.
+  static const calendarArchivedBarOpacity = 0.45;
+
+  /// Une carte de « Prochains rendez-vous » (spec §4.6 R : 230 dp).
+  static const calendarUpcomingCardWidth = 230.0;
+
+  /// Au plus : la maquette laisse une carte s'élargir à son intitulé.
+  static const calendarUpcomingCardMaxWidth = 360.0;
+
+  /// Le bord d'une carte de rendez-vous : la teinte de sa nature, voilée.
+  static const calendarToneBorderOpacity = 0.28;
+
+  /// Le médaillon du titre « Prochains rendez-vous ».
+  static const calendarUpcomingMedallion = 28.0;
+  static const calendarUpcomingMedallionIcon = 15.0;
+
+  /// L'avancement de l'année : épaisseur, largeur maximale, repères.
+  static const calendarProgressHeight = 8.0;
+  static const calendarProgressMaxWidth = 420.0;
+  static const calendarProgressMarkerWidth = 2.0;
+  static const calendarProgressMarkerHeight = 14.0;
+
+  /// Le bandeau passe sur deux colonnes quand l'une et l'autre tiennent.
+  static const calendarHeroInfoMinWidth = 260.0;
+  static const calendarHeroTilesMinWidth = 300.0;
+  static const calendarHeroTileMinWidth = 150.0;
 }

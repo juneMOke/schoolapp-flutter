@@ -14,16 +14,24 @@ class KubaBannerTile extends StatelessWidget {
   final String? detail;
   final Color valueColor;
 
+  /// Une tuile de texte plutôt que de chiffre (le calendrier scolaire :
+  /// « P4 · 2e semestre », « Examens du 2e semestre ») : libellé en
+  /// petites capitales, valeur à 14 qui passe à la ligne, détail en petit.
+  /// Faux par défaut.
+  final bool dense;
+
   const KubaBannerTile({
     super.key,
     required this.label,
     required this.values,
     this.detail,
     this.valueColor = AppColors.kubaBannerOn,
+    this.dense = false,
   });
 
   @override
   Widget build(BuildContext context) {
+    if (dense) return _dense();
     final muted = AppTypography.bodySmall.copyWith(
       color: AppColors.kubaBannerOnMuted,
     );
@@ -69,4 +77,47 @@ class KubaBannerTile extends StatelessWidget {
       ),
     );
   }
+
+  Widget _dense() => Container(
+    padding: const EdgeInsets.symmetric(
+      horizontal: AppSpacing.md,
+      vertical: AppSpacing.md - AppSpacing.xs / 2,
+    ),
+    decoration: BoxDecoration(
+      color: AppColors.kubaBannerTile,
+      borderRadius: AppRadius.brMd,
+      border: Border.all(color: AppColors.kubaBannerOnFaint),
+    ),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label.toUpperCase(),
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+          style: AppTypography.labelCaps.copyWith(
+            color: AppColors.kubaBannerOnMuted,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        const SizedBox(height: AppSpacing.xs),
+        for (final value in values)
+          Text(
+            value,
+            style: AppTypography.titleSmall.copyWith(color: valueColor),
+          ),
+        if (detail case final detail?) ...[
+          const SizedBox(height: AppSpacing.xs / 2),
+          Text(
+            detail,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: AppTypography.labelSmall.copyWith(
+              color: AppColors.kubaBannerOnMuted,
+            ),
+          ),
+        ],
+      ],
+    ),
+  );
 }

@@ -773,6 +773,49 @@ class AppColors {
   static const calendarHoliday = coteDomainPrune;
   static const calendarHolidaySoft = coteDomainPruneSoft;
 
+  // La liste des calendriers (maquette Calendrier.jsx, CalList / CalCard).
+  /// Le bandeau « Année en cours » finit en brun (dégradé 105°).
+  static const calendarHeroEnd = Color(0xFF7A4A2E);
+
+  /// La pastille « En vigueur » sur le bandeau : vert savane voilé.
+  static const calendarHeroLiveFill = Color(0x593D6B4A);
+  static const calendarHeroLiveBorder = Color(0x598CC8A0);
+
+  /// L'avancement de l'année : or, piste et repères de période.
+  static const calendarProgressStart = orDoux;
+  static const calendarProgressEnd = Color(0xFFE9C27F);
+  static const calendarProgressTrack = Color(0x26FAFAF7);
+  static const calendarProgressMarker = Color(0x8CFAFAF7);
+
+  /// Le texte secondaire du bandeau, dosé comme la maquette.
+  static const calendarHeroMuted = Color(0xB8FAFAF7);
+  static const calendarHeroFaint = Color(0x8CFAFAF7);
+
+  /// « Prochains rendez-vous » : panneau terre cuite pâle vers ardoise pâle.
+  static const calendarUpcomingStart = Color(0xFFFBF1E7);
+  static const calendarUpcomingMid = Color(0xFFFBF6EF);
+  static const calendarUpcomingEnd = Color(0xFFEEF3F6);
+  static const calendarUpcomingBorder = Color(0xFFE8D3C4);
+
+  /// L'ascenseur fin d'une rangée qui défile de côté.
+  static const calendarScrollThumb = Color(0xFFC9B8A6);
+
+  /// Une carte de calendrier, selon son statut : fond, bord, filet du haut.
+  static const calendarCardDraftSurface = Color(0xFFFBF3E2);
+  static const calendarCardDraftBorder = Color(0xFFE8D9B0);
+  static const calendarCardDraftAccent = orDoux;
+  static const calendarCardArchivedSurface = papier;
+  static const calendarCardArchivedBorder = border;
+  static const calendarCardArchivedAccent = borderStrong;
+  static const calendarCardPublishedSurface = bleuArdoiseSoft;
+  static const calendarCardPublishedBorder = Color(0xFFCFE0EA);
+  static const calendarCardPublishedAccent = bleuArdoise;
+
+  /// Les pastilles de statut : brouillon et « à vérifier » en ambre,
+  /// « En vigueur » en savane.
+  static const calendarDraftInk = Color(0xFF8A5A0B);
+  static const calendarLiveInk = vertSavane;
+
   // ── Trésorerie (spec Trésorerie V1.5, §05 « Jetons proposés ») ──
   /// Dégradé de la caisse USD, départ (spec Trésorerie §05).
   static const treasuryUsdDeep = Color(0xFF0E2D42);
