@@ -1,23 +1,22 @@
 import 'package:flutter/material.dart';
-import 'package:school_app_flutter/core/components/buttons/secondary_button.dart';
-import 'package:school_app_flutter/core/components/cards/eteelo_panel_card.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/theme/course_domain_tones.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
-import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/features/schedule/domain/entities/timetable/class_timetable.dart';
 import 'package:school_app_flutter/features/schedule/domain/entities/timetable/class_timetable_view.dart';
 import 'package:school_app_flutter/features/schedule/domain/services/timetable_metrics.dart';
+import 'package:school_app_flutter/features/schedule/presentation/timetable/widgets/timetable_course_reserve_parts.dart';
 import 'package:school_app_flutter/features/schedule/presentation/widgets/schedule_grid_marks.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// G — « Cours à placer » (EDT §4.6 G) : les cours du programme et ce qu'il
-/// reste à placer. Sous 976 dp, un bandeau replié « {n} cours à placer ·
-/// {p}/{v} h » qui se déplie (I13) ; au-delà, à côté de la grille, une liste
-/// dont les cours se glissent vers la grille (I9), et où déposer une séance
-/// la retire (I11).
+/// reste à placer. Sous 976 dp, un bandeau repliable (48 dp au moins, replié
+/// par défaut) « {n} cours à placer · {p}/{v} h », sa barre et « Voir », qui
+/// se déplie en grille de cartes (I13) ; au-delà, une colonne à côté de la
+/// grille — en-tête, compteur, barre — dont les cours se glissent vers la
+/// grille (I9), et où déposer une séance la retire (I11).
 class TimetableCourseReserve extends StatefulWidget {
   final ClassTimetableView view;
 
@@ -55,59 +54,92 @@ class _TimetableCourseReserveState extends State<TimetableCourseReserve> {
     final placedBy = {for (final v in volumes) v.coursId: v.placed};
     final toPlace = volumes.where((v) => (v.remaining ?? 0) > 0).length;
     final (placed, planned) = PlacedHours.totals(volumes);
-    final count = [
-      l10n.classTimetableReserveCount(toPlace),
-      if (planned != null) l10n.classTimetableHoursOf(placed, planned),
-    ].join(' · ');
-    final open = drag != null || _open;
+    final side = drag != null;
+    final open = side || _open;
     final courses = [
       // R5 : un cours prévu à 0 h n'est pas à placer.
       for (final c in view.programme)
         if (c.weeklyHours != 0) c,
     ];
-    final body = Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Row(
-          children: [
-            Expanded(child: Text(count, style: AppTypography.bodyMedium)),
-            if (drag == null)
-              SecondaryButton(
-                label: open
-                    ? l10n.classTimetableReserveHide
-                    : l10n.classTimetableReserveShow,
-                fullWidth: false,
-                onPressed: () => setState(() => _open = !_open),
-              ),
-          ],
-        ),
-        if (open) ...[
-          Text(
-            drag == null
-                ? l10n.classTimetableHelpDraft
-                : l10n.classTimetableReserveDragHint,
-            style: AppTypography.bodySmall,
+    final lines = [
+      for (final course in courses)
+        _draggable(
+          drag,
+          course,
+          ReserveCourseLine(
+            course: course,
+            tone: CourseDomainTones.forDomain(
+              course.domainId,
+              view.domainOrder,
+            ),
+            placed: placedBy[course.coursId] ?? 0,
+            handle: side,
           ),
-          const SizedBox(height: AppSpacing.sm),
-          for (final course in courses)
-            _draggable(
-              drag,
-              course,
-              _CourseLine(
-                course: course,
-                tone: CourseDomainTones.forDomain(
-                  course.domainId,
-                  view.domainOrder,
-                ),
-                placed: placedBy[course.coursId] ?? 0,
+        ),
+    ];
+    final hours = planned == null
+        ? l10n.classTimetableHoursPlaced(placed)
+        : l10n.classTimetableHoursOf(placed, planned);
+    final head = ReserveHeader(
+      title: side
+          ? l10n.classTimetableReserveTitle
+          : '${l10n.classTimetableReserveCount(toPlace)} · $hours',
+      subtitle: side
+          ? l10n.classTimetableReserveDragHint
+          : l10n.classTimetableHelpDraft,
+      counter: side ? hours : null,
+      toggle: side
+          ? null
+          : (open
+                ? l10n.classTimetableReserveHide
+                : l10n.classTimetableReserveShow),
+      open: open,
+      placed: placed,
+      planned: planned,
+    );
+    final panel = Container(
+      decoration: BoxDecoration(
+        color: AppColors.surfaceRaised,
+        borderRadius: AppRadius.brLg,
+        border: Border.all(color: AppColors.timetableWarmBorder),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          if (side)
+            head
+          else
+            Semantics(
+              button: true,
+              expanded: open,
+              child: InkWell(
+                onTap: () => setState(() => _open = !_open),
+                child: head,
               ),
             ),
+          if (open)
+            Padding(
+              padding: const EdgeInsets.all(
+                AppDimensions.timetableReservePadding,
+              ),
+              child: side
+                  ? Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        for (final line in lines)
+                          Padding(
+                            padding: const EdgeInsets.only(
+                              bottom: AppDimensions.timetableReserveGap,
+                            ),
+                            child: line,
+                          ),
+                      ],
+                    )
+                  : _CardGrid(children: lines),
+            ),
         ],
-      ],
-    );
-    final panel = EteeloPanelCard(
-      title: l10n.classTimetableReserveTitle,
-      child: body,
+      ),
     );
     final dropped = widget.onDropped;
     if (drag == null || dropped == null) return panel;
@@ -123,7 +155,7 @@ class _TimetableCourseReserveState extends State<TimetableCourseReserve> {
                   child: Container(
                     alignment: Alignment.center,
                     decoration: BoxDecoration(
-                      color: AppColors.terreCuiteSoft,
+                      color: AppColors.timetableWarmSurface,
                       borderRadius: AppRadius.brLg,
                       border: Border.all(color: AppColors.terreCuite),
                     ),
@@ -177,66 +209,30 @@ class _TimetableCourseReserveState extends State<TimetableCourseReserve> {
   }
 }
 
-class _CourseLine extends StatelessWidget {
-  final TimetableCourse course;
-  final CourseDomainTone tone;
-  final int placed;
+/// La réserve dépliée sous 976 : une grille de cartes de 200 dp au moins.
+class _CardGrid extends StatelessWidget {
+  final List<Widget> children;
 
-  const _CourseLine({
-    required this.course,
-    required this.tone,
-    required this.placed,
-  });
+  const _CardGrid({required this.children});
 
   @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    final planned = course.weeklyHours;
-    final (status, color) = switch (planned) {
-      null => (l10n.classTimetableHoursPlaced(placed), AppColors.textSecondary),
-      final p when p > placed => (
-        l10n.classTimetableRemaining(p - placed),
-        AppColors.ambreInk,
-      ),
-      final p when p == placed => (
-        l10n.classTimetableComplete,
-        AppColors.vertSavane,
-      ),
-      final p => (l10n.classTimetableOver(placed - p), AppColors.error),
-    };
-    return Container(
-      margin: const EdgeInsets.only(bottom: AppSpacing.xs),
-      constraints: const BoxConstraints(
-        minHeight: AppDimensions.timetableReserveLineMinHeight,
-      ),
-      padding: const EdgeInsets.all(AppSpacing.sm),
-      decoration: BoxDecoration(
-        color: tone.soft,
-        borderRadius: AppRadius.brSm,
-        border: Border(
-          left: BorderSide(color: tone.ink, width: AppSpacing.xs),
-        ),
-      ),
-      child: Row(
+  Widget build(BuildContext context) => LayoutBuilder(
+    builder: (context, constraints) {
+      const gap = AppDimensions.timetableReserveGap;
+      final columns =
+          ((constraints.maxWidth + gap) /
+                  (AppDimensions.timetableReserveCardMinWidth + gap))
+              .floor()
+              .clamp(1, 99);
+      final width = ((constraints.maxWidth - gap * (columns - 1)) / columns)
+          .floorToDouble();
+      return Wrap(
+        spacing: gap,
+        runSpacing: gap,
         children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(course.branchLabel, style: AppTypography.bodyMedium),
-                if (course.teacherLabel case final teacher?)
-                  Text(teacher, style: AppTypography.bodySmall),
-              ],
-            ),
-          ),
-          Text(
-            status,
-            maxLines: 1,
-            softWrap: false,
-            style: AppTypography.labelMedium.copyWith(color: color),
-          ),
+          for (final child in children) SizedBox(width: width, child: child),
         ],
-      ),
-    );
-  }
+      );
+    },
+  );
 }

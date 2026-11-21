@@ -17,9 +17,6 @@ import 'package:school_app_flutter/features/schedule/presentation/timetable/widg
 import 'package:school_app_flutter/features/schedule/presentation/timetable/widgets/timetable_course_reserve.dart';
 import 'package:school_app_flutter/features/schedule/domain/entities/time_slot.dart';
 import 'package:school_app_flutter/features/schedule/domain/entities/weekday.dart';
-import 'package:school_app_flutter/features/schedule/presentation/timetable/widgets/consultation_actions.dart';
-import 'package:school_app_flutter/features/schedule/presentation/widgets/schedule_day_view.dart';
-import 'package:school_app_flutter/features/schedule/presentation/widgets/schedule_view_mode.dart';
 import 'package:school_app_flutter/features/schedule/presentation/widgets/schedule_week_grid.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
@@ -27,12 +24,9 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 /// et les actions, la réserve, puis la grille éditable. On place en
 /// **touchant un créneau** (I8) à toutes les largeurs ; à partir de 976 dp
 /// reçus, on glisse aussi (R14) et la réserve passe à côté de la grille. Le
-/// brouillon est la semaine type, sans dates ni bandeaux (R17).
-///
-/// Sous 976 dp, Semaine | Jour s'offre aussi au brouillon, Jour par défaut
-/// sur téléphone : la grille n'y montrait que deux jours à la fois, noms
-/// tronqués. La journée liste tous les créneaux, libres en tirets. À partir
-/// de 976 dp, la vue Semaine reste imposée (R12) : c'est là qu'on glisse.
+/// brouillon est la semaine type, sans dates ni bandeaux (R17), et toujours
+/// en vue Semaine (R12) : sous la largeur mini, la grille défile de côté,
+/// heures figées et « Suite » au bord.
 class TimetableDraftSection extends StatelessWidget {
   final ClassTimetableView view;
   final ClassTimetableCubit cubit;
@@ -41,19 +35,12 @@ class TimetableDraftSection extends StatelessWidget {
   /// Un geste est en cours : les actions attendent (I19).
   final bool busy;
 
-  /// Le choix Semaine | Jour de l'utilisateur (`null` : selon la largeur),
-  /// et le jour retenu.
-  final ClassTimetableMode? mode;
-  final Weekday? day;
-
   const TimetableDraftSection({
     super.key,
     required this.view,
     required this.cubit,
     required this.online,
     this.busy = false,
-    this.mode,
-    this.day,
   });
 
   /// À la souris (poste, web) le glisser part tout de suite ; au doigt,
@@ -91,14 +78,6 @@ class TimetableDraftSection extends StatelessWidget {
           onDropped: (data) =>
               unawaited(gestures.apply(DraftDrop.onReserve(data))),
         );
-        final dayMode =
-            !wide &&
-            (mode ??
-                    (defaultScheduleViewMode(constraints.maxWidth) ==
-                            ScheduleViewMode.day
-                        ? ClassTimetableMode.day
-                        : ClassTimetableMode.week)) ==
-                ClassTimetableMode.day;
         final week = ClassWeekBuilder.build(view, view.draft);
         final palette = ScheduleClassPalette.byCourse(
           ClassWeekBuilder.courseVisuals(view),
@@ -110,25 +89,16 @@ class TimetableDraftSection extends StatelessWidget {
             ? (Weekday day, TimeSlot slot) =>
                   unawaited(gestures.openSlot(day, slot))
             : null;
-        final grid = dayMode
-            ? ScheduleDayView(
-                timetable: week,
-                palette: palette,
-                today: null,
-                selectedDay: day ?? Weekday.mon,
-                onDaySelected: cubit.setDay,
-                marks: marks,
-                onTapSlot: onTapSlot,
-              )
-            : ScheduleWeekGrid(
-                timetable: week,
-                palette: palette,
-                today: null,
-                keepSaturday: true,
-                marks: marks,
-                drag: drag,
-                onTapSlot: onTapSlot,
-              );
+        final grid = ScheduleWeekGrid(
+          timetable: week,
+          palette: palette,
+          today: null,
+          keepSaturday: true,
+          marks: marks,
+          drag: drag,
+          onTapSlot: onTapSlot,
+          look: ScheduleGridLook.classTimetable,
+        );
         return Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -143,8 +113,6 @@ class TimetableDraftSection extends StatelessWidget {
               narrow: narrow,
               help: wide
                   ? l10n.classTimetableHelpDrag
-                  : dayMode
-                  ? l10n.classTimetableHelpDraftDay
                   : l10n.classTimetableHelpDraft,
               gestures: gestures,
             ),
@@ -163,16 +131,6 @@ class TimetableDraftSection extends StatelessWidget {
               )
             else ...[
               reserve,
-              const SizedBox(height: AppSpacing.md),
-              Align(
-                alignment: Alignment.centerLeft,
-                child: ClassTimetableModeSwitch(
-                  mode: dayMode
-                      ? ClassTimetableMode.day
-                      : ClassTimetableMode.week,
-                  onMode: cubit.setMode,
-                ),
-              ),
               const SizedBox(height: AppSpacing.md),
               grid,
             ],

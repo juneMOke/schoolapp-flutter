@@ -11,7 +11,6 @@ import 'package:school_app_flutter/features/schedule/domain/entities/weekly_time
 import 'package:school_app_flutter/features/schedule/presentation/helpers/schedule_class_palette.dart';
 import 'package:school_app_flutter/features/schedule/presentation/helpers/schedule_weekday_labels.dart';
 import 'package:school_app_flutter/features/schedule/presentation/widgets/schedule_day_row.dart';
-import 'package:school_app_flutter/features/schedule/presentation/widgets/schedule_free_slot_row.dart';
 import 'package:school_app_flutter/features/schedule/presentation/widgets/schedule_week_grid.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/features/schedule/presentation/widgets/states/schedule_results_empty_state.dart';
@@ -22,10 +21,6 @@ part 'schedule_day_selector.dart';
 /// Vue Jour (spec §5) : sélecteur de jour (LUN→SAM, jour courant marqué d'un
 /// point, et daté s'il reçoit [dates]) puis liste chronologique des séances du
 /// jour sélectionné. Un jour sans cours affiche l'état vide dédié.
-///
-/// Avec [onTapSlot] (brouillon d'une classe sur téléphone), la journée liste
-/// TOUS ses créneaux, les libres en tirets « + » : toucher un créneau l'ouvre,
-/// comme dans la grille.
 class ScheduleDayView extends StatelessWidget {
   final WeeklyTimetable timetable;
   final ScheduleClassPalette palette;
@@ -36,9 +31,6 @@ class ScheduleDayView extends StatelessWidget {
 
   /// Le quantième de chaque jour (semaine datée) ; `null` : semaine type.
   final Map<Weekday, DateTime>? dates;
-
-  /// Brouillon : toucher un créneau, libre ou occupé.
-  final void Function(Weekday day, TimeSlot slot)? onTapSlot;
 
   /// Jour fermé, séance en cours, filtre de domaine (EDT §4.6 E).
   final ScheduleGridMarks marks;
@@ -52,7 +44,6 @@ class ScheduleDayView extends StatelessWidget {
     required this.onDaySelected,
     this.onOpenCell,
     this.dates,
-    this.onTapSlot,
     this.marks = ScheduleGridMarks.none,
   });
 
@@ -90,7 +81,6 @@ class ScheduleDayView extends StatelessWidget {
             day: selectedDay,
             palette: palette,
             onOpenCell: onOpenCell,
-            onTapSlot: onTapSlot,
             marks: marks,
           ),
       ],
@@ -99,11 +89,7 @@ class ScheduleDayView extends StatelessWidget {
 
   List<TimetableRow> _sessionsFor(Weekday day) {
     final rows = timetable.rows
-        .where(
-          (row) => onTapSlot != null
-              ? !ScheduleWeekGrid.isBreakRow(row)
-              : row.cellFor(day) != null,
-        )
+        .where((row) => row.cellFor(day) != null)
         .toList();
     rows.sort((a, b) => TimeSlot.compareByTime(a.timeSlot, b.timeSlot));
     return rows;
@@ -115,7 +101,6 @@ class _DayList extends StatelessWidget {
   final Weekday day;
   final ScheduleClassPalette palette;
   final void Function(TimetableCell cell)? onOpenCell;
-  final void Function(Weekday day, TimeSlot slot)? onTapSlot;
   final ScheduleGridMarks marks;
 
   const _DayList({
@@ -123,7 +108,6 @@ class _DayList extends StatelessWidget {
     required this.day,
     required this.palette,
     required this.onOpenCell,
-    required this.onTapSlot,
     required this.marks,
   });
 
@@ -149,24 +133,13 @@ class _DayList extends StatelessWidget {
   }
 
   Widget _buildRow(BuildContext context, TimetableRow row) {
-    final tapSlot = onTapSlot;
-    final cell = row.cellFor(day);
-    if (cell == null) {
-      return ScheduleFreeSlotRow(
-        slot: row.timeSlot,
-        onTap: tapSlot == null ? null : () => tapSlot(day, row.timeSlot),
-      );
-    }
+    final cell = row.cellFor(day)!;
     final open = onOpenCell;
     return ScheduleDayRow(
       slot: row.timeSlot,
       cell: cell,
       visual: palette.visualForCell(cell),
-      onTap: tapSlot != null
-          ? () => tapSlot(day, row.timeSlot)
-          : open == null
-          ? null
-          : () => open(cell),
+      onTap: open == null ? null : () => open(cell),
       alert: marks.alerts[cell.sessionId],
       struck: marks.closedDays.containsKey(day),
       emphasis: marks.emphasisOf(cell),
