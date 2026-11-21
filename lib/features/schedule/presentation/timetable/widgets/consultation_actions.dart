@@ -32,27 +32,31 @@ class ConsultationActions extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final printTip = online
+        ? l10n.classTimetablePrint
+        : l10n.classTimetablePrintOffline;
     return Wrap(
       spacing: AppSpacing.md,
       runSpacing: AppSpacing.sm,
       crossAxisAlignment: WrapCrossAlignment.center,
       children: [
-        if (published)
+        // L'icône seule porte son infobulle : le lecteur d'écran l'annonce
+        // (« Imprimer », ou pourquoi c'est inactif hors ligne).
+        if (published && narrow)
+          IconButton.outlined(
+            tooltip: printTip,
+            onPressed: onPrint,
+            icon: const Icon(Icons.print_outlined),
+          ),
+        if (published && !narrow)
           Tooltip(
-            message: online
-                ? l10n.classTimetablePrint
-                : l10n.classTimetablePrintOffline,
-            child: narrow
-                ? IconButton.outlined(
-                    onPressed: onPrint,
-                    icon: const Icon(Icons.print_outlined),
-                  )
-                : SecondaryButton(
-                    label: l10n.classTimetablePrint,
-                    icon: Icons.print_outlined,
-                    fullWidth: false,
-                    onPressed: onPrint,
-                  ),
+            message: printTip,
+            child: SecondaryButton(
+              label: l10n.classTimetablePrint,
+              icon: Icons.print_outlined,
+              fullWidth: false,
+              onPressed: onPrint,
+            ),
           ),
         if (onEdit case final edit?)
           PrimaryButton(

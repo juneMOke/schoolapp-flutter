@@ -20,6 +20,11 @@ class EteeloFilterChip extends StatelessWidget {
   /// `null` : la puce se lit sans se toucher (réglages en lecture seule).
   final VoidCallback? onTap;
 
+  /// La zone de toucher monte à [AppDimensions.minTouchTarget] par une marge
+  /// transparente au-dessus et au-dessous ; la puce garde sa hauteur. La
+  /// rangée qui la porte réduit d'autant son interligne.
+  final bool padTapTarget;
+
   const EteeloFilterChip({
     super.key,
     required this.label,
@@ -30,69 +35,83 @@ class EteeloFilterChip extends StatelessWidget {
     required this.onTap,
     this.count,
     this.icon,
+    this.padTapTarget = false,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Semantics(
-      button: true,
-      selected: selected,
-      child: Material(
-        color: selected ? soft : AppColors.surfaceRaised,
-        shape: RoundedRectangleBorder(
-          borderRadius: AppRadius.brPill,
-          side: BorderSide(
-            color: selected ? color : AppColors.border,
-            width: 1.5,
-          ),
+    final chip = Material(
+      color: selected ? soft : AppColors.surfaceRaised,
+      shape: RoundedRectangleBorder(
+        borderRadius: AppRadius.brPill,
+        side: BorderSide(
+          color: selected ? color : AppColors.border,
+          width: 1.5,
         ),
-        child: InkWell(
-          customBorder: const StadiumBorder(),
-          onTap: onTap,
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(
-              minHeight: AppDimensions.filterChipHeight,
-            ),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  if (icon != null) ...[
-                    Icon(
-                      icon,
-                      size: 16,
-                      color: selected ? ink : AppColors.textSecondary,
-                    ),
-                    const SizedBox(width: AppSpacing.xs),
-                  ],
-                  // Flexible : sur un écran étroit, un libellé long se
-                  // tronque au lieu de faire déborder la puce.
-                  Flexible(
-                    child: Text(
-                      label,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: AppTypography.labelMedium.copyWith(
-                        color: selected ? ink : AppColors.textPrimary,
-                      ),
+      ),
+      child: InkWell(
+        customBorder: const StadiumBorder(),
+        onTap: onTap,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(
+            minHeight: AppDimensions.filterChipHeight,
+          ),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (icon != null) ...[
+                  Icon(
+                    icon,
+                    size: 16,
+                    color: selected ? ink : AppColors.textSecondary,
+                  ),
+                  const SizedBox(width: AppSpacing.xs),
+                ],
+                // Flexible : sur un écran étroit, un libellé long se
+                // tronque au lieu de faire déborder la puce.
+                Flexible(
+                  child: Text(
+                    label,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppTypography.labelMedium.copyWith(
+                      color: selected ? ink : AppColors.textPrimary,
                     ),
                   ),
-                  if (count != null) ...[
-                    const SizedBox(width: AppSpacing.sm),
-                    Text(
-                      '$count',
-                      style: AppTypography.labelMedium.copyWith(
-                        color: selected ? ink : AppColors.textMutedAa,
-                      ),
+                ),
+                if (count != null) ...[
+                  const SizedBox(width: AppSpacing.sm),
+                  Text(
+                    '$count',
+                    style: AppTypography.labelMedium.copyWith(
+                      color: selected ? ink : AppColors.textMutedAa,
                     ),
-                  ],
+                  ),
                 ],
-              ),
+              ],
             ),
           ),
         ),
       ),
+    );
+    return Semantics(
+      button: true,
+      selected: selected,
+      child: padTapTarget
+          ? GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              excludeFromSemantics: true,
+              onTap: onTap,
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(
+                  minHeight: AppDimensions.minTouchTarget,
+                ),
+                child: Align(widthFactor: 1, child: chip),
+              ),
+            )
+          : chip,
     );
   }
 }

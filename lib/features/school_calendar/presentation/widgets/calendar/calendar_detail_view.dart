@@ -83,13 +83,14 @@ class CalendarDetailView extends StatelessWidget {
               canWrite: canWrite,
               actions: actions,
               compact: compact,
+              menu:
+                  constraints.maxWidth < AppBreakpoints.calendarActionsMenuMax,
             ),
             if (verify > 0 && !state.verifyOnly) ...[
               const SizedBox(height: AppSpacing.sm),
-              EteeloNotice.warning(l10n.schoolCalendarVerifyNotice(verify)),
-              Align(
-                alignment: Alignment.centerLeft,
-                child: TextButton(
+              EteeloNotice.warning(
+                l10n.schoolCalendarVerifyNotice(verify),
+                action: TextButton(
                   onPressed: () => cubit.setVerifyOnly(true),
                   child: Text(l10n.schoolCalendarReview),
                 ),

@@ -20,6 +20,7 @@ Widget _app(Widget child) => MaterialApp(
 
 CalendarActionsRow _row({
   required bool compact,
+  bool menu = false,
   bool canWrite = true,
   VoidCallback? print,
   VoidCallback? duplicate,
@@ -27,6 +28,7 @@ CalendarActionsRow _row({
   phase: CalendarPhase.inForce,
   canWrite: canWrite,
   compact: compact,
+  menu: menu,
   actions: CalendarActions(
     openElement: (_) {},
     addOn: (_) {},
@@ -85,5 +87,20 @@ void main() {
     await tester.pumpWidget(_app(_row(compact: false, print: () {})));
     expect(find.text('Imprimer'), findsOneWidget);
     expect(find.text('Ajouter'), findsOneWidget);
+  });
+
+  testWidgets('tablette en deçà de 976 dp : « ⋯ », et « Ajouter » sur la '
+      'ligne de l’aide', (tester) async {
+    tester.view.physicalSize = const Size(800, 600);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(
+      _app(_row(compact: false, menu: true, print: () {}, duplicate: () {})),
+    );
+    expect(find.text('Imprimer'), findsNothing);
+    expect(find.byTooltip("Plus d'actions"), findsOneWidget);
+    final help = tester.getCenter(find.textContaining('Touchez un jour libre'));
+    final add = tester.getCenter(find.text('Ajouter'));
+    expect((help.dy - add.dy).abs(), lessThan(1));
   });
 }

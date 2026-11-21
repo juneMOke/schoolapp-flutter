@@ -37,22 +37,31 @@ class DatedWeekBar extends StatelessWidget {
     return Wrap(
       crossAxisAlignment: WrapCrossAlignment.center,
       children: [
-        IconButton(
-          tooltip: l10n.classTimetablePreviousWeek,
-          onPressed: onPrevious,
-          icon: const Icon(Icons.chevron_left),
-        ),
-        Text(
-          l10n.classTimetableWeekOf(
-            dates.formatShortMonthDay(monday),
-            dates.formatShortMonthDay(saturday),
-          ),
-          style: AppTypography.titleSmall,
-        ),
-        IconButton(
-          tooltip: l10n.classTimetableNextWeek,
-          onPressed: onNext,
-          icon: const Icon(Icons.chevron_right),
+        // ‹ et › restent de part et d'autre de la semaine : sur un téléphone
+        // à ×1,3, c'est le libellé qui passe à la ligne, jamais une flèche.
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            IconButton(
+              tooltip: l10n.classTimetablePreviousWeek,
+              onPressed: onPrevious,
+              icon: const Icon(Icons.chevron_left),
+            ),
+            Flexible(
+              child: Text(
+                l10n.classTimetableWeekOf(
+                  dates.formatShortMonthDay(monday),
+                  dates.formatShortMonthDay(saturday),
+                ),
+                style: AppTypography.titleSmall,
+              ),
+            ),
+            IconButton(
+              tooltip: l10n.classTimetableNextWeek,
+              onPressed: onNext,
+              icon: const Icon(Icons.chevron_right),
+            ),
+          ],
         ),
         if (isThisWeek)
           Text(l10n.classTimetableThisWeek, style: AppTypography.bodySmall)

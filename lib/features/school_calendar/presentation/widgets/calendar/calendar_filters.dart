@@ -120,7 +120,10 @@ class _FiltersSheet extends StatelessWidget {
           a.source != b.source ||
           a.effectiveRhythm != b.effectiveRhythm ||
           a.scopes != b.scopes,
-      builder: (context, state) => Padding(
+      // Toute la largeur de la feuille : sans cela, la colonne prenait celle
+      // de son plus long enfant (252 dp sur 360).
+      builder: (context, state) => Container(
+        width: double.infinity,
         padding: const EdgeInsets.all(AppSpacing.lg),
         child: Column(
           mainAxisSize: MainAxisSize.min,

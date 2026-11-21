@@ -37,8 +37,15 @@ class AppBreakpoints {
 
   /// Hauteur de fenêtre sous laquelle le bandeau d'une année du calendrier
   /// passe en compact, comme sous [calendarMonthCompactMax] de large : sur un
-  /// téléphone en paysage (360 dp), le bandeau complet remplissait l'écran.
-  static const double calendarBannerCompactMaxHeight = 480.0;
+  /// téléphone (360 dp) comme sur une 7″ (600 dp) en paysage, le bandeau
+  /// complet et les actions remplissaient le premier écran, sans le mois.
+  /// Une 10″ en paysage (800) et un poste gardent le bandeau complet.
+  static const double calendarBannerCompactMaxHeight = 720.0;
+
+  /// Largeur reçue sous laquelle Imprimer, Document du ministère et Dupliquer
+  /// passent dans le menu « ⋯ » d'un calendrier, l'aide et « Ajouter » sur
+  /// une seule ligne : en deçà, les quatre boutons prenaient deux lignes.
+  static const double calendarActionsMenuMax = sideBySideMin;
 
   /// Fenêtre sous laquelle une modale de saisie (`EteeloFormDialog`) prend
   /// tout l'écran : centrée, elle gardait 40 dp de marge par côté, soit

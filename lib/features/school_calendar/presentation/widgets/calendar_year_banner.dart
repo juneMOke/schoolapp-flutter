@@ -16,9 +16,10 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 /// cadre, l'avancement « Semaine n / N », puis Période, En ce moment et
 /// Prochaine échéance (CAL-R14). Hors de l'année, ni avancement ni tuiles.
 ///
-/// [compact] (téléphone, ou fenêtre basse) : ni ligne du cadre ni tuiles ;
-/// sous l'avancement, la seule prochaine échéance, sur une ligne. Le bandeau
-/// complet repoussait le calendrier à plus d'un écran plus bas.
+/// [compact] (téléphone, ou fenêtre basse) : ni surtitre (la barre du haut
+/// nomme la page), ni ligne du cadre, ni tuiles ; les dates suivent l'année,
+/// et sous l'avancement vient la seule prochaine échéance. Le bandeau complet
+/// repoussait le calendrier à plus d'un écran plus bas.
 class CalendarYearBanner extends StatelessWidget {
   final SchoolCalendar calendar;
   final CalendarPhase phase;
@@ -58,17 +59,24 @@ class CalendarYearBanner extends StatelessWidget {
     final onDark = AppTypography.bodySmall.copyWith(
       color: AppColors.textOnDark,
     );
+    final dates = CalendarLabels.range(
+      context,
+      calendar.startDate,
+      calendar.endDate,
+    );
     return KubaBanner(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            eyebrow,
-            style: AppTypography.eyebrow.copyWith(
-              color: AppColors.kubaBannerOn,
+          if (!compact) ...[
+            Text(
+              eyebrow,
+              style: AppTypography.eyebrow.copyWith(
+                color: AppColors.kubaBannerOn,
+              ),
             ),
-          ),
-          const SizedBox(height: AppSpacing.xs),
+            const SizedBox(height: AppSpacing.xs),
+          ],
           Wrap(
             spacing: AppSpacing.sm,
             runSpacing: AppSpacing.xs,
@@ -81,13 +89,13 @@ class CalendarYearBanner extends StatelessWidget {
                 ),
               ),
               _Pill(CalendarLabels.phase(l10n, phase)),
+              if (compact) Text(dates, style: onDark),
             ],
           ),
-          const SizedBox(height: AppSpacing.xs),
-          Text(
-            CalendarLabels.range(context, calendar.startDate, calendar.endDate),
-            style: onDark,
-          ),
+          if (!compact) ...[
+            const SizedBox(height: AppSpacing.xs),
+            Text(dates, style: onDark),
+          ],
           if (!compact)
             Text(
               [

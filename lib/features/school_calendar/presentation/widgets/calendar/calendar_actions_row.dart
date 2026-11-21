@@ -35,14 +35,16 @@ class CalendarActions {
 
 /// L'aide et les gestes d'un calendrier. L'aide suit le geste réel : au
 /// doigt « Touchez », à la souris « Cliquez » ; en [compact], toucher un jour
-/// le sélectionne (I7). En [compact], Imprimer, Document du ministère et
-/// Dupliquer passent dans un menu « ⋯ » ; « Ajouter » devient le bouton
+/// le sélectionne (I7). Avec [menu], Imprimer, Document du ministère et
+/// Dupliquer passent dans un menu « ⋯ », et l'aide, « Ajouter » et
+/// « Publier » tiennent sur une ligne ; « Ajouter » devient le bouton
 /// flottant de la page sous [addAsFab].
 class CalendarActionsRow extends StatelessWidget {
   final CalendarPhase phase;
   final bool canWrite;
   final CalendarActions actions;
   final bool compact;
+  final bool menu;
 
   const CalendarActionsRow({
     super.key,
@@ -50,6 +52,7 @@ class CalendarActionsRow extends StatelessWidget {
     required this.canWrite,
     required this.actions,
     this.compact = false,
+    this.menu = false,
   });
 
   /// Fenêtre de téléphone : « Ajouter » est le bouton flottant de la page.
@@ -110,24 +113,15 @@ class CalendarActionsRow extends StatelessWidget {
             fullWidth: false,
             onPressed: publish,
           );
-    if (compact) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+    if (compact || menu) {
+      return Row(
         children: [
-          Row(
-            children: [
-              Expanded(child: help),
-              if (secondary.isNotEmpty) _MoreMenu(items: secondary),
-            ],
-          ),
-          if (addButton != null || publishButton != null) ...[
-            const SizedBox(height: AppSpacing.sm),
-            Wrap(
-              spacing: AppSpacing.sm,
-              runSpacing: AppSpacing.sm,
-              children: [?addButton, ?publishButton],
-            ),
+          Expanded(child: help),
+          for (final button in [?addButton, ?publishButton]) ...[
+            const SizedBox(width: AppSpacing.sm),
+            button,
           ],
+          if (secondary.isNotEmpty) _MoreMenu(items: secondary),
         ],
       );
     }

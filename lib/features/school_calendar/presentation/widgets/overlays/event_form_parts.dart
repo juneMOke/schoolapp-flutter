@@ -239,13 +239,14 @@ class EventNatureChoice extends StatelessWidget {
   Widget build(BuildContext context) {
     if (locked) return EventReplacementNotice(nature: nature);
     final l10n = AppLocalizations.of(context)!;
+    // L'interligne est dans la zone de toucher des puces (48 dp).
     return Wrap(
       spacing: AppSpacing.sm,
-      runSpacing: AppSpacing.sm,
       children: [
         for (final n in CalendarNature.values)
           if (natures.contains(n))
             EteeloFilterChip(
+              padTapTarget: true,
               label: CalendarLabels.nature(l10n, n),
               selected: nature == n,
               color: n.tone.tone,

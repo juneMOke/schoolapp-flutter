@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/components/cards/eteelo_panel_card.dart';
 import 'package:school_app_flutter/core/components/controls/eteelo_filter_chip.dart';
+import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/theme/course_domain_tones.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
@@ -79,11 +80,12 @@ class ClassTimetableDistribution extends StatelessWidget {
               ),
           if (filter != null && domains.length > 1) ...[
             const SizedBox(height: AppSpacing.sm),
+            // L'interligne est dans la zone de toucher des puces (48 dp).
             Wrap(
               spacing: AppSpacing.sm,
-              runSpacing: AppSpacing.sm,
               children: [
                 EteeloFilterChip(
+                  padTapTarget: true,
                   label: l10n.classTimetableAllDomains,
                   selected: domainFilter == null,
                   color: AppColors.textSecondary,
@@ -95,6 +97,7 @@ class ClassTimetableDistribution extends StatelessWidget {
                   () {
                     final tone = CourseDomainTones.forDomain(id, order);
                     return EteeloFilterChip(
+                      padTapTarget: true,
                       label: label,
                       selected: domainFilter == id,
                       color: tone.ink,
@@ -143,6 +146,10 @@ class _Line extends StatelessWidget {
         // Au doigt, toucher une ligne la repère ou la libère.
         onTap: hover == null ? null : () => hover(!linked),
         child: Container(
+          // Une ligne se touche : 48 dp, même sans enseignant.
+          constraints: const BoxConstraints(
+            minHeight: AppDimensions.minTouchTarget,
+          ),
           padding: const EdgeInsets.all(AppSpacing.xs),
           decoration: BoxDecoration(
             color: linked ? tone.soft : null,
