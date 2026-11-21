@@ -23740,9 +23740,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get schoolCalendarMoreActions => 'More actions';
 
   @override
-  String get schoolCalendarFilters => 'Filters';
-
-  @override
   String schoolCalendarVerifyNotice(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
@@ -23984,9 +23981,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String schoolCalendarScopeCatalog(String codes) {
     return 'Levels $codes';
   }
-
-  @override
-  String get schoolCalendarPending => 'Waiting to be sent';
 
   @override
   String schoolCalendarRejected(String reason) {
@@ -24660,13 +24654,6 @@ class AppLocalizationsEn extends AppLocalizations {
       'Tap a slot in the grid to place a course.';
 
   @override
-  String get classTimetableHelpDraftDay =>
-      'Tap a slot of the day to place a course there.';
-
-  @override
-  String get classTimetableFreeSlot => 'Free slot';
-
-  @override
   String get classTimetableReserveTitle => 'Courses to place';
 
   @override
@@ -25097,9 +25084,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get classTimetableTapHint => 'Tap a course to find it in the grid';
-
-  @override
-  String get classTimetableChangeClass => 'Change class';
 
   @override
   String get classTimetableAllDomains => 'All domains';

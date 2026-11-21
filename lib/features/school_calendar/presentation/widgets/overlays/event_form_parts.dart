@@ -215,7 +215,7 @@ class EventFieldLabel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.only(bottom: AppSpacing.xs + 2),
+    padding: const EdgeInsets.only(bottom: AppSpacing.tight),
     child: Text.rich(
       TextSpan(
         text: label,

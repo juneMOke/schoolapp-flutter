@@ -68,7 +68,7 @@ class EteeloDialogDarkHeader extends StatelessWidget {
                         overflow: TextOverflow.ellipsis,
                         style: AppTypography.labelSmall.copyWith(
                           color: AppColors.orDoux,
-                          letterSpacing: 1.2,
+                          letterSpacing: AppTypography.eyebrowLetterSpacing,
                           fontWeight: FontWeight.w600,
                         ),
                       ),

@@ -36448,12 +36448,6 @@ abstract class AppLocalizations {
   /// **'More actions'**
   String get schoolCalendarMoreActions;
 
-  /// No description provided for @schoolCalendarFilters.
-  ///
-  /// In en, this message translates to:
-  /// **'Filters'**
-  String get schoolCalendarFilters;
-
   /// No description provided for @schoolCalendarVerifyNotice.
   ///
   /// In en, this message translates to:
@@ -36752,12 +36746,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Levels {codes}'**
   String schoolCalendarScopeCatalog(String codes);
-
-  /// No description provided for @schoolCalendarPending.
-  ///
-  /// In en, this message translates to:
-  /// **'Waiting to be sent'**
-  String get schoolCalendarPending;
 
   /// No description provided for @schoolCalendarRejected.
   ///
@@ -37611,18 +37599,6 @@ abstract class AppLocalizations {
   /// **'Tap a slot in the grid to place a course.'**
   String get classTimetableHelpDraft;
 
-  /// No description provided for @classTimetableHelpDraftDay.
-  ///
-  /// In en, this message translates to:
-  /// **'Tap a slot of the day to place a course there.'**
-  String get classTimetableHelpDraftDay;
-
-  /// No description provided for @classTimetableFreeSlot.
-  ///
-  /// In en, this message translates to:
-  /// **'Free slot'**
-  String get classTimetableFreeSlot;
-
   /// No description provided for @classTimetableReserveTitle.
   ///
   /// In en, this message translates to:
@@ -38168,12 +38144,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Tap a course to find it in the grid'**
   String get classTimetableTapHint;
-
-  /// No description provided for @classTimetableChangeClass.
-  ///
-  /// In en, this message translates to:
-  /// **'Change class'**
-  String get classTimetableChangeClass;
 
   /// No description provided for @classTimetableAllDomains.
   ///

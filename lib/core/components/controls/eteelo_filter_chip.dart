@@ -64,7 +64,7 @@ class EteeloFilterChip extends StatelessWidget {
           child: Padding(
             padding: EdgeInsets.only(
               left: iconMedallion && icon != null
-                  ? AppSpacing.xs + 2
+                  ? AppSpacing.tight
                   : AppSpacing.md,
               right: AppSpacing.md,
             ),

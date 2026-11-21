@@ -332,7 +332,7 @@ class DocumentViewerHeader extends StatelessWidget {
                     over.toUpperCase(),
                     style: AppTypography.labelSmall.copyWith(
                       color: AppColors.terreCuite,
-                      letterSpacing: 1.2,
+                      letterSpacing: AppTypography.eyebrowLetterSpacing,
                       fontWeight: FontWeight.w600,
                     ),
                   ),

@@ -23906,9 +23906,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String get schoolCalendarMoreActions => 'Plus d\'actions';
 
   @override
-  String get schoolCalendarFilters => 'Filtres';
-
-  @override
   String schoolCalendarVerifyNotice(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
@@ -24149,9 +24146,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String schoolCalendarScopeCatalog(String codes) {
     return 'Niveaux $codes';
   }
-
-  @override
-  String get schoolCalendarPending => 'En attente d\'envoi';
 
   @override
   String schoolCalendarRejected(String reason) {
@@ -24836,13 +24830,6 @@ class AppLocalizationsFr extends AppLocalizations {
       'Touchez un créneau de la grille pour y placer un cours.';
 
   @override
-  String get classTimetableHelpDraftDay =>
-      'Touchez un créneau de la journée pour y placer un cours.';
-
-  @override
-  String get classTimetableFreeSlot => 'Créneau libre';
-
-  @override
   String get classTimetableReserveTitle => 'Cours à placer';
 
   @override
@@ -25277,9 +25264,6 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get classTimetableTapHint =>
       'Touchez un cours pour le repérer dans la grille';
-
-  @override
-  String get classTimetableChangeClass => 'Changer de classe';
 
   @override
   String get classTimetableAllDomains => 'Tous les domaines';

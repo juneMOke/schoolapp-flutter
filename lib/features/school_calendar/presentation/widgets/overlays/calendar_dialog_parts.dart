@@ -55,7 +55,7 @@ class DuplicateCalendarNotice extends StatelessWidget {
                   color: frameworkInk,
                 ),
               ),
-              const SizedBox(width: AppSpacing.xs + 2),
+              const SizedBox(width: AppSpacing.tight),
               Expanded(
                 child: Text(
                   l10n.schoolCalendarDuplicateFramework(
