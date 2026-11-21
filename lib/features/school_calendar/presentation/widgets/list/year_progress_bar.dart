@@ -19,12 +19,21 @@ class YearProgressBar extends StatelessWidget {
   /// Le début de chaque période, dans l'année.
   final List<DateTime> markers;
 
+  /// La légende des bornes sous la barre ; vrai par défaut. Le bandeau d'un
+  /// calendrier ouvert n'en a pas.
+  final bool legend;
+
+  /// La largeur plafond ; `null` : toute la largeur reçue.
+  final double? maxWidth;
+
   const YearProgressBar({
     super.key,
     required this.progress,
     required this.startDate,
     required this.endDate,
     required this.markers,
+    this.legend = true,
+    this.maxWidth = AppDimensions.calendarProgressMaxWidth,
   });
 
   @override
@@ -39,9 +48,7 @@ class YearProgressBar extends StatelessWidget {
     );
     final span = endDate.difference(startDate).inDays;
     return ConstrainedBox(
-      constraints: const BoxConstraints(
-        maxWidth: AppDimensions.calendarProgressMaxWidth,
-      ),
+      constraints: BoxConstraints(maxWidth: maxWidth ?? double.infinity),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -102,22 +109,24 @@ class YearProgressBar extends StatelessWidget {
               },
             ),
           ),
-          const SizedBox(height: AppSpacing.xs),
-          Row(
-            children: [
-              Text(CalendarLabels.shortDay(context, startDate), style: foot),
-              Expanded(
-                child: Text(
-                  l10n.schoolCalendarProgressMarkers,
-                  textAlign: TextAlign.center,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: foot,
+          if (legend) ...[
+            const SizedBox(height: AppSpacing.xs),
+            Row(
+              children: [
+                Text(CalendarLabels.shortDay(context, startDate), style: foot),
+                Expanded(
+                  child: Text(
+                    l10n.schoolCalendarProgressMarkers,
+                    textAlign: TextAlign.center,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: foot,
+                  ),
                 ),
-              ),
-              Text(CalendarLabels.shortDay(context, endDate), style: foot),
-            ],
-          ),
+                Text(CalendarLabels.shortDay(context, endDate), style: foot),
+              ],
+            ),
+          ],
         ],
       ),
     );

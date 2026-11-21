@@ -41,6 +41,20 @@ class CalendarLabels {
     return '${dates.formatShortMonthDay(day)} ${dates.formatYear(day)}';
   }
 
+  /// « lundi 1 sept. 2025 » : avec le jour de la semaine et l'année.
+  static String weekdayWithYear(BuildContext context, DateTime day) {
+    final l10n = AppLocalizations.of(context)!;
+    return '${l10n.calendarWeekdayName('${day.weekday}')} '
+        '${dayWithYear(context, day)}';
+  }
+
+  /// « mardi 9 juin » : le jour touché, sans l'année.
+  static String weekdayDay(BuildContext context, DateTime day) {
+    final l10n = AppLocalizations.of(context)!;
+    return '${l10n.calendarWeekdayName('${day.weekday}')} '
+        '${shortDay(context, day)}';
+  }
+
   /// « 15 juin ».
   static String shortDay(BuildContext context, DateTime day) =>
       MaterialLocalizations.of(context).formatShortMonthDay(day);

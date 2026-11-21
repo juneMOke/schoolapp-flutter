@@ -133,13 +133,18 @@ class SchoolCalendarState extends Equatable {
   }
 
   /// Ce que montrent les vues, après légende, source et « à vérifier ».
-  List<CalendarElement> get visibleElements => [
+  /// Les éléments de la source retenue (Tout | National | Interne) : les
+  /// compteurs de la légende les suivent (CAL-I9).
+  List<CalendarElement> get sourcedElements => [
     for (final e in allElements)
-      if (!hiddenNatures.contains(e.nature) &&
-          (source == CalendarSourceFilter.all ||
-              (source == CalendarSourceFilter.national) == e.isNational) &&
-          (!verifyOnly || e.toVerify))
+      if (source == CalendarSourceFilter.all ||
+          (source == CalendarSourceFilter.national) == e.isNational)
         e,
+  ];
+
+  List<CalendarElement> get visibleElements => [
+    for (final e in sourcedElements)
+      if (!hiddenNatures.contains(e.nature) && (!verifyOnly || e.toVerify)) e,
   ];
 
   SchoolEventRecord? recordOf(String elementId) {

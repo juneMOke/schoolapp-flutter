@@ -3,7 +3,6 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/components/keyboard/page_action_shortcut.dart';
-import 'package:school_app_flutter/core/components/buttons/eteelo_fab.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
 import 'package:school_app_flutter/core/components/skeletons/eteelo_list_skeleton.dart';
@@ -67,33 +66,10 @@ class _Screen extends StatelessWidget {
           cubit,
           AppPageBackground(
             width: PageContentWidth.wide,
-            floatingActionButton: _addFab(context, state),
             child: _content(context, state, cubit),
           ),
         ),
       ),
-    );
-  }
-
-  /// Sur un téléphone, « Ajouter » d'un calendrier ouvert est le bouton
-  /// flottant : à portée du pouce, sans rangée de boutons avant la grille.
-  Widget? _addFab(BuildContext context, SchoolCalendarState state) {
-    final calendar = state.calendar;
-    if (state.status != SchoolCalendarStatus.ready || calendar == null) {
-      return null;
-    }
-    if (!CalendarActionsRow.addAsFab(context)) return null;
-    final rights = CalendarRights.of(context);
-    if (!rights.canWrite || state.phaseOf(calendar).isReadOnly) return null;
-    final actions = SchoolCalendarPageActions(
-      context,
-      context.read<SchoolCalendarCubit>(),
-      rights,
-    );
-    return EteeloFab(
-      label: AppLocalizations.of(context)!.schoolCalendarAdd,
-      icon: Icons.add_rounded,
-      onPressed: () => unawaited(actions.edit(day: state.selectedDay)),
     );
   }
 
