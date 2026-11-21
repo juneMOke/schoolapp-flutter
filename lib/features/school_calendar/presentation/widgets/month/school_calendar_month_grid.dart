@@ -165,7 +165,10 @@ class _WeekRow extends StatelessWidget {
     final content =
         top + header + gap + lanes * (bandHeight + gap) + more + AppSpacing.sm;
     final rowHeight = content > minHeight ? content : minHeight;
+    // Au premier plan : en fond, les cases opaques des jours recouvraient le
+    // filet du haut, et les semaines n'avaient plus de bord haut ni bas.
     return DecoratedBox(
+      position: DecorationPosition.foreground,
       decoration: BoxDecoration(
         border: first
             ? null
