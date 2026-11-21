@@ -54,6 +54,8 @@ Future<void> printSchoolCalendar(
     await showEteeloDocumentViewer(
       context,
       title: l10n.schoolCalendarPrintTitle,
+      eyebrow: l10n.schoolCalendarPrintEyebrow(calendar.yearLabel),
+      description: l10n.schoolCalendarPrintIntro,
       document: PrintableDocument(
         bytes: bytes,
         fileName: SchoolCalendarPdf.fileName(calendar.yearLabel),

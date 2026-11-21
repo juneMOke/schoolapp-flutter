@@ -12,10 +12,12 @@ import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 /// en cours.
 ///
 /// Le contenu est le même dans les deux formes ; il défile lui-même s'il est
-/// long (la modale est bornée en hauteur).
+/// long (la modale est bornée en hauteur). [maxWidth] borne la modale
+/// centrée seulement.
 Future<T?> showEteeloAdaptiveSheet<T>({
   required BuildContext context,
   required WidgetBuilder builder,
+  double maxWidth = AppDimensions.adaptiveSheetDialogMaxWidth,
 }) {
   final size = MediaQuery.sizeOf(context);
   if (size.width < AppBreakpoints.adaptiveSheetDialogMin) {
@@ -46,7 +48,7 @@ Future<T?> showEteeloAdaptiveSheet<T>({
       clipBehavior: Clip.antiAlias,
       child: ConstrainedBox(
         constraints: BoxConstraints(
-          maxWidth: AppDimensions.adaptiveSheetDialogMaxWidth,
+          maxWidth: maxWidth,
           maxHeight: size.height * AppDimensions.dialogMaxHeightRatio,
         ),
         child: builder(dialogContext),

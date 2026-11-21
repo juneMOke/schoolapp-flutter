@@ -18,12 +18,20 @@ class EteeloDialogDarkHeader extends StatelessWidget {
   final Widget? trailing;
   final VoidCallback onClose;
 
+  /// Le style du titre ; `null` : le titre Lora du socle.
+  final TextStyle? titleStyle;
+
+  /// Lignes permises au titre (1 par défaut, tronqué au-delà).
+  final int titleMaxLines;
+
   const EteeloDialogDarkHeader({
     super.key,
     required this.eyebrow,
     required this.title,
     required this.onClose,
     this.trailing,
+    this.titleStyle,
+    this.titleMaxLines = 1,
   });
 
   @override
@@ -67,13 +75,15 @@ class EteeloDialogDarkHeader extends StatelessWidget {
                       const SizedBox(height: AppDimensions.spacingXS),
                       Text(
                         title,
-                        maxLines: 1,
+                        maxLines: titleMaxLines,
                         overflow: TextOverflow.ellipsis,
-                        style: AppTextStyles.totalAmountLora.copyWith(
-                          fontSize: 24,
-                          color: AppColors.textOnDark,
-                          fontWeight: FontWeight.w700,
-                        ),
+                        style:
+                            titleStyle ??
+                            AppTextStyles.totalAmountLora.copyWith(
+                              fontSize: 24,
+                              color: AppColors.textOnDark,
+                              fontWeight: FontWeight.w700,
+                            ),
                       ),
                     ],
                   ),

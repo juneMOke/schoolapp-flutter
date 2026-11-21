@@ -36580,6 +36580,101 @@ abstract class AppLocalizations {
   /// **'{state, select, now{In progress} past{Ended} other{}}'**
   String schoolCalendarWhen(String state);
 
+  /// No description provided for @schoolCalendarDetailInDays.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{Today} =1{Tomorrow} other{In {count} days}}'**
+  String schoolCalendarDetailInDays(int count);
+
+  /// No description provided for @schoolCalendarFormEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Calendar {year}'**
+  String schoolCalendarFormEyebrow(String year);
+
+  /// No description provided for @schoolCalendarFormNoteLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Note'**
+  String get schoolCalendarFormNoteLabel;
+
+  /// No description provided for @schoolCalendarFormOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'(optional)'**
+  String get schoolCalendarFormOptional;
+
+  /// No description provided for @schoolCalendarFormTitleHint.
+  ///
+  /// In en, this message translates to:
+  /// **'{nature, select, ASSESSMENT{P2 tests} EXAM{Mock exams} other{Parents\' meeting}}'**
+  String schoolCalendarFormTitleHint(String nature);
+
+  /// No description provided for @schoolCalendarNewEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'School calendar'**
+  String get schoolCalendarNewEyebrow;
+
+  /// No description provided for @schoolCalendarPrintEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Calendar {year} · published version'**
+  String schoolCalendarPrintEyebrow(String year);
+
+  /// No description provided for @schoolCalendarPrintIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'One landscape A4 page: the eleven months of the year, the legend of the kinds and the key dates.'**
+  String get schoolCalendarPrintIntro;
+
+  /// No description provided for @schoolCalendarPublishFramework.
+  ///
+  /// In en, this message translates to:
+  /// **'{state, select, yes{national framework included} other{no national framework}}'**
+  String schoolCalendarPublishFramework(String state);
+
+  /// No description provided for @schoolCalendarPublishAudience.
+  ///
+  /// In en, this message translates to:
+  /// **'Teachers, students and parents will see this calendar.'**
+  String get schoolCalendarPublishAudience;
+
+  /// No description provided for @schoolCalendarPublishRelay.
+  ///
+  /// In en, this message translates to:
+  /// **'{current} stays in force until {end}; {year} takes over on {start}.'**
+  String schoolCalendarPublishRelay(
+    String current,
+    String end,
+    String year,
+    String start,
+  );
+
+  /// No description provided for @schoolCalendarPublishReference.
+  ///
+  /// In en, this message translates to:
+  /// **'Its periods, tests and exams become the reference for assessments, report cards and the timetable.'**
+  String get schoolCalendarPublishReference;
+
+  /// No description provided for @schoolCalendarDuplicateShift.
+  ///
+  /// In en, this message translates to:
+  /// **'Dates move 52 weeks: a Friday event stays on a Friday. Each carried-over element is marked to check.'**
+  String get schoolCalendarDuplicateShift;
+
+  /// No description provided for @schoolCalendarDuplicateFramework.
+  ///
+  /// In en, this message translates to:
+  /// **'{state, select, integrated{The {year} national framework is not copied: the official version published by ETEELO is included.} awaited{The {year} national framework is not published yet. It will be added automatically once published.} other{The {year} national framework is not copied: the official version is included once published.}}'**
+  String schoolCalendarDuplicateFramework(String state, String year);
+
+  /// No description provided for @schoolCalendarDuplicateDraft.
+  ///
+  /// In en, this message translates to:
+  /// **'{state, select, inForce{The result is a draft: {year} stays in force.} other{The result is a draft: {year} is not changed.}}'**
+  String schoolCalendarDuplicateDraft(String state, String year);
+
   /// No description provided for @schoolCalendarToVerify.
   ///
   /// In en, this message translates to:
@@ -37120,12 +37215,6 @@ abstract class AppLocalizations {
   /// **'{count, plural, =1{1 window set by the academic adviser} other{{count} windows set by the academic adviser}}'**
   String schoolCalendarDuplicateWindowsCount(int count);
 
-  /// No description provided for @schoolCalendarDuplicateRule.
-  ///
-  /// In en, this message translates to:
-  /// **'Dates move 52 weeks: a Friday event stays on a Friday. Each carried-over element is marked to check. The new year\'s national framework is not copied: the official version is included once published. The result is a draft: {year} stays in force.'**
-  String schoolCalendarDuplicateRule(String year);
-
   /// No description provided for @schoolCalendarNewYear.
   ///
   /// In en, this message translates to:
@@ -37197,12 +37286,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count, plural, =1{1 element still to check. It will be published as is.} other{{count} elements still to check. They will be published as is.}}'**
   String schoolCalendarPublishToVerify(int count);
-
-  /// No description provided for @schoolCalendarPublishConsequence.
-  ///
-  /// In en, this message translates to:
-  /// **'The whole school will see this calendar. Its periods, tests and exams become the reference for assessments, report cards and the timetable.'**
-  String get schoolCalendarPublishConsequence;
 
   /// No description provided for @accueilModuleAgendaDescription.
   ///

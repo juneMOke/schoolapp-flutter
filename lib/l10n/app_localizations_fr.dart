@@ -23992,6 +23992,104 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
+  String schoolCalendarDetailInDays(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Dans $count jours',
+      one: 'Demain',
+      zero: 'Aujourd\'hui',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String schoolCalendarFormEyebrow(String year) {
+    return 'Calendrier $year';
+  }
+
+  @override
+  String get schoolCalendarFormNoteLabel => 'Note';
+
+  @override
+  String get schoolCalendarFormOptional => '(facultatif)';
+
+  @override
+  String schoolCalendarFormTitleHint(String nature) {
+    String _temp0 = intl.Intl.selectLogic(nature, {
+      'ASSESSMENT': 'Interrogations de la P2',
+      'EXAM': 'Examens blancs',
+      'other': 'Réunion des parents',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String get schoolCalendarNewEyebrow => 'Calendrier scolaire';
+
+  @override
+  String schoolCalendarPrintEyebrow(String year) {
+    return 'Calendrier $year · version publiée';
+  }
+
+  @override
+  String get schoolCalendarPrintIntro =>
+      'Une page A4 paysage : les onze mois de l\'année, la légende des natures et les dates clés.';
+
+  @override
+  String schoolCalendarPublishFramework(String state) {
+    String _temp0 = intl.Intl.selectLogic(state, {
+      'yes': 'cadre national intégré',
+      'other': 'sans cadre national',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String get schoolCalendarPublishAudience =>
+      'Les enseignants, les élèves et les parents verront ce calendrier.';
+
+  @override
+  String schoolCalendarPublishRelay(
+    String current,
+    String end,
+    String year,
+    String start,
+  ) {
+    return '$current reste en vigueur jusqu\'au $end ; $year prend le relais le $start.';
+  }
+
+  @override
+  String get schoolCalendarPublishReference =>
+      'Les périodes, interrogations et examens deviennent la référence des évaluations, des bulletins et de l\'emploi du temps.';
+
+  @override
+  String get schoolCalendarDuplicateShift =>
+      'Les dates sont décalées de 52 semaines : un événement du vendredi reste un vendredi. Chaque élément repris est marqué à vérifier.';
+
+  @override
+  String schoolCalendarDuplicateFramework(String state, String year) {
+    String _temp0 = intl.Intl.selectLogic(state, {
+      'integrated':
+          'Le cadre national $year n\'est pas recopié : la version officielle publiée par ETEELO est intégrée.',
+      'awaited':
+          'Le cadre national $year n\'est pas encore publié. Il sera ajouté automatiquement dès sa publication.',
+      'other':
+          'Le cadre national $year n\'est pas recopié : la version officielle est intégrée dès sa publication.',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String schoolCalendarDuplicateDraft(String state, String year) {
+    String _temp0 = intl.Intl.selectLogic(state, {
+      'inForce': 'Le résultat est un brouillon : $year reste en vigueur.',
+      'other': 'Le résultat est un brouillon : $year n\'est pas modifié.',
+    });
+    return '$_temp0';
+  }
+
+  @override
   String get schoolCalendarToVerify => 'À vérifier';
 
   @override
@@ -24441,11 +24539,6 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
-  String schoolCalendarDuplicateRule(String year) {
-    return 'Les dates sont décalées de 52 semaines : un événement du vendredi reste un vendredi. Chaque élément repris est marqué à vérifier. Le cadre national de la nouvelle année n\'est pas recopié : la version officielle est intégrée dès sa publication. Le résultat est un brouillon : $year reste en vigueur.';
-  }
-
-  @override
   String get schoolCalendarNewYear => 'Année scolaire';
 
   @override
@@ -24503,10 +24596,6 @@ class AppLocalizationsFr extends AppLocalizations {
     );
     return '$_temp0';
   }
-
-  @override
-  String get schoolCalendarPublishConsequence =>
-      'Toute l\'école verra ce calendrier. Les périodes, interrogations et examens deviennent la référence des évaluations, des bulletins et de l\'emploi du temps.';
 
   @override
   String get accueilModuleAgendaDescription =>

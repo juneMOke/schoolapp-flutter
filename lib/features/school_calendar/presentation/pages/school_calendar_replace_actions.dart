@@ -22,6 +22,7 @@ extension SchoolCalendarReplaceActions on SchoolCalendarPageActions {
       context,
       EventFormDialog(
         newId: cubit.newEventId(),
+        yearLabel: calendar.yearLabel,
         replacing: national,
         natures: {national.nature},
         scopes: state.scopes,

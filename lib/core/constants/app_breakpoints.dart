@@ -85,6 +85,12 @@ class AppBreakpoints {
   /// [formGridThreeColMin].
   static const double formGridTwoColMin = 560.0;
 
+  /// Deux dates d'une même saisie (Du · Au) côte à côte dès que chacune
+  /// garde 164 dp (maquette Calendrier : `minmax(160px, 1fr)`, empilées au
+  /// téléphone de 390), mesuré sur la
+  /// rangée elle-même.
+  static const double datePairSideBySideMin = 340.0;
+
   /// Sous ce seuil, un filtre segmenté de période prend ses libellés courts
   /// (Trésorerie ▸ Clôture : Jour · Semaine · Mois, spec B1).
   static const double periodFilterShortLabelsMax = 560.0;

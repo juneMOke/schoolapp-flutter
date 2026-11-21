@@ -25,6 +25,10 @@ class EteeloFilterChip extends StatelessWidget {
   /// rangée qui la porte réduit d'autant son interligne.
   final bool padTapTarget;
 
+  /// L'icône dans un médaillon rond (plein de [color] quand la puce est
+  /// active, doux sinon) plutôt que nue — la puce de choix d'une nature.
+  final bool iconMedallion;
+
   const EteeloFilterChip({
     super.key,
     required this.label,
@@ -36,6 +40,7 @@ class EteeloFilterChip extends StatelessWidget {
     this.count,
     this.icon,
     this.padTapTarget = false,
+    this.iconMedallion = false,
   });
 
   @override
@@ -57,11 +62,31 @@ class EteeloFilterChip extends StatelessWidget {
             minHeight: AppDimensions.filterChipHeight,
           ),
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+            padding: EdgeInsets.only(
+              left: iconMedallion && icon != null
+                  ? AppSpacing.xs + 2
+                  : AppSpacing.md,
+              right: AppSpacing.md,
+            ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                if (icon != null) ...[
+                if (icon != null && iconMedallion) ...[
+                  Container(
+                    width: AppDimensions.chipIconMedallionSize,
+                    height: AppDimensions.chipIconMedallionSize,
+                    decoration: BoxDecoration(
+                      color: selected ? color : soft,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      icon,
+                      size: AppDimensions.chipIconMedallionIconSize,
+                      color: selected ? AppColors.surfaceRaised : color,
+                    ),
+                  ),
+                  const SizedBox(width: AppSpacing.sm),
+                ] else if (icon != null) ...[
                   Icon(
                     icon,
                     size: 16,
