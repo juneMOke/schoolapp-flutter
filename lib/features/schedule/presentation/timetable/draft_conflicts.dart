@@ -11,9 +11,17 @@ class DraftConflicts {
   const DraftConflicts._();
 
   /// Les cases du brouillon en conflit, et la classe qui occupe l'enseignant.
-  static Map<String, TeacherBooking> of(ClassTimetableView view) {
+  static Map<String, TeacherBooking> of(ClassTimetableView view) =>
+      ofCells(view, view.draft);
+
+  /// Les mêmes conflits sur d'autres cases — la version publiée, pour le
+  /// pavé « Conflits » de la consultation (EDT §4.6 B).
+  static Map<String, TeacherBooking> ofCells(
+    ClassTimetableView view,
+    List<ClassTimetableCell> cells,
+  ) {
     final conflicts = <String, TeacherBooking>{};
-    for (final cell in view.draft) {
+    for (final cell in cells) {
       if (cell.isEmpty) continue;
       final booking = _first(view, cell.teacherId, cell.day, cell.range);
       if (booking != null) conflicts[cell.id] = booking;

@@ -1,17 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/components/buttons/secondary_button.dart';
 import 'package:school_app_flutter/core/components/cards/eteelo_panel_card.dart';
 import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
+import 'package:school_app_flutter/core/widgets/eteelo_page_header.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_select_input.dart';
 import 'package:school_app_flutter/features/schedule/domain/entities/timetable/class_timetable_view.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
-/// Le choix de la classe (EDT §4.6 A) : Cycle → Niveau → Classe, en grille de
-/// champs d'une, deux ou trois colonnes selon la largeur de la carte. Sur
-/// un téléphone, une classe choisie se résume en une ligne (« 6e A · 1er
-/// cycle · 6e ») avec « Changer de classe » : les trois listes empilées
-/// repoussaient l'emploi du temps de près de 300 dp.
+/// Le choix de la classe (EDT §4.6 A) : le sur-titre et le titre de l'écran,
+/// puis Cycle → Niveau → Classe, en grille de champs d'une, deux ou trois
+/// colonnes selon la largeur de la carte (560 · 880). Dans une fenêtre de
+/// moins de 480 dp de haut, une classe choisie se résume en une ligne
+/// (« 7e A · Secondaire › 7e ») avec « Changer ».
 class ClassPicker extends StatefulWidget {
   final List<TimetableClassOption> options;
   final String? selectedId;
@@ -117,51 +120,87 @@ class _ClassPickerState extends State<ClassPicker> {
     final selected = widget.options
         .where((o) => o.classroomId == widget.selectedId)
         .firstOrNull;
-    // Pas de titre : la page porte déjà « Emplois du temps par classe ».
+    // Fenêtre basse (téléphone couché) : la carte se replie en une ligne,
+    // « Changer » rouvre les trois champs (EDT §4.6 A, I23).
+    final low =
+        MediaQuery.sizeOf(context).height <
+        AppBreakpoints.timetablePickerCollapseMaxHeight;
     return EteeloPanelCard(
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          final phone = constraints.maxWidth < AppBreakpoints.formGridTwoColMin;
-          if (phone && selected != null && !_changing) {
-            return Wrap(
-              alignment: WrapAlignment.spaceBetween,
-              crossAxisAlignment: WrapCrossAlignment.center,
-              spacing: AppSpacing.sm,
-              children: [
-                Text(
-                  [
-                    selected.name,
-                    selected.cycleName,
-                    selected.levelName,
-                  ].join(' · '),
-                  style: AppTypography.bodyMedium.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                TextButton(
-                  onPressed: () => setState(() => _changing = true),
-                  child: Text(l10n.classTimetableChangeClass),
-                ),
-              ],
-            );
-          }
-          final columns =
-              constraints.maxWidth >= AppBreakpoints.formGridThreeColMin
-              ? 3
-              : constraints.maxWidth >= AppBreakpoints.formGridTwoColMin
-              ? 2
-              : 1;
-          final width =
-              (constraints.maxWidth - (columns - 1) * AppSpacing.md) / columns;
-          return Wrap(
-            spacing: AppSpacing.md,
-            runSpacing: AppSpacing.md,
-            children: [
-              for (final f in fields) SizedBox(width: width, child: f),
-            ],
-          );
-        },
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          EteeloPageHeader(
+            eyebrow: l10n.classTimetableEyebrow,
+            title: l10n.classTimetableTitle,
+            titleStyle: AppTypography.titleMedium.copyWith(
+              color: AppColors.bleuProfond,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.md),
+          if (low && selected != null && !_changing)
+            _Collapsed(
+              summary: l10n.classTimetablePickerSummary(
+                selected.name,
+                selected.cycleName,
+                selected.levelName,
+              ),
+              label: l10n.classTimetableChange,
+              onChange: () => setState(() => _changing = true),
+            )
+          else
+            LayoutBuilder(
+              builder: (context, constraints) {
+                final columns =
+                    constraints.maxWidth >= AppBreakpoints.formGridThreeColMin
+                    ? 3
+                    : constraints.maxWidth >= AppBreakpoints.formGridTwoColMin
+                    ? 2
+                    : 1;
+                final width =
+                    (constraints.maxWidth - (columns - 1) * AppSpacing.md) /
+                    columns;
+                return Wrap(
+                  spacing: AppSpacing.md,
+                  runSpacing: AppSpacing.md,
+                  children: [
+                    for (final f in fields) SizedBox(width: width, child: f),
+                  ],
+                );
+              },
+            ),
+        ],
       ),
     );
   }
+}
+
+/// Le choix replié d'une fenêtre basse : « 7e A · Secondaire › 7e » et
+/// « Changer » (48 dp).
+class _Collapsed extends StatelessWidget {
+  final String summary;
+  final String label;
+  final VoidCallback onChange;
+
+  const _Collapsed({
+    required this.summary,
+    required this.label,
+    required this.onChange,
+  });
+
+  @override
+  Widget build(BuildContext context) => Row(
+    children: [
+      Expanded(
+        child: Text(
+          summary,
+          style: AppTypography.bodyMedium.copyWith(
+            color: AppColors.textPrimary,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
+      const SizedBox(width: AppSpacing.sm),
+      SecondaryButton(label: label, fullWidth: false, onPressed: onChange),
+    ],
+  );
 }

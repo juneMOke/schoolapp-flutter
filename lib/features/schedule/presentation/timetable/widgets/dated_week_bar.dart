@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
@@ -11,14 +12,16 @@ import 'package:school_app_flutter/features/school_calendar/presentation/helpers
 import 'package:school_app_flutter/features/school_calendar/presentation/helpers/calendar_nature_style.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
-/// La semaine datée (EDT-R17) : ‹ « Semaine du … au … » ›, puis « Cette
-/// semaine » ou « Revenir à cette semaine ».
+/// La semaine datée (EDT-R17, §4.6 C) : ‹ « Semaine du … au … » ›, boutons
+/// de 44 dp bordés, et sous le libellé « Cette semaine » ou « Revenir à cette
+/// semaine ». [expand] : toute la ligne (sous 600), le libellé au centre.
 class DatedWeekBar extends StatelessWidget {
   final DateTime monday;
   final bool isThisWeek;
   final VoidCallback onPrevious;
   final VoidCallback onNext;
   final VoidCallback onThisWeek;
+  final bool expand;
 
   const DatedWeekBar({
     super.key,
@@ -27,6 +30,7 @@ class DatedWeekBar extends StatelessWidget {
     required this.onPrevious,
     required this.onNext,
     required this.onThisWeek,
+    this.expand = false,
   });
 
   @override
@@ -34,45 +38,99 @@ class DatedWeekBar extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final dates = MaterialLocalizations.of(context);
     final saturday = CalendarDays.addDays(monday, 5);
-    return Wrap(
-      crossAxisAlignment: WrapCrossAlignment.center,
+    final label = Column(
+      mainAxisSize: MainAxisSize.min,
       children: [
-        // ‹ et › restent de part et d'autre de la semaine : sur un téléphone
-        // à ×1,3, c'est le libellé qui passe à la ligne, jamais une flèche.
-        Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            IconButton(
-              tooltip: l10n.classTimetablePreviousWeek,
-              onPressed: onPrevious,
-              icon: const Icon(Icons.chevron_left),
-            ),
-            Flexible(
-              child: Text(
-                l10n.classTimetableWeekOf(
-                  dates.formatShortMonthDay(monday),
-                  dates.formatShortMonthDay(saturday),
-                ),
-                style: AppTypography.titleSmall,
-              ),
-            ),
-            IconButton(
-              tooltip: l10n.classTimetableNextWeek,
-              onPressed: onNext,
-              icon: const Icon(Icons.chevron_right),
-            ),
-          ],
+        Text(
+          l10n.classTimetableWeekOf(
+            dates.formatShortMonthDay(monday),
+            dates.formatShortMonthDay(saturday),
+          ),
+          textAlign: TextAlign.center,
+          style: AppTypography.labelLarge.copyWith(
+            color: AppColors.bleuProfond,
+            fontWeight: FontWeight.w700,
+          ),
         ),
         if (isThisWeek)
-          Text(l10n.classTimetableThisWeek, style: AppTypography.bodySmall)
+          Text(
+            l10n.classTimetableThisWeek,
+            style: AppTypography.labelSmall.copyWith(
+              color: AppColors.textMuted,
+            ),
+          )
         else
-          TextButton(
-            onPressed: onThisWeek,
-            child: Text(l10n.classTimetableBackToThisWeek),
+          InkWell(
+            onTap: onThisWeek,
+            borderRadius: AppRadius.brSm,
+            child: Text(
+              l10n.classTimetableBackToThisWeek,
+              style: AppTypography.labelSmall.copyWith(
+                color: AppColors.terreCuiteInk,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
           ),
       ],
     );
+    // ‹ et › restent de part et d'autre de la semaine : sur un téléphone à
+    // ×1,3, c'est le libellé qui passe à la ligne, jamais une flèche.
+    return Row(
+      mainAxisSize: expand ? MainAxisSize.max : MainAxisSize.min,
+      children: [
+        _NavButton(
+          icon: Icons.chevron_left,
+          tooltip: l10n.classTimetablePreviousWeek,
+          onPressed: onPrevious,
+        ),
+        if (expand)
+          Expanded(child: label)
+        else
+          Flexible(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+              child: label,
+            ),
+          ),
+        _NavButton(
+          icon: Icons.chevron_right,
+          tooltip: l10n.classTimetableNextWeek,
+          onPressed: onNext,
+        ),
+      ],
+    );
   }
+}
+
+/// Un bouton ‹ / › de 44 dp, bordé (la zone de toucher atteint 48 dp).
+class _NavButton extends StatelessWidget {
+  final IconData icon;
+  final String tooltip;
+  final VoidCallback onPressed;
+
+  const _NavButton({
+    required this.icon,
+    required this.tooltip,
+    required this.onPressed,
+  });
+
+  @override
+  Widget build(BuildContext context) => IconButton.outlined(
+    tooltip: tooltip,
+    onPressed: onPressed,
+    constraints: const BoxConstraints.tightFor(
+      width: AppDimensions.timetableWeekNavButton,
+      height: AppDimensions.timetableWeekNavButton,
+    ),
+    style: IconButton.styleFrom(
+      tapTargetSize: MaterialTapTargetSize.padded,
+      foregroundColor: AppColors.bleuProfond,
+      backgroundColor: AppColors.surfaceRaised,
+      side: const BorderSide(color: AppColors.border),
+      shape: const RoundedRectangleBorder(borderRadius: AppRadius.brMd),
+    ),
+    icon: Icon(icon),
+  );
 }
 
 /// Les bandeaux de période d'une semaine datée (EDT §4.3, R19, R20) : une
