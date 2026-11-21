@@ -857,6 +857,27 @@ class AppColors {
   /// le fond et ses hachures.
   static const timetableClosedDay = Color(0xFFF6F3EC);
   static const timetableClosedHatch = Color(0xFFE4DDCD);
+
+  // ── Emploi du temps par classe : fidélité à la maquette (EDT §4.6) ──
+  /// L'aide du brouillon et la récréation : pastille ambre.
+  static const timetableHintSurface = Color(0xFFFBF6EA);
+  static const timetableHintStripe = Color(0xFFF7EED8);
+  static const timetableHintBorder = Color(0xFFEEDCB4);
+  static const timetableHintInk = Color(0xFF8A6A1F);
+
+  /// Le cadre chaud de la grille, de la journée et de la réserve.
+  static const timetableWarmBorder = Color(0xFFE8D3C4);
+  static const timetableWarmSurface = Color(0xFFFBF6EF);
+  static const timetableWarmSurfaceDeep = Color(0xFFF8EEE6);
+
+  /// L'encre or sur l'en-tête sombre de la grille.
+  static const timetableHeaderInk = Color(0xFFF3D9A6);
+
+  /// Les hachures d'un créneau libre en consultation.
+  static const timetableEmptyHatch = Color(0x0D8C8478);
+
+  /// L'encre terre cuite d'un statut sur fond clair (réserve, « Voir »).
+  static const timetableWarmInk = Color(0xFF9A4A20);
   static const treasuryChartFutureInk = Color(0xFFC9C3B0);
 
   /// Ombre du filtre sélectionné (terre cuite 70 %).

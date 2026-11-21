@@ -25066,4 +25066,61 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get classTimetablePrintFailed =>
       'La pièce n\'a pas pu être obtenue. Réessayez dans un instant.';
+
+  @override
+  String classTimetablePickerSummary(String name, String cycle, String level) {
+    return '$name · $cycle › $level';
+  }
+
+  @override
+  String get classTimetableChange => 'Changer';
+
+  @override
+  String get classTimetableAbandonDraft => 'Abandonner le brouillon';
+
+  @override
+  String get classTimetablePrintIcon => 'Imprimer l\'emploi du temps';
+
+  @override
+  String classTimetableDraftTraceKept(String when) {
+    return 'La version publiée reste en vigueur jusqu\'à la publication · modifié $when';
+  }
+
+  @override
+  String classTimetableDraftTraceNew(String when) {
+    return 'Jamais publié · modifié $when';
+  }
+
+  @override
+  String get classTimetableWhenJustNow => 'à l\'instant';
+
+  @override
+  String classTimetableWhenToday(String time) {
+    return 'aujourd\'hui · $time';
+  }
+
+  @override
+  String classTimetableWhenYesterday(String time) {
+    return 'hier · $time';
+  }
+
+  @override
+  String classTimetableWhenOn(String date, String time) {
+    return 'le $date · $time';
+  }
+
+  @override
+  String get classTimetableGridMore => 'Suite';
+
+  @override
+  String get classTimetableGridMoreHint => 'Voir la suite de la semaine';
+
+  @override
+  String get classTimetableDayNoClass => 'Pas de cours';
+
+  @override
+  String get classTimetableViewSession => 'Voir la séance';
+
+  @override
+  String get classTimetableDistributionSubtitle => 'Heures placées / prévues';
 }

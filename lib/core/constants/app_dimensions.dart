@@ -1514,7 +1514,7 @@ class AppDimensions {
 
   /// La réserve « Cours à placer » à côté de la grille (≥ 976, EDT A11), et
   /// la hauteur d'une de ses lignes (cible ≥ 48 dp).
-  static const timetableReserveWidth = 280.0;
+  static const timetableReserveWidth = 270.0;
 
   /// La répartition d'une classe à côté de sa grille, sur un grand écran
   /// (≥ [AppBreakpoints.expanded] reçus) : seule dessous, elle s'étirait sur
@@ -1525,6 +1525,99 @@ class AppDimensions {
   /// normal ; en deçà, l'écart se resserre pour tenir sur une rangée.
   static const scheduleDayButtonRoomyWidth = 72.0;
   static const timetableReserveLineMinHeight = 48.0;
+
+  // ── Emploi du temps par classe : fidélité à la maquette (EDT §4.6) ──
+
+  /// La gouttière des heures et la largeur mini d'un jour, en libellés longs
+  /// et, sous 760 reçus, en libellés courts (« Lun. »).
+  static const timetableGridGutter = 70.0;
+  static const timetableGridGutterShort = 58.0;
+  static const timetableGridColumnMin = 120.0;
+  static const timetableGridColumnMinShort = 104.0;
+
+  /// Hauteur plancher d'une ligne de créneau (jamais fixe, texte ×1,3).
+  static const timetableGridRowMinHeight = 58.0;
+
+  /// Le filet or-doux sous l'en-tête du jour courant.
+  static const timetableGridTodayBar = 3.0;
+
+  /// Le fondu qui signale la suite de la semaine, au bord droit.
+  static const timetableGridFadeWidth = 44.0;
+
+  /// Voiles de l'en-tête sombre : jour courant (or), jour fermé (crème),
+  /// et l'encre atténuée de la seconde ligne.
+  static const timetableHeaderTodayVeil = 0.28;
+  static const timetableHeaderClosedVeil = 0.16;
+  static const timetableHeaderCaptionOpacity = 0.65;
+
+  /// Une ligne sur deux, teintée de terre cuite ; la colonne du jour, d'or.
+  static const timetableZebraShare = 0.025;
+  static const timetableTodayCellVeil = 0.08;
+
+  /// Les hachures d'un créneau libre en consultation.
+  static const timetableEmptyHatchGap = 12.0;
+  static const timetableEmptyHatchStroke = 6.0;
+
+  /// Le « + » discret d'un créneau libre en brouillon.
+  static const timetableFreeSlotOpacity = 0.6;
+
+  /// Le repère de couleur de la classe, devant son nom.
+  static const timetableIdentityMarkerWidth = 12.0;
+  static const timetableIdentityMarkerHeight = 40.0;
+
+  /// La pastille « en cours » d'une séance.
+  static const timetableNowDot = 8.0;
+
+  /// Boutons ‹ › de la semaine datée.
+  static const timetableWeekNavButton = 44.0;
+
+  /// Vue Jour : le pavé d'icône d'une séance, la largeur mini d'un jour.
+  static const timetableDayIconTile = 36.0;
+  static const timetableDayButtonMinWidth = 82.0;
+  static const timetableDayTimeWidth = 52.0;
+
+  /// Barres de la réserve et de la répartition (un segment par heure).
+  static const timetableBarHeight = 6.0;
+  static const timetableBarSegmentGap = 3.0;
+  static const timetableDistributionCardMinWidth = 230.0;
+
+  /// Le médaillon d'une carte (réserve, répartition).
+  static const timetableTileIcon = 30.0;
+  static const timetableTileIconLarge = 32.0;
+
+  /// Le pavé « En cours » : sa valeur est un nom de cours, sur deux lignes.
+  static const timetableNowPaveValueFontSize = 20.0;
+
+  /// Le bord d'un bouton icône rond et d'un créneau libre en tirets.
+  static const timetableIconButtonBorder = 1.5;
+
+  /// Le bord et le fond d'une séance de la journée, teintés de son domaine.
+  static const timetableToneBorderShare = 0.24;
+  static const timetableToneSurfaceShare = 0.13;
+
+  /// La pastille « En cours » de la journée.
+  static const timetablePillPaddingV = 2.0;
+
+  /// La répartition : bord et halo bleus (en % de teinte), carte estompée,
+  /// liseré d'une carte, part pâle d'une heure restant à placer.
+  static const timetableDistributionBorderPercent = 20;
+  static const timetableDistributionGlowPercent = 7;
+  static const timetableDistributionGlowStop = 0.35;
+  static const timetableDistributionDimOpacity = 0.4;
+  static const timetableCardEdge = 3.0;
+  static const timetableBarRestPercent = 14;
+
+  /// La légende des domaines : bord teinté, pastille carrée.
+  static const timetableLegendBorderPercent = 26;
+  static const timetableLegendDot = 9.0;
+  static const timetableLegendDotRadius = 3.0;
+
+  /// La réserve : marge et écart de ses lignes, largeur mini d'une carte
+  /// dépliée sous 976.
+  static const timetableReservePadding = 10.0;
+  static const timetableReserveGap = 6.0;
+  static const timetableReserveCardMinWidth = 200.0;
+  static const timetableReserveDoneOpacity = 0.65;
 
   /// Un élément passé, estompé dans les listes (§4.3).
   static const calendarPastOpacity = 0.6;

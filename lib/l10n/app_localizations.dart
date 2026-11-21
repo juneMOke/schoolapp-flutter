@@ -38031,6 +38031,96 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'The document could not be fetched. Try again in a moment.'**
   String get classTimetablePrintFailed;
+
+  /// No description provided for @classTimetablePickerSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} · {cycle} › {level}'**
+  String classTimetablePickerSummary(String name, String cycle, String level);
+
+  /// No description provided for @classTimetableChange.
+  ///
+  /// In en, this message translates to:
+  /// **'Change'**
+  String get classTimetableChange;
+
+  /// No description provided for @classTimetableAbandonDraft.
+  ///
+  /// In en, this message translates to:
+  /// **'Abandon the draft'**
+  String get classTimetableAbandonDraft;
+
+  /// No description provided for @classTimetablePrintIcon.
+  ///
+  /// In en, this message translates to:
+  /// **'Print the timetable'**
+  String get classTimetablePrintIcon;
+
+  /// No description provided for @classTimetableDraftTraceKept.
+  ///
+  /// In en, this message translates to:
+  /// **'The published version stays in force until publication · edited {when}'**
+  String classTimetableDraftTraceKept(String when);
+
+  /// No description provided for @classTimetableDraftTraceNew.
+  ///
+  /// In en, this message translates to:
+  /// **'Never published · edited {when}'**
+  String classTimetableDraftTraceNew(String when);
+
+  /// No description provided for @classTimetableWhenJustNow.
+  ///
+  /// In en, this message translates to:
+  /// **'just now'**
+  String get classTimetableWhenJustNow;
+
+  /// No description provided for @classTimetableWhenToday.
+  ///
+  /// In en, this message translates to:
+  /// **'today · {time}'**
+  String classTimetableWhenToday(String time);
+
+  /// No description provided for @classTimetableWhenYesterday.
+  ///
+  /// In en, this message translates to:
+  /// **'yesterday · {time}'**
+  String classTimetableWhenYesterday(String time);
+
+  /// No description provided for @classTimetableWhenOn.
+  ///
+  /// In en, this message translates to:
+  /// **'on {date} · {time}'**
+  String classTimetableWhenOn(String date, String time);
+
+  /// No description provided for @classTimetableGridMore.
+  ///
+  /// In en, this message translates to:
+  /// **'More'**
+  String get classTimetableGridMore;
+
+  /// No description provided for @classTimetableGridMoreHint.
+  ///
+  /// In en, this message translates to:
+  /// **'See the rest of the week'**
+  String get classTimetableGridMoreHint;
+
+  /// No description provided for @classTimetableDayNoClass.
+  ///
+  /// In en, this message translates to:
+  /// **'No class'**
+  String get classTimetableDayNoClass;
+
+  /// No description provided for @classTimetableViewSession.
+  ///
+  /// In en, this message translates to:
+  /// **'View the session'**
+  String get classTimetableViewSession;
+
+  /// No description provided for @classTimetableDistributionSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Hours placed / planned'**
+  String get classTimetableDistributionSubtitle;
 }
 
 class _AppLocalizationsDelegate
