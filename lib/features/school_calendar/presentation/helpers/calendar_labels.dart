@@ -31,6 +31,20 @@ class CalendarLabels {
     return '${dates.formatShortMonthDay(start)} → ${dates.formatShortMonthDay(end)}';
   }
 
+  /// « 1 sept. 2025 → 3 juil. 2026 » : les bornes d'une année, avec l'année.
+  static String yearRange(BuildContext context, DateTime start, DateTime end) =>
+      '${dayWithYear(context, start)} → ${dayWithYear(context, end)}';
+
+  /// « 25 août 2025 » : sans le jour de la semaine.
+  static String dayWithYear(BuildContext context, DateTime day) {
+    final dates = MaterialLocalizations.of(context);
+    return '${dates.formatShortMonthDay(day)} ${dates.formatYear(day)}';
+  }
+
+  /// « 15 juin ».
+  static String shortDay(BuildContext context, DateTime day) =>
+      MaterialLocalizations.of(context).formatShortMonthDay(day);
+
   static String day(BuildContext context, DateTime day) =>
       MaterialLocalizations.of(context).formatMediumDate(day);
 
