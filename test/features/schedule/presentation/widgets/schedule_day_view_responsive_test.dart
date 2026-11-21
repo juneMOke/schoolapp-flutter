@@ -8,7 +8,6 @@ import 'package:school_app_flutter/features/schedule/domain/entities/weekday.dar
 import 'package:school_app_flutter/features/schedule/domain/entities/weekly_timetable.dart';
 import 'package:school_app_flutter/features/schedule/presentation/helpers/schedule_class_palette.dart';
 import 'package:school_app_flutter/features/schedule/presentation/widgets/schedule_day_view.dart';
-import 'package:school_app_flutter/features/schedule/presentation/widgets/schedule_free_slot_row.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 const _days = [
@@ -72,19 +71,15 @@ Widget _host(Widget child, {double width = 328}) => MaterialApp(
   ),
 );
 
-ScheduleDayView _view(
-  TimetableCell cell, {
-  Map<Weekday, DateTime>? dates,
-  void Function(Weekday, TimeSlot)? onTapSlot,
-}) => ScheduleDayView(
-  timetable: _timetable(cell),
-  palette: ScheduleClassPalette.byCourse(const {}),
-  today: null,
-  selectedDay: Weekday.mon,
-  onDaySelected: (_) {},
-  dates: dates,
-  onTapSlot: onTapSlot,
-);
+ScheduleDayView _view(TimetableCell cell, {Map<Weekday, DateTime>? dates}) =>
+    ScheduleDayView(
+      timetable: _timetable(cell),
+      palette: ScheduleClassPalette.byCourse(const {}),
+      today: null,
+      selectedDay: Weekday.mon,
+      onDaySelected: (_) {},
+      dates: dates,
+    );
 
 void main() {
   testWidgets('les six jours tiennent sur une rangée de téléphone, datés', (
@@ -116,21 +111,11 @@ void main() {
     expect(find.text(' · Salle 12'), findsNothing);
   });
 
-  testWidgets('brouillon : les créneaux libres se listent et se touchent', (
-    tester,
-  ) async {
-    final taps = <String>[];
-    await tester.pumpWidget(
-      _host(_view(_cell(), onTapSlot: (day, slot) => taps.add(slot.id))),
-    );
-    expect(find.byType(ScheduleFreeSlotRow), findsOneWidget);
-    await tester.tap(find.text('Créneau libre'));
-    await tester.tap(find.text('Mathématiques'));
-    expect(taps, ['s1', 's0']);
-  });
-
   testWidgets('consultation : seules les séances se listent', (tester) async {
+    // Le brouillon se construit toujours en vue Semaine (R12) : la journée
+    // de l'enseignant ne liste que ses séances, jamais un créneau libre.
     await tester.pumpWidget(_host(_view(_cell())));
-    expect(find.byType(ScheduleFreeSlotRow), findsNothing);
+    expect(find.text('Mathématiques'), findsOneWidget);
+    expect(find.text('Créneau libre'), findsNothing);
   });
 }

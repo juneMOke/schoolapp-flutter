@@ -98,6 +98,8 @@ class _Body extends StatelessWidget {
       eyebrow: l10n.classTimetableEyebrow,
       title: l10n.classTimetableTitle,
     );
+    final picker =
+        state.status == ClassTimetableStatus.ready && state.options.isNotEmpty;
     final content = switch (state.status) {
       ClassTimetableStatus.loading => EteeloListSkeleton(
         rowCount: 3,
@@ -136,8 +138,9 @@ class _Body extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          header,
-          const SizedBox(height: AppSpacing.lg),
+          // Le choix de la classe porte le titre dans sa carte (EDT §4.6 A) ;
+          // en chargement, en erreur ou sans classe, la page le porte.
+          if (!picker) ...[header, const SizedBox(height: AppSpacing.lg)],
           content,
         ],
       ),

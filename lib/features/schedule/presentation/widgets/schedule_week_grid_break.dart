@@ -5,7 +5,11 @@ class _BreakBand extends StatelessWidget {
   final TimetableRow row;
   final AppLocalizations l10n;
 
-  const _BreakBand({required this.row, required this.l10n});
+  /// Habillage classe : bande ambre, libellé en capitales, qui reste au bord
+  /// gauche quand la semaine défile de côté.
+  final ScrollController? frozen;
+
+  const _BreakBand({required this.row, required this.l10n, this.frozen});
 
   @override
   Widget build(BuildContext context) {
@@ -13,6 +17,55 @@ class _BreakBand extends StatelessWidget {
     final range =
         '${ScheduleTimeFormat.hourMinute(row.timeSlot.startTime)} – '
         '${ScheduleTimeFormat.hourMinute(row.timeSlot.endTime)}';
+    final frozen = this.frozen;
+    if (frozen != null) {
+      final text = '$range · ${label ?? l10n.scheduleBreak}';
+      return DecoratedBox(
+        decoration: const BoxDecoration(
+          color: AppColors.timetableHintSurface,
+          border: Border(top: BorderSide(color: AppColors.border)),
+        ),
+        child: CustomPaint(
+          painter: const HatchPainter(
+            color: AppColors.timetableHintStripe,
+            gap: AppSpacing.lg,
+            stroke: AppSpacing.sm,
+          ),
+          child: Align(
+            alignment: Alignment.centerLeft,
+            child: _Frozen(
+              controller: frozen,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.md,
+                  vertical: AppSpacing.sm,
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(
+                      Icons.free_breakfast_outlined,
+                      size: AppSpacing.md,
+                      color: AppColors.timetableHintInk,
+                    ),
+                    const SizedBox(width: AppSpacing.sm),
+                    Text(
+                      text.toUpperCase(),
+                      maxLines: 1,
+                      style: AppTypography.labelSmall.copyWith(
+                        color: AppColors.timetableHintInk,
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: AppDimensions.insPaveLabelLetterSpacing,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
     return DecoratedBox(
       decoration: const BoxDecoration(
         border: Border(top: BorderSide(color: AppColors.border)),

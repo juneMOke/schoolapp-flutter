@@ -34,6 +34,7 @@ void main() {
         ConsultationActions(
           mode: ClassTimetableMode.week,
           onMode: (_) {},
+          week: const SizedBox.shrink(),
           published: true,
           online: true,
           narrow: true,
@@ -43,7 +44,7 @@ void main() {
       ),
     );
     await expectLater(tester, meetsGuideline(labeledTapTargetGuideline));
-    expect(find.byTooltip('Imprimer'), findsOneWidget);
+    expect(find.byTooltip("Imprimer l'emploi du temps"), findsOneWidget);
     semantics.dispose();
   });
 

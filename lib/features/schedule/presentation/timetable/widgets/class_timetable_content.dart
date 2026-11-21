@@ -24,11 +24,15 @@ class ClassTimetableContent extends StatelessWidget {
   final ClassTimetableCubit cubit;
   final bool online;
 
+  /// L'instant présent, pour « aujourd'hui » et « En cours » (R11).
+  final DateTime Function() clock;
+
   const ClassTimetableContent({
     super.key,
     required this.state,
     required this.cubit,
     required this.online,
+    this.clock = DateTime.now,
   });
 
   @override
@@ -70,6 +74,7 @@ class ClassTimetableContent extends StatelessWidget {
           ClassTimetableSummary(
             view: view,
             cells: view.draft,
+            draft: true,
             conflicts: DraftConflicts.of(view).length,
           ),
           const SizedBox(height: AppSpacing.md),
@@ -78,8 +83,6 @@ class ClassTimetableContent extends StatelessWidget {
             cubit: cubit,
             online: online,
             busy: state.busy,
-            mode: state.mode,
-            day: state.day,
           ),
         ],
       );
@@ -116,8 +119,12 @@ class ClassTimetableContent extends StatelessWidget {
       cubit: cubit,
       view: view,
       onEdit: start,
+      onCopy: canWrite && view.othersKnown && !state.busy
+          ? () => unawaited(copyTimetable(context, cubit))
+          : null,
       ended: ended,
       online: online,
+      clock: clock,
     );
   }
 

@@ -25155,4 +25155,61 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get classTimetablePrintFailed =>
       'The document could not be fetched. Try again in a moment.';
+
+  @override
+  String classTimetablePickerSummary(String name, String cycle, String level) {
+    return '$name · $cycle › $level';
+  }
+
+  @override
+  String get classTimetableChange => 'Change';
+
+  @override
+  String get classTimetableAbandonDraft => 'Abandon the draft';
+
+  @override
+  String get classTimetablePrintIcon => 'Print the timetable';
+
+  @override
+  String classTimetableDraftTraceKept(String when) {
+    return 'The published version stays in force until publication · edited $when';
+  }
+
+  @override
+  String classTimetableDraftTraceNew(String when) {
+    return 'Never published · edited $when';
+  }
+
+  @override
+  String get classTimetableWhenJustNow => 'just now';
+
+  @override
+  String classTimetableWhenToday(String time) {
+    return 'today · $time';
+  }
+
+  @override
+  String classTimetableWhenYesterday(String time) {
+    return 'yesterday · $time';
+  }
+
+  @override
+  String classTimetableWhenOn(String date, String time) {
+    return 'on $date · $time';
+  }
+
+  @override
+  String get classTimetableGridMore => 'More';
+
+  @override
+  String get classTimetableGridMoreHint => 'See the rest of the week';
+
+  @override
+  String get classTimetableDayNoClass => 'No class';
+
+  @override
+  String get classTimetableViewSession => 'View the session';
+
+  @override
+  String get classTimetableDistributionSubtitle => 'Hours placed / planned';
 }

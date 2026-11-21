@@ -103,6 +103,11 @@ class AppBreakpoints {
   /// hauteur basse : un téléphone en paysage (360 dp) n'a pas 230 dp à lui
   /// donner sans cacher son en-tête chiffré.
   static const double treasuryChartLowHeightMax = 480.0;
+
+  /// Fenêtre basse (téléphone couché) : le choix de la classe d'un emploi du
+  /// temps se replie en une ligne + « Changer » (EDT §4.6 A, même seuil).
+  static const double timetablePickerCollapseMaxHeight =
+      treasuryChartLowHeightMax;
   static const double formGridThreeColMin = 880.0;
 
   /// En-tête de page à chiffres (Classes) : en deçà, le titre passe au-dessus

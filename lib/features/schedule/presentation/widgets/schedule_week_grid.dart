@@ -1,8 +1,14 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/components/cards/eteelo_dashed_border.dart';
 import 'package:school_app_flutter/core/components/controls/eteelo_activatable.dart';
+import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
+import 'package:school_app_flutter/core/theme/app_motion.dart';
+import 'package:school_app_flutter/core/theme/color_mix.dart';
+import 'package:school_app_flutter/core/theme/dashboard_tones.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_radius.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
@@ -24,6 +30,8 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 part 'schedule_week_grid_cell.dart';
 part 'schedule_week_grid_parts.dart';
 part 'schedule_week_grid_break.dart';
+part 'schedule_week_grid_class.dart';
+part 'schedule_week_grid_class_header.dart';
 
 /// Grille hebdomadaire (spec §3) : colonnes = jours (LUN→SAM), lignes =
 /// créneaux ; la récréation s'insère en bande après son créneau. Colonne du jour
@@ -55,6 +63,14 @@ class ScheduleWeekGrid extends StatelessWidget {
   /// Le glisser-déposer du brouillon (≥ 976 dp reçus, R14) ; `null` : aucun.
   final ScheduleGridDrag? drag;
 
+  /// L'habillage : celui de la vue enseignant (défaut), ou celui de
+  /// l'emploi du temps d'une classe (EDT §4.6 D).
+  final ScheduleGridLook look;
+
+  /// Le quantième de chaque jour (semaine datée, habillage classe) ; `null` :
+  /// semaine type.
+  final Map<Weekday, DateTime>? dates;
+
   const ScheduleWeekGrid({
     super.key,
     required this.timetable,
@@ -65,6 +81,8 @@ class ScheduleWeekGrid extends StatelessWidget {
     this.onTapSlot,
     this.marks = ScheduleGridMarks.none,
     this.drag,
+    this.look = ScheduleGridLook.plain,
+    this.dates,
   });
 
   @override
@@ -83,6 +101,9 @@ class ScheduleWeekGrid extends StatelessWidget {
           return const SizedBox.shrink();
         }
 
+        if (look == ScheduleGridLook.classTimetable) {
+          return _classGrid(l10n, rows, days, available);
+        }
         final columnWidth = ((available - _gutter) / days.length).clamp(
           _minColumn,
           double.infinity,
@@ -139,6 +160,75 @@ class ScheduleWeekGrid extends StatelessWidget {
     );
   }
 
+  /// L'habillage d'une classe (EDT §4.6 D) : en-tête sombre daté, libellés
+  /// courts sous 760 reçus, heures figées quand la semaine défile de côté.
+  Widget _classGrid(
+    AppLocalizations l10n,
+    List<TimetableRow> rows,
+    List<Weekday> days,
+    double outer,
+  ) {
+    // Le cadre a un bord d'un dp de chaque côté : la semaine tient dans ce
+    // qui reste, sinon elle défilerait de deux pixels.
+    final available = outer - 2;
+    final short = outer < AppBreakpoints.detailCompactMax;
+    final gutter = short
+        ? AppDimensions.timetableGridGutterShort
+        : AppDimensions.timetableGridGutter;
+    final minColumn = short
+        ? AppDimensions.timetableGridColumnMinShort
+        : AppDimensions.timetableGridColumnMin;
+    final columnWidth = ((available - gutter) / days.length).clamp(
+      minColumn,
+      double.infinity,
+    );
+    final hours = {
+      for (final day in days)
+        day: rows.where((r) => !isBreakRow(r) && r.cellFor(day) != null).length,
+    };
+    return _ClassGridFrame(
+      width: gutter + columnWidth * days.length,
+      builder: (frozen) => [
+        _ClassHeader(
+          days: days,
+          columnWidth: columnWidth,
+          gutter: gutter,
+          today: today,
+          short: short,
+          dates: dates,
+          hours: hours,
+          closedDays: marks.closedDays,
+          frozen: frozen,
+          l10n: l10n,
+        ),
+        for (final (index, row) in rows.indexed)
+          isBreakRow(row)
+              ? _BreakBand(row: row, l10n: l10n, frozen: frozen)
+              : _SlotRow(
+                  row: row,
+                  days: days,
+                  columnWidth: columnWidth,
+                  gutter: gutter,
+                  minHeight: AppDimensions.timetableGridRowMinHeight,
+                  today: today,
+                  palette: palette,
+                  l10n: l10n,
+                  onOpenCell: onOpenCell,
+                  onTapSlot: onTapSlot,
+                  marks: marks,
+                  drag: drag,
+                  firstRow: index == rows.indexWhere((r) => !isBreakRow(r)),
+                  frozen: frozen,
+                  zebra: rows
+                      .take(index)
+                      .where((r) => !isBreakRow(r))
+                      .length
+                      .isOdd,
+                ),
+      ],
+    );
+  }
+
   List<Weekday> _visibleDays(double available) {
     if (keepSaturday || available >= _narrowBreakpoint) {
       return timetable.days;
@@ -161,4 +251,13 @@ class ScheduleWeekGrid extends StatelessWidget {
     }
     return row.cells.values.every((cell) => cell == null);
   }
+}
+
+/// L'habillage de la grille et de sa journée.
+enum ScheduleGridLook {
+  /// Cours ▸ Emploi du temps (enseignant) : l'habillage historique.
+  plain,
+
+  /// Agenda ▸ Emploi du temps par classe (EDT §4.6 D).
+  classTimetable,
 }

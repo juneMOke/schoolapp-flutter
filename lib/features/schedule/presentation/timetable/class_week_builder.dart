@@ -1,6 +1,7 @@
 import 'package:school_app_flutter/core/theme/course_domain_tones.dart';
 import 'package:school_app_flutter/features/academics/presentation/helpers/academics_class_visual.dart';
 import 'package:school_app_flutter/features/schedule/domain/entities/time_slot.dart';
+import 'package:school_app_flutter/l10n/app_localizations.dart';
 import 'package:school_app_flutter/features/schedule/domain/entities/timetable/class_timetable.dart';
 import 'package:school_app_flutter/features/schedule/domain/entities/timetable/class_timetable_view.dart';
 import 'package:school_app_flutter/features/schedule/domain/entities/timetable_cell.dart';
@@ -93,6 +94,15 @@ class ClassWeekBuilder {
         }(),
     };
   }
+
+  /// coursId → nom de son domaine, « Sans domaine » à défaut (vue Jour).
+  static Map<String, String> domainLabels(
+    ClassTimetableView view,
+    AppLocalizations l10n,
+  ) => {
+    for (final course in view.programme)
+      course.coursId: course.domainLabel ?? l10n.classTimetableNoDomain,
+  };
 
   static String _clock(int minutes) =>
       '${(minutes ~/ 60).toString().padLeft(2, '0')}:'
