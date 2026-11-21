@@ -24370,6 +24370,85 @@ class AppLocalizationsEn extends AppLocalizations {
   String get schoolCalendarPrintFailed => 'The print could not be prepared.';
 
   @override
+  String schoolCalendarWeeksCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count weeks',
+      one: '1 week',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String schoolCalendarNationalCountLabel(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'national',
+      one: 'national',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String schoolCalendarInternalCountLabel(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'internal',
+      one: 'internal',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get schoolCalendarKeyNational => 'national';
+
+  @override
+  String get schoolCalendarKeyInternal => 'internal';
+
+  @override
+  String get schoolCalendarKeyNationalSolid => 'national (solid)';
+
+  @override
+  String get schoolCalendarKeyInternalDashed => 'internal (dashed)';
+
+  @override
+  String get schoolCalendarToday => 'Today';
+
+  @override
+  String get schoolCalendarDuplicateNextYear => 'Duplicate for next year';
+
+  @override
+  String calendarWeekdayName(String weekday) {
+    String _temp0 = intl.Intl.selectLogic(weekday, {
+      '1': 'Monday',
+      '2': 'Tuesday',
+      '3': 'Wednesday',
+      '4': 'Thursday',
+      '5': 'Friday',
+      '6': 'Saturday',
+      'other': 'Sunday',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String calendarWeekdayTwo(String weekday) {
+    String _temp0 = intl.Intl.selectLogic(weekday, {
+      '1': 'Mo',
+      '2': 'Tu',
+      '3': 'We',
+      '4': 'Th',
+      '5': 'Fr',
+      '6': 'Sa',
+      'other': 'Su',
+    });
+    return '$_temp0';
+  }
+
+  @override
   String get subMenuClassTimetable => 'Timetable';
 
   @override

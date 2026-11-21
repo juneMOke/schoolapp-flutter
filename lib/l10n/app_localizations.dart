@@ -37252,6 +37252,72 @@ abstract class AppLocalizations {
   /// **'The print could not be prepared.'**
   String get schoolCalendarPrintFailed;
 
+  /// No description provided for @schoolCalendarWeeksCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 week} other{{count} weeks}}'**
+  String schoolCalendarWeeksCount(int count);
+
+  /// No description provided for @schoolCalendarNationalCountLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{national} other{national}}'**
+  String schoolCalendarNationalCountLabel(int count);
+
+  /// No description provided for @schoolCalendarInternalCountLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{internal} other{internal}}'**
+  String schoolCalendarInternalCountLabel(int count);
+
+  /// No description provided for @schoolCalendarKeyNational.
+  ///
+  /// In en, this message translates to:
+  /// **'national'**
+  String get schoolCalendarKeyNational;
+
+  /// No description provided for @schoolCalendarKeyInternal.
+  ///
+  /// In en, this message translates to:
+  /// **'internal'**
+  String get schoolCalendarKeyInternal;
+
+  /// No description provided for @schoolCalendarKeyNationalSolid.
+  ///
+  /// In en, this message translates to:
+  /// **'national (solid)'**
+  String get schoolCalendarKeyNationalSolid;
+
+  /// No description provided for @schoolCalendarKeyInternalDashed.
+  ///
+  /// In en, this message translates to:
+  /// **'internal (dashed)'**
+  String get schoolCalendarKeyInternalDashed;
+
+  /// No description provided for @schoolCalendarToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get schoolCalendarToday;
+
+  /// No description provided for @schoolCalendarDuplicateNextYear.
+  ///
+  /// In en, this message translates to:
+  /// **'Duplicate for next year'**
+  String get schoolCalendarDuplicateNextYear;
+
+  /// No description provided for @calendarWeekdayName.
+  ///
+  /// In en, this message translates to:
+  /// **'{weekday, select, 1{Monday} 2{Tuesday} 3{Wednesday} 4{Thursday} 5{Friday} 6{Saturday} other{Sunday}}'**
+  String calendarWeekdayName(String weekday);
+
+  /// No description provided for @calendarWeekdayTwo.
+  ///
+  /// In en, this message translates to:
+  /// **'{weekday, select, 1{Mo} 2{Tu} 3{We} 4{Th} 5{Fr} 6{Sa} other{Su}}'**
+  String calendarWeekdayTwo(String weekday);
+
   /// No description provided for @subMenuClassTimetable.
   ///
   /// In en, this message translates to:

@@ -24542,6 +24542,88 @@ class AppLocalizationsFr extends AppLocalizations {
       'L\'impression n\'a pas pu être préparée.';
 
   @override
+  String schoolCalendarWeeksCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count semaines',
+      one: '1 semaine',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String schoolCalendarNationalCountLabel(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'nationaux',
+      one: 'national',
+      zero: 'nationaux',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String schoolCalendarInternalCountLabel(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'internes',
+      one: 'interne',
+      zero: 'internes',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get schoolCalendarKeyNational => 'national';
+
+  @override
+  String get schoolCalendarKeyInternal => 'interne';
+
+  @override
+  String get schoolCalendarKeyNationalSolid => 'national (plein)';
+
+  @override
+  String get schoolCalendarKeyInternalDashed => 'interne (tirets)';
+
+  @override
+  String get schoolCalendarToday => 'Aujourd\'hui';
+
+  @override
+  String get schoolCalendarDuplicateNextYear =>
+      'Dupliquer pour l\'année suivante';
+
+  @override
+  String calendarWeekdayName(String weekday) {
+    String _temp0 = intl.Intl.selectLogic(weekday, {
+      '1': 'lundi',
+      '2': 'mardi',
+      '3': 'mercredi',
+      '4': 'jeudi',
+      '5': 'vendredi',
+      '6': 'samedi',
+      'other': 'dimanche',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String calendarWeekdayTwo(String weekday) {
+    String _temp0 = intl.Intl.selectLogic(weekday, {
+      '1': 'Lu',
+      '2': 'Ma',
+      '3': 'Me',
+      '4': 'Je',
+      '5': 'Ve',
+      '6': 'Sa',
+      'other': 'Di',
+    });
+    return '$_temp0';
+  }
+
+  @override
   String get subMenuClassTimetable => 'Emploi du temps';
 
   @override

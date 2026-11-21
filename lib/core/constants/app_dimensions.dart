@@ -1474,7 +1474,7 @@ class AppDimensions {
   static const calendarMonthDayHeader = 24.0;
 
   /// Une bande d'élément : avec son intitulé, ou en trait sans texte (compact).
-  static const calendarBandHeight = 18.0;
+  static const calendarBandHeight = 22.0;
   static const calendarBandCompactHeight = 6.0;
   static const calendarBandGap = 2.0;
 
@@ -1531,6 +1531,7 @@ class AppDimensions {
 
   /// Les tailles de la pastille de date (CalendarDateChip).
   static const calendarDateChipSmall = 34.0;
+  static const calendarDateChipList = 38.0;
   static const calendarDateChipMedium = 40.0;
   static const calendarDateChipLarge = 44.0;
 
@@ -1580,4 +1581,112 @@ class AppDimensions {
   static const calendarHeroInfoMinWidth = 260.0;
   static const calendarHeroTilesMinWidth = 300.0;
   static const calendarHeroTileMinWidth = 150.0;
+
+  // Un calendrier ouvert (maquette Calendrier.jsx, CalDetail).
+  /// Le médaillon du bandeau et son icône.
+  static const calendarDetailMedallion = 50.0;
+  static const calendarDetailMedallionIcon = 24.0;
+
+  /// L'aide d'un calendrier garde au moins cette largeur à côté des gestes.
+  static const calendarHelpMinWidth = 200.0;
+
+  /// Une tuile « 21 nationaux » du bandeau : largeur plancher.
+  static const calendarBannerCountMinWidth = 84.0;
+
+  /// Les petites icônes du bandeau (cadenas, crayon).
+  static const calendarBannerSmallIcon = 11.0;
+
+  /// Les onglets de vue : hauteur d'un onglet, rayons, marge interne.
+  static const calendarTabHeight = 40.0;
+  static const calendarTabsRadius = 14.0;
+  static const calendarTabRadius = 10.0;
+  static const calendarTabsPadding = 4.0;
+  static const calendarTabIcon = 14.0;
+
+  /// La navigation de mois : boutons de 44 dp, libellé d'au moins 150.
+  static const calendarMonthNavButton = 44.0;
+  static const calendarMonthNavLabelMinWidth = 150.0;
+
+  /// La légende : carré de couleur, hauteur d'une puce (poste, doigt).
+  static const calendarLegendSwatch = 10.0;
+  static const calendarLegendSwatchRadius = 3.0;
+  static const calendarLegendChipHeight = 32.0;
+  static const calendarLegendChipTouchHeight = 40.0;
+  static const calendarLegendStrikeOpacity = 0.7;
+  static const calendarLegendChipPaddingH = 11.0;
+  static const calendarLegendBorderOpacity = 0.4;
+
+  /// La clé « national / interne » : échantillon, plein ou en trait.
+  static const calendarKeySwatchWidth = 16.0;
+  static const calendarKeySwatchHeight = 10.0;
+  static const calendarKeyLineHeight = 6.0;
+
+  /// Une bande nationale : liseré gauche, part du ton dans le fond doux.
+  static const calendarBandAccent = 3.0;
+  static const calendarBandRowGap = 3.0;
+  static const calendarBandRadius = 6.0;
+  static const calendarBandInset = 4.0;
+  static const calendarBandCompactInset = 3.0;
+  static const calendarMonthHeaderPadding = 10.0;
+  static const calendarBandPaddingH = 6.0;
+  static const calendarBandCompactRowGap = 2.0;
+  static const calendarBandBorderOpacity = 0.33;
+  static const calendarBandLockOpacity = 0.7;
+  static const calendarBandNationalMix = 0.2;
+
+  /// Une bande interne : trait des tirets.
+  static const calendarBandInternalStroke = 1.5;
+
+  /// Le contour d'un bouton rond (Imprimer, Dupliquer) d'un calendrier.
+  static const calendarIconButtonStroke = 1.5;
+
+  /// La marque « à vérifier » d'une bande.
+  static const calendarVerifyDot = 6.0;
+
+  /// Les cases du mois, hautes au poste, plus basses sous 900 dp.
+  static const calendarMonthCellMinHeightWide = 112.0;
+  static const calendarMonthCellMinHeightNarrow = 92.0;
+
+  /// Le trait d'une période dans le mois compact : estompé.
+  static const calendarCompactPeriodOpacity = 0.45;
+
+  /// La pastille du jour du jour dans le mois.
+  static const calendarTodayDot = 22.0;
+  static const calendarSelectedRing = 2.0;
+
+  /// Les hachures d'un jour hors du mois : pas et épaisseur.
+  static const calendarHatchStep = 10.0;
+  static const calendarHatchStroke = 5.0;
+
+  /// La liste du mois : médaillon de l'en-tête et œil.
+  static const calendarSideMedallion = 28.0;
+  static const calendarSideMedallionIcon = 14.0;
+  static const calendarEye = 30.0;
+  static const calendarEyeSmall = 26.0;
+  static const calendarEyeIcon = 15.0;
+  static const calendarEyeIconSmall = 13.0;
+
+  /// Une ligne survolée prend 7 % de sa teinte.
+  static const calendarRowHoverOpacity = 0.07;
+
+  /// La vue Liste : liseré de nature, colonne de durée.
+  static const calendarListAccent = 3.0;
+  static const calendarListAccentSoftOpacity = 0.33;
+  static const calendarDurationColumn = 70.0;
+  static const calendarHairline = 1.0;
+  static const calendarSourceIcon = 11.0;
+  static const calendarSourceSquare = 8.0;
+  static const calendarSourceSquareRadius = 2.0;
+  static const calendarNatureTagIcon = 10.0;
+
+  /// La vue Année : hauteur d'un jour (poste, téléphone), soulignement de
+  /// période, opacité d'un élément interne.
+  static const calendarYearDayHeight = 22.0;
+  static const calendarYearDayHeightCompact = 18.0;
+  static const calendarYearPeriodUnderline = 2.0;
+  static const calendarYearPeriodUnderlineOpacity = 0.33;
+  static const calendarInternalOpacity = 0.78;
+  static const calendarPeriodTagFont = 9.0;
+  static const calendarYearDayRadius = 5.0;
+  static const calendarYearDayRadiusCompact = 4.0;
 }
