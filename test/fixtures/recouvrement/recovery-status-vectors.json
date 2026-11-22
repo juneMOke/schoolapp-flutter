@@ -1,0 +1,196 @@
+{
+  "description": "Vecteurs de reference du recouvrement v2 (finance). Meme fichier cote tablette (LocalFeeChargeAggregate et sa regle « en ordre »). Montants en centimes, jamais convertis. Par creance : reste = max(0, du - paye). Par devise : du = somme des dus, paid = somme des payes BRUTS (jamais plafonnes), outstanding = somme des restes planches creance par creance, imputable = du - outstanding = somme des min(du, paye). Situation, testee dans cet ordre : SETTLED si outstanding = 0 dans chaque devise (un eleve dont tous les dus sont a 0 est donc SETTLED), sinon NO_PAYMENT si paid = 0 dans chaque devise, sinon PARTIAL. Regles : SOME_PAYMENT = situation != NO_PAYMENT ; FULLY_SETTLED = situation == SETTLED ; AT_LEAST(X, devise) = SETTLED ou imputable(devise) >= X. AT_LEAST n'existe que si le perimetre ne porte qu'une devise : null ici quand l'eleve en porte deux. Tri « du moins avance au plus avance » : perimetre mono-devise, avancement = imputable / du (1 si du = 0), compare en produits croises d'entiers, puis nom (collation francaise, accents et casse ignores au premier niveau), puis studentId ; perimetre mixte, NO_PAYMENT puis PARTIAL puis SETTLED, puis nom, puis studentId.",
+  "cases": [
+    {
+      "name": "rien paye sur un frais",
+      "charges": [
+        {"feeCode": "TUITION", "currency": "USD", "expectedInCents": 24000, "paidInCents": 0}
+      ],
+      "due": {"USD": 24000}, "paid": {"USD": 0}, "outstanding": {"USD": 24000}, "imputable": {"USD": 0},
+      "situation": "NO_PAYMENT",
+      "inOrder": {"SOME_PAYMENT": false, "FULLY_SETTLED": false},
+      "atLeast": [{"thresholdInCents": 15000, "currency": "USD", "inOrder": false}]
+    },
+    {
+      "name": "partiel : le seuil atteint exactement met en ordre",
+      "charges": [
+        {"feeCode": "TUITION", "currency": "USD", "expectedInCents": 24000, "paidInCents": 10000}
+      ],
+      "due": {"USD": 24000}, "paid": {"USD": 10000}, "outstanding": {"USD": 14000}, "imputable": {"USD": 10000},
+      "situation": "PARTIAL",
+      "inOrder": {"SOME_PAYMENT": true, "FULLY_SETTLED": false},
+      "atLeast": [
+        {"thresholdInCents": 10000, "currency": "USD", "inOrder": true},
+        {"thresholdInCents": 10001, "currency": "USD", "inOrder": false}
+      ]
+    },
+    {
+      "name": "solde exact",
+      "charges": [
+        {"feeCode": "TUITION", "currency": "USD", "expectedInCents": 24000, "paidInCents": 24000}
+      ],
+      "due": {"USD": 24000}, "paid": {"USD": 24000}, "outstanding": {"USD": 0}, "imputable": {"USD": 24000},
+      "situation": "SETTLED",
+      "inOrder": {"SOME_PAYMENT": true, "FULLY_SETTLED": true},
+      "atLeast": [{"thresholdInCents": 15000, "currency": "USD", "inOrder": true}]
+    },
+    {
+      "name": "trop-percu sur un frais et impaye sur un autre : le plancher par creance garde le reste, et « au moins » compte l'imputable, pas le brut",
+      "charges": [
+        {"feeCode": "TUITION", "currency": "USD", "expectedInCents": 30000, "paidInCents": 40000},
+        {"feeCode": "BOOKS", "currency": "USD", "expectedInCents": 10000, "paidInCents": 0}
+      ],
+      "due": {"USD": 40000}, "paid": {"USD": 40000}, "outstanding": {"USD": 10000}, "imputable": {"USD": 30000},
+      "situation": "PARTIAL",
+      "inOrder": {"SOME_PAYMENT": true, "FULLY_SETTLED": false},
+      "atLeast": [
+        {"thresholdInCents": 30000, "currency": "USD", "inOrder": true},
+        {"thresholdInCents": 35000, "currency": "USD", "inOrder": false}
+      ]
+    },
+    {
+      "name": "exonere sur toute la selection : en ordre sous les trois regles",
+      "charges": [
+        {"feeCode": "TUITION", "currency": "USD", "expectedInCents": 0, "paidInCents": 0},
+        {"feeCode": "BOOKS", "currency": "USD", "expectedInCents": 0, "paidInCents": 0}
+      ],
+      "due": {"USD": 0}, "paid": {"USD": 0}, "outstanding": {"USD": 0}, "imputable": {"USD": 0},
+      "situation": "SETTLED",
+      "inOrder": {"SOME_PAYMENT": true, "FULLY_SETTLED": true},
+      "atLeast": [{"thresholdInCents": 15000, "currency": "USD", "inOrder": true}]
+    },
+    {
+      "name": "exonere sur un frais, rien paye sur l'autre : la regle s'applique normalement",
+      "charges": [
+        {"feeCode": "TUITION", "currency": "USD", "expectedInCents": 0, "paidInCents": 0},
+        {"feeCode": "BOOKS", "currency": "USD", "expectedInCents": 5000, "paidInCents": 0}
+      ],
+      "due": {"USD": 5000}, "paid": {"USD": 0}, "outstanding": {"USD": 5000}, "imputable": {"USD": 0},
+      "situation": "NO_PAYMENT",
+      "inOrder": {"SOME_PAYMENT": false, "FULLY_SETTLED": false},
+      "atLeast": [{"thresholdInCents": 1000, "currency": "USD", "inOrder": false}]
+    },
+    {
+      "name": "exonere sur un frais, partiel sur l'autre",
+      "charges": [
+        {"feeCode": "TUITION", "currency": "USD", "expectedInCents": 0, "paidInCents": 0},
+        {"feeCode": "BOOKS", "currency": "USD", "expectedInCents": 5000, "paidInCents": 2000}
+      ],
+      "due": {"USD": 5000}, "paid": {"USD": 2000}, "outstanding": {"USD": 3000}, "imputable": {"USD": 2000},
+      "situation": "PARTIAL",
+      "inOrder": {"SOME_PAYMENT": true, "FULLY_SETTLED": false},
+      "atLeast": [
+        {"thresholdInCents": 2000, "currency": "USD", "inOrder": true},
+        {"thresholdInCents": 2500, "currency": "USD", "inOrder": false}
+      ]
+    },
+    {
+      "name": "solde mais du sous le seuil : en ordre (il ne doit plus rien) — a confirmer par le porteur",
+      "charges": [
+        {"feeCode": "TUITION", "currency": "USD", "expectedInCents": 5000, "paidInCents": 5000}
+      ],
+      "due": {"USD": 5000}, "paid": {"USD": 5000}, "outstanding": {"USD": 0}, "imputable": {"USD": 5000},
+      "situation": "SETTLED",
+      "inOrder": {"SOME_PAYMENT": true, "FULLY_SETTLED": true},
+      "atLeast": [{"thresholdInCents": 15000, "currency": "USD", "inOrder": true}]
+    },
+    {
+      "name": "versement sur un frais exonere : du a 0, rien a rendre, solde",
+      "charges": [
+        {"feeCode": "TUITION", "currency": "USD", "expectedInCents": 0, "paidInCents": 3000}
+      ],
+      "due": {"USD": 0}, "paid": {"USD": 3000}, "outstanding": {"USD": 0}, "imputable": {"USD": 0},
+      "situation": "SETTLED",
+      "inOrder": {"SOME_PAYMENT": true, "FULLY_SETTLED": true},
+      "atLeast": [{"thresholdInCents": 15000, "currency": "USD", "inOrder": true}]
+    },
+    {
+      "name": "deux creances du meme frais (changement de niveau) : le trop-percu de l'une n'efface pas l'autre",
+      "charges": [
+        {"feeCode": "TUITION", "currency": "USD", "expectedInCents": 10000, "paidInCents": 15000},
+        {"feeCode": "TUITION", "currency": "USD", "expectedInCents": 10000, "paidInCents": 0}
+      ],
+      "due": {"USD": 20000}, "paid": {"USD": 15000}, "outstanding": {"USD": 10000}, "imputable": {"USD": 10000},
+      "situation": "PARTIAL",
+      "inOrder": {"SOME_PAYMENT": true, "FULLY_SETTLED": false},
+      "atLeast": [
+        {"thresholdInCents": 10000, "currency": "USD", "inOrder": true},
+        {"thresholdInCents": 15000, "currency": "USD", "inOrder": false}
+      ]
+    },
+    {
+      "name": "mixte : solde en dollars, rien en francs — partiel, « au moins » indisponible",
+      "charges": [
+        {"feeCode": "TUITION", "currency": "USD", "expectedInCents": 24000, "paidInCents": 24000},
+        {"feeCode": "REGISTRATION", "currency": "CDF", "expectedInCents": 5000000, "paidInCents": 0}
+      ],
+      "due": {"USD": 24000, "CDF": 5000000}, "paid": {"USD": 24000, "CDF": 0},
+      "outstanding": {"USD": 0, "CDF": 5000000}, "imputable": {"USD": 24000, "CDF": 0},
+      "situation": "PARTIAL",
+      "inOrder": {"SOME_PAYMENT": true, "FULLY_SETTLED": false},
+      "atLeast": null
+    },
+    {
+      "name": "mixte : rien paye dans aucune devise",
+      "charges": [
+        {"feeCode": "TUITION", "currency": "USD", "expectedInCents": 24000, "paidInCents": 0},
+        {"feeCode": "REGISTRATION", "currency": "CDF", "expectedInCents": 5000000, "paidInCents": 0}
+      ],
+      "due": {"USD": 24000, "CDF": 5000000}, "paid": {"USD": 0, "CDF": 0},
+      "outstanding": {"USD": 24000, "CDF": 5000000}, "imputable": {"USD": 0, "CDF": 0},
+      "situation": "NO_PAYMENT",
+      "inOrder": {"SOME_PAYMENT": false, "FULLY_SETTLED": false},
+      "atLeast": null
+    },
+    {
+      "name": "mixte : solde dans chaque devise",
+      "charges": [
+        {"feeCode": "TUITION", "currency": "USD", "expectedInCents": 24000, "paidInCents": 24000},
+        {"feeCode": "REGISTRATION", "currency": "CDF", "expectedInCents": 5000000, "paidInCents": 5000000}
+      ],
+      "due": {"USD": 24000, "CDF": 5000000}, "paid": {"USD": 24000, "CDF": 5000000},
+      "outstanding": {"USD": 0, "CDF": 0}, "imputable": {"USD": 24000, "CDF": 5000000},
+      "situation": "SETTLED",
+      "inOrder": {"SOME_PAYMENT": true, "FULLY_SETTLED": true},
+      "atLeast": null
+    }
+  ],
+  "sorting": [
+    {
+      "name": "mono-devise : avancement croissant en produits croises, puis nom en collation francaise, puis id",
+      "students": [
+        {"studentId": "00000000-0000-0000-0000-000000000006", "displayName": "Zola KABILA", "charges": [{"feeCode": "TUITION", "currency": "USD", "expectedInCents": 0, "paidInCents": 0}]},
+        {"studentId": "00000000-0000-0000-0000-000000000005", "displayName": "Yves MBALA", "charges": [{"feeCode": "TUITION", "currency": "USD", "expectedInCents": 24000, "paidInCents": 24000}]},
+        {"studentId": "00000000-0000-0000-0000-000000000004", "displayName": "Emile NGOY", "charges": [{"feeCode": "TUITION", "currency": "USD", "expectedInCents": 10000, "paidInCents": 5000}]},
+        {"studentId": "00000000-0000-0000-0000-000000000003", "displayName": "Élodie BANZA", "charges": [{"feeCode": "TUITION", "currency": "USD", "expectedInCents": 24000, "paidInCents": 12000}]},
+        {"studentId": "00000000-0000-0000-0000-000000000002", "displayName": "Bruno ILUNGA", "charges": [{"feeCode": "TUITION", "currency": "USD", "expectedInCents": 24000, "paidInCents": 10000}]},
+        {"studentId": "00000000-0000-0000-0000-000000000008", "displayName": "Ange LUKUSA", "charges": [{"feeCode": "TUITION", "currency": "USD", "expectedInCents": 24000, "paidInCents": 0}]},
+        {"studentId": "00000000-0000-0000-0000-000000000007", "displayName": "Ange LUKUSA", "charges": [{"feeCode": "TUITION", "currency": "USD", "expectedInCents": 24000, "paidInCents": 0}]}
+      ],
+      "expectedOrder": [
+        "00000000-0000-0000-0000-000000000007",
+        "00000000-0000-0000-0000-000000000008",
+        "00000000-0000-0000-0000-000000000002",
+        "00000000-0000-0000-0000-000000000003",
+        "00000000-0000-0000-0000-000000000004",
+        "00000000-0000-0000-0000-000000000005",
+        "00000000-0000-0000-0000-000000000006"
+      ]
+    },
+    {
+      "name": "mixte : situation (rien paye, partiel, solde), puis nom, puis id",
+      "students": [
+        {"studentId": "00000000-0000-0000-0000-000000000011", "displayName": "Alain KASONGO", "charges": [{"feeCode": "TUITION", "currency": "USD", "expectedInCents": 24000, "paidInCents": 24000}, {"feeCode": "REGISTRATION", "currency": "CDF", "expectedInCents": 5000000, "paidInCents": 5000000}]},
+        {"studentId": "00000000-0000-0000-0000-000000000012", "displayName": "Béatrice MUKENDI", "charges": [{"feeCode": "TUITION", "currency": "USD", "expectedInCents": 24000, "paidInCents": 100}, {"feeCode": "REGISTRATION", "currency": "CDF", "expectedInCents": 5000000, "paidInCents": 0}]},
+        {"studentId": "00000000-0000-0000-0000-000000000013", "displayName": "Zacharie TSHIBANGU", "charges": [{"feeCode": "TUITION", "currency": "USD", "expectedInCents": 24000, "paidInCents": 0}, {"feeCode": "REGISTRATION", "currency": "CDF", "expectedInCents": 5000000, "paidInCents": 0}]},
+        {"studentId": "00000000-0000-0000-0000-000000000014", "displayName": "Aimée TSHALA", "charges": [{"feeCode": "TUITION", "currency": "USD", "expectedInCents": 24000, "paidInCents": 24000}, {"feeCode": "REGISTRATION", "currency": "CDF", "expectedInCents": 5000000, "paidInCents": 0}]}
+      ],
+      "expectedOrder": [
+        "00000000-0000-0000-0000-000000000013",
+        "00000000-0000-0000-0000-000000000014",
+        "00000000-0000-0000-0000-000000000012",
+        "00000000-0000-0000-0000-000000000011"
+      ]
+    }
+  ]
+}

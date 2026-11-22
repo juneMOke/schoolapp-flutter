@@ -98,6 +98,7 @@ import 'package:school_app_flutter/features/finance/offline/domain/usecases/get_
 import 'package:school_app_flutter/features/finance/offline/domain/usecases/count_pending_payments_use_case.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/usecases/get_recovery_positions_use_case.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/usecases/get_fee_codes_for_year_use_case.dart';
+import 'package:school_app_flutter/features/finance/offline/domain/usecases/get_fee_natures_for_year_use_case.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/usecases/get_fee_tariffs_for_level_use_case.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/usecases/has_fee_grid_use_case.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/usecases/initialize_charges_use_case.dart';
@@ -798,6 +799,9 @@ void registerEnrollmentFinanceOffline(GetIt getIt) {
   );
   getIt.registerFactory<GetFeeCodesForYearUseCase>(
     () => GetFeeCodesForYearUseCase(getIt<FinanceOfflineRepository>()),
+  );
+  getIt.registerFactory<GetFeeNaturesForYearUseCase>(
+    () => GetFeeNaturesForYearUseCase(getIt<FinanceOfflineRepository>()),
   );
   getIt.registerFactory<GetFeeChargePositionsByLevelUseCase>(
     () =>

@@ -367,6 +367,11 @@ class FinanceOfflineRepositoryImpl implements FinanceOfflineRepository {
   ) => _guard(() => _dao.getFeeCodesForYear(academicYearId));
 
   @override
+  Future<Either<Failure, List<({String feeCode, List<String> currencies})>>>
+  getFeeNaturesForYear(String academicYearId) =>
+      _guard(() => _dao.getFeeNaturesForYear(academicYearId));
+
+  @override
   Future<Either<Failure, List<LocalFeeLevelAggregate>>>
   getFeeChargePositionsByLevel({
     required String academicYearId,

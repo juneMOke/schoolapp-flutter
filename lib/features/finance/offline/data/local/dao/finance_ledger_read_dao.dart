@@ -465,6 +465,49 @@ class FinanceLedgerReadDao {
     return rows.map((r) => r['fee_code'] as String).toList(growable: false);
   }
 
+  /// Les natures de l'année **avec leur(s) devise(s)** — ce que le sélecteur
+  /// de frais du Recouvrement v2 groupe par devise.
+  ///
+  /// Même population et même ordre que [getFeeCodesForYear] (la plus portée
+  /// d'abord) ; une nature peut porter deux devises (dollars au primaire,
+  /// francs au secondaire) : elle les rend toutes, triées.
+  Future<List<({String feeCode, List<String> currencies})>>
+  getFeeNaturesForYear(String academicYearId) async {
+    final rows = await _db.rawQuery(
+      '''
+      SELECT fee_code, currency, COUNT(*) AS charges
+      FROM student_charges
+      WHERE academic_year_id = ? OR academic_year_id IS NULL
+      GROUP BY fee_code, currency
+      ''',
+      [academicYearId],
+    );
+    final counts = <String, int>{};
+    final currencies = <String, Set<String>>{};
+    for (final r in rows) {
+      final code = r['fee_code'] as String;
+      counts.update(
+        code,
+        (v) => v + (r['charges'] as int),
+        ifAbsent: () => r['charges'] as int,
+      );
+      final currency = r['currency'] as String?;
+      currencies.putIfAbsent(code, () => <String>{});
+      if (currency != null && currency.isNotEmpty) {
+        currencies[code]!.add(currency.toUpperCase());
+      }
+    }
+    final codes = counts.keys.toList()
+      ..sort((a, b) {
+        final byCount = counts[b]!.compareTo(counts[a]!);
+        return byCount != 0 ? byCount : a.compareTo(b);
+      });
+    return [
+      for (final code in codes)
+        (feeCode: code, currencies: (currencies[code]!.toList()..sort())),
+    ];
+  }
+
   /// Position de **toute la population** sur un frais, ventilée par niveau
   /// (tableau de bord du Contrôle des frais).
   ///

@@ -227,6 +227,10 @@ class FinanceLocalDao {
   Future<List<String>> getFeeCodesForYear(String academicYearId) =>
       _read.getFeeCodesForYear(academicYearId);
 
+  Future<List<({String feeCode, List<String> currencies})>>
+  getFeeNaturesForYear(String academicYearId) =>
+      _read.getFeeNaturesForYear(academicYearId);
+
   Future<List<LocalFeeLevelAggregate>> getFeeChargePositionsByLevel({
     required String academicYearId,
     required String feeCode,
