@@ -10,13 +10,14 @@ import 'package:school_app_flutter/core/widgets/app_page_background.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_event.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_state.dart';
+import 'package:school_app_flutter/features/classes/domain/entities/offline/offline_classroom.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_summary.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/gender.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/states/enrollment_error_type.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/states/enrollment_results_error_state.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/entities/local_fee_charge_aggregate.dart';
-import 'package:school_app_flutter/features/finance/offline/domain/entities/local_finance_entities.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/entities/local_recovery_line.dart';
+import 'package:school_app_flutter/features/finance/presentation/bloc/finance/fee_section_titles_cubit.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/bloc/fee_control_selection_cubit.dart';
 import 'package:school_app_flutter/core/theme/app_theme.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/bloc/fee_control_bloc.dart';
@@ -52,21 +53,10 @@ const _complet = _Session([
   'classroom.read',
 ]);
 
+/// Toute recherche porte sur UNE classe (spec v2, R2 : champ Classe unique) —
+/// il n'y a plus de maille « niveau ».
 const tQuery = FeeControlQuery(
   academicYearId: 'ay-1',
-  schoolLevelGroupId: 'g1',
-  schoolLevelId: 'l1',
-  feeCodes: ['TUITION'],
-  statusFilter: FeeControlPaymentFilter.settled,
-  page: 0,
-  size: 10,
-);
-
-/// Même recherche, mais bornée à une classe.
-const tClassroomQuery = FeeControlQuery(
-  academicYearId: 'ay-1',
-  schoolLevelGroupId: 'g1',
-  schoolLevelId: 'l1',
   classroomId: 'cls-1',
   feeCodes: ['TUITION'],
   statusFilter: FeeControlPaymentFilter.settled,
@@ -74,26 +64,13 @@ const tClassroomQuery = FeeControlQuery(
   size: 10,
 );
 
-/// La même recherche, avec ce que le sélecteur a réellement affiché : le
-/// libellé de la ligne de grille et son code.
-const tNamedQuery = FeeControlQuery(
-  academicYearId: 'ay-1',
-  schoolLevelGroupId: 'g1',
-  schoolLevelId: 'l1',
-  feeCodes: ['TUITION'],
-  statusFilter: FeeControlPaymentFilter.settled,
-  page: 0,
-  size: 10,
-);
-
 /// La même recherche relancée sur un autre statut. Rien de ce qui décide du
-/// message de vide ne change (ni la maille, ni le périmètre, ni la
-/// répartition) : seule la puce de critère bouge. Une différence dans le
-/// message ne peut donc venir que du verdict de droits.
+/// message de vide ne change (ni la classe, ni la répartition) : seule la puce
+/// de critère bouge. Une différence dans le message ne peut donc venir que du
+/// verdict de droits.
 const tRelanceQuery = FeeControlQuery(
   academicYearId: 'ay-1',
-  schoolLevelGroupId: 'g1',
-  schoolLevelId: 'l1',
+  classroomId: 'cls-1',
   feeCodes: ['TUITION'],
   statusFilter: FeeControlPaymentFilter.none,
   page: 0,
@@ -138,6 +115,7 @@ Future<void> _pumpView(
   WidgetTester tester,
   FeeControlState state, {
   _Session? session,
+  FeeSectionTitlesState titles = const FeeSectionTitlesState(),
 }) async {
   final bloc = MockFeeControlBloc();
   when(() => bloc.state).thenReturn(state);
@@ -154,6 +132,7 @@ Future<void> _pumpView(
       child: FeeControlResultsView(
         onViewRequested: (_) {},
         onRowTapped: (_) {},
+        titles: titles,
       ),
     ),
   );
@@ -291,7 +270,7 @@ void main() {
         status: EnrollmentLoadStatus.success,
         studentsInScope: 0,
         classroomRosterSize: 0,
-        lastQuery: tClassroomQuery,
+        lastQuery: tQuery,
       ),
     );
 
@@ -314,7 +293,7 @@ void main() {
         status: EnrollmentLoadStatus.success,
         studentsInScope: 0,
         classroomRosterSize: 24,
-        lastQuery: tClassroomQuery,
+        lastQuery: tQuery,
       ),
     );
 
@@ -340,95 +319,13 @@ void main() {
           studentsInScope: 24,
           classroomRosterSize: 24,
           breakdown: FeeControlBreakdown(),
-          lastQuery: tClassroomQuery,
+          lastQuery: tQuery,
         ),
       );
 
       expect(find.textContaining('ne porte ce frais'), findsOneWidget);
     },
   );
-
-  // B-4 — les trois messages écrits jusqu'ici disaient tous « de cette
-  // classe ». Une recherche « toutes les classes du niveau » ne pouvait donc
-  // qu'échouer vers « modifiez le formulaire et relancez » : on envoyait
-  // l'opérateur corriger des critères qui n'y peuvent rien, alors que sa
-  // tablette n'avait simplement aucune inscription pour ce niveau.
-  group('maille NIVEAU : le vide a ses propres causes', () {
-    testWidgets('aucune inscription locale → le dit, sans accuser la saisie', (
-      tester,
-    ) async {
-      tester.view.physicalSize = const Size(1400, 1400);
-      tester.view.devicePixelRatio = 1.0;
-      addTearDown(tester.view.reset);
-
-      await _pumpView(
-        tester,
-        const FeeControlState(
-          status: EnrollmentLoadStatus.success,
-          studentsInScope: 0,
-          // Aucune classe choisie : `classroomRosterSize` reste nul, et c'est
-          // précisément ce qui rendait l'état inatteignable.
-          lastQuery: tQuery,
-        ),
-      );
-
-      expect(
-        find.textContaining('Aucun élève inscrit à ce niveau'),
-        findsOneWidget,
-      );
-      expect(
-        find.textContaining('Modifiez le formulaire'),
-        findsNothing,
-        reason: 'les critères n\'y sont pour rien',
-      );
-    });
-
-    testWidgets('des élèves mais aucun ne porte ce frais → le dit AU NIVEAU', (
-      tester,
-    ) async {
-      // Le message de classe (« de cette classe ») affirmait une maille que
-      // l'opérateur n'avait pas choisie.
-      tester.view.physicalSize = const Size(1400, 1400);
-      tester.view.devicePixelRatio = 1.0;
-      addTearDown(tester.view.reset);
-
-      await _pumpView(
-        tester,
-        const FeeControlState(
-          status: EnrollmentLoadStatus.success,
-          studentsInScope: 30,
-          breakdown: FeeControlBreakdown(),
-          lastQuery: tQuery,
-        ),
-      );
-
-      expect(find.textContaining('Aucun élève de ce niveau'), findsOneWidget);
-      expect(find.textContaining('de cette classe'), findsNothing);
-    });
-
-    testWidgets('CONTRE-ÉPREUVE : des élèves concernés → là, c\'est la saisie', (
-      tester,
-    ) async {
-      // Le seul cas où « modifiez le formulaire » est un bon conseil : des
-      // élèves portent bien ce frais, et c'est le filtre de statut ou les noms
-      // qui n'ont rien laissé passer. Le décompte est mesuré AVANT le filtre.
-      tester.view.physicalSize = const Size(1400, 1400);
-      tester.view.devicePixelRatio = 1.0;
-      addTearDown(tester.view.reset);
-
-      await _pumpView(
-        tester,
-        const FeeControlState(
-          status: EnrollmentLoadStatus.success,
-          studentsInScope: 30,
-          breakdown: FeeControlBreakdown(settled: 12),
-          lastQuery: tQuery,
-        ),
-      );
-
-      expect(find.textContaining('Modifiez le formulaire'), findsOneWidget);
-    });
-  });
 
   testWidgets('échec → écran d\'erreur partagé', (tester) async {
     tester.view.physicalSize = const Size(1400, 1200);
@@ -459,7 +356,7 @@ void main() {
       status: EnrollmentLoadStatus.success,
       studentsInScope: 0,
       classroomRosterSize: 0,
-      lastQuery: tClassroomQuery,
+      lastQuery: tQuery,
     );
 
     testWidgets(
@@ -499,7 +396,7 @@ void main() {
             status: EnrollmentLoadStatus.success,
             studentsInScope: 0,
             classroomRosterSize: 24,
-            lastQuery: tClassroomQuery,
+            lastQuery: tQuery,
           ),
           session: _sansRien,
         );
@@ -533,37 +430,6 @@ void main() {
         findsNothing,
       );
     });
-
-    // Le droit sur les classes n'explique un vide que si la requête filtre par
-    // classe : à la maille niveau, il n'a rien à voir avec le résultat.
-    testWidgets(
-      'sans classroom.read mais sans filtre de classe : rien à dire',
-      (tester) async {
-        tester.view.physicalSize = const Size(1400, 1400);
-        tester.view.devicePixelRatio = 1.0;
-        addTearDown(tester.view.reset);
-
-        await _pumpView(
-          tester,
-          const FeeControlState(
-            status: EnrollmentLoadStatus.success,
-            studentsInScope: 12,
-            breakdown: FeeControlBreakdown(settled: 12),
-            lastQuery: tQuery,
-          ),
-          session: _sansClasse,
-        );
-
-        expect(
-          find.textContaining('le contrôle par classe est impossible'),
-          findsNothing,
-        );
-        expect(
-          find.textContaining('Aucun élève ne correspond à ces critères'),
-          findsOneWidget,
-        );
-      },
-    );
 
     testWidgets('droits complets : les messages de synchro reviennent', (
       tester,
@@ -646,7 +512,7 @@ void main() {
         tester,
         // Recherche lancée, résultats pas encore posés : c'est le tableau qui
         // est rendu, avec ses lignes vides.
-        const FeeControlState(lastQuery: tClassroomQuery),
+        const FeeControlState(lastQuery: tQuery),
         session: _sansRien,
       );
 
@@ -758,12 +624,10 @@ void main() {
     });
   });
 
-  /// La puce rappelle ce que l'opérateur a demandé. Elle affichait la nature
-  /// localisée pendant que le sélecteur, lui, propose le libellé de la grille :
-  /// cliquer « Frais scolaires annuels (SCO) » et se voir répondre « Frais de
-  /// scolarité » fait douter d'avoir cherché la bonne chose.
+  /// La puce rappelle ce que l'opérateur a demandé, nommé comme la pastille
+  /// du sélecteur : le titre que l'école donne à sa section.
   group('puce du frais', () {
-    testWidgets('reprend le libellé de la grille et son code', (tester) async {
+    testWidgets('reprend le titre de section de l\'école', (tester) async {
       tester.view.physicalSize = const Size(1600, 900);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.reset);
@@ -776,35 +640,20 @@ void main() {
           status: EnrollmentLoadStatus.success,
           studentsInScope: 12,
           breakdown: FeeControlBreakdown(settled: 12),
-          // Le nom vient désormais de la GRILLE portée par l'état, pas d'un
-          // libellé recopié dans la requête : l'écran est borné à un niveau,
-          // donc à une grille, et c'est elle qui nomme.
-          tariffs: [
-            LocalFeeTariff(
-              id: 't-1',
-              feeCode: 'TUITION',
-              label: 'Frais scolaires annuels',
-              code: 'SCO',
-              amountInCents: 150000,
-              currency: 'USD',
-            ),
-          ],
-          lastQuery: tNamedQuery,
+          lastQuery: tQuery,
         ),
         session: _complet,
+        titles: const FeeSectionTitlesState(
+          titles: {'TUITION': 'Frais scolaires annuels'},
+        ),
       );
 
-      expect(
-        find.text('Frais : Frais scolaires annuels (SCO)'),
-        findsOneWidget,
-      );
+      expect(find.text('Frais : Frais scolaires annuels'), findsOneWidget);
     });
 
-    /// Sans libellé descendu — nature à plusieurs tranches, ou requête d'avant
-    /// ce lot rejouée depuis l'état — la puce retombe sur la nature. C'est le
-    /// repli que `feeDesignation` tient déjà : un frais sans nom du tout serait
-    /// pire que trop générique.
-    testWidgets('sans libellé, la nature localisée reprend la main', (
+    /// Sans titre descendu sur l'appareil, la puce retombe sur la nature
+    /// localisée : un frais sans nom du tout serait pire que trop générique.
+    testWidgets('sans titre, la nature localisée reprend la main', (
       tester,
     ) async {
       tester.view.physicalSize = const Size(1600, 900);
@@ -823,6 +672,94 @@ void main() {
       );
 
       expect(find.text('Frais : Frais de scolarité'), findsOneWidget);
+    });
+
+    testWidgets('plusieurs frais retenus : la puce les nomme tous, dans '
+        'l\'ordre de la requête', (tester) async {
+      tester.view.physicalSize = const Size(1600, 900);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
+
+      await _pumpView(
+        tester,
+        const FeeControlState(
+          status: EnrollmentLoadStatus.success,
+          studentsInScope: 12,
+          breakdown: FeeControlBreakdown(settled: 12),
+          lastQuery: FeeControlQuery(
+            academicYearId: 'ay-1',
+            classroomId: 'cls-1',
+            feeCodes: ['TUITION', 'TRANSPORT'],
+            statusFilter: FeeControlPaymentFilter.settled,
+            page: 0,
+            size: 10,
+          ),
+        ),
+        session: _complet,
+        titles: const FeeSectionTitlesState(
+          titles: {'TUITION': 'Scolarité', 'TRANSPORT': 'Bus'},
+        ),
+      );
+
+      expect(find.text('Frais : Scolarité + Bus'), findsOneWidget);
+    });
+  });
+
+  /// La classe se nomme — l'id ne dit rien à personne —, et la rubrique des
+  /// élèves sans classe se dit « Non affectés ».
+  group('puce de la classe', () {
+    testWidgets('nomme la classe interrogée', (tester) async {
+      tester.view.physicalSize = const Size(1600, 900);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
+
+      await _pumpView(
+        tester,
+        const FeeControlState(
+          status: EnrollmentLoadStatus.success,
+          studentsInScope: 12,
+          breakdown: FeeControlBreakdown(settled: 12),
+          classrooms: [
+            OfflineClassroom(
+              id: 'cls-1',
+              academicYearId: 'ay-1',
+              name: '1ère A',
+            ),
+          ],
+          lastQuery: tQuery,
+        ),
+        session: _complet,
+      );
+
+      expect(find.text('Classe : 1ère A'), findsOneWidget);
+    });
+
+    testWidgets('« Non affectés » pour la rubrique sans classe', (
+      tester,
+    ) async {
+      tester.view.physicalSize = const Size(1600, 900);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
+
+      await _pumpView(
+        tester,
+        const FeeControlState(
+          status: EnrollmentLoadStatus.success,
+          studentsInScope: 12,
+          breakdown: FeeControlBreakdown(settled: 12),
+          lastQuery: FeeControlQuery(
+            academicYearId: 'ay-1',
+            classroomId: feeControlUnassigned,
+            feeCodes: ['TUITION'],
+            statusFilter: FeeControlPaymentFilter.settled,
+            page: 0,
+            size: 10,
+          ),
+        ),
+        session: _complet,
+      );
+
+      expect(find.text('Classe : Non affectés'), findsOneWidget);
     });
   });
 
@@ -902,8 +839,7 @@ void main() {
           breakdown: FeeControlBreakdown(settled: 12),
           lastQuery: FeeControlQuery(
             academicYearId: 'ay-1',
-            schoolLevelGroupId: 'g1',
-            schoolLevelId: 'l1',
+            classroomId: 'cls-1',
             feeCodes: ['TUITION'],
             statusFilter: FeeControlPaymentFilter.all,
             page: 0,

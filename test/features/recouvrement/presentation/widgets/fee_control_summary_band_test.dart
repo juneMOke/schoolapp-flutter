@@ -18,8 +18,7 @@ class MockFeeControlBloc extends MockBloc<FeeControlEvent, FeeControlState>
 
 const tQuery = FeeControlQuery(
   academicYearId: 'ay-1',
-  schoolLevelGroupId: 'g1',
-  schoolLevelId: 'l1',
+  classroomId: 'c1',
   feeCodes: ['TUITION'],
   statusFilter: FeeControlPaymentFilter.settled,
   page: 0,

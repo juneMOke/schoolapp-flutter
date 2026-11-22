@@ -1,13 +1,10 @@
 import 'package:equatable/equatable.dart';
-import 'package:school_app_flutter/core/money/currency_code.dart';
-import 'package:school_app_flutter/core/money/exchange_rate.dart';
 import 'package:school_app_flutter/core/money/money.dart';
 import 'package:school_app_flutter/core/money/money_bag.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_summary.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/student_charge.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/entities/local_recovery_line.dart';
-import 'package:school_app_flutter/features/recouvrement/presentation/bloc/recouvrement_pivot.dart';
-import 'package:school_app_flutter/features/recouvrement/presentation/bloc/recouvrement_rate.dart';
+import 'package:school_app_flutter/features/recouvrement/domain/rules/recovery_rule.dart';
 
 /// La **situation recherchée** — les cinq segments de l'écran.
 ///
@@ -75,52 +72,24 @@ class FeeControlRow extends Equatable {
   bool get hasNoExpectation =>
       line.charges.every((c) => c.expectedInCents <= 0);
 
-  /// Taux de recouvrement de la ligne, en pourcentage entier — l'ordre de
-  /// travail de l'écran.
-  ///
-  /// `null` quand la ligne mêle deux devises et qu'aucun cours ne les rapproche.
-  /// C'est « on ne sait pas », jamais zéro : un élève à jour n'a pas à remonter
-  /// en tête d'une liste de relance parce que le taux du jour manque.
-  ///
-  /// La règle est `(attendu − reste) / attendu`, celle de [RecoveryRate], et
-  /// non `payé / attendu` comme la spec l'écrit : la seconde franchit 100 % dès
-  /// qu'un versement solde la créance d'un autre exercice, et le serveur comme
-  /// le tableau de bord appliquent déjà la première.
-  int? ratePercent(ExchangeRate? rate) {
-    final pivot = currencies.length == 1 ? currencies.first : CurrencyCode.usd;
-    final expectedPivot = RecouvrementPivot.inCurrency(expected, pivot, rate);
-    final remainingPivot = RecouvrementPivot.inCurrency(remaining, pivot, rate);
-    if (expectedPivot == null || remainingPivot == null) return null;
-    return RecoveryRate.of(
-      expectedInCents: expectedPivot,
-      remainingInCents: remainingPivot,
-    );
-  }
+  /// La position lue avec l'arithmétique **partagée avec le serveur** (payé
+  /// imputable, reste planché par créance) — cf. [RecoveryStanding].
+  RecoveryStanding get standing =>
+      RecoveryStanding.of([for (final c in line.charges) c.position]);
 
-  /// A payé **au moins** [threshold], tout ramené dans la devise du plancher.
-  ///
-  /// `false` quand une devise ne s'y convertit pas : on n'affirme pas qu'un
-  /// élève a fait un geste sur un chiffre inventé.
-  bool paidAtLeast(Money threshold, ExchangeRate? rate) {
-    final paidPivot = RecouvrementPivot.inCurrency(
-      paid,
-      threshold.currency,
-      rate,
-    );
-    if (paidPivot == null) return false;
-    return paidPivot >= threshold.amountInCents;
-  }
+  /// Taux d'avancement entier, mono-devise ; `null` en mixte — jamais de
+  /// conversion (spec v2, R1).
+  int? get progressPercent => standing.progressPercent;
 
-  bool matches(
-    FeeControlPaymentFilter filter, {
-    Money? threshold,
-    ExchangeRate? rate,
-  }) {
+  /// Le segment « a payé au moins… » applique **la règle AT_LEAST** du serveur
+  /// (vecteurs partagés) : payé imputable ≥ seuil, ou plus rien à payer.
+  bool matches(FeeControlPaymentFilter filter, {Money? threshold}) {
     if (filter == FeeControlPaymentFilter.threshold) {
-      // Un plancher vide vise tout le monde : « a payé au moins zéro » est vrai
-      // de chacun, et c'est la lecture littérale d'un champ qu'on n'a pas encore
-      // rempli.
-      return threshold == null || paidAtLeast(threshold, rate);
+      // Un champ vide ne filtre pas encore : c'est la lecture littérale d'un
+      // montant qu'on n'a pas encore saisi.
+      if (threshold == null) return true;
+      return standing.inOrder(RecoveryRuleKind.atLeast, threshold: threshold) ??
+          false;
     }
     final target = filter.targetStatus;
     return target == null || status == target;
@@ -130,111 +99,102 @@ class FeeControlRow extends Equatable {
   List<Object?> get props => [summary, line];
 }
 
-/// Critères posés par le formulaire (sans l'année, que la page tient du
-/// contexte académique).
+/// Une nature de frais de l'année et sa ou ses devise(s) — une ligne du choix
+/// des frais (O1), groupé par devise.
+class FeeNature extends Equatable {
+  final String feeCode;
+
+  /// Triées ; deux quand la nature est en dollars ici et en francs là.
+  final List<String> currencies;
+
+  const FeeNature({required this.feeCode, required this.currencies});
+
+  @override
+  List<Object?> get props => [feeCode, currencies];
+}
+
+/// Valeur de fil de la rubrique « Non affectés » — la même que le serveur
+/// (`classroomId=UNASSIGNED`, périmètre `UNASSIGNED` de la liste de relance).
+const String feeControlUnassigned = 'UNASSIGNED';
+
+/// Critères posés par la carte de périmètre (sans l'année, que la page tient
+/// du contexte académique).
 class FeeControlSearchRequest extends Equatable {
-  final String schoolLevelGroupId;
-  final String schoolLevelId;
+  /// Une classe de l'année, ou [feeControlUnassigned] pour les élèves sans
+  /// classe (spec v2, R2 ; arbitrage du 2026-11-22 : choix du champ Classe, en
+  /// dernier).
+  final String classroomId;
 
-  /// Classe visée, ou `null` pour « toutes les classes du niveau ». Facultatif :
-  /// un niveau dont les classes ne sont pas encore composées doit rester
-  /// contrôlable.
-  final String? classroomId;
-
-  /// Les natures de frais retenues. **Jamais vide** — le sélecteur ignore le
-  /// clic qui décocherait la dernière.
+  /// Les natures de frais retenues, dans l'ordre de l'école. **Jamais vide**.
   final List<String> feeCodes;
 
   final FeeControlPaymentFilter statusFilter;
 
   /// Montant plancher du segment « A payé au moins… ». `null` hors de ce
-  /// segment, et `null` aussi quand la sélection mêle deux devises : comparer
-  /// 50 000 FC à 120 $ n'a pas de sens, et l'écran refuse de le simuler.
+  /// segment, et `null` aussi en sélection mixte : le segment y est désactivé.
   final Money? threshold;
 
   const FeeControlSearchRequest({
-    required this.schoolLevelGroupId,
-    required this.schoolLevelId,
-    this.classroomId,
+    required this.classroomId,
     required this.feeCodes,
     required this.statusFilter,
     this.threshold,
   });
 
+  bool get isUnassigned => classroomId == feeControlUnassigned;
+
   @override
-  List<Object?> get props => [
-    schoolLevelGroupId,
-    schoolLevelId,
-    classroomId,
-    feeCodes,
-    statusFilter,
-    threshold,
-  ];
+  List<Object?> get props => [classroomId, feeCodes, statusFilter, threshold];
 }
 
 /// Photo immuable de la dernière recherche jouée — sert à la rejouer
 /// (pagination, réessai) et à reconstituer la phrase qui rejoue la requête.
 class FeeControlQuery extends Equatable {
   final String academicYearId;
-  final String schoolLevelGroupId;
-  final String schoolLevelId;
 
-  /// Classe visée, ou `null` pour tout le niveau.
-  final String? classroomId;
+  /// Une classe, ou [feeControlUnassigned].
+  final String classroomId;
 
   final List<String> feeCodes;
   final FeeControlPaymentFilter statusFilter;
   final Money? threshold;
-
-  /// Cours du jour au moment de la lecture. **Transporté dans la requête** et
-  /// non lu au vol : le réessai et la pagination doivent rejouer le même
-  /// classement, et un taux qui bouge entre deux pages réordonnerait la liste
-  /// sous les doigts.
-  final ExchangeRate? rate;
 
   final int page;
   final int size;
 
   const FeeControlQuery({
     required this.academicYearId,
-    required this.schoolLevelGroupId,
-    required this.schoolLevelId,
-    this.classroomId,
+    required this.classroomId,
     required this.feeCodes,
     required this.statusFilter,
     this.threshold,
-    this.rate,
     required this.page,
     required this.size,
   });
 
+  bool get isUnassigned => classroomId == feeControlUnassigned;
+
   /// La même question, posée sur une autre situation — ce que fait une tuile de
-  /// compteur.
-  ///
-  /// Le plancher tombe : aucune tuile n'active « a payé au moins… », et le
-  /// garder ferait filtrer sur un seuil que plus rien n'affiche.
-  FeeControlQuery copyWithSituation(FeeControlPaymentFilter filter) =>
-      FeeControlQuery(
-        academicYearId: academicYearId,
-        schoolLevelGroupId: schoolLevelGroupId,
-        schoolLevelId: schoolLevelId,
-        classroomId: classroomId,
-        feeCodes: feeCodes,
-        statusFilter: filter,
-        rate: rate,
-        page: 0,
-        size: size,
-      );
+  /// compteur. Le plancher tombe : aucune tuile n'active « a payé au moins… ».
+  FeeControlQuery copyWithSituation(
+    FeeControlPaymentFilter filter, {
+    Money? threshold,
+  }) => FeeControlQuery(
+    academicYearId: academicYearId,
+    classroomId: classroomId,
+    feeCodes: feeCodes,
+    statusFilter: filter,
+    threshold: filter.needsThreshold ? threshold : null,
+    page: 0,
+    size: size,
+  );
 
   FeeControlQuery copyWithPage(int page) => FeeControlQuery(
     academicYearId: academicYearId,
-    schoolLevelGroupId: schoolLevelGroupId,
-    schoolLevelId: schoolLevelId,
     classroomId: classroomId,
     feeCodes: feeCodes,
     statusFilter: statusFilter,
     threshold: threshold,
-    rate: rate,
     page: page,
     size: size,
   );
@@ -242,58 +202,75 @@ class FeeControlQuery extends Equatable {
   @override
   List<Object?> get props => [
     academicYearId,
-    schoolLevelGroupId,
-    schoolLevelId,
     classroomId,
     feeCodes,
     statusFilter,
     threshold,
-    rate,
     page,
     size,
   ];
 }
 
 /// Ce que le tableau de bord transmet à l'écran nominatif quand on lui demande
-/// « qui, précisément ? ».
+/// « qui, précisément ? » (spec v2, R12 du contrôle) — et ce que l'adresse
+/// retient (frais, classe, situation et son montant).
 ///
-/// Le tableau de bord pose la question, l'écran voisin donne les noms : le
-/// passage doit conserver **exactement** le périmètre lu, sinon la liste ne
-/// répondrait pas de la synthèse qui l'a ouverte.
+/// Repris **une seule fois**, à l'arrivée ; ensuite l'écran vit seul.
 class FeeControlIntent extends Equatable {
-  final String schoolLevelGroupId;
-  final String schoolLevelId;
-
-  /// Classe visée, `null` pour tout le niveau — selon qu'on parte d'une ligne
-  /// de classe ou de la ligne du niveau.
+  /// Une classe, [feeControlUnassigned], ou `null` : la classe de la dernière
+  /// visite (périmètre « établissement » ou « cycle » côté tableau de bord).
   final String? classroomId;
 
-  final String feeCode;
+  /// Les frais, dans l'ordre de l'école. Jamais vide.
+  final List<String> feeCodes;
+
+  final FeeControlPaymentFilter situation;
+
+  /// Le montant du segment « a payé au moins… », en centimes.
+  final int? thresholdInCents;
 
   const FeeControlIntent({
-    required this.schoolLevelGroupId,
-    required this.schoolLevelId,
     this.classroomId,
-    required this.feeCode,
+    required this.feeCodes,
+    this.situation = FeeControlPaymentFilter.all,
+    this.thresholdInCents,
   });
 
-  static const _groupKey = 'cycle';
-  static const _levelKey = 'level';
-  static const _classroomKey = 'classroom';
-  static const _feeKey = 'fee';
+  /// Les clés que l'écran tient dans l'adresse — et efface quand elles
+  /// tombent.
+  static const queryKeys = [
+    _feesKey,
+    _classroomKey,
+    _situationKey,
+    _thresholdKey,
+  ];
 
-  /// Le périmètre écrit dans l'adresse : un onglet rechargé ou un lien collé
-  /// rouvre la même liste, sans dépendre de `extra`, perdu au rechargement.
+  static const _classroomKey = 'classe';
+  static const _feesKey = 'frais';
+  static const _situationKey = 'situation';
+  static const _thresholdKey = 'montant';
+
+  static const _situationWire = {
+    FeeControlPaymentFilter.all: 'tous',
+    FeeControlPaymentFilter.none: 'rien',
+    FeeControlPaymentFilter.partial: 'partiel',
+    FeeControlPaymentFilter.settled: 'solde',
+    FeeControlPaymentFilter.threshold: 'au-moins',
+  };
+
+  /// La question écrite dans l'adresse : un onglet rechargé ou un lien collé
+  /// rouvre la même liste (spec v2, §0 « Ce que l'adresse retient »).
   Map<String, String> toQueryParameters() => {
-    _groupKey: schoolLevelGroupId,
-    _levelKey: schoolLevelId,
+    _feesKey: feeCodes.join(','),
     _classroomKey: ?classroomId,
-    _feeKey: feeCode,
+    if (situation != FeeControlPaymentFilter.all)
+      _situationKey: _situationWire[situation]!,
+    if (situation.needsThreshold && thresholdInCents != null)
+      _thresholdKey: '$thresholdInCents',
   };
 
   /// Reconstruit l'intention depuis la route : `extra` d'abord, l'adresse
-  /// ensuite. `null` dès qu'il n'y a rien à reconstruire : l'écran s'ouvre
-  /// alors vierge, comme par le menu.
+  /// ensuite. `null` sans frais : l'écran s'ouvre alors sur la dernière visite.
   static FeeControlIntent? fromRoute(
     Object? extra, [
     Map<String, String> queryParameters = const {},
@@ -304,23 +281,30 @@ class FeeControlIntent extends Equatable {
       return value.isEmpty ? null : value;
     }
 
-    final group = read(_groupKey);
-    final level = read(_levelKey);
-    final fee = read(_feeKey);
-    if (group == null || level == null || fee == null) return null;
+    final fees = [
+      for (final code in (read(_feesKey) ?? '').split(','))
+        if (code.trim().isNotEmpty) code.trim(),
+    ];
+    if (fees.isEmpty) return null;
+    final wire = read(_situationKey);
+    final situation = _situationWire.entries
+        .where((e) => e.value == wire)
+        .map((e) => e.key)
+        .firstOrNull;
+    final amount = int.tryParse(read(_thresholdKey) ?? '');
     return FeeControlIntent(
-      schoolLevelGroupId: group,
-      schoolLevelId: level,
       classroomId: read(_classroomKey),
-      feeCode: fee,
+      feeCodes: fees,
+      situation: situation ?? FeeControlPaymentFilter.all,
+      thresholdInCents: amount != null && amount >= 0 ? amount : null,
     );
   }
 
   @override
   List<Object?> get props => [
-    schoolLevelGroupId,
-    schoolLevelId,
     classroomId,
-    feeCode,
+    feeCodes,
+    situation,
+    thresholdInCents,
   ];
 }

@@ -9,49 +9,21 @@ sealed class FeeControlEvent extends Equatable {
 
 /// Charge la grille tarifaire du niveau choisi (émis à chaque changement de
 /// niveau dans le formulaire).
-class FeeControlTariffsRequested extends FeeControlEvent {
+/// Charge le **catalogue** de l'écran : les natures de frais de l'année avec
+/// leur(s) devise(s), et toutes les classes de l'année (champ Classe unique,
+/// spec v2 R2). Rejoué par « Réessayer ».
+class FeeControlCatalogRequested extends FeeControlEvent {
   final String academicYearId;
-  final String schoolLevelGroupId;
-  final String schoolLevelId;
 
-  const FeeControlTariffsRequested({
-    required this.academicYearId,
-    required this.schoolLevelGroupId,
-    required this.schoolLevelId,
-  });
+  const FeeControlCatalogRequested({required this.academicYearId});
 
   @override
-  List<Object?> get props => [
-    academicYearId,
-    schoolLevelGroupId,
-    schoolLevelId,
-  ];
+  List<Object?> get props => [academicYearId];
 }
 
-/// Charge les classes du niveau choisi (maille sous-niveau du contrôle).
-class FeeControlClassroomsRequested extends FeeControlEvent {
-  final String academicYearId;
-  final String schoolLevelId;
-
-  const FeeControlClassroomsRequested({
-    required this.academicYearId,
-    required this.schoolLevelId,
-  });
-
-  @override
-  List<Object?> get props => [academicYearId, schoolLevelId];
-}
-
-/// Lance la recherche : élèves inscrits de la classe, croisés avec leur
-/// position sur les frais retenus, bornés à la situation demandée.
 class FeeControlSearchRequested extends FeeControlEvent {
   final String academicYearId;
   final FeeControlSearchRequest request;
-
-  /// Cours du jour, lu par la page. Il ne sert **qu'à arbitrer** : ordonner les
-  /// lignes et comparer un plancher à un sac mixte. Aucun montant affiché n'est
-  /// converti.
-  final ExchangeRate? rate;
 
   final int page;
   final int size;
@@ -59,13 +31,12 @@ class FeeControlSearchRequested extends FeeControlEvent {
   const FeeControlSearchRequested({
     required this.academicYearId,
     required this.request,
-    this.rate,
     this.page = 0,
     this.size = AppConstants.enrollmentDefaultPageSize,
   });
 
   @override
-  List<Object?> get props => [academicYearId, request, rate, page, size];
+  List<Object?> get props => [academicYearId, request, page, size];
 }
 
 /// Change la **situation recherchée** sans changer de périmètre — le geste
@@ -75,10 +46,13 @@ class FeeControlSearchRequested extends FeeControlEvent {
 class FeeControlSituationRequested extends FeeControlEvent {
   final FeeControlPaymentFilter filter;
 
-  const FeeControlSituationRequested(this.filter);
+  /// Le montant du segment « a payé au moins… » ; ignoré ailleurs.
+  final Money? threshold;
+
+  const FeeControlSituationRequested(this.filter, {this.threshold});
 
   @override
-  List<Object?> get props => [filter];
+  List<Object?> get props => [filter, threshold];
 }
 
 /// Change de page sur la liste courante (aucune relecture de la base).

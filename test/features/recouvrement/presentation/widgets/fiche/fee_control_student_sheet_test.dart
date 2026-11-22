@@ -5,8 +5,8 @@ import 'package:school_app_flutter/core/theme/app_theme.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/enrollment_summary.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/gender.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/entities/local_fee_charge_aggregate.dart';
-import 'package:school_app_flutter/features/finance/offline/domain/entities/local_finance_entities.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/entities/local_recovery_line.dart';
+import 'package:school_app_flutter/features/finance/presentation/bloc/finance/fee_section_titles_cubit.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/contracts/fee_control_contracts.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/widgets/fiche/fee_control_student_sheet.dart';
 import 'package:school_app_flutter/features/student/domain/entities/student_summary.dart';
@@ -17,15 +17,11 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 /// ⚠️ Harnais sous `AppTheme.light`, et ce n'est pas décoratif : le pied de
 /// cette modale pose deux boutons inline. Sans le vrai thème, un oubli de
 /// `minimumSize` la ferait sortir SANS TAILLE, et rien ne le dirait ici.
-const tTariffs = [
-  LocalFeeTariff(
-    id: 't-1',
-    feeCode: 'TUITION',
-    label: 'Scolarité annuelle',
-    amountInCents: 22000,
-    currency: 'USD',
-  ),
-];
+/// Le titre que l'école donne à la section — celui des pastilles du choix
+/// des frais.
+const tTitles = FeeSectionTitlesState(
+  titles: {'TUITION': 'Scolarité annuelle'},
+);
 
 FeeControlRow buildRow({List<RecoveryChargePosition> charges = const []}) =>
     FeeControlRow(
@@ -77,6 +73,7 @@ void main() {
     WidgetTester tester, {
     required FeeControlRow row,
     bool marked = false,
+    FeeSectionTitlesState titles = tTitles,
   }) async {
     tester.view.physicalSize = const Size(900, 700);
     tester.view.devicePixelRatio = 1.0;
@@ -90,8 +87,7 @@ void main() {
         supportedLocales: AppLocalizations.supportedLocales,
         home: FeeControlStudentSheet(
           row: row,
-          tariffs: tTariffs,
-          rate: null,
+          sectionTitles: titles,
           marked: marked,
           onToggleMark: () => marks++,
           onOpenRecord: () => records++,
@@ -115,7 +111,7 @@ void main() {
     expect(find.text('1ÈRE ANNÉE · PRIMAIRE'), findsOneWidget);
   });
 
-  testWidgets('chaque frais dit son avancement, nommé par la grille', (
+  testWidgets('chaque frais dit son avancement, nommé comme sa pastille', (
     tester,
   ) async {
     await pumpSheet(tester, row: buildRow());
@@ -124,6 +120,18 @@ void main() {
     // 60 payés sur 220 → 27 %, et le reste s'écrit parce qu'il en reste.
     expect(find.textContaining('27 %'), findsOneWidget);
     expect(find.textContaining('reste'), findsOneWidget);
+  });
+
+  testWidgets('sans titre sur l\'appareil, la nature localisée nomme le '
+      'frais', (tester) async {
+    await pumpSheet(
+      tester,
+      row: buildRow(),
+      titles: const FeeSectionTitlesState(),
+    );
+
+    expect(find.text('Frais de scolarité'), findsOneWidget);
+    expect(find.text('Scolarité annuelle'), findsNothing);
   });
 
   testWidgets('un frais soldé n\'affiche PAS « reste 0 »', (tester) async {
@@ -221,8 +229,7 @@ void main() {
             width: 400,
             child: FeeControlStudentSheet.docked(
               row: buildRow(),
-              tariffs: tTariffs,
-              rate: null,
+              sectionTitles: tTitles,
               marked: false,
               onToggleMark: () => marks++,
               onOpenRecord: () => records++,

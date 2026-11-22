@@ -2,10 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
-import 'package:school_app_flutter/core/money/exchange_rate.dart';
 import 'package:school_app_flutter/core/money/money.dart';
 import 'package:school_app_flutter/core/money/money_format.dart';
-import 'package:school_app_flutter/features/finance/offline/domain/entities/local_finance_entities.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/entities/local_recovery_line.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/fee_section_titles_cubit.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/bloc/recouvrement_rate.dart';
@@ -20,22 +18,13 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 class FeeControlFeeLine extends StatelessWidget {
   final RecoveryChargePosition charge;
 
-  /// Grille du niveau, pour nommer le frais comme l'école l'a écrit.
-  final List<LocalFeeTariff> tariffs;
-
   /// Le titre que l'école donne à chaque nature. Il prime sur la grille : la
   /// fiche nomme le frais comme la pastille qui l'a retenu.
   final FeeSectionTitlesState sectionTitles;
 
-  /// Reçu pour homogénéité de signature ; inutilisé — une créance n'a qu'une
-  /// devise, et son taux n'a donc jamais besoin d'un cours.
-  final ExchangeRate? rate;
-
   const FeeControlFeeLine({
     super.key,
     required this.charge,
-    required this.tariffs,
-    required this.rate,
     this.sectionTitles = const FeeSectionTitlesState(),
   });
 
@@ -50,12 +39,7 @@ class FeeControlFeeLine extends StatelessWidget {
       expectedInCents: charge.expectedInCents,
       remainingInCents: charge.remainingInCents,
     );
-    final label = feeControlFeeCodeLabel(
-      feeControlFeeOptionFor(tariffs, charge.feeCode),
-      charge.feeCode,
-      l10n,
-      sectionTitle: sectionTitles.titleOf(charge.feeCode),
-    );
+    final label = recouvrementFeeTitle(charge.feeCode, sectionTitles, l10n);
 
     return Padding(
       padding: const EdgeInsets.only(bottom: AppDimensions.spacingM),

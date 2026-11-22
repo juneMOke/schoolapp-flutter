@@ -41,7 +41,6 @@ import 'package:school_app_flutter/features/enrollment/presentation/pages/pre_re
 import 'package:school_app_flutter/features/finance/presentation/pages/facturation_page.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/pages/fee_control_feature_scope.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/pages/recouvrement_dashboard_page.dart';
-import 'package:school_app_flutter/features/recouvrement/presentation/pages/fee_control_page.dart';
 import 'package:school_app_flutter/features/finance/presentation/pages/finance_feature_scope.dart';
 import 'package:school_app_flutter/features/finance/presentation/pages/finance_stats_dashboard_page.dart';
 import 'package:school_app_flutter/features/finance/presentation/pages/finance_stats_dashboard_scope.dart';
@@ -475,8 +474,16 @@ class AppRouter {
           // `extra` porte les critères quand l'écran est ouvert depuis le
           // tableau de bord ; vide, l'écran s'ouvre vierge comme par le menu.
           // Hors de la coquille, l'écran porte sa propre barre, avec le retour.
-          builder: (context, state) =>
-              FeeControlPage.fromRoute(state.extra, state.uri.queryParameters),
+          // Ne s'ouvre plus hors de la coquille (spec v2, R15) : l'ancienne
+          // adresse renvoie au sous-menu, question comprise.
+          redirect: (context, state) => Uri(
+            path: AppRoutesNames.homeSubMenuPath(
+              MenuConstants.recouvrementControlId,
+            ),
+            queryParameters: state.uri.queryParameters.isEmpty
+                ? null
+                : state.uri.queryParameters,
+          ).toString(),
         ),
       ],
     ),

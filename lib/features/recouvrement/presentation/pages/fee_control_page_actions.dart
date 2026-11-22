@@ -1,18 +1,25 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/constants/menu_constants.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:school_app_flutter/core/components/documents/eteelo_document_viewer.dart';
 import 'package:school_app_flutter/core/components/documents/printable_document.dart';
+import 'package:school_app_flutter/core/di/injection.dart';
 import 'package:school_app_flutter/core/widgets/app_snack_bar.dart';
 import 'package:school_app_flutter/features/academic_year/presentation/bloc/academic_year_context_bloc.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/helpers/enrollment_level_labels.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/fee_section_titles_cubit.dart';
+import 'package:school_app_flutter/features/finance/offline/domain/usecases/get_payer_suggestions_use_case.dart';
 import 'package:school_app_flutter/features/finance/presentation/context/facturation_detail_intent.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/bloc/fee_control_bloc.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/bloc/fee_control_selection_cubit.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/export/fee_control_call_sheet_pdf.dart';
+import 'package:school_app_flutter/features/recouvrement/presentation/export/fee_control_notify_pdf.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/helpers/fee_control_query_phrase.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/widgets/fiche/fee_control_student_sheet.dart';
+import 'package:school_app_flutter/features/recouvrement/presentation/widgets/relance/fee_control_notify_content.dart';
+import 'package:school_app_flutter/features/recouvrement/presentation/widgets/relance/fee_control_notify_dialog.dart';
+import 'package:school_app_flutter/features/school/presentation/cubit/school_identity_cubit.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 import 'package:school_app_flutter/router/app_routes_names.dart';
 
@@ -34,7 +41,6 @@ Future<void> openStudentSheet(
   String academicYearId,
 ) async {
   final selection = context.read<FeeControlSelectionCubit>();
-  final bloc = context.read<FeeControlBloc>();
   // Lus AVANT la modale : elle s'ouvre sur le navigateur racine, hors de portée
   // des blocs de la page.
   final titles = context.read<FeeSectionTitlesCubit>().state;
@@ -46,9 +52,7 @@ Future<void> openStudentSheet(
           bloc: selection,
           builder: (_, state) => FeeControlStudentSheet(
             row: row,
-            tariffs: bloc.state.tariffs,
             sectionTitles: titles,
-            rate: bloc.state.lastQuery?.rate,
             marked: state.marked.contains(row.studentId),
             onToggleMark: () {
               Navigator.of(dialogContext).pop(false);
@@ -137,7 +141,6 @@ Future<void> printCallSheet(BuildContext context) async {
     ).join(' · '),
     academicYearLabel: academicYear?.name ?? '',
     issuedOn: DateTime.now(),
-    rate: bloc.state.lastQuery?.rate,
     l10n: l10n,
   );
 
@@ -154,6 +157,62 @@ Future<void> printCallSheet(BuildContext context) async {
       fileName: l10n.feeControlCallListAction,
     ),
   );
+}
+
+/// **Relance des parents** des cochés (O4) : la sur-couche, puis le PDF
+/// « Relance des parents » remis au partage de l'appareil (Q4). Même
+/// population et même ordre que la feuille d'appel. [share] : la couture.
+Future<void> notifyParents(
+  BuildContext context, {
+  FeeControlNotifyShare share = shareNotifyPdf,
+}) async {
+  final l10n = AppLocalizations.of(context)!;
+  final selection = context.read<FeeControlSelectionCubit>();
+  final bloc = context.read<FeeControlBloc>();
+  final rows = [
+    for (final row in bloc.results)
+      if (selection.state.selected.contains(row.studentId)) row,
+  ];
+  if (rows.isEmpty) return;
+
+  final label = notifyContextLabel(
+    bloc.state,
+    l10n,
+    titles: context.read<FeeSectionTitlesCubit>().state,
+  );
+  final school = context.read<SchoolIdentityCubit?>()?.state.school?.name ?? '';
+  final now = DateTime.now();
+  final recipients = await resolveNotifyRecipients(
+    rows,
+    getIt<GetPayerSuggestionsUseCase>().call,
+  );
+  if (!context.mounted) return;
+
+  final sent = await FeeControlNotifyDialog.show(
+    context,
+    FeeControlNotifyDialog(
+      contextLabel: label,
+      initialMessage: composeNotifyMessage(
+        l10n,
+        context: label,
+        schoolName: school,
+        today: now,
+      ),
+      recipients: recipients,
+      onSend: (message) => FeeControlNotifyPdf.share(
+        share,
+        schoolName: school,
+        context: label,
+        message: message,
+        recipients: recipients,
+        issuedOn: now,
+        l10n: l10n,
+      ),
+    ),
+  );
+  if (!sent || !context.mounted) return;
+  selection.clearSelection();
+  AppSnackBar.showSuccess(context, l10n.feeControlNotifySent(rows.length));
 }
 
 /// Ouvre la **Facturation**. L'issue d'un écran où personne n'a payé n'est pas
@@ -176,7 +235,7 @@ void openFinancialRecord(
     return;
   }
 
-  final levelId = context.read<FeeControlBloc>().state.lastQuery?.schoolLevelId;
+  final levelId = row.line.schoolLevelId;
   final academicYearContext = context
       .read<AcademicYearContextBloc>()
       .state
@@ -206,5 +265,17 @@ void openFinancialRecord(
       levelName: labels.levelName,
       levelGroupName: labels.levelGroupName,
     ),
+  );
+}
+
+/// Ouvre **Recouvrement ▸ Contrôle des frais** dans la coquille, sur la
+/// question [intent] (R15) : l'adresse `/home/recouvrement-controle?frais=…`
+/// sélectionne le sous-menu, et la page la lit à son arrivée (R12).
+void openFeeControl(BuildContext context, FeeControlIntent intent) {
+  context.go(
+    Uri(
+      path: AppRoutesNames.homeSubMenuPath(MenuConstants.recouvrementControlId),
+      queryParameters: intent.toQueryParameters(),
+    ).toString(),
   );
 }

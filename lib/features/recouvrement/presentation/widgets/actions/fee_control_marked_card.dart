@@ -58,7 +58,7 @@ class FeeControlMarkedCard extends StatelessWidget {
                           children: [
                             const Icon(
                               Icons.person_off_outlined,
-                              size: 18,
+                              size: AppDimensions.recoveryIconSize18,
                               color: AppColors.error,
                             ),
                             const SizedBox(width: AppDimensions.spacingS),

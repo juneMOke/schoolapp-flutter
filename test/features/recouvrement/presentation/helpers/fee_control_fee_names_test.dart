@@ -27,14 +27,15 @@ const _titles = FeeSectionTitlesState(
   titles: {'TUITION': 'Frais scolaires annuels'},
 );
 
-FeeControlState _searched(List<LocalFeeTariff> tariffs) => FeeControlState(
-  tariffs: tariffs,
-  lastQuery: const FeeControlQuery(
+FeeControlState _searched({
+  String classroomId = 'c1',
+  FeeControlPaymentFilter filter = FeeControlPaymentFilter.all,
+}) => FeeControlState(
+  lastQuery: FeeControlQuery(
     academicYearId: 'ay-1',
-    schoolLevelGroupId: 'g1',
-    schoolLevelId: 'l1',
-    feeCodes: ['TUITION'],
-    statusFilter: FeeControlPaymentFilter.all,
+    classroomId: classroomId,
+    feeCodes: const ['TUITION'],
+    statusFilter: filter,
     page: 0,
     size: 20,
   ),
@@ -184,48 +185,49 @@ void main() {
     });
   });
 
+  // La v2 choisit les frais à l'échelle de l'année, sans grille de niveau :
+  // le nom vient du titre de l'école, sinon de la nature localisée — jamais
+  // d'une ligne de tarif, qui varie d'un niveau à l'autre.
   group('la requête rejouée', () {
     test('le sous-titre nomme le frais comme sa pastille', () {
       expect(
-        FeeControlQueryPhrase.parts(
-          _searched([_tariff()]),
-          l10n,
-          titles: _titles,
-        ).first,
+        FeeControlQueryPhrase.parts(_searched(), l10n, titles: _titles).first,
         'Frais scolaires annuels',
       );
     });
 
-    test('sans titre, la phrase reste celle de la grille', () {
+    test('sans titre, la nature localisée', () {
       expect(
-        FeeControlQueryPhrase.parts(_searched([_tariff()]), l10n).first,
-        'Minerval 1ère année',
+        FeeControlQueryPhrase.parts(_searched(), l10n).first,
+        'TUITION'.localizedFeeLabel(l10n),
       );
     });
 
-    test('la puce d\'un état vide désigne toujours la LIGNE de grille unique '
-        '— libellé et code, de quoi vérifier ce qu\'on a cherché', () {
-      final chip = FeeControlQueryPhrase.chips(
-        _searched([_tariff()]),
-        l10n,
-        titles: _titles,
-      ).first;
-
-      expect(chip, contains('Minerval 1ère année'));
-      expect(chip, contains('T1'));
+    test('la situation s\'écrit toujours, « Tous » compris (maquette : '
+        '« Scolarité · 1ère primaire · Tous »)', () {
+      expect(
+        FeeControlQueryPhrase.parts(_searched(), l10n, titles: _titles).last,
+        l10n.feeControlPaymentStatusAll,
+      );
     });
 
-    test('plusieurs tranches : la puce nomme par le titre de section, plutôt '
-        'que par la nature générique', () {
+    test('la rubrique « Non affectés » se nomme comme telle', () {
+      expect(
+        FeeControlQueryPhrase.parts(
+          _searched(classroomId: feeControlUnassigned),
+          l10n,
+          titles: _titles,
+        ),
+        contains(l10n.recouvrementUnassigned),
+      );
+    });
+
+    test('la puce d\'un état vide nomme le frais par le titre de l\'école', () {
       final chip = FeeControlQueryPhrase.chips(
-        _searched([
-          _tariff(id: 't1', label: 'Minerval — 1/2', code: 'T1'),
-          _tariff(id: 't2', label: 'Minerval — 2/2', code: 'T2'),
-        ]),
+        _searched(),
         l10n,
         titles: _titles,
       ).first;
-
       expect(chip, contains('Frais scolaires annuels'));
     });
   });

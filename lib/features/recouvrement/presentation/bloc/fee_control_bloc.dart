@@ -5,19 +5,17 @@ import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/core/helpers/client_side_paginator.dart';
 import 'package:school_app_flutter/features/classes/domain/entities/offline/offline_classroom.dart';
 import 'package:school_app_flutter/features/classes/domain/usecases/offline/get_offline_classrooms_usecase.dart';
+import 'package:school_app_flutter/features/classes/domain/usecases/offline/get_composed_rosters_usecase.dart';
 import 'package:school_app_flutter/features/classes/domain/usecases/offline/get_offline_roster_usecase.dart';
 import 'package:school_app_flutter/features/enrollment/offline/domain/usecases/search_local_enrollments_use_case.dart';
 import 'package:school_app_flutter/features/enrollment/offline/presentation/bloc/enrollment_local_list_projector.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/contracts/enrollment_load_status.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/states/enrollment_error_type.dart';
-import 'package:school_app_flutter/features/finance/offline/domain/entities/local_finance_entities.dart';
-import 'package:school_app_flutter/core/money/exchange_rate.dart';
+import 'package:school_app_flutter/core/money/money.dart';
 import 'package:school_app_flutter/core/money/money_bag.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/usecases/get_recovery_positions_use_case.dart';
-import 'package:school_app_flutter/features/finance/offline/domain/usecases/get_fee_tariffs_for_level_use_case.dart';
-import 'package:school_app_flutter/features/finance/offline/domain/usecases/has_fee_grid_use_case.dart';
+import 'package:school_app_flutter/features/finance/offline/domain/usecases/get_fee_natures_for_year_use_case.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/bloc/fee_control_projector.dart';
-import 'package:school_app_flutter/features/recouvrement/presentation/bloc/fee_control_tariffs_resolver.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/contracts/fee_control_contracts.dart';
 
 // Un seul import suffit aux widgets du Contrôle des frais pour l'état, le
@@ -32,41 +30,32 @@ export 'package:school_app_flutter/features/recouvrement/presentation/contracts/
 part 'fee_control_event.dart';
 part 'fee_control_state.dart';
 
-/// BLoC du **Contrôle des frais** : pour une **sélection de frais** et une
-/// classe donnée, qui est soldé, qui est partiel, qui n'a rien versé.
+/// BLoC du **Contrôle des frais** (spec Recouvrement v2, page 2) : pour une
+/// **sélection de frais** et une classe — ou la rubrique « Non affectés » —,
+/// qui est soldé, qui est partiel, qui n'a rien versé.
 ///
-/// Bloc **dédié**, et non un mode de plus sur `EnrollmentLocalListBloc` : ce
-/// dernier est partagé par la Facturation et les Documents, et y ajouter des
-/// critères financiers y ferait entrer un domaine qui n'est pas le sien.
+/// Lecture **100 % locale** (arbitrage du 2026-11-21 : le contrôle reste hors
+/// ligne), en deux temps :
+///  1. les élèves réellement inscrits de l'année
+///     (`SearchLocalEnrollmentsUseCase.currentYearEnrolled`, désactivés exclus
+///     comme au serveur), ramenés à la classe par son roster local COMPOSÉ —
+///     ou, pour « Non affectés », privés de tous les élèves d'un roster ;
+///  2. leur position sur les frais retenus (`GetRecoveryPositionsUseCase`),
+///     lue avec l'arithmétique partagée avec le serveur (`RecoveryStanding`).
 ///
-/// Lecture **100 % locale**, en deux temps :
-///  1. les élèves réellement inscrits de la classe
-///     (`SearchLocalEnrollmentsUseCase.currentYearEnrolled` — mêmes règles de
-///     « facturable » que la Facturation), raffinés nom/post-nom/prénom par
-///     [EnrollmentLocalListProjector] ;
-///  2. leur position sur les frais retenus, lue dans le **même registre** que
-///     le tableau de bord (`GetRecoveryPositionsUseCase`) — c'est ce qui rend
-///     impossible que les deux écrans se contredisent sur le même élève.
-///
-/// Le périmètre se resserre en deux crans : le niveau (obligatoire), puis
-/// éventuellement **une classe** — le roster local composé donne alors les
-/// élèves retenus.
-///
-/// ⚠️ La lecture du registre n'est **pas** bornée au cycle, alors qu'elle
-/// pourrait l'être : un élève qui a changé de niveau en cours d'année porte des
-/// créances sur les deux, et il les doit toutes. Les borner au cycle de sa
-/// classe actuelle ferait disparaître une dette de la feuille que son parent
-/// signe.
+/// **Aucune conversion de devise** : le cours du jour n'entre plus ici. En
+/// sélection mixte, « a payé au moins… » est indisponible et le tri suit la
+/// situation.
 ///
 /// Un élève **sans créance** de ces frais est écarté : « aucun paiement » n'est
-/// pas « aucune créance ». L'écart entre [FeeControlState.studentsInScope] et
-/// `breakdown.total` permet à l'état vide de le dire.
+/// pas « aucune créance ».
 class FeeControlBloc extends Bloc<FeeControlEvent, FeeControlState> {
   final SearchLocalEnrollmentsUseCase _search;
   final GetRecoveryPositionsUseCase _getPositions;
-  final FeeControlTariffsResolver _tariffs;
+  final GetFeeNaturesForYearUseCase _getNatures;
   final GetOfflineClassroomsUseCase _getClassrooms;
   final GetOfflineRosterUseCase _getRoster;
+  final GetComposedRostersUseCase _getComposedRosters;
 
   /// Liste complète filtrée de la recherche courante, conservée pour paginer
   /// sans relire la base.
@@ -76,42 +65,30 @@ class FeeControlBloc extends Bloc<FeeControlEvent, FeeControlState> {
   /// elle que les tuiles de compteur recoupent, sans relire.
   List<FeeControlRow> _charged = const <FeeControlRow>[];
 
-  /// Le résultat **entier**, dans l'ordre où l'écran le sert — pas seulement la
-  /// page affichée.
-  ///
-  /// Exposé parce que la sélection porte sur tout le résultat : la feuille
-  /// d'appel doit pouvoir nommer un élève coché à la page 1 alors qu'on en est
-  /// à la page 3. L'ordre est celui du tri, donc celui de la numérotation
-  /// imprimée.
+  /// Le résultat **entier**, dans l'ordre où l'écran le sert — la sélection
+  /// et les exports portent sur tout le résultat, pas sur la page affichée.
   List<FeeControlRow> get results => List.unmodifiable(_cache);
 
-  // Générations de chargement : le transformer par défaut du bloc étant
-  // `concurrent`, plusieurs chargements peuvent voler en parallèle. Chaque
-  // chargement capture le numéro courant ; seul le PLUS RÉCENT écrit et émet
-  // (sémantique restartable) — une recherche périmée résolue en dernier ne peut
-  // plus repeindre la liste sous une identité de requête plus fraîche.
+  // Générations de chargement (transformer `concurrent`) : seul le PLUS RÉCENT
+  // écrit et émet.
   int _loadGeneration = 0;
-  int _tariffsGeneration = 0;
-  int _classroomsGeneration = 0;
+  int _catalogGeneration = 0;
 
   FeeControlBloc({
     required SearchLocalEnrollmentsUseCase search,
     required GetRecoveryPositionsUseCase getPositions,
-    required GetFeeTariffsForLevelUseCase getTariffs,
-    required HasFeeGridUseCase hasFeeGrid,
+    required GetFeeNaturesForYearUseCase getNatures,
     required GetOfflineClassroomsUseCase getClassrooms,
     required GetOfflineRosterUseCase getRoster,
+    required GetComposedRostersUseCase getComposedRosters,
   }) : _search = search,
        _getPositions = getPositions,
-       _tariffs = FeeControlTariffsResolver(
-         getTariffs: getTariffs,
-         hasFeeGrid: hasFeeGrid,
-       ),
+       _getNatures = getNatures,
        _getClassrooms = getClassrooms,
        _getRoster = getRoster,
+       _getComposedRosters = getComposedRosters,
        super(const FeeControlState.initial()) {
-    on<FeeControlTariffsRequested>(_onTariffsRequested);
-    on<FeeControlClassroomsRequested>(_onClassroomsRequested);
+    on<FeeControlCatalogRequested>(_onCatalogRequested);
     on<FeeControlSearchRequested>(_onSearchRequested);
     on<FeeControlSituationRequested>(_onSituationRequested);
     on<FeeControlPageRequested>(_onPageRequested);
@@ -119,71 +96,36 @@ class FeeControlBloc extends Bloc<FeeControlEvent, FeeControlState> {
     on<FeeControlResetRequested>(_onResetRequested);
   }
 
-  // ── Grille tarifaire ────────────────────────────────────────────────────────
+  // ── Catalogue ──────────────────────────────────────────────────────────────
 
-  Future<void> _onTariffsRequested(
-    FeeControlTariffsRequested event,
+  Future<void> _onCatalogRequested(
+    FeeControlCatalogRequested event,
     Emitter<FeeControlState> emit,
   ) async {
-    final generation = ++_tariffsGeneration;
-    emit(
-      state.copyWith(
-        tariffsStatus: EnrollmentLoadStatus.loading,
-        tariffs: const <LocalFeeTariff>[],
-        feeGridMissing: false,
-      ),
-    );
-
-    final outcome = await _tariffs.resolve(
+    final generation = ++_catalogGeneration;
+    emit(state.copyWith(catalogStatus: EnrollmentLoadStatus.loading));
+    final natures = await _getNatures(academicYearId: event.academicYearId);
+    if (generation != _catalogGeneration) return;
+    final classrooms = await _getClassrooms(
       academicYearId: event.academicYearId,
-      schoolLevelId: event.schoolLevelId,
-      schoolLevelGroupId: _nullIfEmpty(event.schoolLevelGroupId),
     );
-    if (generation != _tariffsGeneration) return;
+    if (generation != _catalogGeneration) return;
 
-    emit(
-      state.copyWith(
-        tariffsStatus: outcome.failed
-            ? EnrollmentLoadStatus.failure
-            : EnrollmentLoadStatus.success,
-        tariffs: outcome.tariffs,
-        feeGridMissing: outcome.gridMissing,
-      ),
-    );
-  }
-
-  // ── Classes du niveau ──────────────────────────────────────────────────────
-
-  Future<void> _onClassroomsRequested(
-    FeeControlClassroomsRequested event,
-    Emitter<FeeControlState> emit,
-  ) async {
-    final generation = ++_classroomsGeneration;
-    emit(
-      state.copyWith(
-        classroomsStatus: EnrollmentLoadStatus.loading,
-        classrooms: const <OfflineClassroom>[],
-      ),
-    );
-
-    final result = await _getClassrooms(
-      academicYearId: event.academicYearId,
-      schoolLevelId: event.schoolLevelId,
-    );
-    if (generation != _classroomsGeneration) return;
-
-    emit(
-      result.fold(
-        (_) => state.copyWith(
-          classroomsStatus: EnrollmentLoadStatus.failure,
-          classrooms: const <OfflineClassroom>[],
-        ),
-        (classrooms) => state.copyWith(
-          classroomsStatus: EnrollmentLoadStatus.success,
-          classrooms: classrooms,
+    final next = natures.fold<FeeControlState?>(
+      (_) => null,
+      (list) => classrooms.fold(
+        (_) => null,
+        (rooms) => state.copyWith(
+          catalogStatus: EnrollmentLoadStatus.success,
+          natures: [
+            for (final n in list)
+              FeeNature(feeCode: n.feeCode, currencies: n.currencies),
+          ],
+          classrooms: rooms,
         ),
       ),
     );
+    emit(next ?? state.copyWith(catalogStatus: EnrollmentLoadStatus.failure));
   }
 
   // ── Recherche ──────────────────────────────────────────────────────────────
@@ -197,13 +139,10 @@ class FeeControlBloc extends Bloc<FeeControlEvent, FeeControlState> {
       emit,
       FeeControlQuery(
         academicYearId: event.academicYearId,
-        schoolLevelGroupId: request.schoolLevelGroupId,
-        schoolLevelId: request.schoolLevelId,
         classroomId: request.classroomId,
         feeCodes: request.feeCodes,
         statusFilter: request.statusFilter,
         threshold: request.threshold,
-        rate: event.rate,
         page: event.page,
         size: event.size,
       ),
@@ -229,14 +168,17 @@ class FeeControlBloc extends Bloc<FeeControlEvent, FeeControlState> {
     final last = state.lastQuery;
     if (last == null) return;
     if (state.status != EnrollmentLoadStatus.success) return;
-    if (last.statusFilter == event.filter) return;
+    final query = last.copyWithSituation(
+      event.filter,
+      threshold: event.threshold,
+    );
+    if (query == last.copyWithPage(0)) return;
 
-    final query = last.copyWithSituation(event.filter);
     _cache = FeeControlProjector.refilter(
       _charged,
       filter: query.statusFilter,
       threshold: query.threshold,
-      rate: query.rate,
+      mixed: state.currencies.length > 1,
     );
     emit(
       state.withPage(
@@ -297,42 +239,36 @@ class FeeControlBloc extends Bloc<FeeControlEvent, FeeControlState> {
 
     final enrolled = await _search.currentYearEnrolled(
       academicYearId: _nullIfEmpty(query.academicYearId),
-      schoolLevelGroupId: _nullIfEmpty(query.schoolLevelGroupId),
-      schoolLevelId: _nullIfEmpty(query.schoolLevelId),
     );
     if (generation != _loadGeneration) return;
 
-    // Maille classe : le roster local COMPOSÉ (miroir ± transferts non
-    // synchronisés) donne les élèves retenus. Lu avant le raffinement par nom,
-    // pour que « élèves du niveau » devienne « élèves de la classe » avant
-    // toute autre coupe. Une classe vide localement (roster pas encore pullé)
-    // donne un ensemble vide — l'écran le dit plutôt que de retomber
-    // silencieusement sur le niveau entier.
+    // Le périmètre : le roster local COMPOSÉ de la classe (miroir ± transferts
+    // non synchronisés) ; pour « Non affectés », tous les inscrits privés des
+    // élèves d'un roster de l'année. Une classe vide localement donne un
+    // ensemble vide — l'écran le dit plutôt que de retomber sur l'année.
     Set<String>? classroomStudentIds;
-    if (query.classroomId != null) {
-      final roster = await _getRoster(classroomId: query.classroomId!);
-      if (generation != _loadGeneration) return;
-      final failed = roster.fold(
-        (failure) {
-          _emitFailure(emit, failure);
-          return true;
-        },
-        (members) {
-          classroomStudentIds = members.map((m) => m.studentId).toSet();
-          return false;
-        },
-      );
-      if (failed) return;
+    Set<String>? assignedStudentIds;
+    final failure = query.isUnassigned
+        ? await _assigned(
+            query.academicYearId,
+            (ids) => assignedStudentIds = ids,
+          )
+        : await _roster(query.classroomId, (ids) => classroomStudentIds = ids);
+    if (generation != _loadGeneration) return;
+    if (failure != null) {
+      _emitFailure(emit, failure);
+      return;
     }
 
     await enrolled.fold((failure) async => _emitFailure(emit, failure), (
       items,
     ) async {
-      final scoped = classroomStudentIds == null
-          ? items
-          : items
-                .where((i) => classroomStudentIds!.contains(i.studentId))
-                .toList(growable: false);
+      final scoped = [
+        for (final i in items)
+          if (classroomStudentIds?.contains(i.studentId) ??
+              !(assignedStudentIds?.contains(i.studentId) ?? false))
+            i,
+      ];
       final summaries = EnrollmentLocalListProjector.project(scoped);
       if (summaries.isEmpty) {
         _cache = const <FeeControlRow>[];
@@ -349,6 +285,7 @@ class FeeControlBloc extends Bloc<FeeControlEvent, FeeControlState> {
             breakdown: const FeeControlBreakdown(),
             expected: MoneyBag.empty,
             collected: MoneyBag.empty,
+            currencies: const <String>{},
             classroomRosterSize: classroomStudentIds?.length,
           ),
         );
@@ -367,7 +304,6 @@ class FeeControlBloc extends Bloc<FeeControlEvent, FeeControlState> {
           lines: lines,
           filter: query.statusFilter,
           threshold: query.threshold,
-          rate: query.rate,
         );
         _cache = join.filtered;
         _charged = join.charged;
@@ -383,11 +319,60 @@ class FeeControlBloc extends Bloc<FeeControlEvent, FeeControlState> {
             breakdown: join.breakdown,
             expected: join.expected,
             collected: join.collected,
+            currencies: join.currencies,
             classroomRosterSize: classroomStudentIds?.length,
           ),
         );
       });
     });
+  }
+
+  /// Les élèves du roster composé de [classroomId] ; rend l'échec, ou `null`.
+  Future<Failure?> _roster(
+    String classroomId,
+    void Function(Set<String>) onIds,
+  ) async {
+    final roster = await _getRoster(classroomId: classroomId);
+    return roster.fold((failure) => failure, (members) {
+      onIds({for (final m in members) m.studentId});
+      return null;
+    });
+  }
+
+  /// Tous les élèves d'un roster de l'année — ce que « Non affectés » retire.
+  /// Un roster par niveau ayant des classes : une vingtaine de lectures au
+  /// plus, sur une base locale.
+  Future<Failure?> _assigned(
+    String academicYearId,
+    void Function(Set<String>) onIds,
+  ) async {
+    final rooms = await _getClassrooms(academicYearId: academicYearId);
+    final levels = rooms.fold<Set<String>?>(
+      (_) => null,
+      (list) => {
+        for (final c in list)
+          if (c.schoolLevelId != null) c.schoolLevelId!,
+      },
+    );
+    if (levels == null) {
+      return rooms.fold((failure) => failure, (_) => null);
+    }
+    final ids = <String>{};
+    for (final level in levels) {
+      final rosters = await _getComposedRosters(
+        academicYearId: academicYearId,
+        schoolLevelId: level,
+      );
+      final failure = rosters.fold<Failure?>((f) => f, (byClass) {
+        for (final members in byClass.values) {
+          ids.addAll(members.map((m) => m.studentId));
+        }
+        return null;
+      });
+      if (failure != null) return failure;
+    }
+    onIds(ids);
+    return null;
   }
 
   /// Purge aussi le cache : l'écran d'erreur remplace la liste, et une

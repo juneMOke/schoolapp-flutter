@@ -1,5 +1,5 @@
 import 'package:equatable/equatable.dart';
-import 'package:school_app_flutter/core/money/exchange_rate.dart';
+import 'package:school_app_flutter/features/recouvrement/domain/rules/recovery_rule.dart';
 import 'package:school_app_flutter/core/money/money.dart';
 import 'package:school_app_flutter/core/helpers/person_name_comparator.dart';
 import 'package:school_app_flutter/core/money/money_bag.dart';
@@ -85,12 +85,16 @@ class FeeControlJoin {
   final MoneyBag expected;
   final MoneyBag collected;
 
+  /// Devises **présentes** dans les créances de [charged].
+  final Set<String> currencies;
+
   const FeeControlJoin({
     required this.charged,
     required this.filtered,
     required this.breakdown,
     required this.expected,
     required this.collected,
+    this.currencies = const <String>{},
   });
 
   static const empty = FeeControlJoin(
@@ -118,7 +122,6 @@ class FeeControlProjector {
     required List<LocalRecoveryLine> lines,
     required FeeControlPaymentFilter filter,
     Money? threshold,
-    ExchangeRate? rate,
   }) {
     final byStudent = _mergeByStudent(lines);
 
@@ -145,6 +148,7 @@ class FeeControlProjector {
       expected = expected + row.expected;
       collected = collected + row.paid;
     }
+    final currencies = {for (final row in charged) ...row.currencies};
 
     return FeeControlJoin(
       charged: charged,
@@ -152,7 +156,7 @@ class FeeControlProjector {
         charged,
         filter: filter,
         threshold: threshold,
-        rate: rate,
+        mixed: currencies.length > 1,
       ),
       breakdown: FeeControlBreakdown(
         settled: settled,
@@ -161,6 +165,7 @@ class FeeControlProjector {
       ),
       expected: expected,
       collected: collected,
+      currencies: currencies,
     );
   }
 
@@ -174,12 +179,12 @@ class FeeControlProjector {
     List<FeeControlRow> charged, {
     required FeeControlPaymentFilter filter,
     Money? threshold,
-    ExchangeRate? rate,
+    required bool mixed,
   }) => List<FeeControlRow>.unmodifiable(
     [
       for (final row in charged)
-        if (row.matches(filter, threshold: threshold, rate: rate)) row,
-    ]..sort((a, b) => _byProgress(a, b, rate)),
+        if (row.matches(filter, threshold: threshold)) row,
+    ]..sort((a, b) => _byProgress(a, b, mixed: mixed)),
   );
 
   /// **Une ligne par élève**, quel que soit le nombre de niveaux qu'il porte.
@@ -210,21 +215,21 @@ class FeeControlProjector {
     return merged;
   }
 
-  /// Du moins avancé au plus avancé, puis par nom — **déterministe**, pour que
-  /// la même liste imprimée deux fois soit identique.
-  ///
-  /// ⚠️ Les lignes dont le taux est inconnu (deux devises, aucun cours) ferment
-  /// la marche : elles ne peuvent pas être placées sur l'échelle de progression,
-  /// et les mettre en tête ferait passer pour urgents des élèves peut-être à
-  /// jour. Leur pastille de statut, elle, reste juste.
-  static int _byProgress(FeeControlRow a, FeeControlRow b, ExchangeRate? rate) {
-    final ra = a.ratePercent(rate);
-    final rb = b.ratePercent(rate);
-    if (ra != rb) {
-      if (ra == null) return 1;
-      if (rb == null) return -1;
-      return ra.compareTo(rb);
-    }
+  /// Du moins avancé au plus avancé, puis par nom — **déterministe**, et le
+  /// même ordre que le serveur (vecteurs partagés) : avancement imputable / dû
+  /// en produits croisés si la classe ne porte qu'une devise, situation (rien
+  /// payé, partiel, soldé) si elle en porte deux. Jamais de conversion.
+  static int _byProgress(
+    FeeControlRow a,
+    FeeControlRow b, {
+    required bool mixed,
+  }) {
+    final byStanding = RecoveryStanding.compareStanding(
+      a.standing,
+      b.standing,
+      mixed: mixed,
+    );
+    if (byStanding != 0) return byStanding;
     // Le taux reste le premier mot de l'ordre — c'est la priorité de relance.
     // Seul le départage change : cascade complète Nom → Post-nom → Prénom,
     // accents repliés, là où deux fiches de même nom se classaient sans
