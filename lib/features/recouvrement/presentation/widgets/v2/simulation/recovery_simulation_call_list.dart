@@ -12,6 +12,7 @@ import 'package:school_app_flutter/features/recouvrement/presentation/bloc/v2/re
 import 'package:school_app_flutter/features/recouvrement/presentation/pages/v2/recovery_dashboard_actions.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/widgets/relance/recouvrement_call_list_sheet.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
+import 'package:school_app_flutter/features/recouvrement/presentation/widgets/v2/classes/recovery_class_name.dart';
 
 /// La taille d'une page lue pour la liste à signer : une classe y tient
 /// d'ordinaire en une seule.
@@ -46,7 +47,7 @@ Future<void> showRecoverySimulationCallList(
     context: context,
     builder: (dialogContext) => _CallListLoader(
       loading: loading,
-      groupLabel: row.classroomName,
+      groupLabel: row.displayName(l10n),
       criterionLabel: criterionLabel,
       onPrint: (title) => openRecoveryExport(
         dialogContext,

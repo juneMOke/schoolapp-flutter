@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:bloc_test/bloc_test.dart';
 import 'package:dartz/dartz.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -108,13 +110,13 @@ ClassroomMember member(String studentId, {String classroomId = 'cls-1'}) =>
 FeeControlSearchRequest request({
   FeeControlPaymentFilter filter = FeeControlPaymentFilter.all,
   List<String> feeCodes = const [tFeeCode],
-  Money? threshold,
+  int? thresholdInCents,
   String classroomId = 'cls-1',
 }) => FeeControlSearchRequest(
   classroomId: classroomId,
   feeCodes: feeCodes,
   statusFilter: filter,
-  threshold: threshold,
+  thresholdInCents: thresholdInCents,
 );
 
 void main() {
@@ -689,7 +691,7 @@ void main() {
           academicYearId: tYear,
           request: request(
             filter: FeeControlPaymentFilter.threshold,
-            threshold: const Money(50000, 'USD'),
+            thresholdInCents: 50000,
           ),
         ),
       ),
@@ -736,7 +738,7 @@ void main() {
           request: request(
             feeCodes: const [tFeeCode, tOtherFee],
             filter: FeeControlPaymentFilter.threshold,
-            threshold: const Money(35000, 'USD'),
+            thresholdInCents: 35000,
           ),
         ),
       ),
@@ -903,7 +905,7 @@ void main() {
             academicYearId: tYear,
             request: request(
               filter: FeeControlPaymentFilter.threshold,
-              threshold: const Money(50000, 'USD'),
+              thresholdInCents: 50000,
             ),
           ),
         );
@@ -925,6 +927,240 @@ void main() {
         const FeeControlSituationRequested(FeeControlPaymentFilter.none),
       ),
       expect: () => const <FeeControlState>[],
+    );
+  });
+
+  // ── Le seuil voyage en centimes ; sa devise vient des lignes lues (B1-B3) ──
+  group('devise du plancher résolue sur les lignes lues', () {
+    blocTest<FeeControlBloc, FeeControlState>(
+      'B1 — le plancher prend la devise de la classe LUE (francs), sans '
+      'qu\'aucune devise ne soit connue au départ',
+      setUp: () {
+        stubEnrolled([student('s1'), student('s2')]);
+        stubPositions([
+          ledger('s1', currency: 'CDF', mirror: 60000),
+          ledger('s2', currency: 'CDF', mirror: 20000),
+        ]);
+      },
+      build: buildBloc,
+      act: (bloc) => bloc.add(
+        FeeControlSearchRequested(
+          academicYearId: tYear,
+          request: request(
+            filter: FeeControlPaymentFilter.threshold,
+            thresholdInCents: 50000,
+          ),
+        ),
+      ),
+      verify: (bloc) {
+        expect(bloc.state.lastQuery?.threshold, const Money(50000, 'CDF'));
+        expect(bloc.state.lastQuery?.thresholdInCents, 50000);
+        expect(bloc.state.rows.map((r) => r.studentId), ['s1']);
+      },
+    );
+
+    blocTest<FeeControlBloc, FeeControlState>(
+      'B2 — classe en dollars puis classe en francs : le plancher suit la '
+      'NOUVELLE classe, jamais la devise de la précédente',
+      setUp: () {
+        stubEnrolled([student('s1'), student('s2'), student('s3')]);
+        stubPositions([ledger('s1', mirror: 60000)]);
+      },
+      build: buildBloc,
+      act: (bloc) async {
+        bloc.add(
+          FeeControlSearchRequested(
+            academicYearId: tYear,
+            request: request(
+              filter: FeeControlPaymentFilter.threshold,
+              thresholdInCents: 50000,
+            ),
+          ),
+        );
+        await Future<void>.delayed(Duration.zero);
+        // La classe suivante est en francs : un partiel au-dessus du seuil,
+        // un partiel au-dessous, un soldé.
+        stubPositions([
+          ledger('s1', currency: 'CDF', expected: 200000, mirror: 60000),
+          ledger('s2', currency: 'CDF', expected: 200000, mirror: 20000),
+          ledger('s3', currency: 'CDF', expected: 200000, mirror: 200000),
+        ]);
+        bloc.add(
+          FeeControlSearchRequested(
+            academicYearId: tYear,
+            request: request(
+              classroomId: 'cls-2',
+              filter: FeeControlPaymentFilter.threshold,
+              thresholdInCents: 50000,
+            ),
+          ),
+        );
+      },
+      verify: (bloc) {
+        expect(bloc.state.lastQuery?.threshold, const Money(50000, 'CDF'));
+        // Un seuil en dollars sur des lignes en francs ne retenait que les
+        // soldés ; le partiel au-dessus du seuil est bien là.
+        expect(bloc.state.rows.map((r) => r.studentId).toSet(), {'s1', 's3'});
+      },
+    );
+
+    blocTest<FeeControlBloc, FeeControlState>(
+      'B3 — champ vide sous « a payé au moins… » : le plancher vaut 0 dans la '
+      'devise lue (R3), et part ainsi à l\'export',
+      setUp: () {
+        stubEnrolled([student('s1'), student('s2')]);
+        stubPositions([ledger('s1', mirror: 60000), ledger('s2')]);
+      },
+      build: buildBloc,
+      act: (bloc) => bloc.add(
+        FeeControlSearchRequested(
+          academicYearId: tYear,
+          request: request(filter: FeeControlPaymentFilter.threshold),
+        ),
+      ),
+      verify: (bloc) {
+        expect(bloc.state.lastQuery?.threshold, const Money(0, 'USD'));
+        expect(bloc.state.rows.length, 2);
+      },
+    );
+
+    blocTest<FeeControlBloc, FeeControlState>(
+      'en sélection mixte, aucun plancher n\'est résolu',
+      setUp: () {
+        stubEnrolled([student('s1'), student('s2')]);
+        stubPositions([
+          ledger('s1', mirror: 60000),
+          ledger('s2', feeCode: tOtherFee, currency: 'CDF'),
+        ]);
+      },
+      build: buildBloc,
+      act: (bloc) => bloc.add(
+        FeeControlSearchRequested(
+          academicYearId: tYear,
+          request: request(
+            feeCodes: const [tFeeCode, tOtherFee],
+            filter: FeeControlPaymentFilter.threshold,
+            thresholdInCents: 50000,
+          ),
+        ),
+      ),
+      verify: (bloc) => expect(bloc.state.lastQuery?.threshold, isNull),
+    );
+
+    blocTest<FeeControlBloc, FeeControlState>(
+      'le montant tapé après la lecture se résout sur la devise des lignes '
+      'déjà lues',
+      setUp: () {
+        stubEnrolled([student('s1'), student('s2')]);
+        stubPositions([
+          ledger('s1', currency: 'CDF', mirror: 60000),
+          ledger('s2', currency: 'CDF', mirror: 20000),
+        ]);
+      },
+      build: buildBloc,
+      act: (bloc) async {
+        bloc.add(
+          FeeControlSearchRequested(academicYearId: tYear, request: request()),
+        );
+        await Future<void>.delayed(Duration.zero);
+        bloc.add(
+          const FeeControlSituationRequested(
+            FeeControlPaymentFilter.threshold,
+            thresholdInCents: 50000,
+          ),
+        );
+      },
+      verify: (bloc) {
+        expect(bloc.state.lastQuery?.threshold, const Money(50000, 'CDF'));
+        expect(bloc.state.rows.map((r) => r.studentId), ['s1']);
+      },
+    );
+  });
+
+  // ── M14 : une situation demandée pendant un chargement n'est pas perdue ───
+  group('situation demandée pendant un chargement', () {
+    late Completer<Either<Failure, List<LocalRecoveryLine>>> gate;
+
+    void stubSlowPositions(List<LocalRecoveryLine> lines) {
+      gate = Completer();
+      when(
+        () => getPositions(
+          academicYearId: any(named: 'academicYearId'),
+          feeCodes: any(named: 'feeCodes'),
+        ),
+      ).thenAnswer((_) => gate.future);
+    }
+
+    final lines = [
+      ledger('s1', mirror: 60000),
+      ledger('s2', mirror: 20000),
+      ledger('s3'),
+    ];
+
+    blocTest<FeeControlBloc, FeeControlState>(
+      'M14 — le montant tapé avant l\'arrivée des lignes s\'y applique',
+      setUp: () {
+        stubEnrolled([student('s1'), student('s2'), student('s3')]);
+        stubSlowPositions(lines);
+      },
+      build: buildBloc,
+      act: (bloc) async {
+        bloc.add(
+          FeeControlSearchRequested(academicYearId: tYear, request: request()),
+        );
+        await Future<void>.delayed(Duration.zero);
+        expect(bloc.state.status, EnrollmentLoadStatus.loading);
+        bloc.add(
+          const FeeControlSituationRequested(
+            FeeControlPaymentFilter.threshold,
+            thresholdInCents: 50000,
+          ),
+        );
+        await Future<void>.delayed(Duration.zero);
+        gate.complete(Right(lines));
+      },
+      verify: (bloc) {
+        expect(bloc.state.status, EnrollmentLoadStatus.success);
+        expect(
+          bloc.state.lastQuery?.statusFilter,
+          FeeControlPaymentFilter.threshold,
+        );
+        expect(bloc.state.lastQuery?.threshold, const Money(50000, 'USD'));
+        expect(bloc.state.rows.map((r) => r.studentId), ['s1']);
+      },
+    );
+
+    blocTest<FeeControlBloc, FeeControlState>(
+      'une nouvelle recherche efface la situation en attente : elle porte '
+      'déjà la question entière',
+      setUp: () {
+        stubEnrolled([student('s1'), student('s2'), student('s3')]);
+        stubSlowPositions(lines);
+      },
+      build: buildBloc,
+      act: (bloc) async {
+        bloc.add(
+          FeeControlSearchRequested(academicYearId: tYear, request: request()),
+        );
+        await Future<void>.delayed(Duration.zero);
+        bloc.add(
+          const FeeControlSituationRequested(FeeControlPaymentFilter.none),
+        );
+        bloc.add(
+          FeeControlSearchRequested(
+            academicYearId: tYear,
+            request: request(filter: FeeControlPaymentFilter.settled),
+          ),
+        );
+        await Future<void>.delayed(Duration.zero);
+        gate.complete(Right(lines));
+      },
+      verify: (bloc) {
+        expect(
+          bloc.state.lastQuery?.statusFilter,
+          FeeControlPaymentFilter.settled,
+        );
+      },
     );
   });
 }

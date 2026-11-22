@@ -57,6 +57,7 @@ class RecoverySimulationControls extends StatelessWidget {
                   label: l10n.recoverySimulationChangeA11y,
                   excludeSemantics: true,
                   button: true,
+                  onTap: onChangeRule,
                   child: TextButton.icon(
                     onPressed: onChangeRule,
                     style: TextButton.styleFrom(

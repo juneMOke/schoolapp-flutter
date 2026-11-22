@@ -66,6 +66,7 @@ import 'package:school_app_flutter/router/return_location.dart';
 import 'package:school_app_flutter/router/router_extra_codec.dart';
 import 'package:school_app_flutter/router/boutique_sale_routes.dart';
 import 'package:school_app_flutter/router/hr_agent_routes.dart';
+import 'package:school_app_flutter/router/legacy_fee_control_redirect.dart';
 import 'package:school_app_flutter/router/student_record_routes.dart';
 import 'package:school_app_flutter/features/attendances/presentation/register/pages/class_presence_page.dart';
 import 'package:school_app_flutter/features/attendances/presentation/justifications/pages/justification_queue_page.dart';
@@ -471,19 +472,11 @@ class AppRouter {
         ),
         GoRoute(
           path: AppRoutesNames.recouvrementControl,
-          // `extra` porte les critères quand l'écran est ouvert depuis le
-          // tableau de bord ; vide, l'écran s'ouvre vierge comme par le menu.
-          // Hors de la coquille, l'écran porte sa propre barre, avec le retour.
-          // Ne s'ouvre plus hors de la coquille (spec v2, R15) : l'ancienne
-          // adresse renvoie au sous-menu, question comprise.
-          redirect: (context, state) => Uri(
-            path: AppRoutesNames.homeSubMenuPath(
-              MenuConstants.recouvrementControlId,
-            ),
-            queryParameters: state.uri.queryParameters.isEmpty
-                ? null
-                : state.uri.queryParameters,
-          ).toString(),
+          // L'écran ne s'ouvre plus hors de la coquille (spec v2, R15) :
+          // l'ancienne adresse renvoie au sous-menu, question comprise,
+          // traduite dans le vocabulaire de la v2.
+          redirect: (context, state) =>
+              legacyFeeControlRedirect(state.uri.queryParameters),
         ),
       ],
     ),

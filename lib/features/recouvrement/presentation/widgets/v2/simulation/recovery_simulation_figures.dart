@@ -8,6 +8,7 @@ import 'package:school_app_flutter/features/recouvrement/domain/entities/recover
 import 'package:school_app_flutter/features/recouvrement/presentation/widgets/v2/simulation/recovery_simulation_texts.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/widgets/v2/simulation/recovery_verdict.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
+import 'package:school_app_flutter/features/recouvrement/presentation/widgets/v2/classes/recovery_class_name.dart';
 
 /// Les classes qui passeraient sous le seuil, dans l'ordre du serveur.
 List<RecoverySimulationRow> recoveryUnmanageableRows(
@@ -80,10 +81,13 @@ List<EteeloKpiCardData> recoverySimulationCards({
 /// « 2ème humanités, 3ème humanités… » ou « aucune sous le seuil ».
 String _names(List<RecoverySimulationRow> rows, AppLocalizations l10n) {
   if (rows.isEmpty) return l10n.recoverySimulationUnmanageableNone;
-  final first = rows.first.classroomName;
+  final first = rows.first.displayName(l10n);
   final two = rows.length == 1
       ? first
-      : l10n.recoverySimulationUnmanageableTwo(first, rows[1].classroomName);
+      : l10n.recoverySimulationUnmanageableTwo(
+          first,
+          rows[1].displayName(l10n),
+        );
   return rows.length > 2 ? l10n.recoverySimulationUnmanageableMore(two) : two;
 }
 

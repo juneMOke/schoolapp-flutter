@@ -148,6 +148,9 @@ class _SituationRow extends StatelessWidget {
       button: true,
       label: l10n.recoveryFiguresSituationRowA11y(label, count),
       hint: l10n.recoveryFiguresSituationRowHint,
+      // L'enfant est tu : l'action « toucher » est portée ici (sinon le
+      // lecteur d'écran annonce un bouton qui ne fait rien).
+      onTap: onTap,
       excludeSemantics: true,
       child: Tooltip(
         message: l10n.recoveryFiguresSituationRowHint,

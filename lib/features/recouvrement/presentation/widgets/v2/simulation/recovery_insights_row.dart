@@ -4,9 +4,11 @@ import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/money/money_format.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/features/recouvrement/domain/entities/recovery_dashboard.dart';
+import 'package:school_app_flutter/features/recouvrement/presentation/widgets/v2/classes/recovery_ranking_options.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/widgets/v2/simulation/recovery_insight_card.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/widgets/v2/simulation/recovery_simulation_figures.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
+import 'package:school_app_flutter/features/recouvrement/presentation/widgets/v2/classes/recovery_class_name.dart';
 
 /// G · trois lectures (R13) : ce que les chiffres impliquent, chacune fondée
 /// sur un bloc visible plus haut. **Aucune n'ordonne une sanction.**
@@ -16,7 +18,9 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 class RecoveryInsightsRow extends StatelessWidget {
   final RecoveryDashboard dashboard;
 
-  /// Le frais du bloc D : son classement nourrit « Écart entre classes ».
+  /// La valeur du choix du bloc D (`feeCode` ou `feeCode|devise`, cf.
+  /// [RecoveryRankingOptions]) : son classement nourrit « Écart entre
+  /// classes », le même que D.
   final String? rankingFeeCode;
   final int unmanageableBelow;
   final VoidCallback onControlStudents;
@@ -72,7 +76,7 @@ class RecoveryInsightsRow extends StatelessWidget {
       body: l10n.recoveryInsightWorstFeeBody(
         worst.label,
         worst.figures.ratePercent!,
-        MoneyFormat.format(worst.figures.outstanding),
+        MoneyFormat.compact(worst.figures.outstanding),
       ),
       actionLabel: l10n.recoveryInsightControl,
       onAction: onControlStudents,
@@ -82,11 +86,11 @@ class RecoveryInsightsRow extends StatelessWidget {
   /// Le classement du bloc D — même choix : le frais choisi, sinon le
   /// premier. Muette sous deux classes classées.
   Widget? _spread(AppLocalizations l10n) {
-    final rankings = dashboard.classRankings;
-    if (rankings.isEmpty) return null;
-    final ranking =
-        rankings.where((r) => r.feeCode == rankingFeeCode).firstOrNull ??
-        rankings.first;
+    final ranking = RecoveryRankingOptions.resolve(
+      RecoveryRankingOptions.of(dashboard),
+      rankingFeeCode ?? '',
+    )?.ranking;
+    if (ranking == null) return null;
     final ranked = [
       for (final row in ranking.ranked)
         if (row.ratePercent != null) row,
@@ -101,17 +105,15 @@ class RecoveryInsightsRow extends StatelessWidget {
       body: l10n.recoveryInsightSpreadBody(
         recoveryFeeInSentence(_feeLabel(ranking.feeCode)),
         best.ratePercent!,
-        best.classroomName,
+        best.displayName(l10n),
         worst.ratePercent!,
-        worst.classroomName,
+        worst.displayName(l10n),
       ),
     );
   }
 
   String _feeLabel(String code) =>
-      dashboard.fees.where((f) => f.code == code).firstOrNull?.label ??
-      dashboard.feeRates.where((f) => f.feeCode == code).firstOrNull?.label ??
-      code;
+      RecoveryRankingOptions.labelOf(dashboard, code);
 
   Widget _simulation(AppLocalizations l10n) {
     final simulation = dashboard.simulation;

@@ -85,8 +85,9 @@ class FeeControlRow extends Equatable {
   /// (vecteurs partagés) : payé imputable ≥ seuil, ou plus rien à payer.
   bool matches(FeeControlPaymentFilter filter, {Money? threshold}) {
     if (filter == FeeControlPaymentFilter.threshold) {
-      // Un champ vide ne filtre pas encore : c'est la lecture littérale d'un
-      // montant qu'on n'a pas encore saisi.
+      // Pas de plancher résolu (sélection mixte : la carte retombe sur
+      // « Tous ») : rien n'est retenu contre l'élève. Un champ vide, lui, est
+      // résolu en 0 (R3) en amont.
       if (threshold == null) return true;
       return standing.inOrder(RecoveryRuleKind.atLeast, threshold: threshold) ??
           false;
@@ -130,21 +131,28 @@ class FeeControlSearchRequest extends Equatable {
 
   final FeeControlPaymentFilter statusFilter;
 
-  /// Montant plancher du segment « A payé au moins… ». `null` hors de ce
-  /// segment, et `null` aussi en sélection mixte : le segment y est désactivé.
-  final Money? threshold;
+  /// Montant plancher du segment « A payé au moins… », **en centimes et sans
+  /// devise** : la devise n'est connue qu'une fois la classe lue, et c'est le
+  /// bloc qui la résout sur les lignes qu'il vient de lire (B1-B2). `null` hors
+  /// de ce segment, ou champ vide (lu « 0 », spec R3).
+  final int? thresholdInCents;
 
   const FeeControlSearchRequest({
     required this.classroomId,
     required this.feeCodes,
     required this.statusFilter,
-    this.threshold,
+    this.thresholdInCents,
   });
 
   bool get isUnassigned => classroomId == feeControlUnassigned;
 
   @override
-  List<Object?> get props => [classroomId, feeCodes, statusFilter, threshold];
+  List<Object?> get props => [
+    classroomId,
+    feeCodes,
+    statusFilter,
+    thresholdInCents,
+  ];
 }
 
 /// Photo immuable de la dernière recherche jouée — sert à la rejouer
@@ -157,6 +165,14 @@ class FeeControlQuery extends Equatable {
 
   final List<String> feeCodes;
   final FeeControlPaymentFilter statusFilter;
+
+  /// Le montant saisi pour « a payé au moins… », en centimes, sans devise —
+  /// ce que l'opérateur a voulu. `null` : champ vide (lu « 0 », spec R3).
+  final int? thresholdInCents;
+
+  /// Le plancher **résolu** sur la devise des lignes lues ([resolvedFor]) :
+  /// c'est lui que le filtrage, la phrase et l'export appliquent. `null` hors
+  /// du segment, en sélection mixte, ou tant que la classe n'est pas lue.
   final Money? threshold;
 
   final int page;
@@ -167,6 +183,7 @@ class FeeControlQuery extends Equatable {
     required this.classroomId,
     required this.feeCodes,
     required this.statusFilter,
+    this.thresholdInCents,
     this.threshold,
     required this.page,
     required this.size,
@@ -174,30 +191,53 @@ class FeeControlQuery extends Equatable {
 
   bool get isUnassigned => classroomId == feeControlUnassigned;
 
+  /// Le plancher de [filter] dans l'unique devise de [currencies] : champ
+  /// vide = 0 (R3). `null` hors du segment, et en mixte ou sans ligne — la
+  /// carte retombe alors sur « Tous ».
+  static Money? thresholdFor(
+    FeeControlPaymentFilter filter,
+    int? thresholdInCents,
+    Set<String> currencies,
+  ) => filter.needsThreshold && currencies.length == 1
+      ? Money.parse(thresholdInCents ?? 0, currencies.single)
+      : null;
+
+  /// La même question, son plancher résolu sur les devises de la classe lue.
+  FeeControlQuery resolvedFor(Set<String> currencies) => _copy(
+    threshold: thresholdFor(statusFilter, thresholdInCents, currencies),
+  );
+
   /// La même question, posée sur une autre situation — ce que fait une tuile de
-  /// compteur. Le plancher tombe : aucune tuile n'active « a payé au moins… ».
+  /// compteur ou le champ du montant. Le plancher tombe hors de « a payé au
+  /// moins… » ; il reste à résoudre ([resolvedFor]).
   FeeControlQuery copyWithSituation(
     FeeControlPaymentFilter filter, {
-    Money? threshold,
+    int? thresholdInCents,
   }) => FeeControlQuery(
     academicYearId: academicYearId,
     classroomId: classroomId,
     feeCodes: feeCodes,
     statusFilter: filter,
-    threshold: filter.needsThreshold ? threshold : null,
+    thresholdInCents: filter.needsThreshold ? thresholdInCents : null,
     page: 0,
     size: size,
   );
 
-  FeeControlQuery copyWithPage(int page) => FeeControlQuery(
-    academicYearId: academicYearId,
-    classroomId: classroomId,
-    feeCodes: feeCodes,
-    statusFilter: statusFilter,
-    threshold: threshold,
-    page: page,
-    size: size,
-  );
+  FeeControlQuery copyWithPage(int page) => _copy(page: page);
+
+  FeeControlQuery _copy({Object? threshold = _keepThreshold, int? page}) =>
+      FeeControlQuery(
+        academicYearId: academicYearId,
+        classroomId: classroomId,
+        feeCodes: feeCodes,
+        statusFilter: statusFilter,
+        thresholdInCents: thresholdInCents,
+        threshold: identical(threshold, _keepThreshold)
+            ? this.threshold
+            : threshold as Money?,
+        page: page ?? this.page,
+        size: size,
+      );
 
   @override
   List<Object?> get props => [
@@ -205,11 +245,14 @@ class FeeControlQuery extends Equatable {
     classroomId,
     feeCodes,
     statusFilter,
+    thresholdInCents,
     threshold,
     page,
     size,
   ];
 }
+
+const _keepThreshold = Object();
 
 /// Ce que le tableau de bord transmet à l'écran nominatif quand on lui demande
 /// « qui, précisément ? » (spec v2, R12 du contrôle) — et ce que l'adresse

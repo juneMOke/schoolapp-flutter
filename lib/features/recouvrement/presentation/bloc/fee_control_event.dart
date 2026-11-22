@@ -43,16 +43,19 @@ class FeeControlSearchRequested extends FeeControlEvent {
 /// d'une tuile de compteur.
 ///
 /// Aucune relecture : la population est déjà en mémoire, seule la coupe bouge.
+/// Demandée pendant un chargement, elle s'applique à l'arrivée des lignes.
 class FeeControlSituationRequested extends FeeControlEvent {
   final FeeControlPaymentFilter filter;
 
-  /// Le montant du segment « a payé au moins… » ; ignoré ailleurs.
-  final Money? threshold;
+  /// Le montant du segment « a payé au moins… », en centimes et **sans
+  /// devise** — le bloc la prend sur les lignes lues ; ignoré ailleurs.
+  /// `null` : champ vide, lu « 0 » (R3).
+  final int? thresholdInCents;
 
-  const FeeControlSituationRequested(this.filter, {this.threshold});
+  const FeeControlSituationRequested(this.filter, {this.thresholdInCents});
 
   @override
-  List<Object?> get props => [filter, threshold];
+  List<Object?> get props => [filter, thresholdInCents];
 }
 
 /// Change de page sur la liste courante (aucune relecture de la base).

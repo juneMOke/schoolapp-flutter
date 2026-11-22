@@ -25,6 +25,9 @@ class RecoveryStudentsToolbar extends StatelessWidget {
   final bool exportsEnabled;
   final String? exportsDisabledReason;
 
+  /// Faux sous un 403 : PDF et Excel ne se montrent pas (Q1).
+  final bool exportsVisible;
+
   const RecoveryStudentsToolbar({
     super.key,
     required this.title,
@@ -36,6 +39,7 @@ class RecoveryStudentsToolbar extends StatelessWidget {
     required this.exportQuery,
     required this.exportsEnabled,
     required this.exportsDisabledReason,
+    this.exportsVisible = true,
   });
 
   @override
@@ -78,12 +82,14 @@ class RecoveryStudentsToolbar extends StatelessWidget {
       search: search,
       onSearchChanged: onSearchChanged,
     );
-    final exports = RecoveryExportButtons(
-      query: exportQuery,
-      title: title ?? '',
-      enabled: exportsEnabled && title != null,
-      disabledReason: exportsDisabledReason,
-    );
+    final exports = exportsVisible
+        ? RecoveryExportButtons(
+            query: exportQuery,
+            title: title ?? '',
+            enabled: exportsEnabled && title != null,
+            disabledReason: exportsDisabledReason,
+          )
+        : null;
     const gap = AppSpacing.sm + 2;
     // Comme la maquette (`flex: 1 1 280px` · `1 1 200px` · boutons) : tout
     // sur une ligne quand les bases y tiennent, sinon le titre prend la
@@ -93,10 +99,12 @@ class RecoveryStudentsToolbar extends StatelessWidget {
         // Les boutons grandissent avec le texte (×1,3) : leur place aussi.
         final toolsWidth =
             AppDimensions.recoveryStudentsSearchMinWidth +
-            gap +
-            MediaQuery.textScalerOf(
-              context,
-            ).scale(AppDimensions.recoveryStudentsExportButtonsWidth);
+            (exports == null
+                ? 0
+                : gap +
+                      MediaQuery.textScalerOf(context).scale(
+                        AppDimensions.recoveryStudentsExportButtonsWidth,
+                      ));
         if (c.maxWidth >=
             AppDimensions.recoveryStudentsTitleMinWidth + gap + toolsWidth) {
           return Row(
@@ -104,7 +112,7 @@ class RecoveryStudentsToolbar extends StatelessWidget {
             children: [
               Expanded(flex: 28, child: heading),
               Expanded(flex: 20, child: searchField),
-              exports,
+              ?exports,
             ],
           );
         }
@@ -118,15 +126,16 @@ class RecoveryStudentsToolbar extends StatelessWidget {
                 spacing: gap,
                 children: [
                   Expanded(child: searchField),
-                  exports,
+                  ?exports,
                 ],
               )
             else ...[
               searchField,
-              Align(
-                alignment: AlignmentDirectional.centerStart,
-                child: exports,
-              ),
+              if (exports != null)
+                Align(
+                  alignment: AlignmentDirectional.centerStart,
+                  child: exports,
+                ),
             ],
           ],
         );

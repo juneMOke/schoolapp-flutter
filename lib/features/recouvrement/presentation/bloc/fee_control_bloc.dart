@@ -11,7 +11,6 @@ import 'package:school_app_flutter/features/enrollment/offline/domain/usecases/s
 import 'package:school_app_flutter/features/enrollment/offline/presentation/bloc/enrollment_local_list_projector.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/contracts/enrollment_load_status.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/states/enrollment_error_type.dart';
-import 'package:school_app_flutter/core/money/money.dart';
 import 'package:school_app_flutter/core/money/money_bag.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/usecases/get_recovery_positions_use_case.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/usecases/get_fee_natures_for_year_use_case.dart';
@@ -73,6 +72,12 @@ class FeeControlBloc extends Bloc<FeeControlEvent, FeeControlState> {
   // écrit et émet.
   int _loadGeneration = 0;
   int _catalogGeneration = 0;
+
+  /// La dernière situation demandée **pendant un chargement** (M14) : un
+  /// montant tapé avant l'arrivée des lignes s'applique à leur arrivée au lieu
+  /// de se perdre. Toute nouvelle recherche l'efface — elle porte déjà la
+  /// question entière.
+  FeeControlSituationRequested? _pendingSituation;
 
   FeeControlBloc({
     required SearchLocalEnrollmentsUseCase search,
@@ -142,7 +147,7 @@ class FeeControlBloc extends Bloc<FeeControlEvent, FeeControlState> {
         classroomId: request.classroomId,
         feeCodes: request.feeCodes,
         statusFilter: request.statusFilter,
-        threshold: request.threshold,
+        thresholdInCents: request.thresholdInCents,
         page: event.page,
         size: event.size,
       ),
@@ -167,11 +172,19 @@ class FeeControlBloc extends Bloc<FeeControlEvent, FeeControlState> {
   ) {
     final last = state.lastQuery;
     if (last == null) return;
+    if (state.status == EnrollmentLoadStatus.loading) {
+      // Les lignes ne sont pas encore là : la coupe attend leur arrivée.
+      _pendingSituation = event;
+      return;
+    }
     if (state.status != EnrollmentLoadStatus.success) return;
-    final query = last.copyWithSituation(
-      event.filter,
-      threshold: event.threshold,
-    );
+    // La devise du plancher : celle des lignes déjà lues (B1-B2).
+    final query = last
+        .copyWithSituation(
+          event.filter,
+          thresholdInCents: event.thresholdInCents,
+        )
+        .resolvedFor(state.currencies);
     if (query == last.copyWithPage(0)) return;
 
     _cache = FeeControlProjector.refilter(
@@ -218,6 +231,7 @@ class FeeControlBloc extends Bloc<FeeControlEvent, FeeControlState> {
     Emitter<FeeControlState> emit,
   ) {
     _loadGeneration++; // invalide tout chargement en vol
+    _pendingSituation = null;
     _cache = const <FeeControlRow>[];
     _charged = const <FeeControlRow>[];
     emit(const FeeControlState.initial());
@@ -225,9 +239,15 @@ class FeeControlBloc extends Bloc<FeeControlEvent, FeeControlState> {
 
   Future<void> _load(
     Emitter<FeeControlState> emit,
-    FeeControlQuery query,
+    FeeControlQuery requested,
   ) async {
+    // Le plancher se résout sur les lignes de CETTE lecture, jamais sur la
+    // classe précédente : il part non résolu.
+    final query = requested.resolvedFor(const <String>{});
     final generation = ++_loadGeneration;
+    // La nouvelle question porte déjà sa situation : une coupe demandée
+    // pendant la lecture précédente ne vaut plus.
+    _pendingSituation = null;
     emit(
       state.copyWith(
         status: EnrollmentLoadStatus.loading,
@@ -259,7 +279,6 @@ class FeeControlBloc extends Bloc<FeeControlEvent, FeeControlState> {
       _emitFailure(emit, failure);
       return;
     }
-
     await enrolled.fold((failure) async => _emitFailure(emit, failure), (
       items,
     ) async {
@@ -275,7 +294,9 @@ class FeeControlBloc extends Bloc<FeeControlEvent, FeeControlState> {
         _charged = const <FeeControlRow>[];
         emit(
           state.withPage(
-            query: query,
+            // La situation demandée pendant la lecture remplace celle de la
+            // question (M14).
+            query: _withPendingSituation(query),
             page: ClientSidePaginator.paginate(
               const <FeeControlRow>[],
               page: 0,
@@ -297,23 +318,27 @@ class FeeControlBloc extends Bloc<FeeControlEvent, FeeControlState> {
         feeCodes: query.feeCodes,
       );
       if (generation != _loadGeneration) return;
+      // La situation demandée pendant la lecture remplace celle de la
+      // question (M14).
+      final asked = _withPendingSituation(query);
 
       positions.fold((failure) => _emitFailure(emit, failure), (lines) {
         final join = FeeControlProjector.join(
           summaries: summaries,
           lines: lines,
-          filter: query.statusFilter,
-          threshold: query.threshold,
+          filter: asked.statusFilter,
+          thresholdInCents: asked.thresholdInCents,
         );
         _cache = join.filtered;
         _charged = join.charged;
         emit(
           state.withPage(
-            query: query,
+            // Le plancher résolu sur la devise des lignes lues.
+            query: asked.resolvedFor(join.currencies),
             page: ClientSidePaginator.paginate(
               join.filtered,
-              page: query.page,
-              size: query.size,
+              page: asked.page,
+              size: asked.size,
             ),
             studentsInScope: summaries.length,
             breakdown: join.breakdown,
@@ -325,6 +350,18 @@ class FeeControlBloc extends Bloc<FeeControlEvent, FeeControlState> {
         );
       });
     });
+  }
+
+  /// [query] avec la dernière situation demandée pendant la lecture, s'il y
+  /// en a une — consommée.
+  FeeControlQuery _withPendingSituation(FeeControlQuery query) {
+    final pending = _pendingSituation;
+    if (pending == null) return query;
+    _pendingSituation = null;
+    return query.copyWithSituation(
+      pending.filter,
+      thresholdInCents: pending.thresholdInCents,
+    );
   }
 
   /// Les élèves du roster composé de [classroomId] ; rend l'échec, ou `null`.
@@ -381,11 +418,17 @@ class FeeControlBloc extends Bloc<FeeControlEvent, FeeControlState> {
   void _emitFailure(Emitter<FeeControlState> emit, Failure failure) {
     _cache = const <FeeControlRow>[];
     _charged = const <FeeControlRow>[];
+    final last = state.lastQuery;
     emit(
-      state.withFailure(
-        errorType: _mapFailureToErrorType(failure),
-        errorMessage: failure.message,
-      ),
+      state
+          .withFailure(
+            errorType: _mapFailureToErrorType(failure),
+            errorMessage: failure.message,
+          )
+          // « Réessayer » rejoue la dernière situation demandée.
+          .copyWith(
+            lastQuery: last == null ? null : _withPendingSituation(last),
+          ),
     );
   }
 

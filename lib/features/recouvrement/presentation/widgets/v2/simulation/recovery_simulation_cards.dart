@@ -10,6 +10,7 @@ import 'package:school_app_flutter/features/recouvrement/presentation/widgets/v2
 import 'package:school_app_flutter/features/recouvrement/presentation/widgets/v2/simulation/recovery_simulation_table.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/widgets/v2/simulation/recovery_verdict.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
+import 'package:school_app_flutter/features/recouvrement/presentation/widgets/v2/classes/recovery_class_name.dart';
 
 /// La simulation sous 600 reçus : une carte par classe, les
 /// [visibleCount] plus touchées, puis « Voir les {n} autres classes » (I17,
@@ -152,7 +153,7 @@ class _ClassCard extends StatelessWidget {
                 children: [
                   Expanded(
                     child: EteeloOverflowText(
-                      row.classroomName,
+                      row.displayName(l10n),
                       // Le nom passe sur deux lignes plutôt que de céder
                       // devant la pastille (texte ×1,3 au téléphone).
                       maxLines: 2,

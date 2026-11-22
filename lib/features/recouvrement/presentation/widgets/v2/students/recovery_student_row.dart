@@ -55,7 +55,9 @@ class RecoveryStudentRowTile extends StatelessWidget {
     final tone = row.inOrder
         ? DashboardSense.encaisse
         : DashboardSense.manquant;
-    final className = row.classroomName ?? l10n.recouvrementUnassigned;
+    final className = row.classroomId == null
+        ? l10n.recouvrementUnassigned
+        : row.classroomName ?? l10n.recouvrementUnassigned;
     final idLine = row.matriculationNumber;
     final sub = switch (layout) {
       RecoveryStudentRowLayout.wide => [

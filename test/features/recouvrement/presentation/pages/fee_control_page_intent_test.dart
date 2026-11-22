@@ -205,7 +205,7 @@ void main() {
     expect(request.classroomId, 'c-a');
     expect(request.feeCodes, ['TUITION']);
     expect(request.statusFilter, FeeControlPaymentFilter.all);
-    expect(request.threshold, isNull);
+    expect(request.thresholdInCents, isNull);
   });
 
   testWidgets('la pastille du frais repris est affichée — la liste montre '
@@ -347,5 +347,112 @@ void main() {
         const FeeControlSituationRequested(FeeControlPaymentFilter.all),
       ),
     ).called(1);
+  });
+
+  testWidgets('B1 — arrivée sur « a payé au moins… » : le montant part en '
+      'centimes, sans attendre une devise que la classe n\'a pas encore '
+      'livrée', (tester) async {
+    await pump(
+      tester,
+      intent: const FeeControlIntent(
+        classroomId: 'c-a',
+        feeCodes: ['TUITION'],
+        situation: FeeControlPaymentFilter.threshold,
+        thresholdInCents: 5000,
+      ),
+      states: const [tCatalog],
+    );
+
+    final request = searches().single.request;
+    expect(request.statusFilter, FeeControlPaymentFilter.threshold);
+    expect(request.thresholdInCents, 5000);
+  });
+
+  testWidgets('B3 — champ vide sous « a payé au moins… » : la recherche part '
+      'quand même sur ce segment, le bloc lira « 0 »', (tester) async {
+    await pump(
+      tester,
+      intent: const FeeControlIntent(
+        classroomId: 'c-a',
+        feeCodes: ['TUITION'],
+        situation: FeeControlPaymentFilter.threshold,
+      ),
+      states: const [tCatalog],
+    );
+
+    final request = searches().single.request;
+    expect(request.statusFilter, FeeControlPaymentFilter.threshold);
+    expect(request.thresholdInCents, isNull);
+  });
+
+  testWidgets('B2 — le montant tapé part en centimes, sans la devise de '
+      'l\'état (peut-être celle de la classe précédente)', (tester) async {
+    await pump(
+      tester,
+      intent: const FeeControlIntent(
+        classroomId: 'c-a',
+        feeCodes: ['TUITION'],
+        situation: FeeControlPaymentFilter.threshold,
+      ),
+      states: [
+        tCatalog,
+        tCatalog.copyWith(
+          status: EnrollmentLoadStatus.success,
+          currencies: const {'USD'},
+          lastQuery: const FeeControlQuery(
+            academicYearId: 'ay-1',
+            classroomId: 'c-a',
+            feeCodes: ['TUITION'],
+            statusFilter: FeeControlPaymentFilter.threshold,
+            page: 0,
+            size: 10,
+          ),
+        ),
+      ],
+    );
+
+    await tester.enterText(find.byType(TextField), '120');
+    await tester.pump();
+
+    verify(
+      () => bloc.add(
+        const FeeControlSituationRequested(
+          FeeControlPaymentFilter.threshold,
+          thresholdInCents: 12000,
+        ),
+      ),
+    ).called(1);
+  });
+
+  testWidgets('I6 — venu du tableau de bord sans classe (périmètre '
+      'établissement ou cycle) : la classe de la dernière visite est reprise', (
+    tester,
+  ) async {
+    FeeControlQuestion.lastVisit = const FeeControlQuestion(
+      feeCodes: ['TRANSPORT'],
+      classroomId: 'c-a',
+    );
+
+    await pump(
+      tester,
+      intent: const FeeControlIntent(feeCodes: ['TUITION']),
+      states: const [tCatalog],
+    );
+
+    final request = searches().single.request;
+    // Les frais du tableau de bord, la classe de la dernière visite.
+    expect(request.feeCodes, ['TUITION']);
+    expect(request.classroomId, 'c-a');
+  });
+
+  testWidgets('I6 — sans classe ni dernière visite : la carte d\'invitation, '
+      'rien n\'est cherché', (tester) async {
+    await pump(
+      tester,
+      intent: const FeeControlIntent(feeCodes: ['TUITION']),
+      states: const [tCatalog],
+    );
+
+    verifyNever(() => bloc.add(any(that: isA<FeeControlSearchRequested>())));
   });
 }

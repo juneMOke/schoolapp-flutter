@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
@@ -25,7 +27,12 @@ class RecoveryDashboardRepositoryImpl implements RecoveryDashboardRepository {
   final ConnectivityService _connectivity;
   final DateTime Function() _now;
 
-  const RecoveryDashboardRepositoryImpl({
+  /// La dernière demande de chaque sorte : une réponse plus ancienne arrivée
+  /// après elle ne remplace pas la photo — la photo est celle des DERNIERS
+  /// réglages (arbitrage du 2026-11-22).
+  final Map<RecoveryCacheKind, String> _latest = {};
+
+  RecoveryDashboardRepositoryImpl({
     required RecoveryDashboardApi api,
     required RecoveryDashboardCacheDao cache,
     required CurrentUserContext currentUser,
@@ -111,6 +118,8 @@ class RecoveryDashboardRepositoryImpl implements RecoveryDashboardRepository {
     required T Function(T value, DateTime at) cached,
   }) async {
     final schoolId = _currentUser.schoolId ?? '';
+    final ticket = jsonEncode(key);
+    if (cacheable) _latest[kind] = ticket;
 
     Future<Either<Failure, T>> offline(Failure failure) async {
       if (!cacheable) return Left(failure);
@@ -156,7 +165,7 @@ class RecoveryDashboardRepositoryImpl implements RecoveryDashboardRepository {
       return const Left(ServerFailure('Réponse du recouvrement illisible.'));
     }
 
-    if (cacheable) {
+    if (cacheable && _latest[kind] == ticket) {
       try {
         await _cache.write(
           schoolId: schoolId,

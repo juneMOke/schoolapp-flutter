@@ -8,6 +8,7 @@ import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/features/recouvrement/domain/entities/recovery_dashboard.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
+import 'package:school_app_flutter/features/recouvrement/presentation/widgets/v2/classes/recovery_class_name.dart';
 
 /// Une classe du bloc D (D7) : « 7ème EB · 17/48 soldés · 21 sans paiement ·
 /// 45 % · reste 9 534 $ », la barre du taux, et l'œil.
@@ -43,13 +44,14 @@ class RecoveryClassRankingRow extends StatelessWidget {
       row.billedStudents,
       row.noPaymentStudents,
     );
+    final name = row.displayName(l10n);
     final rest = l10n.recoveryClassesOutstanding(
-      MoneyFormat.format(row.outstanding),
+      MoneyFormat.compact(row.outstanding),
     );
     return EteeloActivatable(
       onActivate: onTap,
       semanticLabel: [
-        l10n.recoveryClassesView(row.classroomName),
+        l10n.recoveryClassesView(name),
         counts,
         rateText,
         rest,
@@ -77,19 +79,19 @@ class RecoveryClassRankingRow extends StatelessWidget {
             ),
           ),
           child: narrow
-              ? _narrow(counts, rateText, rest)
-              : _wide(counts, rateText, rest),
+              ? _narrow(name, counts, rateText, rest)
+              : _wide(name, counts, rateText, rest),
         ),
       ),
     );
   }
 
-  Widget _identity(String counts) => Column(
+  Widget _identity(String name, String counts) => Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     mainAxisSize: MainAxisSize.min,
     children: [
       Text(
-        row.classroomName,
+        name,
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
         style: AppTypography.titleSmall.copyWith(color: AppColors.textPrimary),
@@ -129,9 +131,9 @@ class RecoveryClassRankingRow extends StatelessWidget {
     ],
   );
 
-  Widget _wide(String counts, String rateText, String rest) => Row(
+  Widget _wide(String name, String counts, String rateText, String rest) => Row(
     children: [
-      Expanded(flex: 12, child: _identity(counts)),
+      Expanded(flex: 12, child: _identity(name, counts)),
       const SizedBox(width: AppSpacing.md),
       Expanded(
         flex: 10,
@@ -151,27 +153,28 @@ class RecoveryClassRankingRow extends StatelessWidget {
 
   /// Sous 600 : le nom prend sa ligne (avec l'œil), les comptes dessous,
   /// puis la barre et le taux côte à côte.
-  Widget _narrow(String counts, String rateText, String rest) => Column(
-    crossAxisAlignment: CrossAxisAlignment.stretch,
-    mainAxisSize: MainAxisSize.min,
-    children: [
-      Row(
+  Widget _narrow(String name, String counts, String rateText, String rest) =>
+      Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisSize: MainAxisSize.min,
         children: [
-          Expanded(child: _identity(counts)),
-          const SizedBox(width: AppSpacing.md),
-          const RecoveryEye(),
+          Row(
+            children: [
+              Expanded(child: _identity(name, counts)),
+              const SizedBox(width: AppSpacing.md),
+              const RecoveryEye(),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.sm - 2),
+          Row(
+            children: [
+              Expanded(child: _bar()),
+              const SizedBox(width: AppSpacing.md),
+              _figures(rateText, rest),
+            ],
+          ),
         ],
-      ),
-      const SizedBox(height: AppSpacing.sm - 2),
-      Row(
-        children: [
-          Expanded(child: _bar()),
-          const SizedBox(width: AppSpacing.md),
-          _figures(rateText, rest),
-        ],
-      ),
-    ],
-  );
+      );
 }
 
 /// La barre d'un taux (`RecFill`) : piste papier, part pleine dans [color].

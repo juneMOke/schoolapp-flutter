@@ -4,6 +4,7 @@ import 'package:school_app_flutter/features/finance/offline/domain/usecases/coun
 import 'package:school_app_flutter/features/recouvrement/domain/entities/recovery_question.dart';
 import 'package:school_app_flutter/features/recouvrement/domain/entities/recovery_students_page.dart';
 import 'package:school_app_flutter/features/recouvrement/domain/repositories/recovery_dashboard_repository.dart';
+import 'package:school_app_flutter/features/recouvrement/presentation/widgets/v2/exports/recovery_export_error_state.dart';
 import 'package:school_app_flutter/features/treasury/domain/entities/cash_report.dart';
 import 'package:school_app_flutter/features/treasury/presentation/widgets/reports/cash_report_viewer.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
@@ -58,6 +59,8 @@ class RecoveryExportViewer extends StatelessWidget {
             ? l10n.recoveryExportReference
             : l10n.recoveryExportReferenceNumber(number);
       },
+      errorBuilder: (failure, retry) =>
+          RecoveryExportErrorState(failure: failure, onRetry: retry),
       loader: (format) async {
         final pending = (await countPending()).fold((_) => 0, (n) => n);
         final result = await repository.export(

@@ -37,6 +37,25 @@ class RecoveryDashboardAddress extends Equatable {
   /// séance seulement, rien sur disque.
   static RecoveryDashboardAddress? lastVisit;
 
+  /// L'année de [lastVisit] : une autre année (ou une autre école sur la même
+  /// tablette, dont les années sont d'autres identifiants) ne la reprend pas —
+  /// son cycle, sa classe ou sa recherche n'y ont aucun sens.
+  static String? lastVisitYearId;
+
+  /// La dernière visite, si elle est de [yearId].
+  static RecoveryDashboardAddress? lastVisitFor(String yearId) =>
+      lastVisitYearId == yearId ? lastVisit : null;
+
+  /// La recherche bornée au contrat (100 caractères) et rognée.
+  static String cleanSearch(String raw) {
+    final trimmed = raw.trim();
+    return trimmed.length <= maxSearchLength
+        ? trimmed
+        : trimmed.substring(0, maxSearchLength);
+  }
+
+  static const maxSearchLength = 100;
+
   static const queryKeys = [
     _fees,
     _scope,

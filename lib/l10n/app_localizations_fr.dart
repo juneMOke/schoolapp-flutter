@@ -25106,7 +25106,8 @@ class AppLocalizationsFr extends AppLocalizations {
       count,
       locale: localeName,
       other: '+$count autres',
-      one: '+1 autre',
+      one: '+$count autre',
+      zero: 'Aucun autre',
     );
     return '$_temp0';
   }
@@ -25121,7 +25122,8 @@ class AppLocalizationsFr extends AppLocalizations {
       count,
       locale: localeName,
       other: '$count frais cochés',
-      one: '1 frais coché',
+      one: '$count frais coché',
+      zero: 'Aucun frais coché',
     );
     return '$_temp0 · au moins un reste coché.';
   }
@@ -25188,7 +25190,7 @@ class AppLocalizationsFr extends AppLocalizations {
       count,
       locale: localeName,
       other: '$count élèves',
-      one: '1 élève',
+      one: '$count élève',
       zero: 'Aucun élève',
     );
     return '$_temp0 · tous les chiffres de la page portent sur ces frais';
@@ -25304,18 +25306,15 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
-  String recoveryClassSheetSubtitle(int count, DateTime date) {
-    final intl.DateFormat dateDateFormat = intl.DateFormat.yMd(localeName);
-    final String dateString = dateDateFormat.format(date);
-
+  String recoveryClassSheetSubtitle(int count, String date) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
       other: '$count élèves',
-      one: '1 élève',
+      one: '$count élève',
       zero: 'Aucun élève',
     );
-    return '$_temp0 · situation au $dateString';
+    return '$_temp0 · situation au $date';
   }
 
   @override
@@ -25585,6 +25584,7 @@ class AppLocalizationsFr extends AppLocalizations {
       locale: localeName,
       other: 'Exporter ces $count élèves',
       one: 'Exporter cet élève',
+      zero: 'Aucun élève à exporter',
     );
     return '$_temp0';
   }
@@ -25596,6 +25596,10 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get recoveryStudentsExportEmpty =>
       'Aucun élève à exporter dans cet onglet.';
+
+  @override
+  String get recoveryStudentsExportAwaitList =>
+      'Les exports attendent que la liste soit chargée.';
 
   @override
   String get recoveryFiguresA11yLabel => 'Chiffres de tête du recouvrement';
@@ -25626,7 +25630,7 @@ class AppLocalizationsFr extends AppLocalizations {
       count,
       locale: localeName,
       other: '$count élèves ont tout soldé',
-      one: '1 élève a tout soldé',
+      one: '$count élève a tout soldé',
       zero: 'Aucun élève n\'a tout soldé',
     );
     return '$_temp0';
@@ -25641,7 +25645,7 @@ class AppLocalizationsFr extends AppLocalizations {
       count,
       locale: localeName,
       other: 'Auprès de $count élèves pas soldés',
-      one: 'Auprès d\'1 élève pas soldé',
+      one: 'Auprès d\'$count élève pas soldé',
       zero: 'Tous les élèves ont soldé',
     );
     return '$_temp0';
@@ -25664,6 +25668,7 @@ class AppLocalizationsFr extends AppLocalizations {
       locale: localeName,
       other: 'Situation des $count élèves',
       one: 'Situation de l\'élève',
+      zero: 'Aucun élève',
     );
     return '$_temp0';
   }
@@ -25687,7 +25692,8 @@ class AppLocalizationsFr extends AppLocalizations {
       count,
       locale: localeName,
       other: '$count élèves',
-      one: '1 élève',
+      one: '$count élève',
+      zero: 'aucun élève',
     );
     return '$label : $_temp0';
   }
@@ -25896,6 +25902,7 @@ class AppLocalizationsFr extends AppLocalizations {
       locale: localeName,
       other: 'Voir les $count autres classes',
       one: 'Voir l\'autre classe',
+      zero: 'Aucune autre classe',
     );
     return '$_temp0';
   }
@@ -25985,7 +25992,8 @@ class AppLocalizationsFr extends AppLocalizations {
       count,
       locale: localeName,
       other: '$count classes',
-      one: '1 classe',
+      one: '$count classe',
+      zero: 'aucune classe',
     );
     return 'Le renvoi ferait passer $_temp0 sous $percent % de l\'effectif. Une relance échelonnée y coûte moins cher qu\'une classe vidée.';
   }
@@ -26022,7 +26030,8 @@ class AppLocalizationsFr extends AppLocalizations {
       count,
       locale: localeName,
       other: 'Notifier $count parents',
-      one: 'Notifier 1 parent',
+      one: 'Notifier $count parent',
+      zero: 'Aucun parent à notifier',
     );
     return '$_temp0';
   }
@@ -26036,8 +26045,8 @@ class AppLocalizationsFr extends AppLocalizations {
       count,
       locale: localeName,
       other: '$count caractères',
-      one: '1 caractère',
-      zero: '0 caractère',
+      one: '$count caractère',
+      zero: '$count caractère',
     );
     return '$_temp0';
   }
@@ -26092,7 +26101,8 @@ class AppLocalizationsFr extends AppLocalizations {
       count,
       locale: localeName,
       other: 'Relance envoyée à $count parents.',
-      one: 'Relance envoyée à 1 parent.',
+      one: 'Relance envoyée à $count parent.',
+      zero: 'Aucune relance envoyée.',
     );
     return '$_temp0';
   }
@@ -26111,4 +26121,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get recouvrementAmountHintDollars => '120';
+
+  @override
+  String get recoveryExportEmpty => 'Aucun élève à exporter dans cette liste.';
 }

@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
+import 'package:school_app_flutter/features/academics/presentation/export/sujet_copie_fonts.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/export/enrollment_pdf_kit.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/widgets/relance/fee_control_notify_content.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
@@ -65,7 +66,13 @@ abstract final class FeeControlNotifyPdf {
     required DateTime issuedOn,
     required AppLocalizations l10n,
   }) async {
-    final document = pw.Document();
+    // Le message est du texte libre, saisi au clavier : apostrophe
+    // typographique, tiret long, « œ »… Les polices intégrées au format
+    // s'arrêtent au Latin-1 et les perdraient — Inter les porte.
+    final fonts = await SujetCopieFonts.load();
+    final document = pw.Document(
+      theme: pw.ThemeData.withFont(base: fonts.body, bold: fonts.bodyBold),
+    );
     final subtitle = [
       context,
       l10n.feeControlCallSheetIssuedOn(formatNotifyDate(issuedOn)),
@@ -88,7 +95,7 @@ abstract final class FeeControlNotifyPdf {
             child: pw.Text(
               message,
               style: pw.TextStyle(
-                font: pw.Font.helvetica(),
+                font: fonts.body,
                 fontSize: EnrollmentPdfKit.bodySize,
                 lineSpacing: 2,
               ),
@@ -129,9 +136,10 @@ abstract final class FeeControlNotifyPdf {
               recipient.parentName ?? l10n.feeControlNotifyUnknownParent,
             ),
             // Sans numéro : un tiret, pas un blanc qui ferait croire à un oubli
-            // d'impression.
+            // d'impression. Le trait d'union du Latin-1 : la cellule du kit
+            // est en Helvetica, qui n'a pas le tiret long.
             EnrollmentPdfKit.cell(
-              recipient.hasPhone ? recipient.phoneNumber! : '—',
+              recipient.hasPhone ? recipient.phoneNumber! : '-',
             ),
             EnrollmentPdfKit.cell(recipient.studentName),
           ],

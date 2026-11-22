@@ -63,11 +63,14 @@ class RecoveryDashboardCubit extends Cubit<RecoveryDashboardState> {
 
   Future<void> ask(String academicYearId, RecoveryQuestion question) async {
     final generation = ++_generation;
+    // Les chiffres d'une AUTRE question ne restent pas sous la nouvelle :
+    // seule une relecture de la même question garde la page en place.
+    final kept = state.question == question ? state.dashboard : null;
     emit(
       RecoveryDashboardState(
         question: question,
         status: RecoveryLoadStatus.loading,
-        dashboard: state.dashboard,
+        dashboard: kept,
       ),
     );
     final pending = (await _countPending()).fold((_) => 0, (n) => n);
@@ -89,11 +92,21 @@ class RecoveryDashboardCubit extends Cubit<RecoveryDashboardState> {
           );
           return;
         }
+        // Un cycle ou une classe que l'année ne connaît plus (adresse ancienne,
+        // autre école sur la tablette) : on retombe sur tout l'établissement.
+        if (failure is NotFoundFailure &&
+            question.scope != RecoveryScopeKind.school) {
+          ask(
+            academicYearId,
+            question.copyWith(scope: RecoveryScopeKind.school, scopeId: null),
+          );
+          return;
+        }
         emit(
           RecoveryDashboardState(
             question: question,
             status: RecoveryLoadStatus.failure,
-            dashboard: state.dashboard,
+            dashboard: kept,
             failure: failure,
           ),
         );

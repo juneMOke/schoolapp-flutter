@@ -23,6 +23,31 @@ Future<void> showRecoveryStudentSheet(
   required String displayName,
   required VoidCallback onOpenControl,
 }) async {
+  // Un double toucher pendant la lecture n'ouvre pas deux fiches.
+  if (_opening) return;
+  _opening = true;
+  try {
+    await _open(
+      context,
+      academicYearId: academicYearId,
+      studentId: studentId,
+      displayName: displayName,
+      onOpenControl: onOpenControl,
+    );
+  } finally {
+    _opening = false;
+  }
+}
+
+var _opening = false;
+
+Future<void> _open(
+  BuildContext context, {
+  required String academicYearId,
+  required String studentId,
+  required String displayName,
+  required VoidCallback onOpenControl,
+}) async {
   final l10n = AppLocalizations.of(context)!;
   // Lus AVANT l'attente : la fiche s'ouvre sur le navigateur racine, hors de
   // portée des blocs de la page.

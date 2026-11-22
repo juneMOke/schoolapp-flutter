@@ -2,12 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
-import 'package:school_app_flutter/core/theme/app_motion.dart';
-import 'package:school_app_flutter/core/theme/color_mix.dart';
 import 'package:school_app_flutter/core/theme/dashboard_tones.dart';
 import 'package:school_app_flutter/core/money/money_format.dart';
 import 'package:school_app_flutter/features/recouvrement/domain/entities/recovery_dashboard.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/widgets/v2/figures/recovery_figures_support.dart';
+import 'package:school_app_flutter/features/recouvrement/presentation/widgets/v2/figures/recovery_rate_track_bar.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Une ligne du bloc C : un frais dans sa devise.
@@ -60,7 +59,7 @@ class RecoveryFeeRateRow extends StatelessWidget {
         ? dash
         : l10n.recoveryRatesRowRateOf(percent, expected);
     final rest = _notBilled ? dash : l10n.recoveryRatesRowRemaining(remaining);
-    final bar = _RateBar(
+    final bar = RecoveryRateTrackBar(
       color: color,
       weight: stacked || heaviestDueInCents <= 0
           ? 1
@@ -183,76 +182,6 @@ class RecoveryFeeRateRow extends StatelessWidget {
         ),
         child: content,
       ),
-    );
-  }
-}
-
-/// La piste (poids) et son remplissage (taux), en dégradé de la couleur du
-/// frais — `FinBarRows` de la maquette.
-class _RateBar extends StatelessWidget {
-  final Color color;
-  final double weight;
-  final double fill;
-
-  const _RateBar({
-    required this.color,
-    required this.weight,
-    required this.fill,
-  });
-
-  /// Les mélanges de la maquette : piste à 8 %, bord à 18 %, dégradé à 78 %.
-  static const int _trackPercent = 8;
-  static const int _borderPercent = 18;
-  static const double _gradientStart = 0.78;
-
-  @override
-  Widget build(BuildContext context) {
-    final reduceMotion =
-        MediaQuery.maybeOf(context)?.disableAnimations ?? false;
-    final radius = BorderRadius.circular(
-      AppDimensions.recouvrementRateBarRadius,
-    );
-
-    Widget barAt(double t) => FractionallySizedBox(
-      alignment: Alignment.centerLeft,
-      widthFactor: weight,
-      child: Container(
-        height: AppDimensions.recouvrementRateBarHeight,
-        clipBehavior: Clip.antiAlias,
-        decoration: BoxDecoration(
-          color: ColorMix.tint(AppColors.surfaceAlt, color, _trackPercent),
-          borderRadius: radius,
-          border: Border.all(
-            color: ColorMix.tint(AppColors.border, color, _borderPercent),
-          ),
-        ),
-        child: FractionallySizedBox(
-          alignment: Alignment.centerLeft,
-          widthFactor: (fill * t).clamp(0.0, 1.0),
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  color.withValues(alpha: _gradientStart),
-                  color,
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-
-    return ExcludeSemantics(
-      child: reduceMotion
-          ? barAt(1)
-          : TweenAnimationBuilder<double>(
-              key: ValueKey<double>(fill),
-              tween: Tween<double>(begin: 0, end: 1),
-              duration: AppMotion.layout,
-              curve: AppMotion.outCurve,
-              builder: (context, t, _) => barAt(t),
-            ),
     );
   }
 }

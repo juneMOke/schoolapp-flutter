@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
+import 'package:school_app_flutter/core/constants/app_constants.dart';
 import 'package:school_app_flutter/core/money/money.dart';
 import 'package:school_app_flutter/core/money/money_format.dart';
 import 'package:school_app_flutter/core/theme/dashboard_tones.dart';
@@ -46,11 +47,16 @@ class RecoveryFiguresSupport {
   }
 
   /// Encre du taux d'un frais, selon la maquette (`FinBarRows`) : vert dès
-  /// 80 %, ambre dès 45 %, rouge en deçà.
+  /// [AppConstants.recoveryRateHealthyFromPercent], ambre dès
+  /// [AppConstants.recoveryRateWatchFromPercent], rouge en deçà.
   static Color rateInk(int? rate) {
     if (rate == null) return AppColors.textMutedAa;
-    if (rate >= 80) return DashboardTones.encreLisible(DashboardSense.encaisse);
-    if (rate >= 45) return AppColors.ambreInk;
+    if (rate >= AppConstants.recoveryRateHealthyFromPercent) {
+      return DashboardTones.encreLisible(DashboardSense.encaisse);
+    }
+    if (rate >= AppConstants.recoveryRateWatchFromPercent) {
+      return AppColors.ambreInk;
+    }
     return DashboardTones.encreLisible(DashboardSense.manquant);
   }
 

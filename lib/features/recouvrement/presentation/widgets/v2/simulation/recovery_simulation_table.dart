@@ -10,6 +10,7 @@ import 'package:school_app_flutter/features/recouvrement/domain/entities/recover
 import 'package:school_app_flutter/features/recouvrement/presentation/widgets/v2/simulation/recovery_simulation_parts.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/widgets/v2/simulation/recovery_verdict.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
+import 'package:school_app_flutter/features/recouvrement/presentation/widgets/v2/classes/recovery_class_name.dart';
 
 /// Le tableau de la simulation, dès 600 reçus : 680 dp au moins
 /// (`recouvrementSimTableMinWidth`), et en deçà il défile de côté sous un
@@ -69,6 +70,7 @@ class RecoverySimulationTable extends StatelessWidget {
     return Semantics(
       button: opens,
       label: _a11y(row, percent, verdict, l10n),
+      onTap: opens ? () => onClassTapped(row) : null,
       excludeSemantics: true,
       child: EteeloColumnTableRow(
         widths: _widths,
@@ -141,15 +143,16 @@ String _a11y(
   RecoveryVerdict? verdict,
   AppLocalizations l10n,
 ) {
+  final name = row.displayName(l10n);
   final base = l10n.recoverySimulationRowA11y(
-    row.classroomName,
+    name,
     row.headcount,
     row.remainingHeadcount,
     percent,
   );
   final withVerdict = verdict == null ? base : '$base, ${verdict.label(l10n)}';
   return row.targetedStudents > 0
-      ? '$withVerdict. ${l10n.recoverySimulationOpenList(row.classroomName)}'
+      ? '$withVerdict. ${l10n.recoverySimulationOpenList(name)}'
       : withVerdict;
 }
 
@@ -164,7 +167,7 @@ class _ClassCell extends StatelessWidget {
     mainAxisSize: MainAxisSize.min,
     children: [
       EteeloOverflowText(
-        row.classroomName,
+        row.displayName(AppLocalizations.of(context)!),
         maxLines: 2,
         style: AppTypography.titleSmall.copyWith(color: AppColors.textPrimary),
       ),

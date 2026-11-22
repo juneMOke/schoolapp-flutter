@@ -101,7 +101,7 @@ class _RecouvrementDashboardViewState
         : RecoveryDashboardAddress.fromQueryParameters(
             router.routerDelegate.currentConfiguration.uri.queryParameters,
           );
-    var address = fromAddress ?? RecoveryDashboardAddress.lastVisit;
+    var address = fromAddress ?? RecoveryDashboardAddress.lastVisitFor(yearId);
     if (address == null) {
       final cached = await context
           .read<RecoveryDashboardCubit>()
@@ -143,6 +143,7 @@ class _RecouvrementDashboardViewState
       if (listChanged) _page = 0;
     });
     RecoveryDashboardAddress.lastVisit = next;
+    RecoveryDashboardAddress.lastVisitYearId = yearId;
     final router = LocationQuery.ownedBy(context);
     if (router != null) LocationQuery.write(router, next.toQueryParameters());
     if (changed && ask) {
@@ -181,6 +182,33 @@ class _RecouvrementDashboardViewState
 
   @override
   Widget build(BuildContext context) {
+    // Les deux écouteurs vivent AU-DESSUS de la porte de l'année : une
+    // relecture de l'année (spinner) démonterait un écouteur placé dessous, et
+    // la réponse du catalogue arrivée entre-temps ne serait jamais entendue —
+    // la page resterait sur ses fantômes.
+    return MultiBlocListener(
+      listeners: [
+        BlocListener<RecoveryCatalogCubit, RecoveryCatalogState>(
+          listenWhen: (p, c) => p.status != c.status,
+          listener: (_, catalog) => _onCatalog(catalog),
+        ),
+        BlocListener<RecoveryDashboardCubit, RecoveryDashboardState>(
+          // La règle retombée côté serveur (mixte, ou périmètre disparu) :
+          // l'adresse suit, sans redemander.
+          listenWhen: (p, c) =>
+              c.question != null &&
+              _address != null &&
+              c.question != _address!.question &&
+              c.status != RecoveryLoadStatus.loading,
+          listener: (_, s) =>
+              _apply(_address!.withQuestion(s.question!), ask: false),
+        ),
+      ],
+      child: _gate(context),
+    );
+  }
+
+  Widget _gate(BuildContext context) {
     return TreasuryRefreshScope(
       onRefresh: _refresh,
       child: AppPageBackground(
@@ -212,32 +240,17 @@ class _RecouvrementDashboardViewState
                 if (mounted) _start(yearId);
               });
             }
-            return BlocListener<RecoveryCatalogCubit, RecoveryCatalogState>(
-              listenWhen: (p, c) => p.status != c.status,
-              listener: (_, catalog) => _onCatalog(catalog),
-              child:
-                  BlocListener<RecoveryDashboardCubit, RecoveryDashboardState>(
-                    // La règle retombée côté serveur (mixte) : l'adresse suit.
-                    listenWhen: (p, c) =>
-                        c.question != null &&
-                        _address != null &&
-                        c.question != _address!.question &&
-                        c.status != RecoveryLoadStatus.loading,
-                    listener: (_, s) =>
-                        _apply(_address!.withQuestion(s.question!), ask: false),
-                    child: RecoveryDashboardBody(
-                      academicYearId: yearId,
-                      yearName: yearContext.academicYear.name,
-                      groups: yearContext.schoolLevelGroups,
-                      address: _address,
-                      onAddressChanged: _apply,
-                      onPageChanged: (page) {
-                        setState(() => _page = page);
-                        _loadStudents();
-                      },
-                      onRetry: _refresh,
-                    ),
-                  ),
+            return RecoveryDashboardBody(
+              academicYearId: yearId,
+              yearName: yearContext.academicYear.name,
+              groups: yearContext.schoolLevelGroups,
+              address: _address,
+              onAddressChanged: _apply,
+              onPageChanged: (page) {
+                setState(() => _page = page);
+                _loadStudents();
+              },
+              onRetry: _refresh,
             );
           },
         ),

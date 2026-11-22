@@ -1,7 +1,9 @@
 import 'package:dartz/dartz.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:school_app_flutter/core/constants/menu_constants.dart';
 import 'package:school_app_flutter/core/di/injection.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/core/theme/app_theme.dart';
@@ -14,6 +16,7 @@ import 'package:school_app_flutter/features/recouvrement/presentation/bloc/v2/re
 import 'package:school_app_flutter/features/recouvrement/presentation/widgets/v2/classes/recovery_class_sheet.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/widgets/v2/exports/recovery_export_buttons.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
+import 'package:school_app_flutter/router/app_routes_names.dart';
 
 import '../../../../fixtures/recovery_fixtures.dart';
 
@@ -109,7 +112,9 @@ void main() {
                 feeCode: 'TUITION',
                 feeLabel: 'Frais de scolarité',
                 row: row,
-                situationAt: DateTime(2026, 9, 5),
+                // 23 h 30 UTC le 4 : déjà le 5 à Kinshasa (UTC+1), quel que
+                // soit le fuseau de la machine de test.
+                situationAt: DateTime.utc(2026, 9, 4, 23, 30),
               ),
               child: const Text('ouvrir'),
             ),
@@ -218,6 +223,100 @@ void main() {
     expect(queries.single.classroomId, 'UNASSIGNED');
     // Sans cycle, le sur-titre est le frais seul.
     expect(find.text('FRAIS DE SCOLARITÉ'), findsOneWidget);
+  });
+
+  testWidgets(
+    '« Ouvrir dans le contrôle » emporte la situation filtrée (R15)',
+    (tester) async {
+      answer((_) => Right(_page(base)));
+      Uri? opened;
+      final router = GoRouter(
+        routes: [
+          GoRoute(
+            path: '/',
+            builder: (context, _) => Scaffold(
+              body: TextButton(
+                onPressed: () => showRecoveryClassSheet(
+                  context,
+                  academicYearId: 'y1',
+                  question: question,
+                  feeCode: 'TUITION',
+                  feeLabel: 'Frais de scolarité',
+                  row: row,
+                  situationAt: DateTime.utc(2026, 9, 5, 8),
+                ),
+                child: const Text('ouvrir'),
+              ),
+            ),
+          ),
+          GoRoute(
+            path: AppRoutesNames.homeSubMenuPath(
+              MenuConstants.recouvrementControlId,
+            ),
+            builder: (context, state) {
+              opened = state.uri;
+              return const Scaffold(body: Text('contrôle'));
+            },
+          ),
+        ],
+      );
+      addTearDown(router.dispose);
+      tester.view.physicalSize = const Size(1280, 900);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      await tester.pumpWidget(
+        MaterialApp.router(
+          theme: AppTheme.light,
+          locale: const Locale('fr'),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          routerConfig: router,
+        ),
+      );
+      await tester.tap(find.text('ouvrir'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Partiel').first);
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Ouvrir dans le contrôle'));
+      await tester.pumpAndSettle();
+      expect(find.text('contrôle'), findsOneWidget);
+      expect(opened!.queryParameters['situation'], 'partiel');
+      expect(opened!.queryParameters['classe'], 'c3');
+      expect(opened!.queryParameters['frais'], 'TUITION');
+    },
+  );
+
+  testWidgets('Non affectés : le libellé traduit, pas celui du serveur', (
+    tester,
+  ) async {
+    answer((_) => Right(_page(base)));
+    final unassigned =
+        recoveryDashboardFixture().classRankings.single.unassigned!;
+    await tester.pumpWidget(
+      MaterialApp(
+        locale: const Locale('en'),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: Builder(
+          builder: (context) => TextButton(
+            onPressed: () => showRecoveryClassSheet(
+              context,
+              academicYearId: 'y1',
+              question: question,
+              feeCode: 'TUITION',
+              feeLabel: 'Tuition',
+              row: unassigned,
+              situationAt: DateTime.utc(2026, 9, 5, 8),
+            ),
+            child: const Text('open'),
+          ),
+        ),
+      ),
+    );
+    await tester.tap(find.text('open'));
+    await tester.pumpAndSettle();
+    expect(find.text('Not assigned'), findsOneWidget);
+    expect(find.text(unassigned.classroomName), findsNothing);
   });
 
   for (final width in [360.0, 600.0, 800.0, 1280.0]) {

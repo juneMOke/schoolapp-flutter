@@ -7,6 +7,7 @@ import 'package:school_app_flutter/features/recouvrement/domain/entities/recover
 import 'package:school_app_flutter/features/recouvrement/domain/repositories/fee_control_export_repository.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/bloc/fee_control_bloc.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/helpers/fee_control_query_phrase.dart';
+import 'package:school_app_flutter/features/recouvrement/presentation/widgets/v2/exports/recovery_export_error_state.dart';
 import 'package:school_app_flutter/features/treasury/domain/entities/cash_report.dart';
 import 'package:school_app_flutter/features/treasury/presentation/widgets/reports/cash_report_viewer.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
@@ -35,7 +36,15 @@ Future<void> openFeeControlExport(
 ) {
   final bloc = context.read<FeeControlBloc>();
   final query = bloc.state.lastQuery;
+  // Pendant un rechargement, `results` porte encore les lignes de l'ancienne
+  // question (I4) : rien ne part hors d'un résultat servi.
+  if (bloc.state.status != EnrollmentLoadStatus.success) return Future.value();
   if (query == null || bloc.results.isEmpty) return Future.value();
+  // Sous « a payé au moins… », le seuil part toujours avec sa devise, 0
+  // compris (R3) ; sans seuil résolu (mixte), le serveur refuserait.
+  if (query.statusFilter.needsThreshold && query.threshold == null) {
+    return Future.value();
+  }
   final l10n = AppLocalizations.of(context)!;
   final titles = context.read<FeeSectionTitlesCubit>().state;
   final lines = [for (final row in bloc.results) row.line];
@@ -52,11 +61,14 @@ Future<void> openFeeControlExport(
       initialFormat: format == RecoveryExportFormat.pdf
           ? CashReportFormat.pdf
           : CashReportFormat.xlsx,
+      errorBuilder: (failure, retry) =>
+          RecoveryExportErrorState(failure: failure, onRetry: retry),
       loader: (cash) async {
         final result = await repository.export(
           classroomId: query.classroomId,
           feeCodes: query.feeCodes,
           filter: feeControlExportFilterOf(query.statusFilter),
+          // Résolu sur la devise des lignes exportées (B2-B3).
           threshold: query.threshold,
           lines: lines,
           format: cash == CashReportFormat.pdf

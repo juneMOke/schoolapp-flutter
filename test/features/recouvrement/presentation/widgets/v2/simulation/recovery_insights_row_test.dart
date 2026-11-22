@@ -86,6 +86,34 @@ void main() {
     expect(find.textContaining('de 90 % (A) à 10 % (B)'), findsOneWidget);
   });
 
+  testWidgets('un frais en deux devises : « code|devise » choisit la '
+      'devise, comme le bloc D', (tester) async {
+    final d = withSimulation(
+      recoveryDashboardFixture(),
+      rankings: [
+        RecoveryClassRanking(
+          feeCode: 'TUITION',
+          currency: 'USD',
+          ranked: [_class('a', 'A', 90), _class('b', 'B', 10)],
+        ),
+        RecoveryClassRanking(
+          feeCode: 'TUITION',
+          currency: 'CDF',
+          ranked: [_class('c', 'C', 70), _class('d', 'D', 40)],
+        ),
+      ],
+    );
+    await pumpSimulation(tester, row(d, fee: 'TUITION|CDF'));
+    expect(find.textContaining('de 70 % (C) à 40 % (D)'), findsOneWidget);
+
+    await pumpSimulation(tester, row(d, fee: 'TUITION|USD'));
+    expect(find.textContaining('de 90 % (A) à 10 % (B)'), findsOneWidget);
+
+    // Le seul code d'un frais en deux devises : le premier choix qui convient.
+    await pumpSimulation(tester, row(d, fee: 'TUITION'));
+    expect(find.textContaining('de 90 % (A) à 10 % (B)'), findsOneWidget);
+  });
+
   testWidgets('une seule classe : pas d\'écart (R13)', (tester) async {
     final d = withSimulation(
       recoveryDashboardFixture(),

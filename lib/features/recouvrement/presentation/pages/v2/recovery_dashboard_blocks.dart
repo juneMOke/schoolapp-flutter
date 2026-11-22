@@ -1,5 +1,8 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/core/constants/app_constants.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/student_charge.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/fee_section_titles_cubit.dart';
@@ -49,6 +52,24 @@ class RecoveryDashboardBlocks extends StatefulWidget {
 class _RecoveryDashboardBlocksState extends State<RecoveryDashboardBlocks> {
   /// La carte E : « Changer » de la simulation y remonte (I14).
   final _studentsKey = GlobalKey();
+
+  /// Le montant de « a payé au moins » relit le serveur à la fin de la
+  /// frappe, pas à chaque chiffre : chaque lecture est un instantané complet.
+  Timer? _amountDebounce;
+
+  @override
+  void dispose() {
+    _amountDebounce?.cancel();
+    super.dispose();
+  }
+
+  void _onAmount(int? cents) {
+    _amountDebounce?.cancel();
+    _amountDebounce = Timer(AppConstants.recoveryAmountDebounce, () {
+      if (!mounted) return;
+      widget.onAddressChanged(widget.address.copyWith(thresholdInCents: cents));
+    });
+  }
 
   RecoveryDashboard get _d => widget.dashboard;
   RecoveryDashboardAddress get _a => widget.address;
@@ -152,11 +173,11 @@ class _RecoveryDashboardBlocksState extends State<RecoveryDashboardBlocks> {
           feesLabel: _feesLabel(l10n),
           onRuleChanged: (rule) =>
               widget.onAddressChanged(_a.copyWith(rule: rule)),
-          onThresholdChanged: (cents) =>
-              widget.onAddressChanged(_a.copyWith(thresholdInCents: cents)),
+          onThresholdChanged: _onAmount,
           onTabChanged: (tab) => widget.onAddressChanged(_a.copyWith(tab: tab)),
-          onSearchChanged: (q) =>
-              widget.onAddressChanged(_a.copyWith(search: q)),
+          onSearchChanged: (q) => widget.onAddressChanged(
+            _a.copyWith(search: RecoveryDashboardAddress.cleanSearch(q)),
+          ),
           onPageChanged: widget.onPageChanged,
           onFeesTapped: _openFees,
           onRetry: widget.onRetryList,
@@ -196,7 +217,7 @@ class _RecoveryDashboardBlocksState extends State<RecoveryDashboardBlocks> {
         gap,
         RecoveryInsightsRow(
           dashboard: _d,
-          rankingFeeCode: _rankingFeeCode,
+          rankingFeeCode: _rankingValue,
           unmanageableBelow: _a.unmanageableBelow,
           onControlStudents: () =>
               _openControl(situation: StudentChargeStatus.due),

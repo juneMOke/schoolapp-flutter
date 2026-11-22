@@ -88,6 +88,10 @@ class FeeControlJoin {
   /// Devises **présentes** dans les créances de [charged].
   final Set<String> currencies;
 
+  /// Le plancher « a payé au moins… » **résolu sur [currencies]** — celui qui
+  /// a coupé [filtered]. `null` hors du segment ou en mixte.
+  final Money? threshold;
+
   const FeeControlJoin({
     required this.charged,
     required this.filtered,
@@ -95,6 +99,7 @@ class FeeControlJoin {
     required this.expected,
     required this.collected,
     this.currencies = const <String>{},
+    this.threshold,
   });
 
   static const empty = FeeControlJoin(
@@ -121,7 +126,7 @@ class FeeControlProjector {
     required List<EnrollmentSummary> summaries,
     required List<LocalRecoveryLine> lines,
     required FeeControlPaymentFilter filter,
-    Money? threshold,
+    int? thresholdInCents,
   }) {
     final byStudent = _mergeByStudent(lines);
 
@@ -149,6 +154,13 @@ class FeeControlProjector {
       collected = collected + row.paid;
     }
     final currencies = {for (final row in charged) ...row.currencies};
+    // La devise du plancher est celle des lignes LUES, jamais celle de la
+    // classe précédente (B1-B2).
+    final threshold = FeeControlQuery.thresholdFor(
+      filter,
+      thresholdInCents,
+      currencies,
+    );
 
     return FeeControlJoin(
       charged: charged,
@@ -166,6 +178,7 @@ class FeeControlProjector {
       expected: expected,
       collected: collected,
       currencies: currencies,
+      threshold: threshold,
     );
   }
 

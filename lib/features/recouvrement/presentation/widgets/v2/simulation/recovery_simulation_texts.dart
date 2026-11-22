@@ -10,9 +10,9 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 String recoveryAmountsText(List<Money> amounts, AppLocalizations l10n) {
   final shown = amounts.where((m) => !m.isZero).toList();
   final list = shown.isEmpty ? amounts.take(1).toList() : shown;
-  if (list.isEmpty) return MoneyFormat.format(const Money(0, 'USD'));
+  if (list.isEmpty) return MoneyFormat.compact(const Money(0, 'USD'));
   return list
-      .map(MoneyFormat.format)
+      .map(MoneyFormat.compact)
       .reduce((a, b) => l10n.recoveryAmountsAnd(a, b));
 }
 
@@ -43,7 +43,7 @@ String recoveryTargetedLabel(
   RecoveryRuleKind.atLeast => l10n.recoverySimulationCriterionBelow(
     currency == null
         ? MoneyFormat.amountOnly(Money(thresholdInCents!, 'USD'))
-        : MoneyFormat.format(Money(thresholdInCents!, currency)),
+        : MoneyFormat.compact(Money(thresholdInCents!, currency)),
   ),
 };
 

@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:dio/dio.dart';
 import 'package:school_app_flutter/core/constants/app_constants.dart';
 import 'package:school_app_flutter/features/documents/data/utils/content_disposition_parser.dart';
+import 'package:school_app_flutter/features/recouvrement/data/export_bytes_guard.dart';
 import 'package:school_app_flutter/features/recouvrement/domain/entities/recovery_students_page.dart';
 
 /// Une réponse JSON brute et l'heure du serveur — le cache la garde telle quelle.
@@ -48,9 +49,11 @@ class RecoveryDashboardApi {
       ),
     );
     final bytes = Uint8List.fromList(response.data ?? const []);
-    if (bytes.isEmpty) {
-      throw const FormatException('Le document reçu est vide.');
-    }
+    ExportBytesGuard.check(
+      bytes,
+      response.headers.value(Headers.contentTypeHeader),
+      format,
+    );
     final situationAt = DateTime.tryParse(
       response.headers.value('x-situation-at') ?? '',
     )?.toLocal();

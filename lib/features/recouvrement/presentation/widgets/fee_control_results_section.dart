@@ -4,6 +4,7 @@ import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
+import 'package:school_app_flutter/core/offline/online_only.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/bloc/fee_control_bloc.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/bloc/fee_control_selection_cubit.dart';
@@ -56,6 +57,9 @@ class FeeControlResultsSection extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _Header(
+              // Un résultat servi seulement : pendant un rechargement, les
+              // lignes exportées seraient celles de l'ancienne question (I4).
+              exportable: state.status == EnrollmentLoadStatus.success,
               // Le total, jamais la page : « Résultat · 21 élèves » sur une
               // page qui en montre dix reste vrai, l'inverse ne l'est pas.
               count: state.totalElements,
@@ -111,6 +115,8 @@ class FeeControlResultsSection extends StatelessWidget {
 }
 
 class _Header extends StatelessWidget {
+  /// Faux hors d'un résultat servi : les exports restent en place, inactifs.
+  final bool exportable;
   final int count;
   final String subtitle;
   final bool allSelected;
@@ -119,6 +125,7 @@ class _Header extends StatelessWidget {
   final VoidCallback? onTogglePage;
 
   const _Header({
+    required this.exportable,
     required this.count,
     required this.subtitle,
     required this.allSelected,
@@ -131,9 +138,14 @@ class _Header extends StatelessWidget {
 
     final actions = <Widget>[
       // R11 : PDF et Excel du résultat entier ; absents sur un résultat vide.
+      // Ils attendent le réseau (Q2) : hors ligne, en place mais inactifs.
       if (count > 0)
-        RecoveryFormatButtons(
-          onSelected: (format) => openFeeControlExport(context, format),
+        OnlineOnly(
+          builder: (context, online) => RecoveryFormatButtons(
+            enabled: online && exportable,
+            disabledReason: online ? null : l10n.recoveryExportsAwaitNetwork,
+            onSelected: (format) => openFeeControlExport(context, format),
+          ),
         ),
       if (onTogglePage != null)
         EteeloButton.ghost(

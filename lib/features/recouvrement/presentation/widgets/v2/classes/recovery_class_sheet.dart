@@ -1,15 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/components/dialogs/eteelo_form_dialog.dart';
-import 'package:school_app_flutter/core/components/skeletons/eteelo_list_skeleton.dart';
 import 'package:school_app_flutter/core/constants/app_constants.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/di/injection.dart';
-import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
-import 'package:school_app_flutter/core/widgets/eteelo_empty_result.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/student_charge.dart';
 import 'package:school_app_flutter/features/recouvrement/domain/entities/recovery_dashboard.dart';
 import 'package:school_app_flutter/features/recouvrement/domain/entities/recovery_question.dart';
@@ -19,11 +16,12 @@ import 'package:school_app_flutter/features/recouvrement/presentation/bloc/v2/re
 import 'package:school_app_flutter/features/recouvrement/presentation/contracts/fee_control_contracts.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/pages/v2/recovery_dashboard_actions.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/widgets/v2/classes/recovery_class_sheet_figures.dart';
+import 'package:school_app_flutter/features/recouvrement/presentation/widgets/v2/classes/recovery_class_name.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/widgets/v2/classes/recovery_class_sheet_filter.dart';
-import 'package:school_app_flutter/features/recouvrement/presentation/widgets/v2/classes/recovery_class_student_list.dart';
+import 'package:school_app_flutter/features/recouvrement/presentation/widgets/v2/classes/recovery_class_sheet_results.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/widgets/v2/exports/recovery_export_buttons.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/widgets/v2/simulation/recovery_simulation_call_list.dart';
-import 'package:school_app_flutter/features/recouvrement/presentation/widgets/v2/states/recovery_results_error_state.dart';
+import 'package:school_app_flutter/features/recouvrement/presentation/widgets/v2/states/recovery_dashboard_states.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Ouvre la fiche d'une classe (O2, I5/I6) : ses chiffres sur [feeCode], la
@@ -143,6 +141,8 @@ class _RecoveryClassSheetState extends State<RecoveryClassSheet> {
       widget.hostContext,
       feeCodes: [widget.feeCode],
       classroomId: _classroomId,
+      // La situation filtrée suit dans le contrôle (R15).
+      situation: _situation,
     );
   }
 
@@ -165,6 +165,13 @@ class _RecoveryClassSheetState extends State<RecoveryClassSheet> {
     final cycle = widget.row.cycleName;
     return BlocBuilder<RecoveryStudentsCubit, RecoveryStudentsState>(
       bloc: _cubit,
+      // Règle n° 9 : seul ce que la fiche affiche la reconstruit — le statut,
+      // la page reçue et l'échec ; un changement de requête seul n'y change
+      // rien (le filtre vit dans l'état local).
+      buildWhen: (before, after) =>
+          before.status != after.status ||
+          before.page != after.page ||
+          before.failure != after.failure,
       builder: (context, state) {
         final page = state.page;
         final ready =
@@ -175,7 +182,7 @@ class _RecoveryClassSheetState extends State<RecoveryClassSheet> {
           eyebrow: cycle == null || cycle.trim().isEmpty
               ? widget.feeLabel
               : l10n.recoveryClassSheetEyebrow(cycle, widget.feeLabel),
-          title: widget.row.classroomName,
+          title: widget.row.displayName(l10n),
           leading: OutlinedButton.icon(
             // Largeur du libellé : le thème étire les boutons pleine ligne.
             style: OutlinedButton.styleFrom(
@@ -188,9 +195,9 @@ class _RecoveryClassSheetState extends State<RecoveryClassSheet> {
           actions: [
             RecoveryExportButtons(
               query: _query(),
-              title: page?.title ?? widget.row.classroomName,
+              title: page?.title ?? widget.row.displayName(l10n),
               enabled: online && page.content.isNotEmpty,
-              disabledReason: _offline(state)
+              disabledReason: RecoveryClassSheetResults.offline(state)
                   ? l10n.recoveryExportsAwaitNetwork
                   : null,
             ),
@@ -205,7 +212,8 @@ class _RecoveryClassSheetState extends State<RecoveryClassSheet> {
               Text(
                 l10n.recoveryClassSheetSubtitle(
                   widget.row.billedStudents,
-                  widget.situationAt.toLocal(),
+                  // À l'heure de l'école, comme l'en-tête de page.
+                  recoveryDay(widget.situationAt),
                 ),
                 style: AppTypography.bodySmall.copyWith(
                   color: AppColors.textSecondary,
@@ -220,50 +228,15 @@ class _RecoveryClassSheetState extends State<RecoveryClassSheet> {
                 onChanged: _select,
               ),
               const SizedBox(height: AppDimensions.recoverySpace10),
-              _results(l10n, state),
+              RecoveryClassSheetResults(
+                state: state,
+                onRetry: _load,
+                onStudentTapped: _openStudent,
+              ),
             ],
           ),
         );
       },
     );
-  }
-
-  /// Hors ligne : une coupure, ou une réponse tirée du cache. La fiche reste
-  /// lisible ; les exports, eux, attendent le réseau.
-  static bool _offline(RecoveryStudentsState state) =>
-      state.page?.cachedAt != null ||
-      (state.status == RecoveryLoadStatus.failure &&
-          state.failure is NetworkFailure);
-
-  Widget _results(AppLocalizations l10n, RecoveryStudentsState state) {
-    final page = state.page;
-    switch (state.status) {
-      case RecoveryLoadStatus.failure:
-        return RecoveryResultsErrorState(
-          failure: state.failure!,
-          onRetry: _load,
-          nominative: true,
-        );
-      case RecoveryLoadStatus.success when page != null:
-        if (page.content.isEmpty) {
-          return EteeloEmptyResult(
-            label: l10n.recoveryClassSheetEmpty,
-            medallionIcon: Icons.filter_alt_off_outlined,
-            minHeight: 0,
-            cardPadding: const EdgeInsets.all(AppSpacing.xl),
-            fullWidthCard: true,
-          );
-        }
-        return RecoveryClassStudentList(
-          rows: page.content,
-          onStudentTapped: _openStudent,
-        );
-      default:
-        return EteeloListSkeleton(
-          rowCount: 6,
-          pillCount: 1,
-          semanticsLabel: l10n.recoveryClassSheetLoading,
-        );
-    }
   }
 }

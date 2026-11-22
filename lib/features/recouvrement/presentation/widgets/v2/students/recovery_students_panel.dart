@@ -13,6 +13,7 @@ import 'package:school_app_flutter/features/recouvrement/domain/rules/recovery_r
 import 'package:school_app_flutter/features/recouvrement/presentation/bloc/v2/recovery_students_cubit.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/widgets/v2/students/recovery_rule_block.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/widgets/v2/students/recovery_students_chrome.dart';
+import 'package:school_app_flutter/features/recouvrement/presentation/widgets/v2/students/recovery_students_export_gate.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/widgets/v2/students/recovery_students_list.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/widgets/v2/students/recovery_students_tabs.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/widgets/v2/students/recovery_students_texts.dart';
@@ -82,14 +83,6 @@ class RecoveryStudentsPanel extends StatelessWidget {
       ? RecoveryRuleKind.somePayment
       : rule;
 
-  int? _countOf(RecoveryTabCounts? c, RecoveryTab t) => c == null
-      ? null
-      : switch (t) {
-          RecoveryTab.toChase => c.toChase,
-          RecoveryTab.inOrder => c.inOrder,
-          RecoveryTab.all => c.all,
-        };
-
   List<RecoveryStudentsTabData> _tabs(AppLocalizations l10n) {
     final counts = students.page?.counts;
     // Le contrat ne donne pas de reste par onglet : celui d'« À relancer »
@@ -133,12 +126,15 @@ class RecoveryStudentsPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final page = students.page;
-    final tabCount = _countOf(page?.counts, tab);
-    final exportable = exportsEnabled && (tabCount ?? 0) > 0;
-    final reason = exportsEnabled
-        ? l10n.recoveryStudentsExportEmpty
-        : exportsDisabledReason;
+    final gate = RecoveryStudentsExportGate.of(
+      students: students,
+      exportQuery: exportQuery,
+      search: search,
+      online: exportsEnabled,
+      offlineReason: exportsDisabledReason,
+      l10n: l10n,
+    );
+    final page = gate.page;
     final verbs = recoveryRuleVerbs(
       l10n,
       _answeredRule,
@@ -214,8 +210,9 @@ class RecoveryStudentsPanel extends StatelessWidget {
                           search: search,
                           onSearchChanged: onSearchChanged,
                           exportQuery: exportQuery,
-                          exportsEnabled: exportable,
-                          exportsDisabledReason: reason,
+                          exportsVisible: gate.visible,
+                          exportsEnabled: gate.armed,
+                          exportsDisabledReason: gate.reason,
                         ),
                         RecoveryStudentsList(
                           students: students,
@@ -227,13 +224,13 @@ class RecoveryStudentsPanel extends StatelessWidget {
                           onRetry: onRetry,
                           layout: layout,
                         ),
-                        if (page != null)
+                        if (page != null && gate.visible)
                           RecoveryStudentsFooter(
-                            count: tabCount ?? 0,
+                            count: gate.tabCount ?? 0,
                             title: page.title,
                             query: exportQuery,
-                            enabled: exportable,
-                            disabledReason: reason,
+                            enabled: gate.armed,
+                            disabledReason: gate.reason,
                           ),
                       ],
                     ),

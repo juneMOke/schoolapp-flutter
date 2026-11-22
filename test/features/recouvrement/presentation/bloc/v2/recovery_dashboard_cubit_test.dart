@@ -157,4 +157,60 @@ void main() {
       await cubit.close();
     },
   );
+
+  test(
+    'une AUTRE question ne garde pas les chiffres de la précédente',
+    () async {
+      when(
+        () => repo.dashboard(
+          any(),
+          tuition,
+          pendingWrites: any(named: 'pendingWrites'),
+        ),
+      ).thenAnswer((_) async => Right(recoveryDashboardFixture()));
+      when(
+        () => repo.dashboard(
+          any(),
+          atLeast,
+          pendingWrites: any(named: 'pendingWrites'),
+        ),
+      ).thenAnswer((_) async => const Left(NetworkFailure('x')));
+      final cubit = build();
+      await cubit.ask('ay-1', tuition);
+      expect(cubit.state.dashboard, isNotNull);
+      await cubit.ask('ay-1', atLeast);
+      expect(cubit.state.status, RecoveryLoadStatus.failure);
+      expect(cubit.state.dashboard, isNull);
+      await cubit.close();
+    },
+  );
+
+  test('un périmètre que l\'année ne connaît plus (404) retombe sur '
+      'l\'établissement', () async {
+    const cycle = RecoveryQuestion(
+      feeCodes: ['TUITION'],
+      scope: RecoveryScopeKind.cycle,
+      scopeId: 'gone',
+    );
+    when(
+      () => repo.dashboard(
+        any(),
+        cycle,
+        pendingWrites: any(named: 'pendingWrites'),
+      ),
+    ).thenAnswer((_) async => const Left(NotFoundFailure('404')));
+    when(
+      () => repo.dashboard(
+        any(),
+        tuition,
+        pendingWrites: any(named: 'pendingWrites'),
+      ),
+    ).thenAnswer((_) async => Right(recoveryDashboardFixture()));
+    final cubit = build();
+    await cubit.ask('ay-1', cycle);
+    await Future<void>.delayed(const Duration(milliseconds: 10));
+    expect(cubit.state.question, tuition);
+    expect(cubit.state.status, RecoveryLoadStatus.success);
+    await cubit.close();
+  });
 }

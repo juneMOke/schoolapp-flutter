@@ -14,7 +14,8 @@ import 'package:school_app_flutter/features/recouvrement/presentation/widgets/v2
 import '../../../../fixtures/recovery_fixtures.dart';
 import 'students_test_harness.dart';
 
-String fmt(int cents, String c) => MoneyFormat.format(Money(cents, c));
+/// Un seul format sur la page : celui des pavés (« 94 797 $ »).
+String fmt(int cents, String c) => MoneyFormat.compact(Money(cents, c));
 
 void main() {
   group('Règle (R8, A8)', () {
@@ -295,6 +296,114 @@ void main() {
       expect(find.textContaining('pas la liste nominative'), findsOneWidget);
       expect(find.text('Réessayer'), findsNothing);
       expect(find.text('163 en ordre'), findsOneWidget);
+    });
+
+    testWidgets('403 : exports masqués, en haut comme en bas (Q1)', (
+      tester,
+    ) async {
+      await pumpPanel(
+        tester,
+        students: RecoveryStudentsState(
+          query: tQuery,
+          status: RecoveryLoadStatus.failure,
+          // Même une page gardée d'avant ne ramène pas les boutons.
+          page: recoveryStudentsFixture(),
+          failure: const UnauthorizedFailure(),
+        ),
+      );
+      expect(find.widgetWithText(OutlinedButton, 'PDF'), findsNothing);
+      expect(find.widgetWithText(OutlinedButton, 'Excel'), findsNothing);
+      expect(
+        find.textContaining('Exporter ces', findRichText: true),
+        findsNothing,
+      );
+    });
+
+    testWidgets('sans page : ni titre, ni pied, exports désarmés', (
+      tester,
+    ) async {
+      await pumpPanel(
+        tester,
+        students: const RecoveryStudentsState(
+          query: tQuery,
+          status: RecoveryLoadStatus.loading,
+        ),
+      );
+      expect(
+        find.textContaining('Liste des élèves', findRichText: true),
+        findsNothing,
+      );
+      expect(
+        find.textContaining('Exporter ces', findRichText: true),
+        findsNothing,
+      );
+      final pdf = tester.widget<OutlinedButton>(
+        find.widgetWithText(OutlinedButton, 'PDF').first,
+      );
+      expect(pdf.onPressed, isNull);
+    });
+
+    testWidgets('en relecture ou en échec : exports désarmés, avec la raison', (
+      tester,
+    ) async {
+      for (final status in [
+        RecoveryLoadStatus.loading,
+        RecoveryLoadStatus.failure,
+      ]) {
+        await pumpPanel(
+          tester,
+          students: RecoveryStudentsState(
+            query: tQuery,
+            status: status,
+            page: recoveryStudentsFixture(),
+            failure: status == RecoveryLoadStatus.failure
+                ? const NetworkFailure()
+                : null,
+          ),
+        );
+        for (final pdf in tester.widgetList<OutlinedButton>(
+          find.widgetWithText(OutlinedButton, 'PDF'),
+        )) {
+          expect(pdf.onPressed, isNull, reason: '$status');
+        }
+        expect(
+          find.byTooltip('Les exports attendent que la liste soit chargée.'),
+          findsWidgets,
+          reason: '$status',
+        );
+      }
+    });
+
+    testWidgets("une page d'une autre question : ni titre ni pied périmés", (
+      tester,
+    ) async {
+      // La page reçue répond à « À relancer » ; l'écran montre « Tous ».
+      await pumpPanel(
+        tester,
+        students: loaded(recoveryStudentsFixture()),
+        tab: RecoveryTab.all,
+      );
+      expect(
+        find.textContaining(
+          "Liste des élèves qui n'ont rien payé",
+          findRichText: true,
+        ),
+        findsNothing,
+      );
+      expect(
+        find.textContaining('Exporter ces', findRichText: true),
+        findsNothing,
+      );
+      // Une autre recherche : pareil.
+      await pumpPanel(
+        tester,
+        students: loaded(recoveryStudentsFixture()),
+        search: 'kab',
+      );
+      expect(
+        find.textContaining('Exporter ces', findRichText: true),
+        findsNothing,
+      );
     });
 
     testWidgets('réseau : « Réessayer » relance', (tester) async {

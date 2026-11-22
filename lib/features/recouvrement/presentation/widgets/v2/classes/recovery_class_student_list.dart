@@ -54,7 +54,7 @@ class RecoveryClassStudentList extends StatelessWidget {
 /// Les montants d'une liste par devise — jamais additionnés : « 10 $ ·
 /// 5 000 FC ».
 String recoveryAmounts(List<Money> amounts) =>
-    amounts.map(MoneyFormat.format).join(' · ');
+    amounts.map(MoneyFormat.compact).join(' · ');
 
 class _StudentLine extends StatelessWidget {
   final RecoveryStudentRow row;

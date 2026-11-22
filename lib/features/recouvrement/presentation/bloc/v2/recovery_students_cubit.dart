@@ -46,11 +46,17 @@ class RecoveryStudentsCubit extends Cubit<RecoveryStudentsState> {
 
   Future<void> load(String academicYearId, RecoveryStudentsQuery query) async {
     final generation = ++_generation;
+    // L'ancienne page ne reste que pour une autre page de la MÊME liste :
+    // sous un autre onglet ou une autre question, son titre, son compte et
+    // ses exports mentiraient (R14).
+    final kept = state.query?.copyWith(page: 0) == query.copyWith(page: 0)
+        ? state.page
+        : null;
     emit(
       RecoveryStudentsState(
         query: query,
         status: RecoveryLoadStatus.loading,
-        page: state.page,
+        page: kept,
       ),
     );
     final pending = (await _countPending()).fold((_) => 0, (n) => n);
@@ -65,7 +71,7 @@ class RecoveryStudentsCubit extends Cubit<RecoveryStudentsState> {
         (failure) => RecoveryStudentsState(
           query: query,
           status: RecoveryLoadStatus.failure,
-          page: state.page,
+          page: kept,
           failure: failure,
         ),
         (page) => RecoveryStudentsState(

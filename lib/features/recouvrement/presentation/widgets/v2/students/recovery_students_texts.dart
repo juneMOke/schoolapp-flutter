@@ -46,7 +46,7 @@ abstract final class RecoveryStudentsTones {
 /// `null` sans montant ou sans devise unique.
 String? recoveryThresholdText(int? thresholdInCents, List<String> currencies) {
   if (thresholdInCents == null || currencies.length != 1) return null;
-  return MoneyFormat.format(Money(thresholdInCents, currencies.single));
+  return MoneyFormat.compact(Money(thresholdInCents, currencies.single));
 }
 
 /// Les deux verbes d'une règle (`recPhrase`) : ce que font les élèves en
@@ -112,7 +112,7 @@ List<String> recoveryAmountLines(List<Money> amounts, List<String> currencies) {
       : [for (final c in currencies) Money(0, c)];
   final sorted = [...source]
     ..sort((a, b) => _currencyRank(a.currency) - _currencyRank(b.currency));
-  return [for (final m in sorted) MoneyFormat.format(m)];
+  return [for (final m in sorted) MoneyFormat.compact(m)];
 }
 
 int _currencyRank(String currency) => currency.toUpperCase() == 'USD' ? 0 : 1;

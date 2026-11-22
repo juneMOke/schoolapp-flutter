@@ -215,6 +215,18 @@ class AppConstants {
   static const int recoveryUnmanageableStep = 5;
   static const int recoveryFragileBand = 15;
 
+  /// Encre du taux de recouvrement d'un frais (bloc C, `FinBarRows`) : vert
+  /// dès ce taux…
+  static const int recoveryRateHealthyFromPercent = 80;
+
+  /// … ambre dès celui-ci, rouge en deçà.
+  static const int recoveryRateWatchFromPercent = 45;
+
+  /// Pause après la dernière frappe du montant « a payé au moins » avant de
+  /// relire le tableau de bord (I8 : le compteur suit sans un calcul serveur
+  /// par chiffre).
+  static const Duration recoveryAmountDebounce = Duration(milliseconds: 400);
+
   /// Taille d'une page de la liste nominative (R9).
   static const int recoveryStudentsPageSize = 10;
 

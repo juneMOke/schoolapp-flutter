@@ -49,11 +49,18 @@ class _FeeControlPerimeterState extends State<FeeControlPerimeter> {
     super.didChangeDependencies();
     if (_started) return;
     _started = true;
-    _question =
+    final lastVisit = FeeControlQuestion.lastVisit;
+    final arrived =
         widget.initial ??
         FeeControlQuestion.fromLocation(context) ??
-        FeeControlQuestion.lastVisit ??
+        lastVisit ??
         const FeeControlQuestion();
+    // R12 : venu du tableau de bord sur un périmètre établissement ou cycle,
+    // l'adresse porte les frais mais pas la classe — celle de la dernière
+    // visite est reprise ; sans elle, la carte d'invitation.
+    _question = arrived.classroomId == null
+        ? arrived.copyWith(classroomId: lastVisit?.classroomId)
+        : arrived;
     final amount = _question.thresholdInCents;
     if (amount != null) _threshold.text = '${amount ~/ 100}';
     context.read<FeeControlBloc>().add(
@@ -96,18 +103,18 @@ class _FeeControlPerimeterState extends State<FeeControlPerimeter> {
     FeeControlQuestion.lastVisit = next;
     next.writeLocation(context);
     final bloc = context.read<FeeControlBloc>();
+    // Le montant part en centimes, sans devise : celle de l'état est peut-être
+    // encore celle de la classe précédente, ou pas encore lue (B1-B2).
     if (!reload && bloc.state.lastQuery != null) {
       bloc.add(
         FeeControlSituationRequested(
           next.situation,
-          threshold: next
-              .toRequest(currency: bloc.state.soleCurrency)
-              ?.threshold,
+          thresholdInCents: next.requestedThresholdInCents,
         ),
       );
       return;
     }
-    final request = next.toRequest(currency: bloc.state.soleCurrency);
+    final request = next.toRequest();
     if (request == null) return;
     bloc.add(
       FeeControlSearchRequested(

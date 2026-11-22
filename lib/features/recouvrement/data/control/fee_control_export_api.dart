@@ -5,6 +5,7 @@ import 'package:archive/archive.dart';
 import 'package:dio/dio.dart';
 import 'package:school_app_flutter/core/constants/app_constants.dart';
 import 'package:school_app_flutter/features/documents/data/utils/content_disposition_parser.dart';
+import 'package:school_app_flutter/features/recouvrement/data/export_bytes_guard.dart';
 import 'package:school_app_flutter/features/recouvrement/domain/entities/recovery_students_page.dart';
 
 /// L'export du contrôle des frais (R11) : `POST /finance/relance-list` au
@@ -45,9 +46,11 @@ class FeeControlExportApi {
       ),
     );
     final bytes = Uint8List.fromList(response.data ?? const []);
-    if (bytes.isEmpty) {
-      throw const FormatException('Le document reçu est vide.');
-    }
+    ExportBytesGuard.check(
+      bytes,
+      response.headers.value(Headers.contentTypeHeader),
+      format,
+    );
     return RecoveryExportFile(
       format: format,
       bytes: bytes,

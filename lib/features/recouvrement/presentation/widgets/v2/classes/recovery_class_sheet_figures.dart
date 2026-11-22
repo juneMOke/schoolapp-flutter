@@ -33,7 +33,7 @@ class RecoveryClassSheetFigures extends StatelessWidget {
     final tiles = <Widget>[
       _SmallTile(
         label: l10n.recoveryClassSheetOutstanding,
-        value: MoneyFormat.format(row.outstanding),
+        value: MoneyFormat.compact(row.outstanding),
         status: StudentChargeStatus.due,
       ),
       _SmallTile(
@@ -66,7 +66,7 @@ class RecoveryClassSheetFigures extends StatelessWidget {
               ? l10n.recoveryClassesRateNone
               : l10n.recoveryClassesRate(rate),
           percent: rate ?? 0,
-          dueText: l10n.recoveryClassSheetDueOf(MoneyFormat.format(row.due)),
+          dueText: l10n.recoveryClassSheetDueOf(MoneyFormat.compact(row.due)),
         );
         return Wrap(
           spacing: gap,

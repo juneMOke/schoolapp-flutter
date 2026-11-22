@@ -44,6 +44,10 @@ class CashReportViewer extends StatefulWidget {
   /// peut dépendre du fichier reçu (numéro de pièce).
   final String Function(CashReportFile? file)? subtitleBuilder;
 
+  /// L'état d'échec, à la place de celui de la Trésorerie : un autre module
+  /// a ses propres refus métier à nommer.
+  final Widget Function(Failure failure, VoidCallback onRetry)? errorBuilder;
+
   /// Couture de test : la page PDF se rasterise par canal de plateforme et ne
   /// se monte pas en test widget.
   final Widget Function(CashReportFile file)? pdfPreviewBuilder;
@@ -56,6 +60,7 @@ class CashReportViewer extends StatefulWidget {
     this.repository,
     this.loader,
     this.subtitleBuilder,
+    this.errorBuilder,
     this.pdfPreviewBuilder,
   }) : assert(repository != null || loader != null);
 
@@ -90,12 +95,23 @@ class _CashReportViewerState extends State<CashReportViewer> {
     _load(_format);
   }
 
+  /// Les formats en cours de lecture : rebasculer pendant qu'un PDF descend
+  /// ne le redemande pas — certains documents consomment un numéro de pièce
+  /// à chaque appel.
+  final _inFlight = <CashReportFormat>{};
+
   Future<void> _load(CashReportFormat format) async {
+    if (!_inFlight.add(format)) return;
     setState(() => _loaded.remove(format));
     final loader = widget.loader;
-    final result = loader != null
-        ? await loader(format)
-        : await widget.repository!.file(widget.reportId, format);
+    final Either<Failure, CashReportFile> result;
+    try {
+      result = loader != null
+          ? await loader(format)
+          : await widget.repository!.file(widget.reportId, format);
+    } finally {
+      _inFlight.remove(format);
+    }
     if (!mounted) return;
     final loaded = result.fold((failure) => _Loaded(failure: failure), (file) {
       if (file.format != CashReportFormat.xlsx) return _Loaded(file: file);
@@ -245,10 +261,12 @@ class _CashReportViewerState extends State<CashReportViewer> {
     if (failure != null) {
       return SingleChildScrollView(
         padding: const EdgeInsets.all(AppSpacing.lg),
-        child: TreasuryResultsErrorState(
-          failure: failure,
-          onRetry: () => _load(_format),
-        ),
+        child:
+            widget.errorBuilder?.call(failure, () => _load(_format)) ??
+            TreasuryResultsErrorState(
+              failure: failure,
+              onRetry: () => _load(_format),
+            ),
       );
     }
     final file = loaded.file!;

@@ -61,6 +61,8 @@ const _guardianWithPhone = LocalPayerIdentity(
 );
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
   group('resolveNotifyRecipients', () {
     test(
       'un parent joignable prime ; sans aucun : listé sans téléphone',

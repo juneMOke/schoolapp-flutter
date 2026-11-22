@@ -38095,7 +38095,7 @@ abstract class AppLocalizations {
   /// No description provided for @recouvrementFeesMore.
   ///
   /// In en, this message translates to:
-  /// **'{count, plural, =1{+1 other} other{+{count} others}}'**
+  /// **'{count, plural, =0{No other} =1{+{count} other} other{+{count} others}}'**
   String recouvrementFeesMore(int count);
 
   /// No description provided for @recouvrementFeesMixedNotice.
@@ -38107,7 +38107,7 @@ abstract class AppLocalizations {
   /// No description provided for @recouvrementFeesCheckedFooter.
   ///
   /// In en, this message translates to:
-  /// **'{count, plural, =1{1 fee ticked} other{{count} fees ticked}} · at least one stays ticked.'**
+  /// **'{count, plural, =0{No fee ticked} =1{{count} fee ticked} other{{count} fees ticked}} · at least one stays ticked.'**
   String recouvrementFeesCheckedFooter(int count);
 
   /// No description provided for @recouvrementFeesAllOfThese.
@@ -38203,7 +38203,7 @@ abstract class AppLocalizations {
   /// No description provided for @recoveryPerimeterFooter.
   ///
   /// In en, this message translates to:
-  /// **'{count, plural, =0{No student} =1{1 student} other{{count} students}} · every figure on this page is about these fees'**
+  /// **'{count, plural, =0{No student} =1{{count} student} other{{count} students}} · every figure on this page is about these fees'**
   String recoveryPerimeterFooter(int count);
 
   /// No description provided for @recoveryExportReference.
@@ -38377,8 +38377,8 @@ abstract class AppLocalizations {
   /// No description provided for @recoveryClassSheetSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'{count, plural, =0{No students} =1{1 student} other{{count} students}} · as of {date}'**
-  String recoveryClassSheetSubtitle(int count, DateTime date);
+  /// **'{count, plural, =0{No students} =1{{count} student} other{{count} students}} · as of {date}'**
+  String recoveryClassSheetSubtitle(int count, String date);
 
   /// No description provided for @recoveryClassSheetRate.
   ///
@@ -38809,7 +38809,7 @@ abstract class AppLocalizations {
   /// No description provided for @recoveryStudentsExportLead.
   ///
   /// In en, this message translates to:
-  /// **'{count, plural, =1{Export this student} other{Export these {count} students}}'**
+  /// **'{count, plural, =0{No student to export} =1{Export this student} other{Export these {count} students}}'**
   String recoveryStudentsExportLead(int count);
 
   /// No description provided for @recoveryStudentsExportRest.
@@ -38823,6 +38823,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No student to export in this tab.'**
   String get recoveryStudentsExportEmpty;
+
+  /// No description provided for @recoveryStudentsExportAwaitList.
+  ///
+  /// In en, this message translates to:
+  /// **'Exports wait for the list to load.'**
+  String get recoveryStudentsExportAwaitList;
 
   /// No description provided for @recoveryFiguresA11yLabel.
   ///
@@ -38857,7 +38863,7 @@ abstract class AppLocalizations {
   /// No description provided for @recoveryFiguresSettledSubline.
   ///
   /// In en, this message translates to:
-  /// **'{count, plural, =0{No student has fully paid} =1{1 student has fully paid} other{{count} students have fully paid}}'**
+  /// **'{count, plural, =0{No student has fully paid} =1{{count} student has fully paid} other{{count} students have fully paid}}'**
   String recoveryFiguresSettledSubline(int count);
 
   /// No description provided for @recoveryFiguresRemaining.
@@ -38869,7 +38875,7 @@ abstract class AppLocalizations {
   /// No description provided for @recoveryFiguresRemainingSubline.
   ///
   /// In en, this message translates to:
-  /// **'{count, plural, =0{Every student has fully paid} =1{From 1 student not fully paid} other{From {count} students not fully paid}}'**
+  /// **'{count, plural, =0{Every student has fully paid} =1{From {count} student not fully paid} other{From {count} students not fully paid}}'**
   String recoveryFiguresRemainingSubline(int count);
 
   /// No description provided for @recoveryFiguresRateRing.
@@ -38887,7 +38893,7 @@ abstract class AppLocalizations {
   /// No description provided for @recoveryFiguresSituationTitle.
   ///
   /// In en, this message translates to:
-  /// **'{count, plural, =1{Status of the student} other{Status of the {count} students}}'**
+  /// **'{count, plural, =0{No students} =1{Status of the student} other{Status of the {count} students}}'**
   String recoveryFiguresSituationTitle(int count);
 
   /// No description provided for @recoveryFiguresSituationNoPayment.
@@ -38917,7 +38923,7 @@ abstract class AppLocalizations {
   /// No description provided for @recoveryFiguresSituationRowA11y.
   ///
   /// In en, this message translates to:
-  /// **'{label}: {count, plural, =1{1 student} other{{count} students}}'**
+  /// **'{label}: {count, plural, =0{no students} =1{{count} student} other{{count} students}}'**
   String recoveryFiguresSituationRowA11y(String label, int count);
 
   /// No description provided for @recoveryFiguresSituationBarA11y.
@@ -39211,7 +39217,7 @@ abstract class AppLocalizations {
   /// No description provided for @recoverySimulationShowMore.
   ///
   /// In en, this message translates to:
-  /// **'{count, plural, =1{Show the other class} other{Show the {count} other classes}}'**
+  /// **'{count, plural, =0{No other class} =1{Show the other class} other{Show the {count} other classes}}'**
   String recoverySimulationShowMore(int count);
 
   /// No description provided for @recoverySimulationShowLess.
@@ -39330,7 +39336,7 @@ abstract class AppLocalizations {
   /// No description provided for @recoveryInsightSimulationUnmanageable.
   ///
   /// In en, this message translates to:
-  /// **'Sending them home would push {count, plural, =1{1 class} other{{count} classes}} below {percent}% of its headcount. A staggered follow-up costs less there than an emptied class.'**
+  /// **'Sending them home would push {count, plural, =0{no class} =1{{count} class} other{{count} classes}} below {percent}% of its headcount. A staggered follow-up costs less there than an emptied class.'**
   String recoveryInsightSimulationUnmanageable(int count, int percent);
 
   /// No description provided for @recoveryInsightSimulationTenable.
@@ -39376,7 +39382,7 @@ abstract class AppLocalizations {
   /// No description provided for @feeControlNotifyTitle.
   ///
   /// In en, this message translates to:
-  /// **'{count, plural, =1{Notify 1 parent} other{Notify {count} parents}}'**
+  /// **'{count, plural, =0{No parent to notify} =1{Notify {count} parent} other{Notify {count} parents}}'**
   String feeControlNotifyTitle(int count);
 
   /// No description provided for @feeControlNotifyMessageLabel.
@@ -39388,7 +39394,7 @@ abstract class AppLocalizations {
   /// No description provided for @feeControlNotifyCharacterCount.
   ///
   /// In en, this message translates to:
-  /// **'{count, plural, =1{1 character} other{{count} characters}}'**
+  /// **'{count, plural, =0{{count} characters} =1{{count} character} other{{count} characters}}'**
   String feeControlNotifyCharacterCount(int count);
 
   /// Message prérempli de la relance (spec contrôle des frais §7 relance.message). context = frais · classe ; date = aujourd'hui + 7 jours, jj/mm/aaaa.
@@ -39460,7 +39466,7 @@ abstract class AppLocalizations {
   /// No description provided for @feeControlNotifySent.
   ///
   /// In en, this message translates to:
-  /// **'{count, plural, =1{Reminder sent to 1 parent.} other{Reminder sent to {count} parents.}}'**
+  /// **'{count, plural, =0{No reminder sent.} =1{Reminder sent to {count} parent.} other{Reminder sent to {count} parents.}}'**
   String feeControlNotifySent(int count);
 
   /// No description provided for @feeControlNotifyPdfTitle.
@@ -39492,6 +39498,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'120'**
   String get recouvrementAmountHintDollars;
+
+  /// No description provided for @recoveryExportEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No student to export in this list.'**
+  String get recoveryExportEmpty;
 }
 
 class _AppLocalizationsDelegate

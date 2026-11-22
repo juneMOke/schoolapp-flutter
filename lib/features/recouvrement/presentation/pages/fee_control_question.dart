@@ -1,5 +1,4 @@
 import 'package:flutter/widgets.dart';
-import 'package:school_app_flutter/core/money/money.dart';
 import 'package:school_app_flutter/core/navigation/location_query.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/contracts/fee_control_contracts.dart';
 
@@ -81,18 +80,20 @@ class FeeControlQuestion {
     });
   }
 
+  /// Le montant à transmettre : en centimes, sans devise, sous « a payé au
+  /// moins… » seulement. La devise, le bloc la prend sur les lignes lues.
+  int? get requestedThresholdInCents =>
+      situation.needsThreshold ? thresholdInCents : null;
+
   /// La requête de recherche, ou `null` si la question est incomplète.
-  FeeControlSearchRequest? toRequest({String? currency}) {
+  FeeControlSearchRequest? toRequest() {
     final classroom = classroomId;
     if (feeCodes.isEmpty || classroom == null) return null;
-    final amount = thresholdInCents;
     return FeeControlSearchRequest(
       classroomId: classroom,
       feeCodes: feeCodes,
       statusFilter: situation,
-      threshold: situation.needsThreshold && amount != null && currency != null
-          ? Money.parse(amount, currency)
-          : null,
+      thresholdInCents: requestedThresholdInCents,
     );
   }
 }
