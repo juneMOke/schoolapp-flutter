@@ -338,12 +338,13 @@ const Map<String, Map<String, ModuleAccess>> kModuleAccessRegistry = {
   // ouverte depuis cet écran reste atteignable — alors même que le contrôle a
   // quitté le module Finances pour le sien.
   MenuConstants.recouvrementMenuId: {
-    // La synthèse ne lit rien de plus que la page nominative — les mêmes
-    // créances, comptées au lieu d'être listées. Lui demander un droit de
-    // statistiques (`finance.stats.read`) la fermerait au secrétariat, qui est
-    // précisément celui qui contrôle.
+    // Recouvrement v2 (arbitrage du 2026-11-22) : le tableau de bord est
+    // calculé par le serveur, et ses chiffres sont sous `finance.stats.read`,
+    // comme les autres tableaux de bord. Sa liste nominative demande en plus
+    // `finance.charge.read` : sans ce second droit, les chiffres restent et la
+    // liste dit ce qui lui manque (403 en place).
     MenuConstants.recouvrementDashboardId: ModuleAccess([
-      Perm.financeChargeRead,
+      Perm.financeStatsRead,
     ]),
     MenuConstants.recouvrementControlId: ModuleAccess([Perm.financeChargeRead]),
   },

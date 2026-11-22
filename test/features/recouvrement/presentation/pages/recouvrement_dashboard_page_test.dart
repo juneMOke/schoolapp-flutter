@@ -1,278 +1,225 @@
-import 'package:bloc_test/bloc_test.dart';
+import 'package:dartz/dartz.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:get_it/get_it.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:school_app_flutter/features/academic_year/domain/entities/academic_year.dart';
-import 'package:school_app_flutter/features/academic_year/domain/entities/academic_year_context.dart';
-import 'package:school_app_flutter/features/academic_year/presentation/bloc/academic_year_context_bloc.dart';
-import 'package:school_app_flutter/features/auth/presentation/bloc/auth_bloc.dart';
-import 'package:school_app_flutter/features/auth/presentation/bloc/auth_event.dart';
-import 'package:school_app_flutter/features/auth/presentation/bloc/auth_state.dart';
-import 'package:school_app_flutter/features/finance/presentation/bloc/finance/exchange_rates_cubit.dart';
-import 'package:school_app_flutter/features/finance/presentation/bloc/finance/fee_section_titles_cubit.dart';
-import 'package:school_app_flutter/features/finance/offline/domain/entities/local_recovery_line.dart';
-import 'package:school_app_flutter/features/recouvrement/presentation/bloc/recouvrement_dashboard_bloc.dart';
-import 'package:school_app_flutter/features/finance/offline/domain/usecases/count_pending_payments_use_case.dart';
-import 'package:school_app_flutter/features/recouvrement/domain/usecases/emit_relance_list_usecase.dart';
-import 'package:school_app_flutter/features/recouvrement/presentation/bloc/recouvrement_simulation_cubit.dart';
-import 'package:school_app_flutter/features/recouvrement/presentation/bloc/relance_list_cubit.dart';
-import 'package:school_app_flutter/features/enrollment/presentation/widgets/states/enrollment_results_error_state.dart';
-import 'package:school_app_flutter/features/recouvrement/presentation/pages/recouvrement_dashboard_page.dart';
-import 'package:school_app_flutter/features/recouvrement/presentation/widgets/dashboard/states/recouvrement_dashboard_empty_state.dart';
-import 'package:school_app_flutter/l10n/app_localizations.dart';
+import 'package:school_app_flutter/core/error/failures.dart';
+import 'package:school_app_flutter/features/recouvrement/domain/entities/recovery_question.dart';
+import 'package:school_app_flutter/features/recouvrement/domain/rules/recovery_rule.dart';
+import 'package:school_app_flutter/features/recouvrement/presentation/bloc/v2/recovery_dashboard_cubit.dart';
+import 'package:school_app_flutter/features/recouvrement/presentation/widgets/v2/exports/recovery_export_buttons.dart';
+import 'package:school_app_flutter/features/recouvrement/presentation/widgets/v2/perimeter/recovery_dashboard_perimeter.dart';
+import 'package:school_app_flutter/features/recouvrement/presentation/widgets/v2/states/recovery_results_error_state.dart';
 
-/// Cubit de taux muet : la série reste vide, comme sur une école qui n'a jamais
-/// paramétré de cours de guichet.
-class _MockExchangeRatesCubit extends Cubit<ExchangeRatesState>
-    implements ExchangeRatesCubit {
-  _MockExchangeRatesCubit() : super(const ExchangeRatesState());
+import '../../fixtures/recovery_fixtures.dart';
+import 'recouvrement_dashboard_page_harness.dart';
 
-  @override
-  Future<void> load() async {}
-}
-
-/// Les titres que l'école a écrits pour ses natures. Vides par défaut : c'est
-/// l'appareil où le catalogue n'est jamais descendu, et le nom localisé y
-/// reprend la main.
-Map<String, String> _sectionTitles = const <String, String>{};
-
-class _StubFeeSectionTitlesCubit extends Cubit<FeeSectionTitlesState>
-    implements FeeSectionTitlesCubit {
-  _StubFeeSectionTitlesCubit(Map<String, String> titles)
-    : super(FeeSectionTitlesState(titles: titles));
-
-  @override
-  Future<void> load() async {}
-}
-
-/// L'édition n'est jamais déclenchée par ces tests : ils vérifient la coque,
-/// pas la sortie papier.
-class _NeverEmit extends Mock implements EmitRelanceListUseCase {}
-
-class _NeverCount extends Mock implements CountPendingPaymentsUseCase {}
-
-class _MockDashboardBloc
-    extends MockBloc<RecouvrementDashboardEvent, RecouvrementDashboardState>
-    implements RecouvrementDashboardBloc {}
-
-/// `MockBloc`, et non `Mock` : un `Mock` nu rend `null` sur `stream` et
-/// `close()`, que `BlocProvider` appelle tous deux — l'écran plantait au
-/// démontage sur un `Null is not a subtype of Future<void>`.
-class _MockAcademicYearBloc
-    extends MockBloc<AcademicYearContextEvent, AcademicYearContextState>
-    implements AcademicYearContextBloc {}
-
-class _MockAuthBloc extends MockBloc<AuthEvent, AuthState>
-    implements AuthBloc {}
-
+/// Le tableau de bord du Recouvrement v2 monté entier : une question, portée
+/// par l'adresse, posée une fois au serveur (R14), et ses états.
 void main() {
-  TestWidgetsFlutterBinding.ensureInitialized();
+  late DashboardHarness h;
 
-  late _MockDashboardBloc bloc;
-  late _MockAcademicYearBloc academicYearBloc;
-  late _MockAuthBloc authBloc;
-
-  setUpAll(() {
-    registerFallbackValue(const AcademicYearContextRequested());
-    registerFallbackValue(const RecouvrementRefreshRequested());
-  });
+  setUpAll(DashboardHarness.registerFallbacks);
 
   setUp(() {
-    bloc = _MockDashboardBloc();
-    academicYearBloc = _MockAcademicYearBloc();
-    authBloc = _MockAuthBloc();
-
-    final academicYearState = AcademicYearContextState(
-      status: AcademicYearContextLoadStatus.success,
-      context: AcademicYearContext(
-        academicYear: AcademicYear(
-          id: 'ay-1',
-          name: '2026-2027',
-          startDate: DateTime(2026, 9, 1),
-          endDate: DateTime(2027, 7, 1),
-          current: true,
-        ),
-        schoolLevelGroups: const [],
-      ),
-    );
-    whenListen(
-      academicYearBloc,
-      const Stream<AcademicYearContextState>.empty(),
-      initialState: academicYearState,
-    );
-
-    const authState = AuthState(status: AuthStatus.authenticated);
-    whenListen(
-      authBloc,
-      const Stream<AuthState>.empty(),
-      initialState: authState,
-    );
-
-    GetIt.instance.registerFactory<RecouvrementDashboardBloc>(() => bloc);
-    // Le taux du jour n'entre dans aucun calcul de l'écran : il ne sert qu'à
-    // dire, sous le périmètre, à quel cours s'arbitre une comparaison. Un cubit
-    // muet suffit donc ici — et sa série vide est un cas réel : une école qui
-    // n'a posé aucun taux.
-    GetIt.instance.registerFactory<ExchangeRatesCubit>(
-      () => _MockExchangeRatesCubit(),
-    );
-    _sectionTitles = const <String, String>{};
-    GetIt.instance.registerFactory<FeeSectionTitlesCubit>(
-      () => _StubFeeSectionTitlesCubit(_sectionTitles),
-    );
-    GetIt.instance.registerFactory<RecouvrementSimulationCubit>(
-      RecouvrementSimulationCubit.new,
-    );
-    GetIt.instance.registerFactory<RelanceListCubit>(
-      () => RelanceListCubit(
-        emitRelanceList: _NeverEmit(),
-        countPendingPayments: _NeverCount(),
-      ),
-    );
-    // Les lignes vivent HORS de l'état : un mock qui ne les stubbe pas rend
-    // `null`, et la page — qui les repasse à la simulation — tombe.
-    when(() => bloc.lines).thenReturn(const <LocalRecoveryLine>[]);
+    h = DashboardHarness()..setUp();
   });
 
-  tearDown(() async {
-    await GetIt.instance.reset();
+  tearDown(() => h.tearDown());
+
+  testWidgets('premier rendu : la question part avec le premier frais du '
+      'catalogue, et l\'adresse le retient', (tester) async {
+    await h.pump(tester);
+
+    final asked = h.askedQuestions();
+    expect(asked, hasLength(1));
+    expect(asked.single, const RecoveryQuestion(feeCodes: ['TUITION']));
+    expect(h.address['frais'], 'TUITION');
+    final students = h.askedStudents();
+    expect(students.single.tab, RecoveryTab.toChase);
+    expect(students.single.page, 0);
+    // En ligne, les exports sont offerts (témoin du cas hors ligne).
+    expect(find.textContaining('Hors ligne'), findsNothing);
+    expect(
+      tester
+          .widgetList<RecoveryFormatButtons>(find.byType(RecoveryFormatButtons))
+          .any((b) => b.enabled),
+      isTrue,
+    );
   });
 
-  Future<void> pump(
-    WidgetTester tester,
-    RecouvrementDashboardState state,
-  ) async {
-    // ⚠️ Le bloc part de `initial` et TRANSITE vers [state] : c'est le
-    // changement que la page écoute pour s'auto-sélectionner. Lui donner
-    // directement l'état final ferait passer le test à côté de tout —
-    // `listenWhen` compare l'ancien et le nouveau, et ne verrait rien bouger.
-    // C'est fidèle à la production : la page reçoit un bloc NEUF à chaque
-    // montage (`registerFactory`), donc toujours à `initial`.
-    whenListen(
-      bloc,
-      Stream<RecouvrementDashboardState>.value(state),
-      initialState: const RecouvrementDashboardState.initial(),
-    );
-
-    tester.view.physicalSize = const Size(1400, 900);
-    tester.view.devicePixelRatio = 1.0;
-    addTearDown(tester.view.reset);
-
-    await tester.pumpWidget(
-      MaterialApp(
-        locale: const Locale('fr'),
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
-        supportedLocales: AppLocalizations.supportedLocales,
-        home: MultiBlocProvider(
-          providers: [
-            BlocProvider<AcademicYearContextBloc>.value(
-              value: academicYearBloc,
-            ),
-            BlocProvider<AuthBloc>.value(value: authBloc),
-          ],
-          child: const RecouvrementDashboardPage(),
-        ),
-      ),
-    );
-    await tester.pumpAndSettle();
-  }
-
-  testWidgets('les pastilles des frais retenus portent le TITRE que l\'école '
-      'donne à la nature — celui qu\'imprime la liste de relance', (
+  testWidgets('A1 : l\'adresse rouvre exactement la même question', (
     tester,
   ) async {
-    _sectionTitles = const {'TUITION': 'Frais scolaires annuels'};
-
-    await pump(
+    await h.pump(
       tester,
-      const RecouvrementDashboardState(
-        feeCodesStatus: EnrollmentLoadStatus.success,
+      query:
+          'frais=TUITION&perimetre=cycle:g1&regle=tout-solde&onglet=tous'
+          '&seuil=70',
+    );
+
+    expect(h.askedQuestions(), const [
+      RecoveryQuestion(
         feeCodes: ['TUITION'],
+        scope: RecoveryScopeKind.cycle,
+        scopeId: 'g1',
+        rule: RecoveryRuleKind.fullySettled,
       ),
-    );
-
-    expect(find.text('Frais scolaires annuels'), findsOneWidget);
+    ]);
+    final students = h.askedStudents().single;
+    expect(students.tab, RecoveryTab.all);
+    expect(students.question.scopeId, 'g1');
+    expect(students.page, 0);
+    expect(tester.widget<Slider>(find.byType(Slider)).value, 70);
+    expect(h.address, {
+      'frais': 'TUITION',
+      'perimetre': 'cycle:g1',
+      'regle': 'tout-solde',
+      'onglet': 'tous',
+      'seuil': '70',
+    });
   });
 
-  testWidgets('à l\'ouverture, l\'écran DEMANDE la liste des natures — sans '
-      'quoi il reste inerte sur un grand-livre plein', (tester) async {
-    // ⚠️ Personne ne la demandait : l'écran écoutait `feeCodes` sans que rien
-    // n'émette jamais l'événement qui les charge. Le sélecteur restait vide et
-    // désactivé, l'auto-sélection n'avait aucune liste sur quoi s'ouvrir, et le
-    // tableau de bord n'affichait rien — sans la moindre erreur. Les autres
-    // tests de ce fichier partaient d'un état où les natures étaient DÉJÀ là :
-    // ils ne pouvaient pas le voir.
-    await pump(tester, const RecouvrementDashboardState.initial());
+  testWidgets('un frais inconnu de l\'adresse est écarté', (tester) async {
+    await h.pump(tester, query: 'frais=GHOST,SUPPLIES');
 
-    verify(
-      () =>
-          bloc.add(const RecouvrementFeeCodesRequested(academicYearId: 'ay-1')),
-    ).called(1);
+    expect(h.askedQuestions().single.feeCodes, ['SUPPLIES']);
+    expect(h.address['frais'], 'SUPPLIES');
   });
 
-  testWidgets('la lecture des natures en ÉCHEC se dit, et offre la reprise', (
+  testWidgets('aucun frais connu dans l\'adresse : le premier du catalogue', (
     tester,
   ) async {
-    // Le même vide que « aucune créance sur l'appareil », pour une raison très
-    // différente. Se taire enverrait synchroniser un appareil qui n'a rien à
-    // synchroniser.
-    await pump(
-      tester,
-      const RecouvrementDashboardState(
-        feeCodesStatus: EnrollmentLoadStatus.failure,
-        errorType: EnrollmentErrorType.server,
+    await h.pump(tester, query: 'frais=GHOST');
+
+    expect(h.askedQuestions().single.feeCodes, ['TUITION']);
+    expect(h.address['frais'], 'TUITION');
+  });
+
+  testWidgets('catalogue vide : le vide structurel, rien ne part', (
+    tester,
+  ) async {
+    h.stubCatalog(const []);
+    await h.pump(tester);
+
+    expect(find.text('Aucun frais configuré pour cette année'), findsOneWidget);
+    expect(find.text('Ouvrir la configuration'), findsOneWidget);
+    expect(find.byType(RecoveryDashboardPerimeter), findsNothing);
+    verifyNever(
+      () => h.repository.dashboard(
+        any(),
+        any(),
+        pendingWrites: any(named: 'pendingWrites'),
       ),
     );
+  });
 
-    expect(find.byType(EnrollmentResultsErrorState), findsOneWidget);
+  group('échec au premier chargement', () {
+    testWidgets('403 : erreur en place sous le périmètre, sans « Réessayer » '
+        '(A16)', (tester) async {
+      h.stubDashboard((_) => const Left(UnauthorizedFailure()));
+      await h.pump(tester);
 
-    await tester.tap(find.text('Réessayer'));
+      expect(find.text('Accès refusé'), findsOneWidget);
+      expect(find.text('Réessayer'), findsNothing);
+      final perimeter = tester.getBottomLeft(
+        find.byType(RecoveryDashboardPerimeter),
+      );
+      final error = tester.getTopLeft(find.byType(RecoveryResultsErrorState));
+      expect(error.dy, greaterThanOrEqualTo(perimeter.dy));
+    });
+
+    testWidgets('réseau : « Réessayer » relit la question', (tester) async {
+      h.stubDashboard((_) => const Left(NetworkFailure()));
+      await h.pump(tester);
+
+      expect(find.text('Connexion impossible'), findsOneWidget);
+      expect(find.byType(RecoveryDashboardPerimeter), findsOneWidget);
+      h.stubDashboard((_) => Right(recoveryDashboardFixture()));
+      await tester.tap(find.text('Réessayer'));
+      await tester.pumpAndSettle();
+
+      expect(h.askedQuestions(), hasLength(2));
+      expect(find.text('Connexion impossible'), findsNothing);
+    });
+  });
+
+  testWidgets('photo hors ligne : le bandeau daté et des exports inactifs', (
+    tester,
+  ) async {
+    h.stubDashboard(
+      (_) => Right(recoveryDashboardFixture().cached(DateTime.utc(2026, 9, 5))),
+    );
+    await h.pump(tester);
+
+    expect(find.textContaining('Hors ligne · chiffres du '), findsOneWidget);
+    final buttons = tester.widgetList<RecoveryFormatButtons>(
+      find.byType(RecoveryFormatButtons),
+    );
+    expect(buttons, isNotEmpty);
+    expect(buttons.every((b) => !b.enabled), isTrue);
+  });
+
+  testWidgets('R8 : « au moins » refusé en 400, la page retombe sur « a payé '
+      'quelque chose » sans redemander une troisième fois', (tester) async {
+    h.stubDashboard(
+      (q) => q.rule == RecoveryRuleKind.atLeast
+          ? const Left(
+              ApiValidationFailure(
+                code: ApiErrorCode.validation,
+                detailCode: recoveryAtLeastUnavailable,
+              ),
+            )
+          : Right(recoveryDashboardFixture()),
+    );
+    await h.pump(tester, query: 'frais=TUITION&regle=au-moins&montant=5000');
+
+    final asked = h.askedQuestions();
+    expect(asked.map((q) => q.rule), [
+      RecoveryRuleKind.atLeast,
+      RecoveryRuleKind.somePayment,
+    ]);
+    expect(h.address.containsKey('regle'), isFalse);
+    expect(h.address['frais'], 'TUITION');
+    expect(h.askedStudents().last.question.rule, RecoveryRuleKind.somePayment);
+  });
+
+  testWidgets('changer d\'onglet relit la liste (page 0), pas les chiffres ; '
+      'le seuil de la simulation ne relit rien', (tester) async {
+    await h.pump(tester);
+    clearInteractions(h.repository);
+
+    await tester.ensureVisible(find.text('Tous').first);
+    await tester.tap(find.text('Tous').first);
     await tester.pumpAndSettle();
 
-    // Deux fois : l'amorçage au montage, puis la reprise.
-    verify(
-      () =>
-          bloc.add(const RecouvrementFeeCodesRequested(academicYearId: 'ay-1')),
-    ).called(2);
-  });
-
-  testWidgets('à l\'ouverture, l\'écran interroge de lui-même le frais le PLUS '
-      'PORTÉ — le premier que le grand-livre rend', (tester) async {
-    await pump(
-      tester,
-      const RecouvrementDashboardState(
-        feeCodesStatus: EnrollmentLoadStatus.success,
-        // Le DAO les trie par effectif décroissant : TUITION est le plus porté,
-        // CANTINE marginal. Un tri alphabétique aurait ouvert sur CANTINE.
-        feeCodes: ['TUITION', 'CANTINE'],
+    final students = h.askedStudents();
+    expect(students, hasLength(1));
+    expect(students.single.tab, RecoveryTab.all);
+    expect(students.single.page, 0);
+    expect(h.address['onglet'], 'tous');
+    verifyNever(
+      () => h.repository.dashboard(
+        any(),
+        any(),
+        pendingWrites: any(named: 'pendingWrites'),
       ),
     );
 
-    final captured = verify(
-      () => bloc.add(captureAny(that: isA<RecouvrementRequested>())),
-    ).captured.cast<RecouvrementRequested>();
+    tester.widget<Slider>(find.byType(Slider)).onChanged!(80);
+    await tester.pumpAndSettle();
 
-    expect(captured, isNotEmpty);
-    expect(captured.first.feeCodes, ['TUITION']);
-    expect(captured.first.academicYearId, 'ay-1');
-    // Aucun cycle : le tableau ouvre sur TOUTE l'école.
-    expect(captured.first.schoolLevelGroupId, isNull);
+    expect(h.address['seuil'], '80');
+    verifyNoMoreInteractions(h.repository);
   });
 
-  testWidgets('aucune créance sur l\'appareil : l\'écran le DIT, au lieu '
-      'd\'offrir deux champs inertes', (tester) async {
-    await pump(
+  for (final width in [360.0, 800.0, 1280.0]) {
+    testWidgets('largeur $width au texte ×1,3 : rendu sans exception', (
       tester,
-      const RecouvrementDashboardState(
-        feeCodesStatus: EnrollmentLoadStatus.success,
-        feeCodes: <String>[],
-      ),
-    );
+    ) async {
+      await h.pump(tester, size: Size(width, 1600), textScale: 1.3);
 
-    expect(find.byType(RecouvrementDashboardEmptyState), findsOneWidget);
-    expect(find.text('Aucun frais facturé'), findsOneWidget);
-    verifyNever(() => bloc.add(any(that: isA<RecouvrementRequested>())));
-  });
+      expect(tester.takeException(), isNull);
+      expect(find.byType(RecoveryDashboardPerimeter), findsOneWidget);
+    });
+  }
 }

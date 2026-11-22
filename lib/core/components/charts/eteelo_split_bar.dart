@@ -53,11 +53,17 @@ class EteeloSplitBar extends StatelessWidget {
   /// enchâssée dans une liste.
   final double height;
 
+  /// Faux : la barre seule, sans sa légende — pour un appelant qui écrit
+  /// lui-même chaque part (lignes cliquables de la carte Situation du
+  /// Recouvrement). Vrai par défaut : le rendu historique ne change pas.
+  final bool showLegend;
+
   const EteeloSplitBar({
     super.key,
     required this.segments,
     required this.semanticsLabel,
     this.height = AppDimensions.enrollmentDashboardSplitBarHeight,
+    this.showLegend = true,
   });
 
   /// Somme des proportions. Zéro quand rien n'a été compté.
@@ -65,6 +71,7 @@ class EteeloSplitBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (!showLegend) return _buildBar(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [

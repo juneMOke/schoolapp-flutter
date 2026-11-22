@@ -1,3 +1,4 @@
+import 'package:dartz/dartz.dart' show Either;
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/components/controls/segmented_tab_filter.dart';
 import 'package:school_app_flutter/core/components/dialogs/eteelo_adaptive_dialog.dart';
@@ -27,7 +28,21 @@ class CashReportViewer extends StatefulWidget {
   final String reportId;
   final String title;
   final CashReportFormat initialFormat;
-  final TreasuryReportsRepository repository;
+
+  /// Le dépôt des rapports de caisse — ignoré quand [loader] est posé.
+  final TreasuryReportsRepository? repository;
+
+  /// Charge le fichier d'un format, à la place de [repository] : la même
+  /// visionneuse sert aux exports d'autres modules (Recouvrement). Chaque
+  /// format n'est demandé qu'une fois par ouverture.
+  final Future<Either<Failure, CashReportFile>> Function(
+    CashReportFormat format,
+  )?
+  loader;
+
+  /// La sous-ligne du bandeau, à la place de la référence [reportId] — elle
+  /// peut dépendre du fichier reçu (numéro de pièce).
+  final String Function(CashReportFile? file)? subtitleBuilder;
 
   /// Couture de test : la page PDF se rasterise par canal de plateforme et ne
   /// se monte pas en test widget.
@@ -38,9 +53,11 @@ class CashReportViewer extends StatefulWidget {
     required this.reportId,
     required this.title,
     required this.initialFormat,
-    required this.repository,
+    this.repository,
+    this.loader,
+    this.subtitleBuilder,
     this.pdfPreviewBuilder,
-  });
+  }) : assert(repository != null || loader != null);
 
   @override
   State<CashReportViewer> createState() => _CashReportViewerState();
@@ -75,7 +92,10 @@ class _CashReportViewerState extends State<CashReportViewer> {
 
   Future<void> _load(CashReportFormat format) async {
     setState(() => _loaded.remove(format));
-    final result = await widget.repository.file(widget.reportId, format);
+    final loader = widget.loader;
+    final result = loader != null
+        ? await loader(format)
+        : await widget.repository!.file(widget.reportId, format);
     if (!mounted) return;
     final loaded = result.fold((failure) => _Loaded(failure: failure), (file) {
       if (file.format != CashReportFormat.xlsx) return _Loaded(file: file);
@@ -119,9 +139,11 @@ class _CashReportViewerState extends State<CashReportViewer> {
         children: [
           DocumentViewerHeader(
             title: widget.title,
-            subtitle: provisional
-                ? l10n.treasuryReportProvisionalRef(widget.reportId)
-                : widget.reportId,
+            subtitle:
+                widget.subtitleBuilder?.call(file) ??
+                (provisional
+                    ? l10n.treasuryReportProvisionalRef(widget.reportId)
+                    : widget.reportId),
             onClose: () => Navigator.of(context).maybePop(),
           ),
           Padding(
