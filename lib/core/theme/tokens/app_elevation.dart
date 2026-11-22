@@ -34,6 +34,16 @@ class AppElevation {
     BoxShadow(color: Color(0x0D2C2A26), blurRadius: 8, offset: Offset(0, 2)),
   ];
 
+  // Calendrier scolaire : l'onglet de vue actif, terre cuite qui rayonne.
+  static const List<BoxShadow> calendarTabSelected = [
+    BoxShadow(
+      color: AppColors.calendarTabsShadow,
+      blurRadius: 14,
+      spreadRadius: -6,
+      offset: Offset(0, 6),
+    ),
+  ];
+
   static BoxDecoration get surface1 => const BoxDecoration(
     color: AppColors.surfaceAlt,
     borderRadius: AppRadius.brMd,

@@ -31,6 +31,34 @@ class CalendarLabels {
     return '${dates.formatShortMonthDay(start)} → ${dates.formatShortMonthDay(end)}';
   }
 
+  /// « 1 sept. 2025 → 3 juil. 2026 » : les bornes d'une année, avec l'année.
+  static String yearRange(BuildContext context, DateTime start, DateTime end) =>
+      '${dayWithYear(context, start)} → ${dayWithYear(context, end)}';
+
+  /// « 25 août 2025 » : sans le jour de la semaine.
+  static String dayWithYear(BuildContext context, DateTime day) {
+    final dates = MaterialLocalizations.of(context);
+    return '${dates.formatShortMonthDay(day)} ${dates.formatYear(day)}';
+  }
+
+  /// « lundi 1 sept. 2025 » : avec le jour de la semaine et l'année.
+  static String weekdayWithYear(BuildContext context, DateTime day) {
+    final l10n = AppLocalizations.of(context)!;
+    return '${l10n.calendarWeekdayName('${day.weekday}')} '
+        '${dayWithYear(context, day)}';
+  }
+
+  /// « mardi 9 juin » : le jour touché, sans l'année.
+  static String weekdayDay(BuildContext context, DateTime day) {
+    final l10n = AppLocalizations.of(context)!;
+    return '${l10n.calendarWeekdayName('${day.weekday}')} '
+        '${shortDay(context, day)}';
+  }
+
+  /// « 15 juin ».
+  static String shortDay(BuildContext context, DateTime day) =>
+      MaterialLocalizations.of(context).formatShortMonthDay(day);
+
   static String day(BuildContext context, DateTime day) =>
       MaterialLocalizations.of(context).formatMediumDate(day);
 
@@ -63,6 +91,16 @@ class CalendarLabels {
       element.rhythm?.wire ?? PeriodRhythm.semester.wire,
     );
   }
+
+  /// Le nom d'un élément tel que le calendrier le montre : « P1 · 1er
+  /// semestre » pour une sous-période, sinon son intitulé.
+  static String title(AppLocalizations l10n, CalendarElement element) =>
+      period(l10n, element) ?? element.title;
+
+  /// L'infobulle d'un élément : « P1 · 1er semestre · 7 sept. → 6 nov. ».
+  static String tooltip(BuildContext context, CalendarElement element) =>
+      '${title(AppLocalizations.of(context)!, element)} · '
+      '${dates(context, element)}';
 
   /// Le texte d'un refus, par son code ; sinon la raison générique.
   static String failure(AppLocalizations l10n, Failure failure) =>

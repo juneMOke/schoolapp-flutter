@@ -18,4 +18,24 @@ class CalendarWeekdayLabels {
         l10n.calendarWeekdayShort(weekday.toString()),
     ];
   }
+
+  /// Le bandeau du mois (maquette `CalMonthView`) : « Lundi » en grand,
+  /// « Lun. » sous 900 dp ([narrow]), « Lu » sous 600 ([compact]).
+  static List<String> header(
+    BuildContext context, {
+    required bool compact,
+    required bool narrow,
+  }) {
+    final l10n = AppLocalizations.of(context)!;
+    String upper(String s) =>
+        s.isEmpty ? s : '${s[0].toUpperCase()}${s.substring(1)}';
+    return [
+      for (var weekday = 1; weekday <= 7; weekday++)
+        compact
+            ? l10n.calendarWeekdayTwo('$weekday')
+            : narrow
+            ? upper(l10n.calendarWeekdayShort('$weekday'))
+            : upper(l10n.calendarWeekdayName('$weekday')),
+    ];
+  }
 }

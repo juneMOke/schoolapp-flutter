@@ -95,6 +95,21 @@ class AppDimensions {
   // Sans plafond, `AlertDialog` (largeur intrinsèque) étale un long message
   // sur une seule ligne de ~1000 dp sur desktop.
   static const confirmationDialogMaxWidth = 480.0;
+
+  /// Sur-couches du calendrier scolaire (maquette CalItemModal / CalEditModal).
+  static const calendarDetailMaxWidth = 480.0;
+  static const calendarFormMaxWidth = 560.0;
+
+  /// Le liseré de la nature, à gauche de la carte de dates du détail.
+  static const calendarDetailAccentWidth = 3.0;
+
+  /// La poignée d'une feuille du bas posée sur un en-tête sombre.
+  static const sheetHandleWidth = 40.0;
+  static const sheetHandleHeight = 4.0;
+
+  /// Le médaillon rond qui porte l'icône d'une puce de choix.
+  static const chipIconMedallionSize = 26.0;
+  static const chipIconMedallionIconSize = 13.0;
   // Formulaire de paramétrage (tarif) : deux selects et un montant.
   static const settingsFormDialogMaxWidth = 560.0;
   // Largeurs de modales jusque-là écrites en littéral dans leur fichier.
@@ -1483,7 +1498,7 @@ class AppDimensions {
   static const calendarMonthDayHeader = 24.0;
 
   /// Une bande d'élément : avec son intitulé, ou en trait sans texte (compact).
-  static const calendarBandHeight = 18.0;
+  static const calendarBandHeight = 22.0;
   static const calendarBandCompactHeight = 6.0;
   static const calendarBandGap = 2.0;
 
@@ -1523,23 +1538,112 @@ class AppDimensions {
 
   /// La réserve « Cours à placer » à côté de la grille (≥ 976, EDT A11), et
   /// la hauteur d'une de ses lignes (cible ≥ 48 dp).
-  static const timetableReserveWidth = 280.0;
-
-  /// La répartition d'une classe à côté de sa grille, sur un grand écran
-  /// (≥ [AppBreakpoints.expanded] reçus) : seule dessous, elle s'étirait sur
-  /// toute la largeur, les heures loin des noms.
-  static const timetableSideDistributionWidth = 380.0;
+  static const timetableReserveWidth = 270.0;
 
   /// Bouton d'un jour (vue Jour) au-delà duquel les jours gardent leur écart
   /// normal ; en deçà, l'écart se resserre pour tenir sur une rangée.
   static const scheduleDayButtonRoomyWidth = 72.0;
   static const timetableReserveLineMinHeight = 48.0;
 
+  // ── Emploi du temps par classe : fidélité à la maquette (EDT §4.6) ──
+
+  /// La gouttière des heures et la largeur mini d'un jour, en libellés longs
+  /// et, sous 760 reçus, en libellés courts (« Lun. »).
+  static const timetableGridGutter = 70.0;
+  static const timetableGridGutterShort = 58.0;
+  static const timetableGridColumnMin = 120.0;
+  static const timetableGridColumnMinShort = 104.0;
+
+  /// Hauteur plancher d'une ligne de créneau (jamais fixe, texte ×1,3).
+  static const timetableGridRowMinHeight = 58.0;
+
+  /// Le filet or-doux sous l'en-tête du jour courant.
+  static const timetableGridTodayBar = 3.0;
+
+  /// Le fondu qui signale la suite de la semaine, au bord droit.
+  static const timetableGridFadeWidth = 44.0;
+
+  /// Voiles de l'en-tête sombre : jour courant (or), jour fermé (crème),
+  /// et l'encre atténuée de la seconde ligne.
+  static const timetableHeaderTodayVeil = 0.28;
+  static const timetableHeaderClosedVeil = 0.16;
+  static const timetableHeaderCaptionOpacity = 0.65;
+
+  /// Une ligne sur deux, teintée de terre cuite ; la colonne du jour, d'or.
+  static const timetableZebraShare = 0.025;
+  static const timetableTodayCellVeil = 0.08;
+
+  /// Les hachures d'un créneau libre en consultation.
+  static const timetableEmptyHatchGap = 12.0;
+  static const timetableEmptyHatchStroke = 6.0;
+
+  /// Le « + » discret d'un créneau libre en brouillon.
+  static const timetableFreeSlotOpacity = 0.6;
+
+  /// Le repère de couleur de la classe, devant son nom.
+  static const timetableIdentityMarkerWidth = 12.0;
+  static const timetableIdentityMarkerHeight = 40.0;
+
+  /// La pastille « en cours » d'une séance.
+  static const timetableNowDot = 8.0;
+
+  /// Boutons ‹ › de la semaine datée.
+  static const timetableWeekNavButton = 44.0;
+
+  /// Vue Jour : le pavé d'icône d'une séance, la largeur mini d'un jour.
+  static const timetableDayIconTile = 36.0;
+  static const timetableDayButtonMinWidth = 82.0;
+  static const timetableDayTimeWidth = 52.0;
+
+  /// Barres de la réserve et de la répartition (un segment par heure).
+  static const timetableBarHeight = 6.0;
+  static const timetableBarSegmentGap = 3.0;
+  static const timetableDistributionCardMinWidth = 230.0;
+
+  /// Le médaillon d'une carte (réserve, répartition).
+  static const timetableTileIcon = 30.0;
+  static const timetableTileIconLarge = 32.0;
+
+  /// Le pavé « En cours » : sa valeur est un nom de cours, sur deux lignes.
+  static const timetableNowPaveValueFontSize = 20.0;
+
+  /// Le bord d'un bouton icône rond et d'un créneau libre en tirets.
+  static const timetableIconButtonBorder = 1.5;
+
+  /// Le bord et le fond d'une séance de la journée, teintés de son domaine.
+  static const timetableToneBorderShare = 0.24;
+  static const timetableToneSurfaceShare = 0.13;
+
+  /// La pastille « En cours » de la journée.
+  static const timetablePillPaddingV = 2.0;
+
+  /// La répartition : bord et halo bleus (en % de teinte), carte estompée,
+  /// liseré d'une carte, part pâle d'une heure restant à placer.
+  static const timetableDistributionBorderPercent = 20;
+  static const timetableDistributionGlowPercent = 7;
+  static const timetableDistributionGlowStop = 0.35;
+  static const timetableDistributionDimOpacity = 0.4;
+  static const timetableCardEdge = 3.0;
+  static const timetableBarRestPercent = 14;
+
+  /// La légende des domaines : bord teinté, pastille carrée.
+  static const timetableLegendBorderPercent = 26;
+  static const timetableLegendDot = 9.0;
+  static const timetableLegendDotRadius = 3.0;
+
+  /// La réserve : marge et écart de ses lignes, largeur mini d'une carte
+  /// dépliée sous 976.
+  static const timetableReservePadding = 10.0;
+  static const timetableReserveGap = 6.0;
+  static const timetableReserveCardMinWidth = 200.0;
+  static const timetableReserveDoneOpacity = 0.65;
+
   /// Un élément passé, estompé dans les listes (§4.3).
   static const calendarPastOpacity = 0.6;
 
   /// Les tailles de la pastille de date (CalendarDateChip).
   static const calendarDateChipSmall = 34.0;
+  static const calendarDateChipList = 38.0;
   static const calendarDateChipMedium = 40.0;
   static const calendarDateChipLarge = 44.0;
 
@@ -1734,4 +1838,162 @@ class AppDimensions {
 
   /// Le cercle du radio d'une règle (bordure 2 px).
   static const recoveryStudentsRadioBorderWidth = 2.0;
+  // La liste des calendriers (maquette CalList / CalCard / CalCurrentHero).
+  /// Une carte de calendrier : largeur minimale de la grille.
+  static const calendarCardMinWidth = 280.0;
+
+  /// Le médaillon d'une carte de calendrier.
+  static const calendarCardMedallion = 42.0;
+  static const calendarCardMedallionIcon = 20.0;
+
+  /// Le filet coloré du haut d'une carte, le liseré d'un rendez-vous.
+  static const calendarCardAccent = 3.0;
+
+  /// La fine barre de répartition par nature.
+  static const calendarNatureBarHeight = 6.0;
+
+  /// L'écart entre les pastilles d'une carte.
+  static const calendarPillGap = 6.0;
+
+  /// Le squelette de la liste : la hauteur du bandeau en attente.
+  static const calendarHeroSkeletonHeight = 210.0;
+
+  /// L'opacité de cette barre sur une carte archivée.
+  static const calendarArchivedBarOpacity = 0.45;
+
+  /// Une carte de « Prochains rendez-vous » (spec §4.6 R : 230 dp).
+  static const calendarUpcomingCardWidth = 230.0;
+
+  /// Au plus : la maquette laisse une carte s'élargir à son intitulé.
+  static const calendarUpcomingCardMaxWidth = 360.0;
+
+  /// Le bord d'une carte de rendez-vous : la teinte de sa nature, voilée.
+  static const calendarToneBorderOpacity = 0.28;
+
+  /// Le médaillon du titre « Prochains rendez-vous ».
+  static const calendarUpcomingMedallion = 28.0;
+  static const calendarUpcomingMedallionIcon = 15.0;
+
+  /// L'avancement de l'année : épaisseur, largeur maximale, repères.
+  static const calendarProgressHeight = 8.0;
+  static const calendarProgressMaxWidth = 420.0;
+  static const calendarProgressMarkerWidth = 2.0;
+  static const calendarProgressMarkerHeight = 14.0;
+
+  /// Le bandeau passe sur deux colonnes quand l'une et l'autre tiennent.
+  static const calendarHeroInfoMinWidth = 260.0;
+  static const calendarHeroTilesMinWidth = 300.0;
+  static const calendarHeroTileMinWidth = 150.0;
+
+  // Un calendrier ouvert (maquette Calendrier.jsx, CalDetail).
+  /// Le médaillon du bandeau et son icône.
+  static const calendarDetailMedallion = 50.0;
+  static const calendarDetailMedallionIcon = 24.0;
+
+  /// L'aide d'un calendrier garde au moins cette largeur à côté des gestes.
+  static const calendarHelpMinWidth = 200.0;
+
+  /// Une tuile « 21 nationaux » du bandeau : largeur plancher.
+  static const calendarBannerCountMinWidth = 84.0;
+
+  /// Les petites icônes du bandeau (cadenas, crayon).
+  static const calendarBannerSmallIcon = 11.0;
+
+  /// Les onglets de vue : hauteur d'un onglet, rayons, marge interne.
+  static const calendarTabHeight = 40.0;
+  static const calendarTabsRadius = 14.0;
+  static const calendarTabRadius = 10.0;
+  static const calendarTabsPadding = 4.0;
+  static const calendarTabIcon = 14.0;
+
+  /// La navigation de mois : boutons de 44 dp, libellé d'au moins 150.
+  static const calendarMonthNavButton = 44.0;
+  static const calendarMonthNavLabelMinWidth = 150.0;
+
+  /// La légende : carré de couleur, hauteur d'une puce (poste, doigt).
+  static const calendarLegendSwatch = 10.0;
+  static const calendarLegendSwatchRadius = 3.0;
+  static const calendarLegendChipHeight = 32.0;
+  static const calendarLegendChipTouchHeight = 40.0;
+  static const calendarLegendStrikeOpacity = 0.7;
+  static const calendarLegendChipPaddingH = 11.0;
+  static const calendarLegendBorderOpacity = 0.4;
+
+  /// La clé « national / interne » : échantillon, plein ou en trait.
+  static const calendarKeySwatchWidth = 16.0;
+  static const calendarKeySwatchHeight = 10.0;
+  static const calendarKeyLineHeight = 6.0;
+
+  /// Une bande nationale : liseré gauche, part du ton dans le fond doux.
+  static const calendarBandAccent = 3.0;
+  static const calendarBandRowGap = 3.0;
+  static const calendarBandRadius = 6.0;
+  static const calendarBandInset = 4.0;
+  static const calendarBandCompactInset = 3.0;
+  static const calendarMonthHeaderPadding = 10.0;
+  static const calendarBandPaddingH = 6.0;
+  static const calendarBandCompactRowGap = 2.0;
+  static const calendarBandBorderOpacity = 0.33;
+  static const calendarBandLockOpacity = 0.7;
+  static const calendarBandNationalMix = 0.2;
+
+  /// Une bande interne : trait des tirets.
+  static const calendarBandInternalStroke = 1.5;
+
+  /// Le contour d'un bouton rond (Imprimer, Dupliquer) d'un calendrier.
+  static const calendarIconButtonStroke = 1.5;
+
+  /// La marque « à vérifier » d'une bande.
+  static const calendarVerifyDot = 6.0;
+
+  /// Les cases du mois, hautes au poste, plus basses sous 900 dp.
+  static const calendarMonthCellMinHeightWide = 112.0;
+  static const calendarMonthCellMinHeightNarrow = 92.0;
+
+  /// Le trait d'une période dans le mois compact : estompé.
+  static const calendarCompactPeriodOpacity = 0.45;
+
+  /// La pastille du jour du jour dans le mois.
+  static const calendarTodayDot = 22.0;
+  static const calendarSelectedRing = 2.0;
+
+  /// Opacité du fond d'une bande du mois : le trait entre les jours se
+  /// devine dessous.
+  static const calendarBandSurfaceOpacity = 0.9;
+
+  /// Les hachures d'un jour hors du mois : pas et épaisseur.
+  static const calendarHatchStep = 10.0;
+  static const calendarHatchStroke = 5.0;
+
+  /// La liste du mois : médaillon de l'en-tête et œil.
+  static const calendarSideMedallion = 28.0;
+  static const calendarSideMedallionIcon = 14.0;
+  static const calendarEye = 30.0;
+  static const calendarEyeSmall = 26.0;
+  static const calendarEyeIcon = 15.0;
+  static const calendarEyeIconSmall = 13.0;
+
+  /// Une ligne survolée prend 7 % de sa teinte.
+  static const calendarRowHoverOpacity = 0.07;
+
+  /// La vue Liste : liseré de nature, colonne de durée.
+  static const calendarListAccent = 3.0;
+  static const calendarListAccentSoftOpacity = 0.33;
+  static const calendarDurationColumn = 70.0;
+  static const calendarHairline = 1.0;
+  static const calendarSourceIcon = 11.0;
+  static const calendarSourceSquare = 8.0;
+  static const calendarSourceSquareRadius = 2.0;
+  static const calendarNatureTagIcon = 10.0;
+
+  /// La vue Année : hauteur d'un jour (poste, téléphone), soulignement de
+  /// période, opacité d'un élément interne.
+  static const calendarYearDayHeight = 22.0;
+  static const calendarYearDayHeightCompact = 18.0;
+  static const calendarYearPeriodUnderline = 2.0;
+  static const calendarYearPeriodUnderlineOpacity = 0.33;
+  static const calendarInternalOpacity = 0.78;
+  static const calendarPeriodTagFont = 9.0;
+  static const calendarYearDayRadius = 5.0;
+  static const calendarYearDayRadiusCompact = 4.0;
 }

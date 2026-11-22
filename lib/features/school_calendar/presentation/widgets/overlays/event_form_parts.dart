@@ -2,82 +2,18 @@ import 'package:school_app_flutter/features/school_calendar/domain/entities/cale
 import 'package:school_app_flutter/features/school_calendar/domain/entities/calendar_scope.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_select_input.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
+import 'package:school_app_flutter/core/widgets/eteelo_text_input.dart';
 import 'package:school_app_flutter/core/components/controls/eteelo_filter_chip.dart';
 import 'package:school_app_flutter/features/school_calendar/domain/entities/calendar_enums.dart';
 import 'package:school_app_flutter/features/school_calendar/presentation/helpers/calendar_nature_style.dart';
 import 'package:school_app_flutter/core/components/status/eteelo_notice.dart';
-import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
-import 'package:school_app_flutter/core/widgets/eteelo_date_input.dart';
 import 'package:school_app_flutter/features/school_calendar/domain/services/calendar_event_validation.dart';
 import 'package:school_app_flutter/features/school_calendar/presentation/helpers/calendar_labels.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
-
-/// « Du » et « Au (inclus) », côte à côte dès `formGridTwoColMin` de carte,
-/// l'un sous l'autre en deçà (spec §4.4 O2). Les dates rendues sont des jours
-/// civils.
-class EventDatesRow extends StatelessWidget {
-  final DateTime? start;
-  final DateTime? end;
-  final DateTime yearStart;
-  final DateTime yearEnd;
-  final ValueChanged<DateTime?> onStart;
-  final ValueChanged<DateTime?> onEnd;
-
-  const EventDatesRow({
-    super.key,
-    required this.start,
-    required this.end,
-    required this.yearStart,
-    required this.yearEnd,
-    required this.onStart,
-    required this.onEnd,
-  });
-
-  static DateTime? _day(DateTime? d) =>
-      d == null ? null : DateTime.utc(d.year, d.month, d.day);
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    final from = EteeloDateInput(
-      label: l10n.schoolCalendarFormFrom,
-      value: start,
-      required: true,
-      firstDate: yearStart,
-      lastDate: yearEnd,
-      onChanged: (d) => onStart(_day(d)),
-    );
-    final to = EteeloDateInput(
-      label: l10n.schoolCalendarFormTo,
-      value: end,
-      required: true,
-      firstDate: yearStart,
-      lastDate: yearEnd,
-      onChanged: (d) => onEnd(_day(d)),
-    );
-    return LayoutBuilder(
-      builder: (context, constraints) =>
-          constraints.maxWidth >= AppBreakpoints.formGridTwoColMin
-          ? Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(child: from),
-                const SizedBox(width: AppSpacing.md),
-                Expanded(child: to),
-              ],
-            )
-          : Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                from,
-                const SizedBox(height: AppSpacing.md),
-                to,
-              ],
-            ),
-    );
-  }
-}
 
 /// Les erreurs (bloquantes) et avertissements (non bloquants) de CAL-R7. Un
 /// intitulé vide ne s'annonce pas : « Ajouter » reste simplement inactif.
@@ -200,9 +136,11 @@ class EventReplacementNotice extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        EventFieldLabel(l10n.schoolCalendarFormNature),
         Align(
           alignment: Alignment.centerLeft,
           child: EteeloFilterChip(
+            iconMedallion: true,
             label: CalendarLabels.nature(l10n, nature),
             selected: true,
             color: nature.tone.tone,
@@ -239,21 +177,97 @@ class EventNatureChoice extends StatelessWidget {
   Widget build(BuildContext context) {
     if (locked) return EventReplacementNotice(nature: nature);
     final l10n = AppLocalizations.of(context)!;
-    return Wrap(
-      spacing: AppSpacing.sm,
-      runSpacing: AppSpacing.sm,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        for (final n in CalendarNature.values)
-          if (natures.contains(n))
-            EteeloFilterChip(
-              label: CalendarLabels.nature(l10n, n),
-              selected: nature == n,
-              color: n.tone.tone,
-              soft: n.tone.soft,
-              ink: n.tone.ink,
-              icon: n.tone.icon,
-              onTap: () => onChanged(n),
+        EventFieldLabel(l10n.schoolCalendarFormNature),
+        // L'interligne est dans la zone de toucher des puces (48 dp).
+        Wrap(
+          spacing: AppSpacing.sm,
+          children: [
+            for (final n in CalendarNature.values)
+              if (natures.contains(n))
+                EteeloFilterChip(
+                  padTapTarget: true,
+                  iconMedallion: true,
+                  label: CalendarLabels.nature(l10n, n),
+                  selected: nature == n,
+                  color: n.tone.tone,
+                  soft: n.tone.soft,
+                  ink: n.tone.ink,
+                  icon: n.tone.icon,
+                  onTap: () => onChanged(n),
+                ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+/// Le libellé d'un champ composé à la main, au style des champs du socle ;
+/// [hint] le suit en plus discret (« (facultatif) »).
+class EventFieldLabel extends StatelessWidget {
+  final String label;
+  final String? hint;
+
+  const EventFieldLabel(this.label, {super.key, this.hint});
+
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.only(bottom: AppSpacing.tight),
+    child: Text.rich(
+      TextSpan(
+        text: label,
+        children: [
+          if (hint case final more?)
+            TextSpan(
+              text: ' $more',
+              style: AppTypography.labelSmall.copyWith(
+                color: AppColors.textMuted,
+              ),
             ),
+        ],
+      ),
+      style: AppTypography.labelFormLarge.copyWith(
+        color: AppColors.textPrimary,
+        height: 1.3,
+      ),
+    ),
+  );
+}
+
+/// « Note (facultatif) » : le libellé en deux tons de la maquette.
+class EventNoteField extends StatelessWidget {
+  final TextEditingController controller;
+
+  const EventNoteField({super.key, required this.controller});
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        ExcludeSemantics(
+          child: EventFieldLabel(
+            l10n.schoolCalendarFormNoteLabel,
+            hint: l10n.schoolCalendarFormOptional,
+          ),
+        ),
+        EteeloTextInput(
+          controller: controller,
+          label: l10n.schoolCalendarFormNote,
+          hideLabel: true,
+          keyboardType: EteeloTextInputType.multiline,
+          minLines: 2,
+          maxLines: 4,
+          inputFormatters: [
+            LengthLimitingTextInputFormatter(
+              CalendarEventValidation.noteMaxLength,
+            ),
+          ],
+        ),
       ],
     );
   }

@@ -1,7 +1,9 @@
+import 'package:school_app_flutter/features/school_calendar/domain/entities/school_calendar.dart';
 import 'package:school_app_flutter/features/school_calendar/presentation/widgets/overlays/publish_calendar_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/components/dialogs/eteelo_adaptive_sheet.dart';
 import 'package:school_app_flutter/core/components/dialogs/eteelo_form_dialog.dart';
+import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/widgets/app_confirmation_dialog.dart';
 import 'package:school_app_flutter/core/widgets/app_snack_bar.dart';
 import 'package:school_app_flutter/features/school_calendar/domain/entities/calendar_element.dart';
@@ -29,9 +31,11 @@ class SchoolCalendarPageActions {
   Future<void> openElement(CalendarElement element) async {
     final choice = await showEteeloAdaptiveSheet<ElementDetailChoice>(
       context: context,
+      maxWidth: AppDimensions.calendarDetailMaxWidth,
       builder: (_) => ElementDetailSheet(
         element: element,
         scopes: cubit.state.scopes,
+        today: cubit.state.today,
         replaced: switch (element.replaces) {
           final id? => cubit.state.nationalOf(id),
           null => null,
@@ -87,6 +91,7 @@ class SchoolCalendarPageActions {
       context,
       EventFormDialog(
         newId: cubit.newEventId(),
+        yearLabel: calendar.yearLabel,
         initial: initial,
         initialDay: day,
         natures: rights.writableNatures,
@@ -164,31 +169,48 @@ class SchoolCalendarPageActions {
     );
   }
 
-  /// O3 : vers l'année suivante.
-  Future<void> duplicate() async {
+  /// O3 : vers l'année suivante — du calendrier ouvert, ou de la carte
+  /// [source] de la liste (menu « ⋮ »).
+  Future<void> duplicate({SchoolCalendar? source}) async {
     final state = cubit.state;
-    final calendar = state.calendar;
+    final calendar = source ?? state.calendar;
     final target = calendar?.nextYearLabel;
     if (calendar == null || target == null) return;
+    final events = source == null
+        ? state.events
+        : (state.libraryEvents[source.id] ?? const []);
+    // Le cadre de l'année visée, pour dire s'il est intégré ou attendu ;
+    // inconnu si la question échoue (la duplication reste possible).
+    final years = await cubit.creatableYears();
+    if (!context.mounted) return;
+    final framework = years.fold(
+      (_) => null,
+      (list) => [
+        for (final y in list)
+          if (y.yearLabel == target) y.framework,
+      ].firstOrNull,
+    );
     final natures = await EteeloFormDialog.show<List<CalendarNature>>(
       context,
       DuplicateCalendarDialog(
         sourceYear: calendar.yearLabel,
         targetYear: target,
-        eventCount: state.events
+        targetFramework: framework,
+        sourceInForce: state.phaseOf(calendar) == CalendarPhase.inForce,
+        eventCount: events
             .where(
               (r) => DuplicateCalendarDialog.eventNatures.contains(
                 r.element.nature,
               ),
             )
             .length,
-        windowCount: state.events
+        windowCount: events
             .where((r) => r.element.nature == CalendarNature.assessment)
             .length,
       ),
     );
     if (!context.mounted || natures == null || natures.isEmpty) return;
-    final result = await cubit.duplicate(natures);
+    final result = await cubit.duplicate(natures, source: source);
     if (!context.mounted) return;
     result.fold(
       (f) => AppSnackBar.showError(context, CalendarLabels.failure(_l10n, f)),
@@ -200,25 +222,34 @@ class SchoolCalendarPageActions {
   }
 
   /// O5 : un seul envoi, même sur un double appui (le dialogue se ferme).
-  Future<void> publish({required bool online}) async {
+  Future<void> publish({required bool online, SchoolCalendar? source}) async {
     final state = cubit.state;
-    final calendar = state.calendar;
+    final calendar = source ?? state.calendar;
     if (calendar == null) return;
-    final all = state.allElements;
-    final ok = await EteeloFormDialog.show<bool>(
+    final summary = state.summaryOf(calendar);
+    final all = summary.elements;
+    final current = state.inForce;
+    final ok = await PublishCalendarDialog.show(
       context,
       PublishCalendarDialog(
+        relay: current == null || current.id == calendar.id
+            ? null
+            : (
+                current: current.yearLabel,
+                end: CalendarLabels.day(context, current.endDate),
+                start: CalendarLabels.day(context, calendar.startDate),
+              ),
         year: calendar.yearLabel,
         total: all.length,
         schoolCount: all.where((e) => !e.isNational).length,
-        toVerify: state.toVerifyCount,
+        toVerify: summary.toVerifyCount,
         hasFramework: calendar.hasFramework,
         online: online,
-        pending: state.pendingCount > 0,
+        pending: summary.pendingCount > 0,
       ),
     );
-    if (!context.mounted || ok != true) return;
-    final result = await cubit.publish();
+    if (!context.mounted || !ok) return;
+    final result = await cubit.publish(source: source);
     if (!context.mounted) return;
     result.fold(
       (f) => AppSnackBar.showError(context, CalendarLabels.failure(_l10n, f)),

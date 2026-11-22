@@ -4,6 +4,9 @@ class AppSpacing {
   AppSpacing._();
 
   static const double xs = 4;
+
+  /// Entre [xs] et [sm] : marge d'un médaillon de puce, écart serré d'icône.
+  static const double tight = 6;
   static const double sm = 8;
   static const double md = 12;
   static const double lg = 16;

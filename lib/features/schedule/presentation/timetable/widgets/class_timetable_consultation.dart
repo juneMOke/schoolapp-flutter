@@ -1,45 +1,44 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:school_app_flutter/features/schedule/presentation/timetable/widgets/consultation_actions.dart';
-import 'package:school_app_flutter/features/schedule/presentation/timetable/print_action.dart';
-import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
-import 'package:school_app_flutter/core/constants/app_dimensions.dart';
-import 'package:school_app_flutter/core/device/desktop_platform.dart';
 import 'package:school_app_flutter/core/components/keyboard/page_action_shortcut.dart';
-import 'package:school_app_flutter/core/components/dialogs/eteelo_adaptive_sheet.dart';
+import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
+import 'package:school_app_flutter/core/device/desktop_platform.dart';
 import 'package:school_app_flutter/core/helpers/school_time.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/features/schedule/domain/entities/timetable/class_timetable_view.dart';
-import 'package:school_app_flutter/features/schedule/domain/entities/timetable_cell.dart';
 import 'package:school_app_flutter/features/schedule/domain/entities/weekday.dart';
 import 'package:school_app_flutter/features/schedule/domain/services/timetable_metrics.dart';
 import 'package:school_app_flutter/features/schedule/presentation/helpers/schedule_class_palette.dart';
 import 'package:school_app_flutter/features/schedule/presentation/timetable/bloc/class_timetable_cubit.dart';
 import 'package:school_app_flutter/features/schedule/presentation/timetable/class_week_builder.dart';
+import 'package:school_app_flutter/features/schedule/presentation/timetable/draft_conflicts.dart';
+import 'package:school_app_flutter/features/schedule/presentation/timetable/print_action.dart';
 import 'package:school_app_flutter/features/schedule/presentation/timetable/timetable_marks.dart';
+import 'package:school_app_flutter/features/schedule/presentation/timetable/widgets/class_day_view.dart';
 import 'package:school_app_flutter/features/schedule/presentation/timetable/widgets/class_timetable_distribution.dart';
 import 'package:school_app_flutter/features/schedule/presentation/timetable/widgets/class_timetable_summary.dart';
+import 'package:school_app_flutter/features/schedule/presentation/timetable/widgets/consultation_actions.dart';
 import 'package:school_app_flutter/features/schedule/presentation/timetable/widgets/dated_week_bar.dart';
-import 'package:school_app_flutter/features/schedule/presentation/timetable/widgets/session_detail_sheet.dart';
-import 'package:school_app_flutter/features/schedule/presentation/widgets/schedule_day_view.dart';
+import 'package:school_app_flutter/features/schedule/presentation/timetable/widgets/session_opener.dart';
 import 'package:school_app_flutter/features/schedule/presentation/widgets/schedule_view_mode.dart';
 import 'package:school_app_flutter/features/schedule/presentation/widgets/schedule_week_grid.dart';
 import 'package:school_app_flutter/features/school_calendar/domain/services/calendar_days.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// La version publiée d'une classe (EDT §4.1, colonne Consultation) : la
-/// synthèse et « En cours », la semaine datée et ses jours fermés (barrés,
-/// R17), la grille ou la journée, la répartition — où survoler un cours le
-/// repère (I5) et toucher un domaine filtre (I6). Toucher une séance ouvre
-/// O1 (I4).
+/// synthèse et « En cours », la barre d'actions et la semaine datée, ses
+/// jours fermés (barrés, R17), la grille ou la journée, puis la répartition —
+/// où survoler un cours le repère (I5) et toucher un domaine filtre (I6).
+/// Toucher une séance ouvre O1 (I4).
 class ClassTimetableConsultation extends StatefulWidget {
   final ClassTimetableState state;
   final ClassTimetableCubit cubit;
   final ClassTimetableView view;
 
-  /// « Modifier » (I7), si l'utilisateur peut construire.
+  /// « Modifier » (I7) et « Copier… » (I15), si l'utilisateur peut construire.
   final VoidCallback? onEdit;
+  final VoidCallback? onCopy;
 
   /// L'avis des gestes faits sur un brouillon fini (R18), s'il y en a.
   final Widget? ended;
@@ -47,14 +46,20 @@ class ClassTimetableConsultation extends StatefulWidget {
   /// « Imprimer » demande le réseau : la pièce vient du serveur (R16).
   final bool online;
 
+  /// L'instant présent (« aujourd'hui », « En cours », R11) ; l'horloge par
+  /// défaut.
+  final DateTime Function() clock;
+
   const ClassTimetableConsultation({
     super.key,
     required this.state,
     required this.cubit,
     required this.view,
     this.onEdit,
+    this.onCopy,
     this.ended,
     this.online = true,
+    this.clock = DateTime.now,
   });
 
   @override
@@ -81,7 +86,8 @@ class _ClassTimetableConsultationState
     final isThisWeek = state.week == null;
     final monday = state.week ?? cubit.thisWeek;
     final closed = TimetableMarks.closedDays(calendar, l10n);
-    final wallClock = SchoolTime.wallClock(DateTime.now());
+    final instant = widget.clock();
+    final wallClock = SchoolTime.wallClock(instant);
     // R11 : « aujourd'hui » et « En cours » cette semaine seulement, jamais
     // un jour sans cours (férié, vacances).
     final weekday = isThisWeek ? CurrentSession.weekdayOf(wallClock) : null;
@@ -106,7 +112,15 @@ class _ClassTimetableConsultationState
     final palette = ScheduleClassPalette.byCourse(
       ClassWeekBuilder.courseVisuals(view),
     );
-    void open(TimetableCell cell) => unawaited(_open(context, cell, monday));
+    final dates = {
+      for (final day in Weekday.values)
+        day: CalendarDays.addDays(monday, day.index),
+    };
+    final opener = SessionOpener(
+      view: view,
+      dates: dates,
+      currentId: now?.current?.id,
+    );
     // R16 : seule une classe publiée s'imprime ; hors ligne, le bouton reste
     // visible et inactif, avec sa raison.
     final published = view.header?.isPublished ?? false;
@@ -122,11 +136,6 @@ class _ClassTimetableConsultationState
                 ? ClassTimetableMode.day
                 : ClassTimetableMode.week);
         final narrow = constraints.maxWidth < AppBreakpoints.dataTableCardsMax;
-        // Grand écran : la répartition à côté de la grille, à hauteur des
-        // cours qu'elle repère, au lieu d'une bande étirée dessous.
-        final side =
-            mode == ClassTimetableMode.week &&
-            constraints.maxWidth >= AppBreakpoints.expanded;
         final body = mode == ClassTimetableMode.week
             ? ScheduleWeekGrid(
                 timetable: week,
@@ -134,34 +143,21 @@ class _ClassTimetableConsultationState
                 today: today,
                 keepSaturday: true,
                 marks: marks,
-                onOpenCell: open,
+                look: ScheduleGridLook.classTimetable,
+                dates: dates,
+                onOpenCell: (cell) => unawaited(opener.open(context, cell)),
               )
-            : ScheduleDayView(
+            : ClassDayView(
                 timetable: week,
                 palette: palette,
                 today: today,
                 selectedDay: state.day ?? weekday ?? Weekday.mon,
                 onDaySelected: cubit.setDay,
                 marks: marks,
-                onOpenCell: open,
-                dates: {
-                  for (final day in Weekday.values)
-                    day: CalendarDays.addDays(monday, day.index),
-                },
+                dates: dates,
+                domains: ClassWeekBuilder.domainLabels(view, l10n),
+                onOpenCell: (cell) => unawaited(opener.open(context, cell)),
               );
-        final distribution = ClassTimetableDistribution(
-          view: view,
-          cells: view.published,
-          linkedCoursId: _linked,
-          onHoverCours: _hover,
-          hint: mode == ClassTimetableMode.week
-              ? expectsPhysicalKeyboard
-                    ? l10n.classTimetableHoverHint
-                    : l10n.classTimetableTapHint
-              : null,
-          domainFilter: _domain,
-          onDomainFilter: (d) => setState(() => _domain = d),
-        );
         return PageActionShortcut(
           action: PageAction.print,
           onInvoke: print,
@@ -173,80 +169,51 @@ class _ClassTimetableConsultationState
                 view: view,
                 cells: view.published,
                 now: now,
+                conflicts: DraftConflicts.ofCells(view, view.published).length,
               ),
               const SizedBox(height: AppSpacing.md),
               ConsultationActions(
                 mode: mode,
                 onMode: cubit.setMode,
+                week: DatedWeekBar(
+                  monday: monday,
+                  isThisWeek: isThisWeek,
+                  expand: narrow,
+                  onPrevious: () => unawaited(cubit.shiftWeek(-1)),
+                  onNext: () => unawaited(cubit.shiftWeek(1)),
+                  onThisWeek: () => unawaited(cubit.setWeek(null)),
+                ),
                 published: published,
                 online: widget.online,
                 narrow: narrow,
                 onPrint: print,
+                onCopy: widget.onCopy,
                 onEdit: widget.onEdit,
               ),
-              const SizedBox(height: AppSpacing.sm),
-              DatedWeekBar(
-                monday: monday,
-                isThisWeek: isThisWeek,
-                onPrevious: () => unawaited(cubit.shiftWeek(-1)),
-                onNext: () => unawaited(cubit.shiftWeek(1)),
-                onThisWeek: () => unawaited(cubit.setWeek(null)),
-              ),
-              if (calendar != null) PeriodBanners(week: calendar),
-              const SizedBox(height: AppSpacing.md),
-              if (side)
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(child: body),
-                    const SizedBox(width: AppSpacing.lg),
-                    SizedBox(
-                      width: AppDimensions.timetableSideDistributionWidth,
-                      child: distribution,
-                    ),
-                  ],
-                )
-              else ...[
-                body,
-                const SizedBox(height: AppSpacing.lg),
-                distribution,
+              if (calendar != null) ...[
+                const SizedBox(height: AppSpacing.md),
+                PeriodBanners(week: calendar),
               ],
+              const SizedBox(height: AppSpacing.md),
+              body,
+              const SizedBox(height: AppSpacing.lg),
+              ClassTimetableDistribution(
+                view: view,
+                cells: view.published,
+                linkedCoursId: _linked,
+                onHoverCours: _hover,
+                hint: mode == ClassTimetableMode.week
+                    ? expectsPhysicalKeyboard
+                          ? l10n.classTimetableHoverHint
+                          : l10n.classTimetableTapHint
+                    : null,
+                domainFilter: _domain,
+                onDomainFilter: (d) => setState(() => _domain = d),
+              ),
             ],
           ),
         );
       },
-    );
-  }
-
-  Future<void> _open(
-    BuildContext context,
-    TimetableCell cell,
-    DateTime monday,
-  ) async {
-    final view = widget.view;
-    final source = [
-      for (final c in view.published)
-        if (c.id == cell.sessionId) c,
-    ].firstOrNull;
-    if (source == null) return;
-    final now = widget.state.week == null
-        ? TimetableMarks.now(
-            view,
-            widget.state.calendar,
-            SchoolTime.wallClock(DateTime.now()),
-          )
-        : null;
-    await showEteeloAdaptiveSheet<void>(
-      context: context,
-      builder: (_) => SessionDetailSheet(
-        view: view,
-        cell: source,
-        currentId: now?.current?.id,
-        dates: {
-          for (final day in Weekday.values)
-            day: CalendarDays.addDays(monday, day.index),
-        },
-      ),
     );
   }
 }

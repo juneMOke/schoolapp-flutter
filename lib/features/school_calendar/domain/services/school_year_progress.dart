@@ -33,6 +33,17 @@ class SchoolYearProgress extends Equatable {
   /// Part écoulée, de 0 à 1.
   double get ratio => weekCount == 0 ? 0 : (week / weekCount).clamp(0, 1);
 
+  /// Le nombre de semaines de l'année, du lundi de la rentrée au lundi de la
+  /// dernière semaine, comptées toutes les deux : connu même hors de l'année
+  /// (un brouillon affiche « 44 semaines »).
+  static int weekCountOf(DateTime startDate, DateTime endDate) =>
+      CalendarDays.between(
+            CalendarDays.mondayOf(startDate),
+            CalendarDays.mondayOf(endDate),
+          ) ~/
+          7 +
+      1;
+
   /// `null` hors de l'année scolaire : ni semaine, ni période, ni échéance.
   ///
   /// [rhythm] choisit le jeu de périodes (A1) ; `null` accepte toute période.
@@ -47,9 +58,7 @@ class SchoolYearProgress extends Equatable {
     if (!CalendarDays.within(day, startDate, endDate)) return null;
     final firstMonday = CalendarDays.mondayOf(startDate);
     final week = CalendarDays.between(firstMonday, day) ~/ 7 + 1;
-    final weekCount =
-        CalendarDays.between(firstMonday, CalendarDays.mondayOf(endDate)) ~/ 7 +
-        1;
+    final weekCount = weekCountOf(startDate, endDate);
 
     CalendarElement? period;
     final now = <CalendarElement>[];
