@@ -212,20 +212,11 @@ import 'package:school_app_flutter/features/finance/domain/usecases/get_payments
 import 'package:school_app_flutter/features/finance/domain/usecases/get_student_charges_usecase.dart';
 import 'package:school_app_flutter/features/finance/domain/usecases/update_student_charge_expected_amount_usecase.dart';
 import 'package:school_app_flutter/features/enrollment/offline/domain/usecases/search_local_enrollments_use_case.dart';
-import 'package:school_app_flutter/features/finance/offline/domain/usecases/get_fee_codes_for_year_use_case.dart';
+import 'package:school_app_flutter/features/finance/offline/domain/usecases/get_fee_natures_for_year_use_case.dart';
+import 'package:school_app_flutter/features/classes/domain/usecases/offline/get_composed_rosters_usecase.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/usecases/get_recovery_positions_use_case.dart';
-import 'package:school_app_flutter/features/finance/offline/domain/usecases/get_fee_tariffs_for_level_use_case.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/usecases/has_fee_grid_use_case.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/bloc/fee_control_bloc.dart';
-import 'package:school_app_flutter/features/recouvrement/presentation/bloc/recouvrement_dashboard_bloc.dart';
-import 'package:school_app_flutter/features/recouvrement/data/datasources/relance_list_remote_data_source.dart';
-import 'package:school_app_flutter/features/recouvrement/data/repositories/relance_list_repository_impl.dart';
-import 'package:school_app_flutter/features/recouvrement/domain/repositories/relance_list_repository.dart';
-import 'package:school_app_flutter/features/recouvrement/domain/usecases/emit_relance_list_usecase.dart';
-import 'package:school_app_flutter/features/recouvrement/presentation/bloc/recouvrement_simulation_cubit.dart';
-import 'package:school_app_flutter/features/finance/offline/domain/usecases/count_pending_payments_use_case.dart';
-import 'package:school_app_flutter/features/recouvrement/presentation/bloc/recouvrement_call_list_cubit.dart';
-import 'package:school_app_flutter/features/recouvrement/presentation/bloc/relance_list_cubit.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/usecases/initialize_charges_use_case.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/finance_bloc.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/finance_till_bloc.dart';
@@ -994,53 +985,10 @@ Future<void> configureDependencies({
     () => FeeControlBloc(
       search: getIt<SearchLocalEnrollmentsUseCase>(),
       getPositions: getIt<GetRecoveryPositionsUseCase>(),
-      getTariffs: getIt<GetFeeTariffsForLevelUseCase>(),
-      hasFeeGrid: getIt<HasFeeGridUseCase>(),
+      getNatures: getIt<GetFeeNaturesForYearUseCase>(),
       getClassrooms: getIt<GetOfflineClassroomsUseCase>(),
       getRoster: getIt<GetOfflineRosterUseCase>(),
-    ),
-  );
-
-  // Tableau de bord du Recouvrement — même lecture locale que l'écran
-  // nominatif, mais la population n'est pas donnée : elle est découverte dans
-  // le grand-livre, sur une SÉLECTION de frais.
-  // Simulation de renvoi — pur et synchrone, sans aucune dépendance : il
-  // chiffre ce que le tableau de bord lui donne, et n'écrit jamais.
-  // La liste de relance — le SEUL appel réseau du module, et il écrit un
-  // document. `finance.charge.read` suffit côté serveur.
-  getIt.registerLazySingleton<RelanceListRemoteDataSource>(
-    () => RelanceListRemoteDataSource(getIt<Dio>()),
-  );
-  getIt.registerLazySingleton<RelanceListRepository>(
-    () => RelanceListRepositoryImpl(
-      remoteDataSource: getIt<RelanceListRemoteDataSource>(),
-      requiredAuth: getIt<Map<String, dynamic>>(),
-    ),
-  );
-  getIt.registerFactory<EmitRelanceListUseCase>(
-    () => EmitRelanceListUseCase(getIt<RelanceListRepository>()),
-  );
-
-  // L'aperçu nominatif — lecture locale seule, aucune écriture.
-  getIt.registerFactory<RecouvrementCallListCubit>(
-    () => RecouvrementCallListCubit(
-      searchEnrollments: getIt<SearchLocalEnrollmentsUseCase>(),
-    ),
-  );
-  getIt.registerFactory<RelanceListCubit>(
-    () => RelanceListCubit(
-      emitRelanceList: getIt<EmitRelanceListUseCase>(),
-      countPendingPayments: getIt<CountPendingPaymentsUseCase>(),
-    ),
-  );
-  getIt.registerFactory<RecouvrementSimulationCubit>(
-    RecouvrementSimulationCubit.new,
-  );
-  getIt.registerFactory<RecouvrementDashboardBloc>(
-    () => RecouvrementDashboardBloc(
-      getFeeCodes: getIt<GetFeeCodesForYearUseCase>(),
-      getPositions: getIt<GetRecoveryPositionsUseCase>(),
-      searchEnrollments: getIt<SearchLocalEnrollmentsUseCase>(),
+      getComposedRosters: getIt<GetComposedRostersUseCase>(),
     ),
   );
 

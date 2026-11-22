@@ -41,7 +41,7 @@ abstract final class FeeControlCallSheetPdf {
     required String context,
     required String academicYearLabel,
     required DateTime issuedOn,
-    required ExchangeRate? rate,
+    ExchangeRate? rate,
     required AppLocalizations l10n,
   }) async {
     final document = pw.Document();

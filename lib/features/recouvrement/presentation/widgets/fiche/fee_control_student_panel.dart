@@ -37,9 +37,7 @@ class FeeControlStudentPanel extends StatelessWidget {
         return BlocBuilder<FeeControlSelectionCubit, FeeControlSelectionState>(
           builder: (context, selection) => FeeControlStudentSheet.docked(
             row: row,
-            tariffs: state.tariffs,
             sectionTitles: context.watch<FeeSectionTitlesCubit>().state,
-            rate: state.lastQuery?.rate,
             marked: selection.marked.contains(row.studentId),
             onToggleMark: () => toggleStudentMark(context, row),
             onOpenRecord: () =>

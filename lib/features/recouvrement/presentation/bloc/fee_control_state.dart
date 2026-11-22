@@ -3,20 +3,15 @@ part of 'fee_control_bloc.dart';
 const _undefined = Object();
 
 class FeeControlState extends Equatable {
-  // ── Grille tarifaire du niveau sélectionné ─────────────────────────────────
+  // ── Catalogue : natures de l'année et classes de l'année ────────────────
 
-  final EnrollmentLoadStatus tariffsStatus;
-  final List<LocalFeeTariff> tariffs;
+  final EnrollmentLoadStatus catalogStatus;
 
-  /// Vrai quand la grille est absente **de l'appareil** pour l'année, et non
-  /// simplement vide pour ce niveau. Deux causes qui se ressemblent à l'écran
-  /// et pas au guichet : « ce niveau n'a pas de frais » est une information,
-  /// « la grille n'est pas descendue » appelle une synchronisation.
-  final bool feeGridMissing;
+  /// Les natures facturées sur l'année, avec leur(s) devise(s), la plus portée
+  /// d'abord.
+  final List<FeeNature> natures;
 
-  // ── Classes du niveau sélectionné ──────────────────────────────────────────
-
-  final EnrollmentLoadStatus classroomsStatus;
+  /// Toutes les classes de l'année — le champ Classe unique, groupé par cycle.
   final List<OfflineClassroom> classrooms;
 
   // ── Résultats ──────────────────────────────────────────────────────────────
@@ -43,8 +38,14 @@ class FeeControlState extends Equatable {
   final MoneyBag expected;
   final MoneyBag collected;
 
-  /// Taille du roster local de la classe demandée, ou `null` si la recherche
-  /// portait sur tout le niveau. `0` distingue « le roster n'est pas descendu
+  /// Devises **présentes** dans les créances de la classe sur la sélection —
+  /// et non celles des frais cochés : un même frais peut être en dollars au
+  /// primaire et en francs au secondaire. Deux devises ⇒ « a payé au moins… »
+  /// indisponible, tri par situation.
+  final Set<String> currencies;
+
+  /// Taille du roster local de la classe demandée, ou `null` pour la rubrique
+  /// « Non affectés », qui n'a pas de roster. `0` distingue « le roster n'est pas descendu
   /// sur cet appareil » de « la classe existe mais aucun de ses élèves n'a de
   /// dossier local » — deux pannes qui donnent la même liste vide et appellent
   /// deux gestes différents.
@@ -55,10 +56,8 @@ class FeeControlState extends Equatable {
   final FeeControlQuery? lastQuery;
 
   const FeeControlState({
-    this.tariffsStatus = EnrollmentLoadStatus.initial,
-    this.tariffs = const <LocalFeeTariff>[],
-    this.feeGridMissing = false,
-    this.classroomsStatus = EnrollmentLoadStatus.initial,
+    this.catalogStatus = EnrollmentLoadStatus.initial,
+    this.natures = const <FeeNature>[],
     this.classrooms = const <OfflineClassroom>[],
     this.status = EnrollmentLoadStatus.initial,
     this.rows = const <FeeControlRow>[],
@@ -70,6 +69,7 @@ class FeeControlState extends Equatable {
     this.breakdown = const FeeControlBreakdown(),
     this.expected = MoneyBag.empty,
     this.collected = MoneyBag.empty,
+    this.currencies = const <String>{},
     this.classroomRosterSize,
     this.errorType,
     this.errorMessage,
@@ -81,11 +81,15 @@ class FeeControlState extends Equatable {
   /// Vrai tant qu'aucune recherche n'a été lancée → carte d'invitation.
   bool get hasSearched => lastQuery != null;
 
+  /// Une seule devise dans la classe : « a payé au moins… » est offert.
+  bool get atLeastAvailable => currencies.length <= 1;
+
+  /// L'unique devise de la classe, ou `null` (mixte, ou pas encore lu).
+  String? get soleCurrency => currencies.length == 1 ? currencies.first : null;
+
   FeeControlState copyWith({
-    EnrollmentLoadStatus? tariffsStatus,
-    List<LocalFeeTariff>? tariffs,
-    bool? feeGridMissing,
-    EnrollmentLoadStatus? classroomsStatus,
+    EnrollmentLoadStatus? catalogStatus,
+    List<FeeNature>? natures,
     List<OfflineClassroom>? classrooms,
     EnrollmentLoadStatus? status,
     List<FeeControlRow>? rows,
@@ -97,16 +101,15 @@ class FeeControlState extends Equatable {
     FeeControlBreakdown? breakdown,
     MoneyBag? expected,
     MoneyBag? collected,
+    Set<String>? currencies,
     Object? classroomRosterSize = _undefined,
     Object? errorType = _undefined,
     Object? errorMessage = _undefined,
     Object? lastQuery = _undefined,
   }) {
     return FeeControlState(
-      tariffsStatus: tariffsStatus ?? this.tariffsStatus,
-      tariffs: tariffs ?? this.tariffs,
-      feeGridMissing: feeGridMissing ?? this.feeGridMissing,
-      classroomsStatus: classroomsStatus ?? this.classroomsStatus,
+      catalogStatus: catalogStatus ?? this.catalogStatus,
+      natures: natures ?? this.natures,
       classrooms: classrooms ?? this.classrooms,
       status: status ?? this.status,
       rows: rows ?? this.rows,
@@ -118,6 +121,7 @@ class FeeControlState extends Equatable {
       breakdown: breakdown ?? this.breakdown,
       expected: expected ?? this.expected,
       collected: collected ?? this.collected,
+      currencies: currencies ?? this.currencies,
       classroomRosterSize: identical(classroomRosterSize, _undefined)
           ? this.classroomRosterSize
           : classroomRosterSize as int?,
@@ -142,6 +146,7 @@ class FeeControlState extends Equatable {
     FeeControlBreakdown? breakdown,
     MoneyBag? expected,
     MoneyBag? collected,
+    Set<String>? currencies,
     Object? classroomRosterSize = _undefined,
   }) => copyWith(
     status: EnrollmentLoadStatus.success,
@@ -154,6 +159,7 @@ class FeeControlState extends Equatable {
     breakdown: breakdown,
     expected: expected,
     collected: collected,
+    currencies: currencies,
     classroomRosterSize: classroomRosterSize,
     lastQuery: query.copyWithPage(page.page),
     errorType: null,
@@ -174,6 +180,7 @@ class FeeControlState extends Equatable {
     breakdown: const FeeControlBreakdown(),
     expected: MoneyBag.empty,
     collected: MoneyBag.empty,
+    currencies: const <String>{},
     classroomRosterSize: null,
     errorType: errorType,
     errorMessage: errorMessage,
@@ -181,10 +188,8 @@ class FeeControlState extends Equatable {
 
   @override
   List<Object?> get props => [
-    tariffsStatus,
-    tariffs,
-    feeGridMissing,
-    classroomsStatus,
+    catalogStatus,
+    natures,
     classrooms,
     status,
     rows,
@@ -196,6 +201,7 @@ class FeeControlState extends Equatable {
     breakdown,
     expected,
     collected,
+    currencies,
     classroomRosterSize,
     errorType,
     errorMessage,

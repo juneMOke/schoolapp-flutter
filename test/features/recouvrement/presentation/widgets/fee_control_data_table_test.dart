@@ -73,7 +73,6 @@ Future<void> _pumpTable(
         child: FeeControlDataTable(
           rows: rows,
           totalCount: rows.length,
-          rate: null,
           selected: selected,
           marked: marked,
           onViewRequested: onViewRequested ?? (_) {},

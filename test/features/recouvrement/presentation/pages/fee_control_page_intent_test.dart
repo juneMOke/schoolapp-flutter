@@ -1,12 +1,9 @@
-import 'dart:async';
-
 import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:school_app_flutter/features/finance/presentation/bloc/finance/exchange_rates_cubit.dart';
-import 'package:school_app_flutter/features/finance/presentation/bloc/finance/fee_section_titles_cubit.dart';
 import 'package:get_it/get_it.dart';
+import 'package:go_router/go_router.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:school_app_flutter/features/academic_year/domain/entities/academic_year.dart';
 import 'package:school_app_flutter/features/academic_year/domain/entities/academic_year_context.dart';
@@ -14,12 +11,14 @@ import 'package:school_app_flutter/features/academic_year/presentation/bloc/acad
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_event.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_state.dart';
+import 'package:school_app_flutter/features/classes/domain/entities/offline/offline_classroom.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/school_level.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/school_level_group.dart';
 import 'package:school_app_flutter/features/enrollment/domain/entities/school_level_group_bundle.dart';
+import 'package:school_app_flutter/features/finance/presentation/bloc/finance/fee_section_titles_cubit.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/bloc/fee_control_bloc.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/pages/fee_control_page.dart';
-import 'package:school_app_flutter/features/finance/offline/domain/entities/local_finance_entities.dart';
+import 'package:school_app_flutter/features/recouvrement/presentation/pages/fee_control_question.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 class _MockFeeControlBloc extends MockBloc<FeeControlEvent, FeeControlState>
@@ -32,49 +31,42 @@ class _MockAcademicYearBloc
 class _MockAuthBloc extends MockBloc<AuthEvent, AuthState>
     implements AuthBloc {}
 
-/// Aucun cours en base : l'écran doit rester lisible sans lui.
-class _StubExchangeRatesCubit extends Cubit<ExchangeRatesState>
-    implements ExchangeRatesCubit {
-  _StubExchangeRatesCubit() : super(const ExchangeRatesState());
-
-  @override
-  Future<void> load() async {}
-
-  @override
-  noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
-}
-
-/// Aucun titre de section sur l'appareil : les pastilles se nomment par la
-/// grille, comme avant que le catalogue existe.
+/// L'école a titré sa section : la pastille du frais porte ce titre.
 class _StubFeeSectionTitlesCubit extends Cubit<FeeSectionTitlesState>
     implements FeeSectionTitlesCubit {
-  _StubFeeSectionTitlesCubit() : super(const FeeSectionTitlesState());
+  _StubFeeSectionTitlesCubit()
+    : super(
+        const FeeSectionTitlesState(titles: {'TUITION': 'Minerval annuel'}),
+      );
 
   @override
   Future<void> load() async {}
 }
 
-const tIntent = FeeControlIntent(
+const tIntent = FeeControlIntent(classroomId: 'c-a', feeCodes: ['TUITION']);
+
+const tClassroom = OfflineClassroom(
+  id: 'c-a',
+  academicYearId: 'ay-1',
   schoolLevelGroupId: 'g1',
   schoolLevelId: 'lvl-1',
-  classroomId: 'c-a',
-  feeCode: 'TUITION',
+  name: '1ère A',
 );
 
-const tTariff = LocalFeeTariff(
-  id: 't1',
-  academicYearId: 'ay-1',
-  schoolLevelId: 'lvl-1',
-  feeCode: 'TUITION',
-  label: 'Minerval annuel',
-  code: 'T1',
-  amountInCents: 100000,
-  currency: 'USD',
+/// Le catalogue de l'année tel que le bloc le sert : la nature et la classe
+/// de l'intention existent.
+const tCatalog = FeeControlState(
+  catalogStatus: EnrollmentLoadStatus.success,
+  natures: [
+    FeeNature(feeCode: 'TUITION', currencies: ['USD']),
+    FeeNature(feeCode: 'TRANSPORT', currencies: ['USD']),
+  ],
+  classrooms: [tClassroom],
 );
 
-/// L'écran nominatif ouvert **depuis le tableau de bord** : il doit repartir du
-/// périmètre exact que la synthèse affichait, sans que l'opérateur resaisisse
-/// quoi que ce soit.
+/// L'écran nominatif ouvert **depuis le tableau de bord** (ou par un lien) :
+/// il doit repartir de la question exacte — frais, classe, situation — sans
+/// que l'opérateur resaisisse quoi que ce soit.
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
@@ -88,6 +80,9 @@ void main() {
   });
 
   setUp(() {
+    // La dernière visite est une mémoire de séance, statique : sans remise à
+    // zéro, un test hériterait de la question du précédent.
+    FeeControlQuestion.lastVisit = null;
     bloc = _MockFeeControlBloc();
     academicYearBloc = _MockAcademicYearBloc();
     authBloc = _MockAuthBloc();
@@ -134,220 +129,330 @@ void main() {
     );
 
     GetIt.instance.registerFactory<FeeControlBloc>(() => bloc);
-    // La page lit le cours du jour pour ordonner ses lignes. Un cubit réel
-    // sur un dépôt bouchonné suffit : aucun taux n'est attendu ici.
-    GetIt.instance.registerFactory<ExchangeRatesCubit>(
-      () => _StubExchangeRatesCubit(),
-    );
     GetIt.instance.registerFactory<FeeSectionTitlesCubit>(
       () => _StubFeeSectionTitlesCubit(),
     );
   });
 
-  tearDown(() async => GetIt.instance.reset());
+  tearDown(() async {
+    FeeControlQuestion.lastVisit = null;
+    await GetIt.instance.reset();
+  });
+
+  Widget providers(Widget child) => MultiBlocProvider(
+    providers: [
+      BlocProvider<AcademicYearContextBloc>.value(value: academicYearBloc),
+      BlocProvider<AuthBloc>.value(value: authBloc),
+    ],
+    child: child,
+  );
+
+  void listen(List<FeeControlState> states) => whenListen(
+    bloc,
+    Stream<FeeControlState>.fromIterable(states),
+    initialState: const FeeControlState.initial(),
+  );
+
+  void wideView(WidgetTester tester) {
+    tester.view.physicalSize = const Size(1400, 1200);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.reset);
+  }
 
   Future<void> pump(
     WidgetTester tester, {
     required List<FeeControlState> states,
     FeeControlIntent? intent = tIntent,
   }) async {
-    whenListen(
-      bloc,
-      Stream<FeeControlState>.fromIterable(states),
-      initialState: const FeeControlState.initial(),
-    );
-
-    tester.view.physicalSize = const Size(1400, 1200);
-    tester.view.devicePixelRatio = 1.0;
-    addTearDown(tester.view.reset);
-
+    listen(states);
+    wideView(tester);
     await tester.pumpWidget(
       MaterialApp(
         locale: const Locale('fr'),
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
-        home: MultiBlocProvider(
-          providers: [
-            BlocProvider<AcademicYearContextBloc>.value(
-              value: academicYearBloc,
-            ),
-            BlocProvider<AuthBloc>.value(value: authBloc),
-          ],
-          child: FeeControlPage(intent: intent),
-        ),
+        home: providers(FeeControlPage(intent: intent)),
       ),
     );
     await tester.pumpAndSettle();
   }
 
-  testWidgets('l\'intention charge la grille ET les classes de son niveau', (
+  List<FeeControlSearchRequested> searches() => verify(
+    () => bloc.add(captureAny(that: isA<FeeControlSearchRequested>())),
+  ).captured.cast<FeeControlSearchRequested>();
+
+  testWidgets('l\'arrivée charge le catalogue de l\'année, une seule fois', (
     tester,
   ) async {
     await pump(tester, states: const <FeeControlState>[]);
 
     verify(
-      () => bloc.add(
-        const FeeControlTariffsRequested(
-          academicYearId: 'ay-1',
-          schoolLevelGroupId: 'g1',
-          schoolLevelId: 'lvl-1',
-        ),
-      ),
+      () => bloc.add(const FeeControlCatalogRequested(academicYearId: 'ay-1')),
     ).called(1);
-    verify(
-      () => bloc.add(
-        const FeeControlClassroomsRequested(
-          academicYearId: 'ay-1',
-          schoolLevelId: 'lvl-1',
-        ),
-      ),
-    ).called(1);
+    // Sans catalogue, la question ne peut pas encore être vérifiée : rien ne
+    // part.
+    verifyNever(() => bloc.add(any(that: isA<FeeControlSearchRequested>())));
   });
 
-  testWidgets('la recherche part quand la GRILLE arrive, et porte la '
-      'désignation de la ligne tarifaire', (tester) async {
-    await pump(
-      tester,
-      states: [
-        const FeeControlState(
-          tariffsStatus: EnrollmentLoadStatus.success,
-          tariffs: [tTariff],
-        ),
-      ],
-    );
+  testWidgets('la recherche part quand le CATALOGUE arrive, sur la classe et '
+      'les frais de l\'intention', (tester) async {
+    await pump(tester, states: const [tCatalog]);
 
-    final captured = verify(
-      () => bloc.add(captureAny(that: isA<FeeControlSearchRequested>())),
-    ).captured.cast<FeeControlSearchRequested>();
-
+    final captured = searches();
     expect(captured, hasLength(1));
+    expect(captured.single.academicYearId, 'ay-1');
     final request = captured.single.request;
-    expect(request.schoolLevelGroupId, 'g1');
-    expect(request.schoolLevelId, 'lvl-1');
     expect(request.classroomId, 'c-a');
-    // La sélection d'ouverture porte le frais désigné, et lui seul : lancée
-    // plus tôt, la requête serait partie sur une grille pas encore lue.
     expect(request.feeCodes, ['TUITION']);
+    expect(request.statusFilter, FeeControlPaymentFilter.all);
+    expect(request.thresholdInCents, isNull);
   });
 
-  testWidgets('la recherche ne part QU\'UNE fois, même si la grille est '
-      'rechargée', (tester) async {
+  testWidgets('la pastille du frais repris est affichée — la liste montre '
+      'sur quoi elle porte', (tester) async {
+    await pump(tester, states: const [tCatalog]);
+
+    expect(find.text('Minerval annuel'), findsOneWidget);
+  });
+
+  testWidgets('une nature absente du catalogue est écartée : la question '
+      'retombe sur la première nature de l\'année', (tester) async {
     await pump(
       tester,
-      states: [
-        const FeeControlState(tariffsStatus: EnrollmentLoadStatus.loading),
-        const FeeControlState(
-          tariffsStatus: EnrollmentLoadStatus.success,
-          tariffs: [tTariff],
-        ),
-        const FeeControlState(tariffsStatus: EnrollmentLoadStatus.loading),
-        const FeeControlState(
-          tariffsStatus: EnrollmentLoadStatus.success,
-          tariffs: [tTariff],
-        ),
-      ],
+      intent: const FeeControlIntent(classroomId: 'c-a', feeCodes: ['UNKNOWN']),
+      states: const [tCatalog],
     );
 
-    verify(
-      () => bloc.add(any(that: isA<FeeControlSearchRequested>())),
-    ).called(1);
+    expect(searches().single.request.feeCodes, ['TUITION']);
   });
 
-  testWidgets('la nature absente de la grille : rien n\'est cherché, plutôt '
-      'qu\'un vide inexplicable', (tester) async {
+  testWidgets('une classe disparue de l\'année est oubliée : rien n\'est '
+      'cherché, plutôt qu\'un vide inexplicable', (tester) async {
     await pump(
       tester,
-      states: const [
-        FeeControlState(
-          tariffsStatus: EnrollmentLoadStatus.success,
-          tariffs: <LocalFeeTariff>[],
-        ),
-      ],
+      intent: const FeeControlIntent(
+        classroomId: 'c-gone',
+        feeCodes: ['TUITION'],
+      ),
+      states: const [tCatalog],
     );
 
     verifyNever(() => bloc.add(any(that: isA<FeeControlSearchRequested>())));
   });
 
-  testWidgets(
-    'sans intention — ouverture par le menu — l\'écran reste vierge',
-    (tester) async {
-      await pump(
-        tester,
-        intent: null,
-        states: const [
-          FeeControlState(
-            tariffsStatus: EnrollmentLoadStatus.success,
-            tariffs: [tTariff],
-          ),
-        ],
-      );
-
-      verifyNever(() => bloc.add(any(that: isA<FeeControlTariffsRequested>())));
-      verifyNever(() => bloc.add(any(that: isA<FeeControlSearchRequested>())));
-    },
-  );
-
-  testWidgets('le formulaire GARDE le frais pré-rempli pendant que la grille '
-      'charge — sinon la liste s\'affiche sans montrer sur quoi elle porte', (
-    tester,
-  ) async {
-    // ⚠️ Les états sont émis UN PAR UN, avec un `pump` entre chacun. Un
-    // `Stream.fromIterable` est drainé avant le premier frame : le formulaire
-    // ne verrait alors que l'état final, et ne traverserait jamais le
-    // chargement — l'instant précis que cette garde protège.
-    final controller = StreamController<FeeControlState>();
-    addTearDown(controller.close);
-    whenListen(
-      bloc,
-      controller.stream,
-      initialState: const FeeControlState.initial(),
+  testWidgets('« Non affectés » n\'est pas une classe du catalogue, mais une '
+      'rubrique : elle est cherchée telle quelle', (tester) async {
+    await pump(
+      tester,
+      intent: const FeeControlIntent(
+        classroomId: feeControlUnassigned,
+        feeCodes: ['TUITION'],
+      ),
+      states: const [tCatalog],
     );
 
-    tester.view.physicalSize = const Size(1400, 1200);
-    tester.view.devicePixelRatio = 1.0;
-    addTearDown(tester.view.reset);
+    final request = searches().single.request;
+    expect(request.classroomId, feeControlUnassigned);
+    expect(request.isUnassigned, isTrue);
+  });
+
+  testWidgets('sans intention ni dernière visite — ouverture par le menu — '
+      'aucune classe n\'est choisie, rien n\'est cherché', (tester) async {
+    await pump(tester, intent: null, states: const [tCatalog]);
+
+    verify(
+      () => bloc.add(const FeeControlCatalogRequested(academicYearId: 'ay-1')),
+    ).called(1);
+    verifyNever(() => bloc.add(any(that: isA<FeeControlSearchRequested>())));
+  });
+
+  testWidgets('sans intention, la dernière visite de la séance est reprise', (
+    tester,
+  ) async {
+    FeeControlQuestion.lastVisit = const FeeControlQuestion(
+      feeCodes: ['TRANSPORT'],
+      classroomId: 'c-a',
+    );
+
+    await pump(tester, intent: null, states: const [tCatalog]);
+
+    final request = searches().single.request;
+    expect(request.classroomId, 'c-a');
+    expect(request.feeCodes, ['TRANSPORT']);
+  });
+
+  testWidgets('l\'adresse porte la question : un onglet rechargé rouvre la '
+      'même liste', (tester) async {
+    listen(const [tCatalog]);
+    wideView(tester);
+    final router = GoRouter(
+      initialLocation: '/controle?frais=TRANSPORT&classe=c-a&situation=rien',
+      routes: [
+        GoRoute(
+          path: '/controle',
+          builder: (_, _) => providers(const FeeControlPage()),
+        ),
+      ],
+    );
+    addTearDown(router.dispose);
 
     await tester.pumpWidget(
-      MaterialApp(
+      MaterialApp.router(
         locale: const Locale('fr'),
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
-        home: MultiBlocProvider(
-          providers: [
-            BlocProvider<AcademicYearContextBloc>.value(
-              value: academicYearBloc,
-            ),
-            BlocProvider<AuthBloc>.value(value: authBloc),
-          ],
-          child: const FeeControlPage(intent: tIntent),
+        routerConfig: router,
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final request = searches().single.request;
+    expect(request.classroomId, 'c-a');
+    expect(request.feeCodes, ['TRANSPORT']);
+    expect(request.statusFilter, FeeControlPaymentFilter.none);
+  });
+
+  testWidgets('la classe porte deux devises : « a payé au moins… » tombe et '
+      'la situation revient à « Tous »', (tester) async {
+    await pump(
+      tester,
+      intent: const FeeControlIntent(
+        classroomId: 'c-a',
+        feeCodes: ['TUITION'],
+        situation: FeeControlPaymentFilter.threshold,
+        thresholdInCents: 5000,
+      ),
+      states: [
+        tCatalog,
+        // La lecture servie révèle deux devises dans la classe.
+        tCatalog.copyWith(
+          status: EnrollmentLoadStatus.success,
+          currencies: const {'USD', 'CDF'},
+          lastQuery: const FeeControlQuery(
+            academicYearId: 'ay-1',
+            classroomId: 'c-a',
+            feeCodes: ['TUITION'],
+            statusFilter: FeeControlPaymentFilter.threshold,
+            page: 0,
+            size: 10,
+          ),
+        ),
+      ],
+    );
+
+    // La population est déjà lue : seule la coupe change, sans plancher.
+
+    verify(
+      () => bloc.add(
+        const FeeControlSituationRequested(FeeControlPaymentFilter.all),
+      ),
+    ).called(1);
+  });
+
+  testWidgets('B1 — arrivée sur « a payé au moins… » : le montant part en '
+      'centimes, sans attendre une devise que la classe n\'a pas encore '
+      'livrée', (tester) async {
+    await pump(
+      tester,
+      intent: const FeeControlIntent(
+        classroomId: 'c-a',
+        feeCodes: ['TUITION'],
+        situation: FeeControlPaymentFilter.threshold,
+        thresholdInCents: 5000,
+      ),
+      states: const [tCatalog],
+    );
+
+    final request = searches().single.request;
+    expect(request.statusFilter, FeeControlPaymentFilter.threshold);
+    expect(request.thresholdInCents, 5000);
+  });
+
+  testWidgets('B3 — champ vide sous « a payé au moins… » : la recherche part '
+      'quand même sur ce segment, le bloc lira « 0 »', (tester) async {
+    await pump(
+      tester,
+      intent: const FeeControlIntent(
+        classroomId: 'c-a',
+        feeCodes: ['TUITION'],
+        situation: FeeControlPaymentFilter.threshold,
+      ),
+      states: const [tCatalog],
+    );
+
+    final request = searches().single.request;
+    expect(request.statusFilter, FeeControlPaymentFilter.threshold);
+    expect(request.thresholdInCents, isNull);
+  });
+
+  testWidgets('B2 — le montant tapé part en centimes, sans la devise de '
+      'l\'état (peut-être celle de la classe précédente)', (tester) async {
+    await pump(
+      tester,
+      intent: const FeeControlIntent(
+        classroomId: 'c-a',
+        feeCodes: ['TUITION'],
+        situation: FeeControlPaymentFilter.threshold,
+      ),
+      states: [
+        tCatalog,
+        tCatalog.copyWith(
+          status: EnrollmentLoadStatus.success,
+          currencies: const {'USD'},
+          lastQuery: const FeeControlQuery(
+            academicYearId: 'ay-1',
+            classroomId: 'c-a',
+            feeCodes: ['TUITION'],
+            statusFilter: FeeControlPaymentFilter.threshold,
+            page: 0,
+            size: 10,
+          ),
+        ),
+      ],
+    );
+
+    await tester.enterText(find.byType(TextField), '120');
+    await tester.pump();
+
+    verify(
+      () => bloc.add(
+        const FeeControlSituationRequested(
+          FeeControlPaymentFilter.threshold,
+          thresholdInCents: 12000,
         ),
       ),
-    );
-    await tester.pumpAndSettle();
+    ).called(1);
+  });
 
-    // La grille est demandée, donc encore vide. Sans garde, `didUpdateWidget`
-    // y voit un frais « disparu » et l'efface — alors qu'il n'est que pas
-    // encore arrivé.
-    controller.add(
-      const FeeControlState(
-        tariffsStatus: EnrollmentLoadStatus.loading,
-        tariffs: <LocalFeeTariff>[],
-      ),
+  testWidgets('I6 — venu du tableau de bord sans classe (périmètre '
+      'établissement ou cycle) : la classe de la dernière visite est reprise', (
+    tester,
+  ) async {
+    FeeControlQuestion.lastVisit = const FeeControlQuestion(
+      feeCodes: ['TRANSPORT'],
+      classroomId: 'c-a',
     );
-    await tester.pumpAndSettle();
 
-    controller.add(
-      const FeeControlState(
-        tariffsStatus: EnrollmentLoadStatus.success,
-        tariffs: [tTariff],
-      ),
+    await pump(
+      tester,
+      intent: const FeeControlIntent(feeCodes: ['TUITION']),
+      states: const [tCatalog],
     );
-    await tester.pumpAndSettle();
 
-    // La pastille du frais est là ET cochée. Chercher le seul libellé ne
-    // suffirait pas : il apparaîtrait aussi sur une pastille décochée, et le
-    // test resterait vert alors que la sélection aurait été effacée.
-    expect(find.text('Minerval annuel'), findsOneWidget);
-    expect(find.byIcon(Icons.check_box), findsOneWidget);
+    final request = searches().single.request;
+    // Les frais du tableau de bord, la classe de la dernière visite.
+    expect(request.feeCodes, ['TUITION']);
+    expect(request.classroomId, 'c-a');
+  });
+
+  testWidgets('I6 — sans classe ni dernière visite : la carte d\'invitation, '
+      'rien n\'est cherché', (tester) async {
+    await pump(
+      tester,
+      intent: const FeeControlIntent(feeCodes: ['TUITION']),
+      states: const [tCatalog],
+    );
+
+    verifyNever(() => bloc.add(any(that: isA<FeeControlSearchRequested>())));
   });
 }

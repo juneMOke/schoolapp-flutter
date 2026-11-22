@@ -420,6 +420,15 @@ class AppDimensions {
   static const recouvrementFeeChipRadius = 999.0;
   static const recouvrementFeeChipIconSize = 15.0;
   static const recouvrementScopeFieldWidth = 230.0;
+  // Recouvrement v2 (maquette vivante `RecFraisBar`) : le champ des frais en
+  // résumé fait au moins 50 dp ; le périmètre / la classe à côté, 250 dp ; la
+  // barre arrondie à 18.
+  static const recouvrementFeeFieldMinHeight = 50.0;
+  static const recouvrementScopeSelectWidth = 250.0;
+  static const recouvrementPerimeterBarRadius = 18.0;
+  static const recouvrementPerimeterBadge = 28.0;
+  // Segments de la situation recherchée : 48 dp de cible (spec v2, §4.6 B).
+  static const recouvrementSegmentHeight = minTouchTarget;
   // Barres du taux par frais (spec §4) : hauteur 20, radius 5.
   static const recouvrementRateBarHeight = 20.0;
   static const recouvrementRateBarRadius = 5.0;
@@ -1638,6 +1647,197 @@ class AppDimensions {
   static const calendarDateChipMedium = 40.0;
   static const calendarDateChipLarge = 44.0;
 
+  // ── Recouvrement v2 · bloc D (classes en tête / à relancer) et fiche O2 ──
+
+  /// Médaillon de l'en-tête du panneau (`FinSectionHead` : 34, rayon 11,
+  /// icône 18).
+  static const recoveryClassHeadMedallion = 34.0;
+  static const recoveryClassHeadMedallionRadius = 11.0;
+  static const recoveryClassHeadIconSize = 18.0;
+
+  /// Largeur mini du choix du frais (maquette : 190).
+  static const recoveryClassFeeSelectMinWidth = 190.0;
+
+  /// La barre de taux d'une classe (`RecFill`, h = 7).
+  static const recoveryClassBarHeight = 7.0;
+
+  /// La part de la barre dans la ligne large (`minmax(0,1.2fr)` pour le nom,
+  /// `minmax(60px,1fr)` pour la barre).
+  static const recoveryClassBarMinWidth = 60.0;
+
+  /// L'œil d'une ligne (`RecEye` : 32, rayon 10).
+  static const recoveryClassEyeSize = 32.0;
+  static const recoveryClassEyeRadius = 10.0;
+  static const recoveryClassEyeIconSize = 16.0;
+
+  /// La fiche d'une classe (O2) : modale large.
+  static const recoveryClassSheetMaxWidth = 720.0;
+
+  /// Pavés de la fiche : largeur mini (`minmax(105px, 1fr)`), chiffre du taux
+  /// (28) et des comptes (20).
+  static const recoveryClassSheetTileMinWidth = 105.0;
+  static const recoveryClassSheetRateSize = 28.0;
+  static const recoveryClassSheetCountSize = 20.0;
+
+  /// Le liseré gauche d'une ligne d'élève (4 dp, §4.3).
+  static const recoveryClassStudentStripe = 4.0;
+
+  /// Pastilles du filtre : hauteur 36 à l'œil (48 au doigt).
+  static const recoveryClassFilterHeight = 36.0;
+
+  // ── Recouvrement v2 · blocs B (chiffres de tête) et C (taux par frais) ──
+
+  /// Largeur plancher d'une carte de la bande B (`minmax(230px, 1fr)`) : une
+  /// par ligne au téléphone, 2 × 2 de 552 à 708 reçus, 3 + 1 à 828, quatre en
+  /// ligne dès 1112.
+  static const recoveryKeyFigureMinWidth = 230.0;
+
+  /// L'anneau du taux perçu sur le pavé « Perçu à ce jour » (46 dp, trait 5).
+  static const recoveryRateRingSize = 46.0;
+  static const recoveryRateRingStroke = 5.0;
+
+  /// La barre à trois parts de la carte « Situation ».
+  static const recoverySituationBarHeight = 12.0;
+
+  /// Largeur plancher d'une piste du bloc C : un frais minuscule reste visible.
+  static const recoveryRateTrackMinFraction = 0.06;
+
+  // ---------------------------------------------------------------------------
+  // Recouvrement v2 · bloc E « Où en est chaque élève ? »
+  // ---------------------------------------------------------------------------
+
+  /// Le rond d'un choix de règle et son point quand il est coché.
+  static const recoveryStudentsRadioSize = 20.0;
+  static const recoveryStudentsRadioDot = 10.0;
+
+  /// La jauge « {n} en ordre » d'un choix de règle.
+  static const recoveryStudentsGaugeWidth = 70.0;
+  static const recoveryStudentsGaugeHeight = 5.0;
+
+  /// Le champ de montant d'« a payé au moins ».
+  static const recoveryStudentsAmountFieldWidth = 128.0;
+
+  /// Le filet de l'onglet actif et le liseré gauche d'une ligne colorée.
+  static const recoveryStudentsTabRule = 4.0;
+  static const recoveryStudentsRowStripe = 4.0;
+
+  /// Le compteur d'un onglet, au poste puis sous 600 reçus.
+  static const recoveryStudentsTabCountSize = 26.0;
+  static const recoveryStudentsTabCountSizeNarrow = 22.0;
+
+  /// Le titre « Est en ordre l'élève qui… » et le titre R10 (Lora).
+  static const recoveryStudentsRuleHeadingSize = 20.0;
+  static const recoveryStudentsListTitleSize = 17.0;
+
+  /// L'œil en bout de ligne (32 à l'œil, la ligne entière reste cliquable).
+  static const recoveryStudentsEyeSize = 32.0;
+
+  /// Bases de la rangée titre · recherche · exports : le titre prend
+  /// sa ligne quand la place manque.
+  static const recoveryStudentsTitleMinWidth = 280.0;
+  static const recoveryStudentsSearchMinWidth = 200.0;
+
+  /// La place des deux boutons PDF · Excel dans cette rangée.
+  static const recoveryStudentsExportButtonsWidth = 200.0;
+
+  /// Hauteur plancher d'une ligne d'élève.
+  static const recoveryStudentsRowMinHeight = 56.0;
+
+  // ---- Recouvrement v2 · bloc F (simulation) et G (trois lectures) ----
+
+  /// La barre avant / après d'une classe : 22 dans le tableau, 14 en carte.
+  static const recoverySimKeptBarHeight = 22.0;
+  static const recoverySimKeptBarCompactHeight = 14.0;
+  static const recoverySimKeptBarRadius = 6.0;
+  static const recoverySimKeptBarMinWidth = 60.0;
+  static const recoverySimKeptPercentMinWidth = 38.0;
+
+  /// Colonnes fixes du tableau (tient dans `recouvrementSimTableMinWidth`).
+  static const recoverySimColHeadcount = 62.0;
+  static const recoverySimColLeaving = 80.0;
+  static const recoverySimColRemaining = 70.0;
+  static const recoverySimColVerdict = 120.0;
+  static const recoverySimColEye = 48.0;
+
+  /// Le curseur « Classe ingérable sous {p} % » (`flex: 0 1 260px`).
+  static const recoverySimSliderMaxWidth = 260.0;
+
+  /// L'icône de la pastille du critère.
+  static const recoverySimChipIcon = 14.0;
+
+  /// L'œil d'une classe (32 à l'œil, la ligne entière reste cliquable).
+  static const recoverySimEyeSize = 32.0;
+  static const recoverySimEyeRadius = 10.0;
+  static const recoverySimEyeIcon = 16.0;
+
+  /// Une carte de classe sous 600 reçus : liseré gauche, arrondi.
+  static const recoverySimCardStripe = 4.0;
+  static const recoverySimCardRadius = 14.0;
+
+  /// Une lecture (G) : arrondi, filet gauche, médaillon.
+  static const recoveryInsightRadius = 14.0;
+  static const recoveryInsightFilet = 3.0;
+  static const recoveryInsightMedallionRadius = 11.0;
+  static const recoveryInsightIcon = 18.0;
+
+  // ── Contrôle des frais · O4 Relance des parents ─────────────────────────
+  /// La sur-couche « Notifier {n} parent(s) » centrée (maquette : 560) ;
+  /// plein écran sous `AppBreakpoints.formDialogFullscreenMax`.
+  static const recoveryNotifyDialogMaxWidth = 560.0;
+
+  /// Arrondi du cadre du message et de la liste des destinataires.
+  static const recoveryNotifyFrameRadius = 10.0;
+
+  // ── Recouvrement v2 · périmètre et finitions ────────────────────────────
+  // Pas fins de la maquette `ui_kits/app/Recouvrement.jsx` (en px), entre les
+  // crans d'`AppSpacing` ; 14 y est déjà `AppSpacing.gridGap`.
+  static const recoverySpace2 = 2.0; // marginTop: 2 des sous-titres, du radio
+  static const recoverySpace3 = 3.0; // gap: 3 avant le chevron « Modifier »
+  static const recoverySpace5 = 5.0; // padding 5 des pastilles, gap: 5
+  static const recoverySpace6 = 6.0; // gap: 6 des pastilles et segments
+  static const recoverySpace7 = 7.0; // gap: 7 icône ↔ libellé
+  static const recoverySpace9 = 9.0; // padding: 9 des encarts et lignes
+  static const recoverySpace10 = 10.0; // gap / padding: 10
+  static const recoverySpace11 = 11.0; // padding: 11 des cases et pastilles
+  static const recoverySpace13 = 13.0; // padding: 0 13px des segments
+  static const recoverySpace18 = 18.0; // padding: 14px 18px de la barre (large)
+
+  /// Icônes de la maquette (13, 14 et 18 px) ; 16 = `detailMiniIconSize`.
+  static const recoveryIconSize13 = 13.0;
+  static const recoveryIconSize14 = 14.0;
+  static const recoveryIconSize18 = 18.0;
+
+  /// Bordure 1.5px des champs, cases et pastilles (`RecFraisBar`, `RecOpt`).
+  static const recoveryControlBorderWidth = 1.5;
+
+  /// Lettrage des surtitres en capitales (`letterSpacing: .06em` sur 11 px).
+  static const recoveryOverlineLetterSpacing = 0.66;
+
+  /// Barre du périmètre : médaillon (9 px d'arrondi, icône 15) et bordure 2.
+  static const recouvrementPerimeterBadgeRadius = 9.0;
+  static const recouvrementPerimeterBadgeIconSize = 15.0;
+  static const recouvrementPerimeterBarBorderWidth = 2.0;
+
+  /// Champ des frais (`RecFraisBar`) : arrondi 14, bouton « Modifier » à 10.
+  static const recouvrementFeeFieldRadius = 14.0;
+  static const recouvrementFeeEditButtonRadius = 10.0;
+
+  /// La case d'un frais dans le choix O1 (`RecOpt` multi) : 22 px, arrondi 7,
+  /// bordure 2.
+  static const recouvrementCheckboxSize = 22.0;
+  static const recouvrementCheckboxRadius = 7.0;
+  static const recouvrementCheckboxBorderWidth = 2.0;
+
+  /// Le compteur d'un segment de situation (`min-width: 22px`).
+  static const recouvrementSegmentCountMinWidth = 22.0;
+
+  /// Le montant saisi dans le segment « Au moins » (`RecAmountInput`).
+  static const recouvrementAmountInputHeight = 34.0;
+  static const recouvrementAmountInputWidth = 76.0;
+  static const recouvrementAmountInputRadius = 10.0;
+
+  /// Le cercle du radio d'une règle (bordure 2 px).
+  static const recoveryStudentsRadioBorderWidth = 2.0;
   // La liste des calendriers (maquette CalList / CalCard / CalCurrentHero).
   /// Une carte de calendrier : largeur minimale de la grille.
   static const calendarCardMinWidth = 280.0;

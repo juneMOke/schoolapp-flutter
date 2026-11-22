@@ -129,6 +129,46 @@ void main() {
     });
   });
 
+  group('getFeeNaturesForYear', () {
+    test('même ordre que les codes, et chaque nature porte SES devises — une '
+        'nature en dollars au primaire et en francs au secondaire rend les '
+        'deux', () async {
+      await insertCharge('c1', 's1', 'TUITION');
+      await insertCharge('c2', 's2', 'TUITION', currency: 'CDF');
+      await insertCharge('c3', 's3', 'TUITION');
+      await insertCharge('c4', 's1', 'REGISTRATION', currency: 'CDF');
+
+      final natures = await dao.getFeeNaturesForYear('ay-1');
+      expect([for (final n in natures) n.feeCode], ['TUITION', 'REGISTRATION']);
+      expect(natures.first.currencies, ['CDF', 'USD']);
+      expect(natures.last.currencies, ['CDF']);
+    });
+
+    test(
+      'l\'ordre compte les créances TOUTES devises confondues : grouper '
+      'par devise ne doit pas faire passer devant une nature moins portée',
+      () async {
+        await insertCharge('c1', 's1', 'TUITION');
+        await insertCharge('c2', 's2', 'TUITION', currency: 'CDF');
+        await insertCharge('c3', 's1', 'CANTINE');
+
+        // Par ligne (fee_code, devise), TUITION ne compterait qu'une créance par
+        // devise — à égalité avec CANTINE, que l'ordre alphabétique placerait
+        // devant.
+        final natures = await dao.getFeeNaturesForYear('ay-1');
+        expect(natures.first.feeCode, 'TUITION');
+      },
+    );
+
+    test('l\'année se borne comme pour les codes', () async {
+      await insertCharge('c1', 's1', 'TUITION', year: null);
+      await insertCharge('c2', 's2', 'CANTINE', year: 'ay-2');
+
+      final natures = await dao.getFeeNaturesForYear('ay-1');
+      expect([for (final n in natures) n.feeCode], ['TUITION']);
+    });
+  });
+
   group('getFeeChargePositionsByLevel', () {
     test('découvre la population sans qu\'on la lui donne, sur le seul frais '
         'demandé', () async {

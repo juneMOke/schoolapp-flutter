@@ -34,7 +34,6 @@ void main() {
           child: FeeControlDataTable(
             rows: [row('s1', lastName: 'MOKE', expected: big, mirror: 1000)],
             totalCount: 1,
-            rate: null,
             selected: const {},
             marked: const {},
             onViewRequested: (_) {},

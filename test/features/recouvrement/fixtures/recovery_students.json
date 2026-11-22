@@ -1,0 +1,306 @@
+{
+ "situationAt": "2026-09-05T08:30:00Z",
+ "pendingWrites": 0,
+ "title": "Liste des élèves qui n'ont rien payé (pas en ordre) pour Frais de scolarité",
+ "perimeterLabel": "Tout l'établissement",
+ "currencies": [
+  "USD"
+ ],
+ "atLeastAvailable": true,
+ "counts": {
+  "TO_CHASE": 315,
+  "IN_ORDER": 163,
+  "ALL": 478
+ },
+ "situationCounts": {
+  "NO_PAYMENT": 315,
+  "PARTIAL": 59,
+  "SETTLED": 104
+ },
+ "content": [
+  {
+   "studentId": "s0",
+   "displayName": "KABONGO Mukendi Jean",
+   "matriculationNumber": "MAT-0100",
+   "parentName": "Parent de KABONGO",
+   "classroomId": "c1",
+   "classroomName": "1ère maternelle",
+   "due": [
+    {
+     "amountInCents": 24000,
+     "currency": "USD"
+    }
+   ],
+   "paid": [
+    {
+     "amountInCents": 0,
+     "currency": "USD"
+    }
+   ],
+   "outstanding": [
+    {
+     "amountInCents": 24000,
+     "currency": "USD"
+    }
+   ],
+   "situation": "NO_PAYMENT",
+   "inOrder": false
+  },
+  {
+   "studentId": "s1",
+   "displayName": "MBUYI Kalala Grâce",
+   "matriculationNumber": "MAT-0101",
+   "parentName": "Parent de MBUYI",
+   "classroomId": "c2",
+   "classroomName": "2ème maternelle",
+   "due": [
+    {
+     "amountInCents": 24000,
+     "currency": "USD"
+    }
+   ],
+   "paid": [
+    {
+     "amountInCents": 0,
+     "currency": "USD"
+    }
+   ],
+   "outstanding": [
+    {
+     "amountInCents": 24000,
+     "currency": "USD"
+    }
+   ],
+   "situation": "NO_PAYMENT",
+   "inOrder": false
+  },
+  {
+   "studentId": "s2",
+   "displayName": "NGOY Ilunga Patrick",
+   "matriculationNumber": "MAT-0102",
+   "parentName": "Parent de NGOY",
+   "classroomId": "c3",
+   "classroomName": "1ère primaire",
+   "due": [
+    {
+     "amountInCents": 24000,
+     "currency": "USD"
+    }
+   ],
+   "paid": [
+    {
+     "amountInCents": 0,
+     "currency": "USD"
+    }
+   ],
+   "outstanding": [
+    {
+     "amountInCents": 24000,
+     "currency": "USD"
+    }
+   ],
+   "situation": "NO_PAYMENT",
+   "inOrder": false
+  },
+  {
+   "studentId": "s3",
+   "displayName": "TSHIBANDA Mwamba Ruth",
+   "matriculationNumber": "MAT-0103",
+   "parentName": null,
+   "classroomId": "c4",
+   "classroomName": "2ème primaire",
+   "due": [
+    {
+     "amountInCents": 24000,
+     "currency": "USD"
+    }
+   ],
+   "paid": [
+    {
+     "amountInCents": 0,
+     "currency": "USD"
+    }
+   ],
+   "outstanding": [
+    {
+     "amountInCents": 24000,
+     "currency": "USD"
+    }
+   ],
+   "situation": "NO_PAYMENT",
+   "inOrder": false
+  },
+  {
+   "studentId": "s4",
+   "displayName": "ILUNGA Kasongo David",
+   "matriculationNumber": "MAT-0104",
+   "parentName": "Parent de ILUNGA",
+   "classroomId": "c5",
+   "classroomName": "3ème primaire",
+   "due": [
+    {
+     "amountInCents": 24000,
+     "currency": "USD"
+    }
+   ],
+   "paid": [
+    {
+     "amountInCents": 0,
+     "currency": "USD"
+    }
+   ],
+   "outstanding": [
+    {
+     "amountInCents": 24000,
+     "currency": "USD"
+    }
+   ],
+   "situation": "NO_PAYMENT",
+   "inOrder": false
+  },
+  {
+   "studentId": "s5",
+   "displayName": "MUTOMBO Kabeya Esther",
+   "matriculationNumber": "MAT-0105",
+   "parentName": "Parent de MUTOMBO",
+   "classroomId": "c6",
+   "classroomName": "4ème primaire",
+   "due": [
+    {
+     "amountInCents": 24000,
+     "currency": "USD"
+    }
+   ],
+   "paid": [
+    {
+     "amountInCents": 0,
+     "currency": "USD"
+    }
+   ],
+   "outstanding": [
+    {
+     "amountInCents": 24000,
+     "currency": "USD"
+    }
+   ],
+   "situation": "NO_PAYMENT",
+   "inOrder": false
+  },
+  {
+   "studentId": "s6",
+   "displayName": "KASONGO Banza Joseph",
+   "matriculationNumber": "MAT-0106",
+   "parentName": "Parent de KASONGO",
+   "classroomId": "c7",
+   "classroomName": "5ème primaire",
+   "due": [
+    {
+     "amountInCents": 24000,
+     "currency": "USD"
+    }
+   ],
+   "paid": [
+    {
+     "amountInCents": 0,
+     "currency": "USD"
+    }
+   ],
+   "outstanding": [
+    {
+     "amountInCents": 24000,
+     "currency": "USD"
+    }
+   ],
+   "situation": "NO_PAYMENT",
+   "inOrder": false
+  },
+  {
+   "studentId": "s7",
+   "displayName": "LUKUSA Ngalula Sarah",
+   "matriculationNumber": "MAT-0107",
+   "parentName": "Parent de LUKUSA",
+   "classroomId": "c8",
+   "classroomName": "6ème primaire",
+   "due": [
+    {
+     "amountInCents": 24000,
+     "currency": "USD"
+    }
+   ],
+   "paid": [
+    {
+     "amountInCents": 0,
+     "currency": "USD"
+    }
+   ],
+   "outstanding": [
+    {
+     "amountInCents": 24000,
+     "currency": "USD"
+    }
+   ],
+   "situation": "NO_PAYMENT",
+   "inOrder": false
+  },
+  {
+   "studentId": "s8",
+   "displayName": "MWAMBA Tshala Daniel",
+   "matriculationNumber": "MAT-0108",
+   "parentName": "Parent de MWAMBA",
+   "classroomId": "c9",
+   "classroomName": "7ème EB",
+   "due": [
+    {
+     "amountInCents": 24000,
+     "currency": "USD"
+    }
+   ],
+   "paid": [
+    {
+     "amountInCents": 0,
+     "currency": "USD"
+    }
+   ],
+   "outstanding": [
+    {
+     "amountInCents": 24000,
+     "currency": "USD"
+    }
+   ],
+   "situation": "NO_PAYMENT",
+   "inOrder": false
+  },
+  {
+   "studentId": "s9",
+   "displayName": "NTUMBA Mbala Rachel",
+   "matriculationNumber": "MAT-0109",
+   "parentName": "Parent de NTUMBA",
+   "classroomId": "c10",
+   "classroomName": "8ème EB",
+   "due": [
+    {
+     "amountInCents": 24000,
+     "currency": "USD"
+    }
+   ],
+   "paid": [
+    {
+     "amountInCents": 0,
+     "currency": "USD"
+    }
+   ],
+   "outstanding": [
+    {
+     "amountInCents": 24000,
+     "currency": "USD"
+    }
+   ],
+   "situation": "NO_PAYMENT",
+   "inOrder": false
+  }
+ ],
+ "page": 0,
+ "size": 10,
+ "totalElements": 315,
+ "totalPages": 32
+}

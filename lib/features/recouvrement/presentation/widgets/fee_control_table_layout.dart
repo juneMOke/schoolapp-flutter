@@ -5,7 +5,6 @@ import 'package:school_app_flutter/core/components/tables/index.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
-import 'package:school_app_flutter/core/money/exchange_rate.dart';
 import 'package:school_app_flutter/core/money/money_bag.dart';
 import 'package:school_app_flutter/core/money/money_format.dart';
 import 'package:school_app_flutter/features/finance/domain/entities/student_charge.dart';
@@ -78,7 +77,6 @@ class FeeControlTableLayout {
     List<FeeControlRow> rows,
     AppLocalizations l10n, {
     required bool wide,
-    required ExchangeRate? rate,
     required Set<String> selected,
     required Set<String> marked,
     required ValueChanged<FeeControlRow> onViewRequested,
@@ -133,7 +131,7 @@ class FeeControlTableLayout {
                     _amount(expected),
                     _amount(paid, color: paidColor),
                     _amount(remaining, color: remainingColor),
-                    _situation(row, l10n, rate),
+                    _situation(row, l10n),
                   ]
                 : [
                     _selectCell(row, selected, marked, onSelectionToggled),
@@ -146,7 +144,7 @@ class FeeControlTableLayout {
                       secondaryVariant: DataTableCellTextVariant.mono,
                       secondaryColor: paidColor,
                     ),
-                    _situation(row, l10n, rate),
+                    _situation(row, l10n),
                   ],
             trailing: DataTableTrailingSpec(
               type: DataTableTrailingType.eye,
@@ -180,9 +178,9 @@ class FeeControlTableLayout {
   static DataTableCellSpec _situation(
     FeeControlRow row,
     AppLocalizations l10n,
-    ExchangeRate? rate,
   ) {
-    final percent = row.hasNoExpectation ? null : row.ratePercent(rate);
+    // Mono-devise seulement : en mixte, aucun pourcentage (spec v2, R1).
+    final percent = row.hasNoExpectation ? null : row.progressPercent;
     return DataTableCellSpec(
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -193,14 +191,13 @@ class FeeControlTableLayout {
               visuals: row.status.visuals,
             ),
           ),
-          const SizedBox(width: AppDimensions.spacingXS),
-          Text(
-            // Un tiret plutôt qu'un « 0 % » : rien n'était attendu, ou aucun
-            // cours ne rapproche les deux devises de la ligne. Les deux se
-            // disent « on ne sait pas », pas « rien n'a été payé ».
-            percent == null ? '—' : '$percent %',
-            style: AppTextStyles.caption.copyWith(color: AppColors.textMuted),
-          ),
+          if (percent != null) ...[
+            const SizedBox(width: AppDimensions.spacingXS),
+            Text(
+              '$percent %',
+              style: AppTextStyles.caption.copyWith(color: AppColors.textMuted),
+            ),
+          ],
         ],
       ),
     );

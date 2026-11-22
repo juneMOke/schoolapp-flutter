@@ -1,131 +1,83 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:school_app_flutter/features/recouvrement/presentation/widgets/fiche/fee_control_student_panel.dart';
 import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
-import 'package:school_app_flutter/core/layout/page_content_width.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/di/injection.dart';
+import 'package:school_app_flutter/core/layout/page_content_width.dart';
+import 'package:school_app_flutter/core/offline/online_only.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/widgets/app_page_background.dart';
-import 'package:school_app_flutter/features/recouvrement/presentation/pages/fee_control_page_actions.dart';
-import 'package:school_app_flutter/features/recouvrement/presentation/widgets/actions/fee_control_action_bar.dart';
-import 'package:school_app_flutter/features/recouvrement/presentation/widgets/actions/fee_control_marked_card.dart';
+import 'package:school_app_flutter/core/widgets/eteelo_page_header.dart';
 import 'package:school_app_flutter/features/academic_year/presentation/bloc/academic_year_context_bloc.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_event.dart';
 import 'package:school_app_flutter/features/enrollment/presentation/widgets/bootstrap_context_error.dart';
-import 'package:school_app_flutter/features/finance/presentation/bloc/finance/exchange_rates_cubit.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/fee_section_titles_cubit.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/bloc/fee_control_bloc.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/bloc/fee_control_selection_cubit.dart';
-import 'package:school_app_flutter/features/recouvrement/presentation/bloc/recouvrement_pivot.dart';
-import 'package:school_app_flutter/features/recouvrement/presentation/helpers/fee_control_page_helpers.dart';
-import 'package:school_app_flutter/features/finance/presentation/widgets/common/finance_motion.dart';
+import 'package:school_app_flutter/features/recouvrement/presentation/pages/fee_control_page_actions.dart';
+import 'package:school_app_flutter/features/recouvrement/presentation/pages/fee_control_question.dart';
+import 'package:school_app_flutter/features/recouvrement/presentation/widgets/actions/fee_control_action_bar.dart';
+import 'package:school_app_flutter/features/recouvrement/presentation/widgets/actions/fee_control_marked_card.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/widgets/fee_control_results_view.dart';
-import 'package:school_app_flutter/features/recouvrement/presentation/widgets/perimeter/fee_control_perimeter_card.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/widgets/fee_control_summary_band.dart';
-import 'package:school_app_flutter/features/recouvrement/presentation/widgets/recouvrement_control_top_bar.dart';
+import 'package:school_app_flutter/features/recouvrement/presentation/widgets/fiche/fee_control_student_panel.dart';
+import 'package:school_app_flutter/features/recouvrement/presentation/widgets/perimeter/fee_control_perimeter.dart';
+import 'package:school_app_flutter/l10n/app_localizations.dart';
 
-/// Contrôle des frais : pour un frais d'une classe, qui est soldé, qui est
-/// partiel, qui n'a rien versé.
+/// **Recouvrement ▸ Contrôle des frais** (spec Recouvrement v2, page 2) : pour
+/// des frais et une classe, nommer les élèves — qui a tout soldé, qui a payé
+/// en partie, qui n'a rien versé, qui a atteint un montant —, puis agir sur une
+/// sélection.
 ///
-/// Même anatomie que la Facturation (gate du contexte académique, formulaire
-/// puis résultats), et l'œil rouvre **la fiche financière de la Facturation** —
-/// aucune duplication du détail.
+/// Toujours **dans la coquille** (R15 du tableau de bord) : le tableau de bord
+/// y mène par l'adresse `/home/recouvrement-controle?frais=…&classe=…`, que
+/// cette page lit une fois à l'arrivée (R12), puis tient à jour.
 class FeeControlPage extends StatelessWidget {
-  /// Critères posés par le tableau de bord, quand l'écran est ouvert depuis
-  /// lui. `null` à l'ouverture par le menu : l'écran est alors vierge.
+  /// Critères posés par le tableau de bord (tests, liens) ; à défaut,
+  /// l'adresse, puis la dernière visite.
   final FeeControlIntent? intent;
 
-  /// Vrai quand l'écran est ouvert par sa ROUTE, hors de la coquille : il n'a
-  /// alors ni barre latérale ni TopBar, et porte sa propre barre, avec le
-  /// retour. Faux dans la coquille, dont la TopBar le titre déjà.
-  final bool standalone;
-
-  const FeeControlPage({super.key, this.intent, this.standalone = false});
-
-  /// L'écran tel que sa route le construit : hors de la coquille, donc avec sa
-  /// barre ; `extra` ou l'adresse portent les critères du tableau de bord,
-  /// s'il en a posé.
-  factory FeeControlPage.fromRoute(
-    Object? extra, [
-    Map<String, String> queryParameters = const {},
-  ]) => FeeControlPage(
-    intent: FeeControlIntent.fromRoute(extra, queryParameters),
-    standalone: true,
-  );
+  const FeeControlPage({super.key, this.intent});
 
   @override
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
         BlocProvider<FeeControlBloc>(create: (_) => getIt<FeeControlBloc>()),
-        // Le cours du jour n'est lu QUE pour arbitrer : ordonner les lignes et
-        // comparer un plancher à un sac mixte. Aucun montant affiché n'est
-        // converti (doctrine bi-devise, règle 6).
-        BlocProvider<ExchangeRatesCubit>(
-          create: (_) => getIt<ExchangeRatesCubit>()..load(),
-        ),
         // Le titre que l'école donne à chaque nature — celui que le tableau de
-        // bord et la liste de relance écrivent aussi. Local d'abord, une
-        // relecture par session ensuite, muette en échec : un nom d'hier vaut
-        // mieux qu'un écran qui attend le réseau pour nommer un frais.
+        // bord et les exports écrivent aussi.
         BlocProvider<FeeSectionTitlesCubit>(
           create: (_) => getIt<FeeSectionTitlesCubit>()..load(),
         ),
-        // Brouillon de séance : les cochés et les marqués « à renvoyer ». Rien
-        // n'en sort tant qu'on ne le demande pas, rien n'y survit à la sortie
-        // du module.
+        // Brouillon de séance : les cochés et les marqués « à renvoyer ».
         BlocProvider<FeeControlSelectionCubit>(
           create: (_) => FeeControlSelectionCubit(),
         ),
       ],
-      child: _FeeControlView(intent: intent, standalone: standalone),
+      child: _FeeControlView(intent: intent),
     );
   }
 }
 
 class _FeeControlView extends StatefulWidget {
   final FeeControlIntent? intent;
-  final bool standalone;
 
-  const _FeeControlView({this.intent, required this.standalone});
+  const _FeeControlView({this.intent});
 
   @override
   State<_FeeControlView> createState() => _FeeControlViewState();
 }
 
 class _FeeControlViewState extends State<_FeeControlView> {
-  /// Vrai tant que la recherche d'ouverture n'a pas été lancée.
-  ///
-  /// Elle attend la grille : la requête porte le libellé et le code de la ligne
-  /// tarifaire, que seule la grille chargée peut donner. La lancer plus tôt
-  /// enverrait une désignation vide, et la puce de critère mentirait sur ce qui
-  /// est contrôlé.
-  bool _pendingIntentSearch = false;
-
-  /// Vrai tant que la grille du niveau visé n'a pas été demandée.
-  bool _pendingIntentPrime = false;
-
   /// Grand écran : l'aperçu d'un élève s'ancre à droite du tableau.
   bool _docked = false;
-
-  /// L'élève dont l'aperçu est ancré ; `null` = aucun.
   String? _dockedStudentId;
-
-  /// Le contenu garde son état (périmètre saisi, tri) quand un
-  /// redimensionnement le fait passer dans sa colonne, et retour.
   final _contentKey = GlobalKey();
-
-  void _closeDockedSheet(String studentId) {
-    if (!mounted || _dockedStudentId != studentId) return;
-    setState(() => _dockedStudentId = null);
-  }
 
   @override
   void initState() {
     super.initState();
-    _pendingIntentSearch = widget.intent != null;
-    _pendingIntentPrime = widget.intent != null;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       context.read<AcademicYearContextBloc>().add(
@@ -134,64 +86,17 @@ class _FeeControlViewState extends State<_FeeControlView> {
     });
   }
 
-  /// Charge la grille et les classes du niveau visé, puis arme la recherche.
-  void _primeFromIntent(String academicYearId) {
-    final intent = widget.intent;
-    if (intent == null) return;
-    final bloc = context.read<FeeControlBloc>();
-    bloc.add(
-      FeeControlTariffsRequested(
-        academicYearId: academicYearId,
-        schoolLevelGroupId: intent.schoolLevelGroupId,
-        schoolLevelId: intent.schoolLevelId,
-      ),
-    );
-    bloc.add(
-      FeeControlClassroomsRequested(
-        academicYearId: academicYearId,
-        schoolLevelId: intent.schoolLevelId,
-      ),
-    );
+  void _closeDockedSheet(String studentId) {
+    if (!mounted || _dockedStudentId != studentId) return;
+    setState(() => _dockedStudentId = null);
   }
 
-  /// Lance **une seule fois** la recherche d'ouverture, la grille arrivée.
-  void _searchFromIntent(String academicYearId, FeeControlState state) {
-    final intent = widget.intent;
-    if (!_pendingIntentSearch || intent == null) return;
-    if (state.tariffsStatus != EnrollmentLoadStatus.success) return;
-    // La nature n'est pas dans la grille de ce niveau : il n'y a rien à
-    // chercher, et forcer une requête afficherait un vide inexplicable. La
-    // carte reste pré-remplie, l'utilisateur voit ce qui manque.
-    _pendingIntentSearch = false;
-    if (!state.tariffs.any((t) => t.feeCode == intent.feeCode)) return;
-
-    _search(
-      academicYearId,
-      FeeControlSearchRequest(
-        schoolLevelGroupId: intent.schoolLevelGroupId,
-        schoolLevelId: intent.schoolLevelId,
-        classroomId: intent.classroomId,
-        feeCodes: [intent.feeCode],
-        statusFilter: FeeControlPaymentFilter.all,
-      ),
-    );
-  }
-
-  /// Le seul canal de recherche : il attache le cours du jour à la requête.
-  ///
-  /// Attaché ICI et non lu par le BLoC : la requête est une **photo**, et le
-  /// réessai comme la pagination doivent rejouer le même classement. Un cours
-  /// qui bouge entre deux pages réordonnerait la liste sous les doigts.
-  void _search(String academicYearId, FeeControlSearchRequest request) {
-    context.read<FeeControlBloc>().add(
-      FeeControlSearchRequested(
-        academicYearId: academicYearId,
-        request: request,
-        rate: RecouvrementPivot.dollarInFrancs(
-          context.read<ExchangeRatesCubit>().state.rates,
-        ),
-      ),
-    );
+  void _openSheet(FeeControlRow row, String academicYearId) {
+    if (_docked) {
+      setState(() => _dockedStudentId = row.studentId);
+      return;
+    }
+    openStudentSheet(context, row, academicYearId);
   }
 
   @override
@@ -207,12 +112,7 @@ class _FeeControlViewState extends State<_FeeControlView> {
         final studentId = _dockedStudentId;
         return AppPageBackground(
           width: PageContentWidth.wide,
-          // Ancrable : le contenu défile dans sa colonne — toujours la même,
-          // pour que l'ouverture de l'aperçu ne ramène pas la liste en haut.
           scrollable: !_docked,
-          // Posée hors du `BlocBuilder` : la sortie reste offerte même quand
-          // le contexte académique charge ou échoue.
-          appBar: widget.standalone ? const RecouvrementControlTopBar() : null,
           child: !_docked
               ? content
               : Row(
@@ -245,16 +145,8 @@ class _FeeControlViewState extends State<_FeeControlView> {
     );
   }
 
-  /// Ouvre l'aperçu d'un élève : ancré sur grand écran, en modale sinon.
-  void _openSheet(FeeControlRow row, String academicYearId) {
-    if (_docked) {
-      setState(() => _dockedStudentId = row.studentId);
-      return;
-    }
-    openStudentSheet(context, row, academicYearId);
-  }
-
   Widget _content(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return BlocBuilder<AcademicYearContextBloc, AcademicYearContextState>(
       buildWhen: (prev, curr) =>
           prev.status != curr.status || prev.context != curr.context,
@@ -266,121 +158,62 @@ class _FeeControlViewState extends State<_FeeControlView> {
             child: Center(child: CircularProgressIndicator()),
           );
         }
-
         if (academicYearState.status != AcademicYearContextLoadStatus.success) {
           return BootstrapContextError(
             onLogout: () =>
                 context.read<AuthBloc>().add(const AuthLogoutRequested()),
           );
         }
-
-        final academicYearId = academicYearState.context?.academicYear.id ?? '';
-        final options = FeeControlPageHelpers.buildAcademicOptions(
-          academicYearState.context?.schoolLevelGroups ?? const [],
-        );
-
-        // Le contexte académique connu, l'intention peut charger la grille et
-        // les classes de son niveau. Hors frame de build : émettre un
-        // événement pendant la construction ferait rebâtir sous soi-même.
-        if (_pendingIntentPrime) {
-          _pendingIntentPrime = false;
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (!mounted) return;
-            _primeFromIntent(academicYearId);
-          });
-        }
+        final yearContext = academicYearState.context!;
+        final academicYearId = yearContext.academicYear.id;
 
         return BlocListener<FeeControlBloc, FeeControlState>(
           // Une sélection n'a de sens que dans son périmètre : changer de
-          // frais, de classe, de situation ou de plancher la vide. Les
-          // marques « à renvoyer », elles, traversent — on les constitue
-          // justement en parcourant les classes.
-          listenWhen: (prev, curr) => prev.lastQuery != curr.lastQuery,
+          // frais, de classe, de situation ou de plancher la vide (R7).
+          listenWhen: (prev, curr) =>
+              prev.lastQuery?.copyWithPage(0) !=
+              curr.lastQuery?.copyWithPage(0),
           listener: (context, _) =>
               context.read<FeeControlSelectionCubit>().clearSelection(),
-          child: AnimatedSwitcher(
-            duration: FinanceMotion.standard,
-            child: Column(
-              key: const ValueKey('fee-control-content'),
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                BlocConsumer<FeeControlBloc, FeeControlState>(
-                  listenWhen: (prev, curr) =>
-                      prev.tariffsStatus != curr.tariffsStatus,
-                  listener: (context, state) =>
-                      _searchFromIntent(academicYearId, state),
-                  buildWhen: (prev, curr) =>
-                      prev.status != curr.status ||
-                      prev.tariffsStatus != curr.tariffsStatus ||
-                      prev.tariffs != curr.tariffs ||
-                      prev.classroomsStatus != curr.classroomsStatus ||
-                      prev.classrooms != curr.classrooms ||
-                      prev.feeGridMissing != curr.feeGridMissing,
-                  builder: (context, state) {
-                    final bloc = context.read<FeeControlBloc>();
-                    return FeeControlPerimeterCard(
-                      initial: widget.intent,
-                      options: options,
-                      tariffs: state.tariffs,
-                      // Abonné : le titre d'une nature peut arriver après la
-                      // grille — la relecture réseau rend plus tard que le
-                      // cache —, et la pastille doit alors se renommer.
-                      sectionTitles: context
-                          .watch<FeeSectionTitlesCubit>()
-                          .state,
-                      classrooms: state.classrooms,
-                      isTariffsLoading:
-                          state.tariffsStatus == EnrollmentLoadStatus.loading,
-                      isClassroomsLoading:
-                          state.classroomsStatus ==
-                          EnrollmentLoadStatus.loading,
-                      feeGridMissing: state.feeGridMissing,
-                      // `tariffsStatus: failure` était stocké et lu par
-                      // personne : le sélecteur de frais retombait alors sur
-                      // « aucun frais défini pour ce niveau », qui affirme sur
-                      // l'école ce qui n'est vrai que de cet appareil.
-                      tariffsFailed:
-                          state.tariffsStatus == EnrollmentLoadStatus.failure,
-                      isLoading: state.status == EnrollmentLoadStatus.loading,
-                      // Un niveau choisi ouvre deux lectures locales : sa grille
-                      // tarifaire et ses classes.
-                      onLevelSelected: (groupId, levelId) {
-                        bloc.add(
-                          FeeControlTariffsRequested(
-                            academicYearId: academicYearId,
-                            schoolLevelGroupId: groupId,
-                            schoolLevelId: levelId,
-                          ),
-                        );
-                        bloc.add(
-                          FeeControlClassroomsRequested(
-                            academicYearId: academicYearId,
-                            schoolLevelId: levelId,
-                          ),
-                        );
-                      },
-                      onSearch: (request) => _search(academicYearId, request),
-                      onClear: () => bloc.add(const FeeControlResetRequested()),
-                    );
-                  },
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              EteeloPageHeader(
+                eyebrow: l10n.recouvrementControlEyebrow(
+                  yearContext.academicYear.name,
                 ),
-                const SizedBox(height: AppDimensions.spacingM),
-                const FeeControlSummaryBand(),
-                FeeControlActionBar(
+                title: l10n.recouvrementControlTitle,
+                subtitle: l10n.recouvrementControlSubtitle,
+              ),
+              const SizedBox(height: AppSpacing.lg),
+              FeeControlPerimeter(
+                academicYearId: academicYearId,
+                groups: yearContext.schoolLevelGroups,
+                initial: widget.intent == null
+                    ? null
+                    : FeeControlQuestion.fromIntent(widget.intent!),
+              ),
+              const SizedBox(height: AppSpacing.lg),
+              const FeeControlSummaryBand(),
+              // La relance attend le réseau (Q2) : hors ligne, son bouton
+              // reste en place mais inactif.
+              OnlineOnly(
+                builder: (context, online) => FeeControlActionBar(
                   onCallList: () => printCallSheet(context),
+                  onNotify: online ? () => notifyParents(context) : null,
                   onMark: () => markSelection(context),
                 ),
-                FeeControlResultsView(
-                  titles: context.watch<FeeSectionTitlesCubit>().state,
-                  onViewRequested: (row) =>
-                      openFinancialRecord(context, row, academicYearId),
-                  onRowTapped: (row) => _openSheet(row, academicYearId),
-                  openedStudentId: _docked ? _dockedStudentId : null,
-                  onBilling: () => openBilling(context),
-                ),
-                const FeeControlMarkedCard(),
-              ],
-            ),
+              ),
+              FeeControlResultsView(
+                titles: context.watch<FeeSectionTitlesCubit>().state,
+                onViewRequested: (row) =>
+                    openFinancialRecord(context, row, academicYearId),
+                onRowTapped: (row) => _openSheet(row, academicYearId),
+                openedStudentId: _docked ? _dockedStudentId : null,
+                onBilling: () => openBilling(context),
+              ),
+              const FeeControlMarkedCard(),
+            ],
           ),
         );
       },

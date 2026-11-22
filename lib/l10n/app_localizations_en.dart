@@ -25157,6 +25157,1067 @@ class AppLocalizationsEn extends AppLocalizations {
       'The document could not be fetched. Try again in a moment.';
 
   @override
+  String recouvrementControlEyebrow(String year) {
+    return 'Collections · $year';
+  }
+
+  @override
+  String get recouvrementControlTitle => 'Who has paid, who hasn’t?';
+
+  @override
+  String get recouvrementControlSubtitle =>
+      'Fee by fee, class by class: settled, partial or nothing paid — with call list, reminder and student record.';
+
+  @override
+  String get recouvrementClassLabel => 'Class';
+
+  @override
+  String get recouvrementClassPlaceholder => 'Choose a class';
+
+  @override
+  String get recouvrementUnassigned => 'Not assigned';
+
+  @override
+  String get recouvrementFeesQuestion => 'Which fees to analyse?';
+
+  @override
+  String get recouvrementFeesForWhich => 'For which fees?';
+
+  @override
+  String get recouvrementFeesOneOrMore => '· one or more';
+
+  @override
+  String get recouvrementFeesEdit => 'Change';
+
+  @override
+  String recouvrementFeesMore(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '+$count others',
+      one: '+$count other',
+      zero: 'No other',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get recouvrementFeesMixedNotice =>
+      'Francs and dollars ticked together: each currency reads on its own, never added up or converted. Comparing with an amount is then not offered.';
+
+  @override
+  String recouvrementFeesCheckedFooter(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count fees ticked',
+      one: '$count fee ticked',
+      zero: 'No fee ticked',
+    );
+    return '$_temp0 · at least one stays ticked.';
+  }
+
+  @override
+  String get recouvrementFeesAllOfThese => 'All of these';
+
+  @override
+  String get recouvrementFeesGroupUsd => 'Fees in dollars';
+
+  @override
+  String get recouvrementFeesGroupCdf => 'Fees in francs';
+
+  @override
+  String recouvrementFeesGroupOther(String currency) {
+    return 'Fees in $currency';
+  }
+
+  @override
+  String get recouvrementAtLeastMixed =>
+      'Unavailable: francs and dollars ticked together';
+
+  @override
+  String get recouvrementClose => 'Close';
+
+  @override
+  String get recoveryDashboardTitle => 'How much is left to collect?';
+
+  @override
+  String recoveryDashboardSubtitle(String date) {
+    return 'Position at $date · each fee in its own currency, francs and dollars never added together.';
+  }
+
+  @override
+  String get recoveryDashboardSubtitleNoDate =>
+      'Each fee in its own currency, francs and dollars never added together.';
+
+  @override
+  String recoveryOfflineBanner(String date, String time) {
+    return 'Offline · figures from $date at $time. Exports need the network.';
+  }
+
+  @override
+  String get recoveryExportsAwaitNetwork => 'Exports need the network.';
+
+  @override
+  String get recoveryEmptyTitle => 'No fee configured for this year';
+
+  @override
+  String get recoveryEmptyDescription =>
+      'The collection dashboard is computed from the year\'s fees and enrolled students. Configure the fees, then enrol at least one student.';
+
+  @override
+  String get recoveryEmptyAction => 'Open the configuration';
+
+  @override
+  String recoveryScopeCycle(String cycle) {
+    return '$cycle cycle';
+  }
+
+  @override
+  String recoveryPerimeterFooter(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count students',
+      one: '$count student',
+      zero: 'No student',
+    );
+    return '$_temp0 · every figure on this page is about these fees';
+  }
+
+  @override
+  String get recoveryExportReference => 'Collection';
+
+  @override
+  String recoveryExportReferenceNumber(String number) {
+    return 'Collection · $number';
+  }
+
+  @override
+  String recoveryStudentSheetUnavailable(String name) {
+    return '$name\'s record is not on this device yet: synchronise, then try again.';
+  }
+
+  @override
+  String get recoveryErrorNetworkTitle => 'Cannot connect';
+
+  @override
+  String get recoveryErrorNetwork =>
+      'The collection dashboard is computed on the server. Check the connection, then try again.';
+
+  @override
+  String get recoveryErrorUnauthorizedTitle => 'Session expired';
+
+  @override
+  String get recoveryErrorUnauthorized =>
+      'Your session has expired. Sign in again to view collection.';
+
+  @override
+  String get recoveryErrorForbiddenTitle => 'Access denied';
+
+  @override
+  String get recoveryErrorForbidden =>
+      'Your account is not allowed to view collection. Ask your school\'s administrator for access.';
+
+  @override
+  String get recoveryErrorForbiddenList =>
+      'Your account can read the figures, but not the named list of students. Ask your school\'s administrator for access.';
+
+  @override
+  String get recoveryErrorServerTitle => 'Server error';
+
+  @override
+  String get recoveryErrorServer =>
+      'The collection figures could not be computed. Try again in a moment; if the problem persists, contact support.';
+
+  @override
+  String recoveryErrorIncident(String code) {
+    return 'Incident code: $code';
+  }
+
+  @override
+  String get recoveryClassesTitle => 'Leading classes and classes to chase';
+
+  @override
+  String get recoveryClassesSubtitle =>
+      'One fee at a time · tap a class to see its students';
+
+  @override
+  String get recoveryClassesFeeField => 'Ranked fee';
+
+  @override
+  String recoveryClassesFeeOption(String label, String symbol) {
+    return '$label ($symbol)';
+  }
+
+  @override
+  String get recoveryClassesTop => 'Leading';
+
+  @override
+  String get recoveryClassesBottom => 'Chase first';
+
+  @override
+  String recoveryClassesCounts(int settled, int billed, int noPayment) {
+    return '$settled/$billed settled · $noPayment without payment';
+  }
+
+  @override
+  String recoveryClassesRate(int percent) {
+    return '$percent%';
+  }
+
+  @override
+  String get recoveryClassesRateNone => '—';
+
+  @override
+  String recoveryClassesOutstanding(String amount) {
+    return '$amount left';
+  }
+
+  @override
+  String get recoveryClassesSingle => 'Only one class in the scope.';
+
+  @override
+  String get recoveryClassesNone => 'No class in the scope.';
+
+  @override
+  String get recoveryClassesUnassignedHeading => 'Unassigned · not ranked';
+
+  @override
+  String recoveryClassesView(String name) {
+    return 'View class $name';
+  }
+
+  @override
+  String recoveryClassSheetEyebrow(String cycle, String fee) {
+    return '$cycle · $fee';
+  }
+
+  @override
+  String recoveryClassSheetSubtitle(int count, String date) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count students',
+      one: '$count student',
+      zero: 'No students',
+    );
+    return '$_temp0 · as of $date';
+  }
+
+  @override
+  String get recoveryClassSheetRate => 'Collection rate';
+
+  @override
+  String recoveryClassSheetDueOf(String amount) {
+    return 'of $amount expected';
+  }
+
+  @override
+  String get recoveryClassSheetOutstanding => 'Outstanding';
+
+  @override
+  String get recoveryClassSheetAll => 'All';
+
+  @override
+  String get recoveryClassSheetNoPayment => 'Nothing paid';
+
+  @override
+  String get recoveryClassSheetPartial => 'Partial';
+
+  @override
+  String get recoveryClassSheetSettled => 'Settled';
+
+  @override
+  String get recoveryClassSheetFilterLabel => 'Filter students';
+
+  @override
+  String recoveryClassSheetFilterA11y(String label, int count) {
+    return '$label, $count students';
+  }
+
+  @override
+  String get recoveryClassSheetEmpty => 'No student in this filter.';
+
+  @override
+  String get recoveryClassSheetLoading => 'Loading the class\'s students';
+
+  @override
+  String get recoveryClassSheetOpenControl => 'Open in fee control';
+
+  @override
+  String recoveryClassSheetPaidOf(String paid, String due) {
+    return 'paid $paid / $due';
+  }
+
+  @override
+  String recoveryClassSheetViewStudent(String name) {
+    return 'View $name\'s record';
+  }
+
+  @override
+  String get recoveryStudentsTitle => 'Where does each student stand?';
+
+  @override
+  String get recoveryStudentsSubtitle =>
+      'Choose the rule, then the tab: the list and the exports follow.';
+
+  @override
+  String recoveryStudentsFeesPill(String fees) {
+    return 'On $fees';
+  }
+
+  @override
+  String get recoveryStudentsRuleHeading =>
+      'A student is in good standing who…';
+
+  @override
+  String get recoveryStudentsRuleHint =>
+      'one choice · also applies to the exports and the simulation';
+
+  @override
+  String get recoveryStudentsRuleSomePayment => 'has paid something';
+
+  @override
+  String get recoveryStudentsRuleFullySettled => 'has settled everything';
+
+  @override
+  String get recoveryStudentsRuleAtLeast => 'has paid at least';
+
+  @override
+  String get recoveryStudentsRuleAmountLabel => 'Minimum amount';
+
+  @override
+  String recoveryStudentsRuleInOrderCount(int count) {
+    return '$count in good standing';
+  }
+
+  @override
+  String get recoveryStudentsRuleEnterAmount => 'enter an amount';
+
+  @override
+  String get recoveryStudentsRuleContrarySomePayment =>
+      'So not in good standing: has paid nothing at all.';
+
+  @override
+  String get recoveryStudentsRuleContraryFullySettled =>
+      'So not in good standing: has paid nothing or only part.';
+
+  @override
+  String recoveryStudentsRuleContraryAtLeast(String amount) {
+    return 'So not in good standing: has paid less than the amount entered ($amount).';
+  }
+
+  @override
+  String get recoveryStudentsRuleContraryAtLeastEmpty =>
+      'So not in good standing: has paid less than the amount entered.';
+
+  @override
+  String get recoveryStudentsTabToChase => 'To chase';
+
+  @override
+  String recoveryStudentsTabToChaseSub(String amount) {
+    return 'outstanding $amount';
+  }
+
+  @override
+  String get recoveryStudentsTabInOrder => 'In good standing';
+
+  @override
+  String recoveryStudentsTabInOrderSub(int percent) {
+    return '$percent% of the headcount';
+  }
+
+  @override
+  String get recoveryStudentsTabAll => 'All';
+
+  @override
+  String get recoveryStudentsTabAllSub => 'green + red';
+
+  @override
+  String get recoveryStudentsVerbOkSomePayment => 'have paid something';
+
+  @override
+  String get recoveryStudentsVerbKoSomePayment => 'have paid nothing';
+
+  @override
+  String get recoveryStudentsVerbOkFullySettled => 'have settled everything';
+
+  @override
+  String get recoveryStudentsVerbKoFullySettled =>
+      'have not settled everything';
+
+  @override
+  String recoveryStudentsVerbOkAtLeast(String amount) {
+    return 'have paid at least $amount';
+  }
+
+  @override
+  String recoveryStudentsVerbKoAtLeast(String amount) {
+    return 'have paid less than $amount';
+  }
+
+  @override
+  String recoveryStudentsHelpToChase(String verb) {
+    return 'These students $verb: to chase.';
+  }
+
+  @override
+  String recoveryStudentsHelpInOrder(String verb) {
+    return 'These students $verb: nothing to claim.';
+  }
+
+  @override
+  String get recoveryStudentsHelpAllGreen => 'Green';
+
+  @override
+  String get recoveryStudentsHelpAllRed => 'Red';
+
+  @override
+  String recoveryStudentsHelpAll(String okVerb, String koVerb) {
+    return 'Green: $okVerb · Red: $koVerb.';
+  }
+
+  @override
+  String recoveryStudentsListCount(int count) {
+    return '· $count';
+  }
+
+  @override
+  String get recoveryStudentsSearch => 'Name, registration number or parent';
+
+  @override
+  String get recoveryStudentsColStudent => 'Student';
+
+  @override
+  String get recoveryStudentsColClass => 'Class';
+
+  @override
+  String get recoveryStudentsColPaid => 'Paid';
+
+  @override
+  String get recoveryStudentsColOutstanding => 'Outstanding';
+
+  @override
+  String get recoveryStudentsColSituation => 'Status';
+
+  @override
+  String get recoveryStudentsColStudentClass => 'Student · class';
+
+  @override
+  String get recoveryStudentsColOutstandingPaid => 'Outstanding · paid';
+
+  @override
+  String get recoveryStudentsSituationNone => 'Nothing paid';
+
+  @override
+  String get recoveryStudentsSituationPartial => 'Partial';
+
+  @override
+  String get recoveryStudentsSituationSettled => 'Settled';
+
+  @override
+  String get recoveryStudentsInOrder => 'In good standing';
+
+  @override
+  String get recoveryStudentsToChase => 'To chase';
+
+  @override
+  String recoveryStudentsViewSheet(String name) {
+    return 'View $name\'s record';
+  }
+
+  @override
+  String recoveryStudentsPaidUnder(String amount) {
+    return 'paid $amount';
+  }
+
+  @override
+  String get recoveryStudentsCardPaid => 'Paid';
+
+  @override
+  String get recoveryStudentsCardOutstanding => 'Outstanding';
+
+  @override
+  String recoveryStudentsRange(int from, int to, int total) {
+    return '$from–$to of $total students';
+  }
+
+  @override
+  String recoveryStudentsPage(int page, int total) {
+    return 'Page $page / $total';
+  }
+
+  @override
+  String get recoveryStudentsEmptyToChase =>
+      'Every student is in good standing under this rule.';
+
+  @override
+  String get recoveryStudentsEmptyInOrder =>
+      'No student is in good standing under this rule.';
+
+  @override
+  String get recoveryStudentsEmptyAll => 'No students.';
+
+  @override
+  String recoveryStudentsEmptySearch(String search) {
+    return 'No student matches “$search”.';
+  }
+
+  @override
+  String get recoveryStudentsLoading => 'Loading students…';
+
+  @override
+  String recoveryStudentsExportLead(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Export these $count students',
+      one: 'Export this student',
+      zero: 'No student to export',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get recoveryStudentsExportRest =>
+      ' — one section per class, green in good standing, red to chase';
+
+  @override
+  String get recoveryStudentsExportEmpty => 'No student to export in this tab.';
+
+  @override
+  String get recoveryStudentsExportAwaitList =>
+      'Exports wait for the list to load.';
+
+  @override
+  String get recoveryFiguresA11yLabel => 'Recovery key figures';
+
+  @override
+  String get recoveryFiguresExpected => 'Expected';
+
+  @override
+  String recoveryFiguresExpectedSubline(String currency) {
+    String _temp0 = intl.Intl.selectLogic(currency, {
+      'USD': 'dollars',
+      'CDF': 'francs',
+      'other': '$currency',
+    });
+    return 'Fees due in $_temp0';
+  }
+
+  @override
+  String get recoveryFiguresExpectedMixedSubline =>
+      'Francs and dollars, never added together';
+
+  @override
+  String get recoveryFiguresCollected => 'Collected to date';
+
+  @override
+  String recoveryFiguresSettledSubline(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count students have fully paid',
+      one: '$count student has fully paid',
+      zero: 'No student has fully paid',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get recoveryFiguresRemaining => 'Still to collect';
+
+  @override
+  String recoveryFiguresRemainingSubline(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'From $count students not fully paid',
+      one: 'From $count student not fully paid',
+      zero: 'Every student has fully paid',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String recoveryFiguresRateRing(int rate) {
+    return '$rate%';
+  }
+
+  @override
+  String recoveryFiguresRateRingA11y(int rate) {
+    return '$rate% of the expected amount collected';
+  }
+
+  @override
+  String recoveryFiguresSituationTitle(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Status of the $count students',
+      one: 'Status of the student',
+      zero: 'No students',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get recoveryFiguresSituationNoPayment => 'Paid nothing';
+
+  @override
+  String get recoveryFiguresSituationPartial => 'Partly paid';
+
+  @override
+  String get recoveryFiguresSituationSettled => 'Fully paid';
+
+  @override
+  String get recoveryFiguresSituationRowHint =>
+      'See these students in fee control';
+
+  @override
+  String recoveryFiguresSituationRowA11y(String label, int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count students',
+      one: '$count student',
+      zero: 'no students',
+    );
+    return '$label: $_temp0';
+  }
+
+  @override
+  String recoveryFiguresSituationBarA11y(int none, int partial, int settled) {
+    return 'Paid nothing: $none · partly paid: $partial · fully paid: $settled';
+  }
+
+  @override
+  String get recoveryRatesTitle => 'Recovery rate by fee';
+
+  @override
+  String get recoveryRatesSubtitleOne =>
+      'A single fee selected · each currency reads on its own';
+
+  @override
+  String recoveryRatesSubtitleMany(int count) {
+    return '$count fees selected · each currency reads on its own';
+  }
+
+  @override
+  String recoveryRatesSubtitleAll(int count) {
+    return 'All $count fees · each currency reads on its own';
+  }
+
+  @override
+  String recoveryRatesCurrencyChip(String currency) {
+    String _temp0 = intl.Intl.selectLogic(currency, {
+      'USD': 'dollars',
+      'CDF': 'francs',
+      'other': '$currency',
+    });
+    return 'Fees in $_temp0';
+  }
+
+  @override
+  String recoveryRatesGroupSummary(
+    String collected,
+    String expected,
+    int rate,
+  ) {
+    return '$collected of $expected · $rate% recovered';
+  }
+
+  @override
+  String recoveryRatesGroupSummaryNoDue(String collected, String expected) {
+    return '$collected of $expected · —';
+  }
+
+  @override
+  String recoveryRatesRowRateOf(int rate, String expected) {
+    return '$rate% of $expected';
+  }
+
+  @override
+  String recoveryRatesRowRemaining(String amount) {
+    return '$amount left';
+  }
+
+  @override
+  String recoveryRatesRowA11y(
+    String label,
+    String collected,
+    String expected,
+    int rate,
+    String remaining,
+  ) {
+    return '$label: $collected collected of $expected, $rate%, $remaining left';
+  }
+
+  @override
+  String recoveryRatesRowNotBilledA11y(String label) {
+    return '$label: billed to no student';
+  }
+
+  @override
+  String get recoverySimulationTitle =>
+      'Simulation: if students not in good standing were sent home';
+
+  @override
+  String get recoverySimulationSubtitle =>
+      'Current headcount → remaining headcount, class by class. Nothing is applied: this is a trade-off calculation.';
+
+  @override
+  String get recoverySimulationCriterionHeading =>
+      'Criterion (the same as above)';
+
+  @override
+  String get recoverySimulationChange => 'Change';
+
+  @override
+  String get recoverySimulationChangeA11y =>
+      'Change the “in good standing” rule, higher up the page';
+
+  @override
+  String get recoverySimulationCriterionNoPayment => 'Have paid nothing';
+
+  @override
+  String get recoverySimulationCriterionNotSettled =>
+      'Have not settled everything';
+
+  @override
+  String recoverySimulationCriterionBelow(String amount) {
+    return 'Have paid less than $amount';
+  }
+
+  @override
+  String get recoverySimulationTargetedNoPayment =>
+      'No payment on the selected fees';
+
+  @override
+  String get recoverySimulationTargetedNotSettled =>
+      'Nothing paid or partly paid';
+
+  @override
+  String get recoverySimulationTargetedBelow => 'Below a minimum amount';
+
+  @override
+  String recoverySimulationUnmanageableSlider(String percent) {
+    return 'Class unmanageable below $percent of its headcount';
+  }
+
+  @override
+  String recoverySimulationPercent(int percent) {
+    return '$percent%';
+  }
+
+  @override
+  String get recoverySimulationHeadcount => 'Headcount today';
+
+  @override
+  String get recoverySimulationHeadcountSub => 'enrolled students';
+
+  @override
+  String get recoverySimulationTargeted => 'Students targeted';
+
+  @override
+  String get recoverySimulationRemaining => 'Remaining headcount';
+
+  @override
+  String recoverySimulationRemainingSub(int percent) {
+    return '$percent% of the headcount kept';
+  }
+
+  @override
+  String get recoverySimulationUnmanageable => 'Unmanageable classes';
+
+  @override
+  String get recoverySimulationUnmanageableNone => 'none below the threshold';
+
+  @override
+  String recoverySimulationUnmanageableTwo(String first, String second) {
+    return '$first, $second';
+  }
+
+  @override
+  String recoverySimulationUnmanageableMore(String names) {
+    return '$names…';
+  }
+
+  @override
+  String get recoverySimulationColClass => 'Class';
+
+  @override
+  String get recoverySimulationColHeadcount => 'Headcount';
+
+  @override
+  String get recoverySimulationColLeaving => 'Sent home';
+
+  @override
+  String get recoverySimulationColRemaining => 'Remaining';
+
+  @override
+  String get recoverySimulationColKept => 'Headcount kept';
+
+  @override
+  String get recoverySimulationColVerdict => 'Verdict';
+
+  @override
+  String recoverySimulationLeaving(int count) {
+    return '−$count';
+  }
+
+  @override
+  String get recoverySimulationCardHeadcount => 'Headcount';
+
+  @override
+  String get recoverySimulationCardLeaving => 'Sent home';
+
+  @override
+  String get recoverySimulationCardRemaining => 'Remaining';
+
+  @override
+  String get recoveryVerdictUnmanageable => 'Unmanageable';
+
+  @override
+  String get recoveryVerdictFragile => 'Fragile';
+
+  @override
+  String get recoveryVerdictTenable => 'Tenable';
+
+  @override
+  String recoverySimulationShowMore(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Show the $count other classes',
+      one: 'Show the other class',
+      zero: 'No other class',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String recoverySimulationShowLess(int count) {
+    return 'Keep only the $count most affected classes';
+  }
+
+  @override
+  String recoverySimulationOpenList(String classroom) {
+    return 'Show the named list for $classroom';
+  }
+
+  @override
+  String recoverySimulationRowA11y(
+    String classroom,
+    int headcount,
+    int remaining,
+    int percent,
+  ) {
+    return '$classroom: $headcount → $remaining students, $percent% of the headcount kept';
+  }
+
+  @override
+  String get recoverySimulationNoteLead =>
+      'Tap a class to open the named list to be signed.';
+
+  @override
+  String recoverySimulationNoteNothingLost(String amount) {
+    return 'These students have paid nothing: sending them home would lose no collected revenue, but it gives up the $amount expected from them.';
+  }
+
+  @override
+  String recoverySimulationNoteWithLoss(String lost, String missing) {
+    return 'Sending them home would also lose $lost already collected from these families, without recovering the $missing still missing.';
+  }
+
+  @override
+  String recoveryAmountsAnd(String first, String second) {
+    return '$first and $second';
+  }
+
+  @override
+  String get recoverySimulationCallListPrint => 'Print';
+
+  @override
+  String get recoverySimulationCallListSignature => 'Parent\'s signature';
+
+  @override
+  String get recoverySimulationCallListCollectorVisa => 'Bursar\'s approval';
+
+  @override
+  String get recoverySimulationCallListDirectionVisa =>
+      'Management\'s approval';
+
+  @override
+  String get recoveryInsightWorstFeeTitle => 'The most overdue fee';
+
+  @override
+  String recoveryInsightWorstFeeBody(String fee, int percent, String amount) {
+    return '$fee tops out at $percent% recovery: $amount is still missing.';
+  }
+
+  @override
+  String get recoveryInsightControl => 'Check the students';
+
+  @override
+  String get recoveryInsightSpreadTitle => 'Gap between classes';
+
+  @override
+  String recoveryInsightSpreadBody(
+    String fee,
+    int bestPercent,
+    String bestClass,
+    int worstPercent,
+    String worstClass,
+  ) {
+    return 'On $fee, from $bestPercent% ($bestClass) to $worstPercent% ($worstClass): the gap owes more to follow-up than to families.';
+  }
+
+  @override
+  String get recoveryInsightSimulationTitle => 'What the simulation says';
+
+  @override
+  String recoveryInsightSimulationUnmanageable(int count, int percent) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count classes',
+      one: '$count class',
+      zero: 'no class',
+    );
+    return 'Sending them home would push $_temp0 below $percent% of its headcount. A staggered follow-up costs less there than an emptied class.';
+  }
+
+  @override
+  String recoveryInsightSimulationTenable(
+    int percent,
+    int remaining,
+    int headcount,
+  ) {
+    return 'No class would fall below $percent%: the measure would remain tenable, with $remaining of $headcount students kept.';
+  }
+
+  @override
+  String feeControlExportTitle(String question) {
+    return 'Fee control · $question';
+  }
+
+  @override
+  String get feeControlExportReference => 'Fee control';
+
+  @override
+  String get feeControlNotifyAction => 'Notify parents';
+
+  @override
+  String get feeControlNotifyOfflineTooltip =>
+      'The reminder needs the network.';
+
+  @override
+  String get feeControlNotifyEyebrow => 'Reminder';
+
+  @override
+  String feeControlNotifyTitle(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Notify $count parents',
+      one: 'Notify $count parent',
+      zero: 'No parent to notify',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get feeControlNotifyMessageLabel => 'Message';
+
+  @override
+  String feeControlNotifyCharacterCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count characters',
+      one: '$count character',
+      zero: '$count characters',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String feeControlNotifyMessage(String context, String date, String school) {
+    return 'Dear parent, the $context fees for your child are not settled. Please come to the school\'s cash desk before $date. The management of $school.';
+  }
+
+  @override
+  String feeControlNotifyMessageNoSchool(String context, String date) {
+    return 'Dear parent, the $context fees for your child are not settled. Please come to the school\'s cash desk before $date. The school management.';
+  }
+
+  @override
+  String get feeControlNotifyRecipients => 'Recipients';
+
+  @override
+  String feeControlNotifyRecipientFor(String student) {
+    return 'for $student';
+  }
+
+  @override
+  String get feeControlNotifyUnknownParent => 'Parent not recorded';
+
+  @override
+  String feeControlNotifyWithoutPhone(int count) {
+    return 'No known phone ($count)';
+  }
+
+  @override
+  String get feeControlNotifyWithoutPhoneNote =>
+      'No number is known on this device for these parents: the reminder names them, but they will have to be reached another way.';
+
+  @override
+  String get feeControlNotifyShareNote =>
+      '“Send” hands the reminder to the device\'s share sheet: pick the app that sends it there.';
+
+  @override
+  String get feeControlNotifySend => 'Send';
+
+  @override
+  String get feeControlNotifySending => 'Sending…';
+
+  @override
+  String get feeControlNotifyFailed =>
+      'Sharing did not go through. Your message is kept: try again.';
+
+  @override
+  String feeControlNotifySent(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Reminder sent to $count parents.',
+      one: 'Reminder sent to $count parent.',
+      zero: 'No reminder sent.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get feeControlNotifyPdfTitle => 'Parent reminder';
+
+  @override
+  String get feeControlNotifyPdfParent => 'Parent';
+
+  @override
+  String get feeControlNotifyPdfPhone => 'Phone';
+
+  @override
+  String get recouvrementAmountHintFrancs => '50,000';
+
+  @override
+  String get recouvrementAmountHintDollars => '120';
+
+  @override
+  String get recoveryExportEmpty => 'No student to export in this list.';
+
+  @override
   String classTimetablePickerSummary(String name, String cycle, String level) {
     return '$name · $cycle › $level';
   }

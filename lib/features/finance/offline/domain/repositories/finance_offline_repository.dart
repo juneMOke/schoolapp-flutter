@@ -216,6 +216,10 @@ abstract class FinanceOfflineRepository {
     String academicYearId,
   );
 
+  /// Les mêmes natures, avec leur(s) devise(s) — le sélecteur du Recouvrement.
+  Future<Either<Failure, List<({String feeCode, List<String> currencies})>>>
+  getFeeNaturesForYear(String academicYearId);
+
   /// Nombre d'encaissements non encore acquittés par le serveur — ce que la
   /// liste de relance imprime sous son titre.
   Future<Either<Failure, int>> countPendingPayments();

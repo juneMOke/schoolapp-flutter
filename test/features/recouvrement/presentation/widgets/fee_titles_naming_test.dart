@@ -1,237 +1,88 @@
-import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:school_app_flutter/core/money/money.dart';
-import 'package:school_app_flutter/core/money/money_bag.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/entities/local_fee_charge_aggregate.dart';
-import 'package:school_app_flutter/features/finance/offline/domain/entities/local_finance_entities.dart';
 import 'package:school_app_flutter/features/finance/offline/domain/entities/local_recovery_line.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/fee_section_titles_cubit.dart';
-import 'package:school_app_flutter/features/recouvrement/presentation/bloc/recouvrement_dashboard_bloc.dart';
-import 'package:school_app_flutter/features/recouvrement/presentation/bloc/recouvrement_simulation_cubit.dart';
-import 'package:school_app_flutter/features/recouvrement/presentation/helpers/fee_control_dashboard_labels.dart';
-import 'package:school_app_flutter/features/recouvrement/presentation/widgets/dashboard/recouvrement_fee_rates_section.dart';
-import 'package:school_app_flutter/features/recouvrement/presentation/widgets/dashboard/recouvrement_insights_section.dart';
-import 'package:school_app_flutter/features/recouvrement/presentation/widgets/dashboard/recouvrement_perimeter_card.dart';
+import 'package:school_app_flutter/features/recouvrement/presentation/contracts/fee_control_contracts.dart';
+import 'package:school_app_flutter/features/recouvrement/presentation/helpers/fee_control_fee_options.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/widgets/fiche/fee_control_fee_line.dart';
-import 'package:school_app_flutter/features/recouvrement/presentation/widgets/perimeter/fee_control_fee_slot.dart';
+import 'package:school_app_flutter/features/recouvrement/presentation/widgets/perimeter/recouvrement_fee_picker_field.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
-/// Un frais, un nom — sur les deux écrans du module.
+/// Un frais, un nom — au contrôle des frais.
 ///
 /// Chaque surface qui nomme une nature est éprouvée ici avec le MÊME catalogue :
 /// l'école a renommé `TUITION` en « Frais scolaires annuels », et ce nom doit
-/// apparaître partout où l'opérateur lit ce frais. C'est aussi celui que la
-/// liste de relance imprime.
-class _MockDashboardBloc
-    extends MockBloc<RecouvrementDashboardEvent, RecouvrementDashboardState>
-    implements RecouvrementDashboardBloc {}
-
+/// apparaître partout où l'opérateur lit ce frais. (Le tableau de bord v2 nomme
+/// ses frais par le libellé que le serveur renvoie : ses tests sont sous
+/// `widgets/v2/`.)
 const _title = 'Frais scolaires annuels';
 const _titles = FeeSectionTitlesState(titles: {'TUITION': _title});
 
-const _tariff = LocalFeeTariff(
-  id: 't1',
-  feeCode: 'TUITION',
-  code: 'T1',
-  label: 'Minerval 1ère année',
-  amountInCents: 20000,
-  currency: 'USD',
-  schoolLevelId: 'l1',
-);
+const _natures = [
+  FeeNature(feeCode: 'TUITION', currencies: ['USD']),
+  FeeNature(feeCode: 'REGISTRATION', currencies: ['USD']),
+];
 
-const _group = RecouvrementCurrencyGroup(
-  currency: 'USD',
-  fees: [
-    RecouvrementFeeRate(
-      feeCode: 'TUITION',
-      currency: 'USD',
-      expectedInCents: 20000,
-      paidInCents: 10000,
-      remainingInCents: 10000,
-    ),
-  ],
-  expectedInCents: 20000,
-  paidInCents: 10000,
-  remainingInCents: 10000,
-);
-
-_MockDashboardBloc _dashboard() {
-  final bloc = _MockDashboardBloc();
-  final state = RecouvrementDashboardState(
-    status: EnrollmentLoadStatus.success,
-    figures: RecouvrementKeyFigures(
-      total: 2,
-      none: 1,
-      partial: 0,
-      settled: 1,
-      expected: MoneyBag.of([Money.parse(20000, 'USD')]),
-      paid: MoneyBag.of([Money.parse(10000, 'USD')]),
-      remaining: MoneyBag.of([Money.parse(10000, 'USD')]),
-    ),
-    rates: const [_group],
-    lastQuery: const RecouvrementQuery(
-      academicYearId: 'ay-1',
-      feeCodes: ['TUITION'],
-    ),
-  );
-  whenListen(
-    bloc,
-    const Stream<RecouvrementDashboardState>.empty(),
-    initialState: state,
-  );
-  return bloc;
-}
-
-Future<void> _pump(
-  WidgetTester tester,
-  Widget child, {
-  RecouvrementDashboardBloc? bloc,
-}) async {
-  final body = SingleChildScrollView(child: child);
+Future<void> _pump(WidgetTester tester, Widget child) async {
   await tester.pumpWidget(
     MaterialApp(
       locale: const Locale('fr'),
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
-      home: Scaffold(
-        body: bloc == null
-            ? body
-            : MultiBlocProvider(
-                providers: [
-                  BlocProvider<RecouvrementDashboardBloc>.value(value: bloc),
-                  BlocProvider<RecouvrementSimulationCubit>(
-                    create: (_) => RecouvrementSimulationCubit(),
-                  ),
-                ],
-                child: body,
-              ),
-      ),
+      home: Scaffold(body: SingleChildScrollView(child: child)),
     ),
   );
   await tester.pumpAndSettle();
 }
 
-FeeControlFeeSlot _slot({
+RecouvrementFeePickerField _field({
   FeeSectionTitlesState titles = const FeeSectionTitlesState(),
-}) => FeeControlFeeSlot(
-  tariffs: const [_tariff],
-  selected: const {'TUITION'},
-  hasLevel: true,
-  isLoading: false,
-  feeGridMissing: false,
-  loadFailed: false,
+  List<String> selected = const ['TUITION'],
+}) => RecouvrementFeePickerField(
+  natures: _natures,
+  selected: selected,
+  titles: titles,
+  sheetTitle: 'Quels frais analyser ?',
   onChanged: (_) {},
-  onRetry: () {},
-  sectionTitles: titles,
 );
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  group('le tableau de bord', () {
-    testWidgets('frais retenus : la pastille porte le titre de l\'école', (
-      tester,
-    ) async {
-      await _pump(
-        tester,
-        RecouvrementPerimeterCard(
-          feeCodes: const ['TUITION'],
-          selectedFeeCodes: const {'TUITION'},
-          cycles: const [],
-          selectedCycleId: null,
-          onFeeCodesChanged: (_) {},
-          onCycleChanged: (_) {},
-          feeLabels: const {'TUITION': _title},
-        ),
-      );
-
-      expect(find.text(_title), findsOneWidget);
-    });
-
-    testWidgets('taux par frais : le poste se nomme comme sa pastille', (
-      tester,
-    ) async {
-      await _pump(
-        tester,
-        const RecouvrementFeeRatesSection(groups: [_group], titles: _titles),
-        bloc: _dashboard(),
-      );
-
-      expect(find.text(_title), findsOneWidget);
-    });
-
-    testWidgets('taux par frais : sans catalogue, le titre n\'est pas '
-        'inventé', (tester) async {
-      await _pump(
-        tester,
-        const RecouvrementFeeRatesSection(groups: [_group]),
-        bloc: _dashboard(),
-      );
-
-      expect(find.text(_title), findsNothing);
-    });
-
-    testWidgets('lectures : le poste le plus en retard se nomme par son '
-        'titre', (tester) async {
-      await _pump(
-        tester,
-        RecouvrementInsightsSection(
-          labels: FeeControlDashboardLabels.from(const []),
-          showCycleInLabels: true,
-          titles: _titles,
-        ),
-        bloc: _dashboard(),
-      );
-
-      expect(find.textContaining(_title), findsOneWidget);
-    });
-  });
-
   group('l\'écran de contrôle', () {
-    testWidgets('la pastille préfère le titre à la grille : le même nom qu\'au '
-        'tableau de bord', (tester) async {
-      await _pump(tester, _slot(titles: _titles));
+    testWidgets('la pastille du choix des frais porte le titre de l\'école : '
+        'le même nom que sa nature', (tester) async {
+      await _pump(tester, _field(titles: _titles));
 
       expect(find.text(_title), findsOneWidget);
-      expect(find.text('Minerval 1ère année'), findsNothing);
+      expect(find.text('Frais de scolarité'), findsNothing);
     });
 
-    testWidgets('sans titre sur l\'appareil, la grille nomme toujours', (
+    testWidgets('sans titre sur l\'appareil, la nature localisée nomme', (
       tester,
     ) async {
-      await _pump(tester, _slot());
+      await _pump(tester, _field());
 
-      expect(find.text('Minerval 1ère année'), findsOneWidget);
+      expect(find.text('Frais de scolarité'), findsOneWidget);
+      expect(find.text(_title), findsNothing);
     });
 
     testWidgets('les pastilles suivent l\'ordre que l\'école donne à ses '
         'sections', (tester) async {
+      const titles = FeeSectionTitlesState(
+        titles: {'REGISTRATION': 'Frais d\'inscription', 'TUITION': _title},
+      );
       await _pump(
         tester,
-        FeeControlFeeSlot(
-          tariffs: const [
-            _tariff,
-            LocalFeeTariff(
-              id: 't2',
-              feeCode: 'REGISTRATION',
-              label: 'Inscription',
-              amountInCents: 1000,
-              currency: 'USD',
-              schoolLevelId: 'l1',
-            ),
-          ],
-          selected: const {'TUITION'},
-          hasLevel: true,
-          isLoading: false,
-          feeGridMissing: false,
-          loadFailed: false,
-          onChanged: (_) {},
-          onRetry: () {},
-          sectionTitles: const FeeSectionTitlesState(
-            titles: {'REGISTRATION': 'Frais d\'inscription', 'TUITION': _title},
-          ),
+        _field(
+          titles: titles,
+          // La question rangée comme le fait l'écran : l'ordre de l'école,
+          // pas celui des clics ni celui du catalogue.
+          selected: recouvrementSchoolOrder(const [
+            'TUITION',
+            'REGISTRATION',
+          ], titles),
         ),
       );
 
@@ -261,8 +112,6 @@ void main() {
               paidPendingInCents: 0,
             ),
           ),
-          tariffs: [_tariff],
-          rate: null,
           sectionTitles: _titles,
         ),
       );

@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/components/dialogs/dialog_height.dart';
+import 'package:school_app_flutter/core/components/dialogs/eteelo_adaptive_dialog.dart';
 import 'package:school_app_flutter/core/components/skeletons/eteelo_list_skeleton.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
 import 'package:school_app_flutter/core/money/money_bag.dart';
 import 'package:school_app_flutter/core/money/money_format.dart';
-import 'package:school_app_flutter/features/recouvrement/presentation/bloc/recouvrement_call_list_cubit.dart';
-import 'package:school_app_flutter/features/recouvrement/presentation/bloc/relance_list_cubit.dart';
+import 'package:school_app_flutter/features/recouvrement/domain/entities/recovery_students_page.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// L'aperçu nominatif d'un groupe visé — **on lit, puis on décide d'imprimer**.
@@ -19,6 +18,11 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 ///
 /// **Rien n'est écrit tant qu'on n'a pas appuyé sur le bouton.** Ouvrir, lire
 /// et refermer ne consomme aucun numéro de pièce.
+///
+/// La liste à signer d'une classe de la simulation du Recouvrement v2 (O5) :
+/// des [RecoveryStudentRow] déjà lus sur le serveur, une colonne « Signature
+/// du parent » et les visas, plein écran sous 760 de fenêtre, et
+/// « Imprimer ».
 class RecouvrementCallListSheet extends StatelessWidget {
   /// Le groupe visé, tel que le classement le nomme.
   final String groupLabel;
@@ -26,53 +30,89 @@ class RecouvrementCallListSheet extends StatelessWidget {
   /// Le critère, en toutes lettres — le papier le portera aussi en sous-titre.
   final String criterionLabel;
 
-  /// Ce que fait le bouton d'édition. `null` désarme le bouton : c'est ce qui
-  /// se passe pendant un rendu, ou pendant l'attente qu'un 429 a imposée.
-  final VoidCallback? onEmit;
+  /// « Imprimer » : ne s'arme qu'une fois la liste lue et non vide.
+  final VoidCallback? onPrint;
 
-  const RecouvrementCallListSheet({
+  /// Les élèves du mode « à signer » ; `null` pendant leur lecture.
+  final List<RecoveryStudentRow>? students;
+
+  /// La liste à signer d'une classe de la simulation (O5). [onPrint] ne
+  /// s'arme qu'une fois la liste lue et non vide.
+  const RecouvrementCallListSheet.students({
     super.key,
     required this.groupLabel,
     required this.criterionLabel,
-    required this.onEmit,
+    required this.students,
+    required this.onPrint,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Dialog(
-      child: ConstrainedBox(
-        constraints: BoxConstraints(
-          maxWidth: AppDimensions.recouvrementCallListMaxWidth,
-          // Une longue liste ne se coupe plus à 620 sur un grand écran.
-          maxHeight: DialogHeight.ofWindow(context),
-        ),
-        child: BlocBuilder<RecouvrementCallListCubit, RecouvrementCallListState>(
-          builder: (context, state) => Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _Header(
-                groupLabel: groupLabel,
-                criterionLabel: criterionLabel,
-                count: state.rows.length,
-              ),
-              Flexible(child: _Body(state: state)),
-              _Footer(
-                // Rien à éditer tant que la liste n'a pas abouti, ou si elle
-                // est vide : un bouton qui produirait un papier sans ligne
-                // n'aurait rien à faire signer.
-                onEmit:
-                    state.status == EnrollmentLoadStatus.success &&
-                        state.rows.isNotEmpty
-                    ? onEmit
-                    : null,
-              ),
-            ],
+    final rows = students;
+    final fullscreen = EteeloAdaptiveDialog.isFullscreen(context);
+    final body = _Body(
+      loading: rows == null,
+      signing: true,
+      lines: [
+        for (final row in rows ?? const <RecoveryStudentRow>[]) _Line.of(row),
+      ],
+    );
+    return EteeloAdaptiveDialog(
+      maxWidth: AppDimensions.recouvrementCallListMaxWidth,
+      maxHeight: DialogHeight.ofWindow(context),
+      child: Column(
+        mainAxisSize: fullscreen ? MainAxisSize.max : MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _Header(
+            groupLabel: groupLabel,
+            criterionLabel: criterionLabel,
+            count: rows?.length ?? 0,
           ),
-        ),
+          if (fullscreen) Expanded(child: body) else Flexible(child: body),
+          _FooterBar(
+            actionLabel: AppLocalizations.of(
+              context,
+            )!.recoverySimulationCallListPrint,
+            actionIcon: const Icon(Icons.print_outlined),
+            onAction: rows != null && rows.isNotEmpty ? onPrint : null,
+          ),
+        ],
       ),
     );
   }
+}
+
+/// Une ligne du document, quelle que soit sa source.
+class _Line {
+  /// `null` quand le registre des inscriptions ne connaît pas l'élève.
+  final String? name;
+  final String studentId;
+
+  /// Le matricule, sous le nom (mode « à signer »).
+  final String? detail;
+  final MoneyBag expected;
+  final MoneyBag paid;
+  final MoneyBag remaining;
+
+  const _Line({
+    required this.name,
+    required this.studentId,
+    this.detail,
+    required this.expected,
+    required this.paid,
+    required this.remaining,
+  });
+
+  _Line.of(RecoveryStudentRow row)
+    : this(
+        name: row.displayName,
+        studentId: row.studentId,
+        detail: row.matriculationNumber,
+        expected: MoneyBag.of(row.due),
+        paid: MoneyBag.of(row.paid),
+        remaining: MoneyBag.of(row.outstanding),
+      );
 }
 
 class _Header extends StatelessWidget {
@@ -118,16 +158,23 @@ class _Header extends StatelessWidget {
 }
 
 class _Body extends StatelessWidget {
-  final RecouvrementCallListState state;
+  final bool loading;
+  final List<_Line> lines;
 
-  const _Body({required this.state});
+  /// Colonne « Signature du parent » et visas en pied.
+  final bool signing;
+
+  const _Body({
+    required this.loading,
+    required this.lines,
+    this.signing = false,
+  });
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
-    if (state.status == EnrollmentLoadStatus.loading ||
-        state.status == EnrollmentLoadStatus.initial) {
+    if (loading) {
       // Le squelette défile comme la liste qu'il annonce : ses six lignes
       // dépassent la hauteur offerte en paysage, et une colonne figée y
       // déborderait de plus de cent pixels.
@@ -137,7 +184,7 @@ class _Body extends StatelessWidget {
       );
     }
 
-    if (state.rows.isEmpty) {
+    if (lines.isEmpty) {
       return Padding(
         padding: const EdgeInsets.all(AppDimensions.spacingXL),
         child: Center(
@@ -149,15 +196,15 @@ class _Body extends StatelessWidget {
       );
     }
 
-    final hasUnnamed = state.rows.any((row) => row.displayName == null);
+    final hasUnnamed = lines.any((line) => line.name == null);
 
     return ListView(
       shrinkWrap: true,
       padding: const EdgeInsets.symmetric(horizontal: AppDimensions.spacingM),
       children: [
         const SizedBox(height: AppDimensions.spacingS),
-        const _ColumnHeader(),
-        for (final row in state.rows) _StudentRow(row: row),
+        _ColumnHeader(signing: signing),
+        for (final line in lines) _StudentRow(line: line, signing: signing),
         if (hasUnnamed) ...[
           const SizedBox(height: AppDimensions.spacingS),
           Text(
@@ -165,6 +212,7 @@ class _Body extends StatelessWidget {
             style: AppTextStyles.caption.copyWith(color: AppColors.textMuted),
           ),
         ],
+        if (signing) const _Visas(),
         const SizedBox(height: AppDimensions.spacingS),
       ],
     );
@@ -172,7 +220,9 @@ class _Body extends StatelessWidget {
 }
 
 class _ColumnHeader extends StatelessWidget {
-  const _ColumnHeader();
+  final bool signing;
+
+  const _ColumnHeader({required this.signing});
 
   @override
   Widget build(BuildContext context) {
@@ -191,6 +241,12 @@ class _ColumnHeader extends StatelessWidget {
           cell(l10n.recouvrementCallListDue, 3, align: TextAlign.end),
           cell(l10n.recouvrementCallListPaid, 3, align: TextAlign.end),
           cell(l10n.recouvrementCallListRemaining, 3, align: TextAlign.end),
+          if (signing)
+            cell(
+              l10n.recoverySimulationCallListSignature,
+              4,
+              align: TextAlign.center,
+            ),
         ],
       ),
     );
@@ -198,14 +254,16 @@ class _ColumnHeader extends StatelessWidget {
 }
 
 class _StudentRow extends StatelessWidget {
-  final RecouvrementCallListRow row;
+  final _Line line;
+  final bool signing;
 
-  const _StudentRow({required this.row});
+  const _StudentRow({required this.line, required this.signing});
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final named = row.displayName;
+    final named = line.name;
+    final detail = line.detail;
 
     return Container(
       padding: const EdgeInsets.symmetric(vertical: AppDimensions.spacingS),
@@ -217,24 +275,54 @@ class _StudentRow extends StatelessWidget {
         children: [
           Expanded(
             flex: 4,
-            child: Text(
-              // Un élève que les inscriptions ne connaissent plus garde sa
-              // dette : on l'écrit par son identifiant plutôt que de le retirer
-              // d'une liste de relance en silence.
-              named ??
-                  l10n.recouvrementCallListUnnamed(
-                    row.studentId.length <= 8
-                        ? row.studentId
-                        : row.studentId.substring(0, 8),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  // Un élève que les inscriptions ne connaissent plus garde sa
+                  // dette : on l'écrit par son identifiant plutôt que de le
+                  // retirer d'une liste de relance en silence.
+                  named ??
+                      l10n.recouvrementCallListUnnamed(
+                        line.studentId.length <= 8
+                            ? line.studentId
+                            : line.studentId.substring(0, 8),
+                      ),
+                  style: named == null
+                      ? AppTextStyles.body.copyWith(color: AppColors.textMuted)
+                      : AppTextStyles.body,
+                ),
+                if (detail != null && detail.isNotEmpty)
+                  Text(
+                    detail,
+                    style: AppTextStyles.caption.copyWith(
+                      color: AppColors.textMuted,
+                    ),
                   ),
-              style: named == null
-                  ? AppTextStyles.body.copyWith(color: AppColors.textMuted)
-                  : AppTextStyles.body,
+              ],
             ),
           ),
-          _amount(row.expected, 3),
-          _amount(row.paid, 3),
-          _amount(row.remaining, 3),
+          _amount(line.expected, 3),
+          _amount(line.paid, 3),
+          _amount(line.remaining, 3),
+          // La case à signer : un trait sur toute sa largeur, rien d'autre.
+          if (signing)
+            const Expanded(
+              flex: 4,
+              child: Padding(
+                padding: EdgeInsets.only(left: AppDimensions.spacingS),
+                child: SizedBox(
+                  height: AppDimensions.minTouchTarget,
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      border: Border(
+                        bottom: BorderSide(color: AppColors.borderStrong),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
         ],
       ),
     );
@@ -258,61 +346,86 @@ class _StudentRow extends StatelessWidget {
   );
 }
 
-class _Footer extends StatelessWidget {
-  final VoidCallback? onEmit;
+/// Les visas du percepteur et de la direction, sous la liste à signer.
+class _Visas extends StatelessWidget {
+  const _Visas();
 
-  const _Footer({required this.onEmit});
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    Widget visa(String label) => Expanded(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: AppTextStyles.caption.copyWith(
+              color: AppColors.textSecondary,
+            ),
+          ),
+          const SizedBox(height: AppDimensions.spacingL),
+          const Divider(height: 1, color: AppColors.borderStrong),
+        ],
+      ),
+    );
+    return Padding(
+      padding: const EdgeInsets.only(top: AppDimensions.spacingL),
+      child: Row(
+        children: [
+          visa(l10n.recoverySimulationCallListCollectorVisa),
+          const SizedBox(width: AppDimensions.spacingL),
+          visa(l10n.recoverySimulationCallListDirectionVisa),
+        ],
+      ),
+    );
+  }
+}
+
+class _FooterBar extends StatelessWidget {
+  final VoidCallback? onAction;
+  final Widget actionIcon;
+  final String actionLabel;
+
+  const _FooterBar({
+    required this.onAction,
+    required this.actionIcon,
+    required this.actionLabel,
+  });
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
-    return BlocBuilder<RelanceListCubit, RelanceListState>(
-      buildWhen: (prev, curr) => prev.status != curr.status,
-      builder: (context, relance) => Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(AppDimensions.spacingM),
-        decoration: const BoxDecoration(
-          border: Border(top: BorderSide(color: AppColors.border)),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: Text(l10n.recouvrementCallListClose),
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(AppDimensions.spacingM),
+      decoration: const BoxDecoration(
+        border: Border(top: BorderSide(color: AppColors.border)),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text(l10n.recouvrementCallListClose),
+          ),
+          const SizedBox(width: AppDimensions.spacingS),
+          FilledButton.icon(
+            // ⚠️ Sans ce `minimumSize`, la modale entière n'a plus de taille.
+            // Le thème donne aux `FilledButton` une largeur minimale infinie
+            // (pensée pour les CTA pleine largeur) ; posé en enfant non-flex
+            // d'un `Row`, qui offre déjà une largeur non bornée, le bouton
+            // lève « BoxConstraints forces an infinite width » — l'erreur est
+            // avalée au layout, et c'est le premier clic suivant qui éclate
+            // sur « Cannot hit test a render box with no size ».
+            style: FilledButton.styleFrom(
+              minimumSize: const Size(0, AppDimensions.minTouchTarget),
             ),
-            const SizedBox(width: AppDimensions.spacingS),
-            FilledButton.icon(
-              // ⚠️ Sans ce `minimumSize`, la modale entière n'a plus de taille.
-              // Le thème donne aux `FilledButton` une largeur minimale infinie
-              // (pensée pour les CTA pleine largeur) ; posé en enfant non-flex
-              // d'un `Row`, qui offre déjà une largeur non bornée, le bouton
-              // lève « BoxConstraints forces an infinite width » — l'erreur est
-              // avalée au layout, et c'est le premier clic suivant qui éclate
-              // sur « Cannot hit test a render box with no size ».
-              style: FilledButton.styleFrom(
-                minimumSize: const Size(0, AppDimensions.minTouchTarget),
-              ),
-              // Le bouton se désarme pendant le rendu ET pendant l'attente
-              // qu'un 429 a imposée : un second appui lancerait un second rendu
-              // que le serveur refuserait.
-              onPressed: relance.isBusy ? null : onEmit,
-              icon: relance.status == RelanceListStatus.preparing
-                  ? const SizedBox(
-                      width: AppDimensions.recouvrementCallListSpinner,
-                      height: AppDimensions.recouvrementCallListSpinner,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : const Icon(Icons.picture_as_pdf_outlined),
-              label: Text(
-                relance.status == RelanceListStatus.preparing
-                    ? l10n.recouvrementRelanceListPreparing
-                    : l10n.recouvrementCallListEmit,
-              ),
-            ),
-          ],
-        ),
+            onPressed: onAction,
+            icon: actionIcon,
+            label: Text(actionLabel),
+          ),
+        ],
       ),
     );
   }

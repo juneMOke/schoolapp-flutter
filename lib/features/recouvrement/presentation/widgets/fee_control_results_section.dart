@@ -1,14 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
+import 'package:school_app_flutter/core/offline/online_only.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/bloc/fee_control_bloc.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/bloc/fee_control_selection_cubit.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/helpers/fee_control_query_phrase.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/widgets/fee_control_data_table.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/finance/fee_section_titles_cubit.dart';
+import 'package:school_app_flutter/features/recouvrement/presentation/widgets/v2/exports/fee_control_export.dart';
+import 'package:school_app_flutter/features/recouvrement/presentation/widgets/v2/exports/recovery_export_buttons.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Le résultat : son en-tête, qui **rejoue la requête**, et le tableau.
@@ -53,6 +57,9 @@ class FeeControlResultsSection extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _Header(
+              // Un résultat servi seulement : pendant un rechargement, les
+              // lignes exportées seraient celles de l'ancienne question (I4).
+              exportable: state.status == EnrollmentLoadStatus.success,
               // Le total, jamais la page : « Résultat · 21 élèves » sur une
               // page qui en montre dix reste vrai, l'inverse ne l'est pas.
               count: state.totalElements,
@@ -75,7 +82,6 @@ class FeeControlResultsSection extends StatelessWidget {
               // Le MÊME cours que celui qui a ordonné la liste : relire le
               // cubit ici ferait afficher un taux qui ne correspond plus à
               // l'ordre des lignes.
-              rate: state.lastQuery?.rate,
               selected: selection.selected,
               marked: selection.marked,
               isLoading: state.status == EnrollmentLoadStatus.loading,
@@ -109,6 +115,8 @@ class FeeControlResultsSection extends StatelessWidget {
 }
 
 class _Header extends StatelessWidget {
+  /// Faux hors d'un résultat servi : les exports restent en place, inactifs.
+  final bool exportable;
   final int count;
   final String subtitle;
   final bool allSelected;
@@ -117,6 +125,7 @@ class _Header extends StatelessWidget {
   final VoidCallback? onTogglePage;
 
   const _Header({
+    required this.exportable,
     required this.count,
     required this.subtitle,
     required this.allSelected,
@@ -127,7 +136,31 @@ class _Header extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
-    return Row(
+    final actions = <Widget>[
+      // R11 : PDF et Excel du résultat entier ; absents sur un résultat vide.
+      // Ils attendent le réseau (Q2) : hors ligne, en place mais inactifs.
+      if (count > 0)
+        OnlineOnly(
+          builder: (context, online) => RecoveryFormatButtons(
+            enabled: online && exportable,
+            disabledReason: online ? null : l10n.recoveryExportsAwaitNetwork,
+            onSelected: (format) => openFeeControlExport(context, format),
+          ),
+        ),
+      if (onTogglePage != null)
+        EteeloButton.ghost(
+          label: allSelected
+              ? l10n.feeControlDeselectPage
+              : l10n.feeControlSelectPage,
+          icon: allSelected
+              ? Icons.check_box_outlined
+              : Icons.check_box_outline_blank,
+          onPressed: onTogglePage,
+          fullWidth: false,
+          size: EteeloButtonSize.compact,
+        ),
+    ];
+    final heading = Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Padding(
@@ -161,21 +194,39 @@ class _Header extends StatelessWidget {
             ],
           ),
         ),
-        if (onTogglePage != null) ...[
-          const SizedBox(width: AppDimensions.spacingS),
-          EteeloButton.ghost(
-            label: allSelected
-                ? l10n.feeControlDeselectPage
-                : l10n.feeControlSelectPage,
-            icon: allSelected
-                ? Icons.check_box_outlined
-                : Icons.check_box_outline_blank,
-            onPressed: onTogglePage,
-            fullWidth: false,
-            size: EteeloButtonSize.compact,
-          ),
-        ],
       ],
+    );
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // Sous 600 dp reçus, les gestes passent sous la question : sur une
+        // ligne, ils écraseraient le titre.
+        final narrow = constraints.maxWidth < AppBreakpoints.dataTableCardsMax;
+        final wrap = Wrap(
+          spacing: AppDimensions.spacingS,
+          runSpacing: AppDimensions.spacingS,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          children: actions,
+        );
+        if (actions.isEmpty) return heading;
+        if (narrow) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              heading,
+              const SizedBox(height: AppDimensions.spacingS),
+              wrap,
+            ],
+          );
+        }
+        return Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(child: heading),
+            const SizedBox(width: AppDimensions.spacingS),
+            wrap,
+          ],
+        );
+      },
     );
   }
 }

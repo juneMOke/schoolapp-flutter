@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/components/tables/index.dart';
 import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
 import 'package:school_app_flutter/core/constants/app_constants.dart';
-import 'package:school_app_flutter/core/money/exchange_rate.dart';
 import 'package:school_app_flutter/core/theme/listing_tones.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/contracts/fee_control_contracts.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/widgets/fee_control_table_layout.dart';
@@ -17,10 +16,6 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 class FeeControlDataTable extends StatelessWidget {
   final List<FeeControlRow> rows;
   final int? totalCount;
-
-  /// Cours du jour, pour le taux affiché en regard de la pastille. Le même que
-  /// celui qui a ordonné la liste.
-  final ExchangeRate? rate;
 
   final Set<String> selected;
   final Set<String> marked;
@@ -48,7 +43,6 @@ class FeeControlDataTable extends StatelessWidget {
   const FeeControlDataTable({
     super.key,
     required this.rows,
-    required this.rate,
     required this.selected,
     required this.marked,
     required this.onViewRequested,
@@ -83,7 +77,6 @@ class FeeControlDataTable extends StatelessWidget {
             rows,
             l10n,
             wide: wide,
-            rate: rate,
             selected: selected,
             marked: marked,
             onViewRequested: onViewRequested,

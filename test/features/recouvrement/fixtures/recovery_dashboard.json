@@ -1,0 +1,530 @@
+{
+ "situationAt": "2026-09-05T08:30:00Z",
+ "academicYear": "2026-2027",
+ "pendingWrites": 0,
+ "perimeterLabel": "Tout l'établissement",
+ "fees": [
+  {
+   "code": "REGISTRATION",
+   "label": "Frais d'inscription",
+   "currencies": [
+    "CDF"
+   ],
+   "sortOrder": 0
+  },
+  {
+   "code": "TUITION",
+   "label": "Frais de scolarité",
+   "currencies": [
+    "USD"
+   ],
+   "sortOrder": 1
+  },
+  {
+   "code": "SUPPLIES",
+   "label": "Fournitures scolaires",
+   "currencies": [
+    "USD"
+   ],
+   "sortOrder": 2
+  },
+  {
+   "code": "ACTIVITIES",
+   "label": "Activités",
+   "currencies": [
+    "USD"
+   ],
+   "sortOrder": 3
+  }
+ ],
+ "currencies": [
+  "USD"
+ ],
+ "atLeastAvailable": true,
+ "studentCount": 478,
+ "keyFigures": [
+  {
+   "currency": "USD",
+   "dueInCents": 13092000,
+   "paidInCents": 3612300,
+   "outstandingInCents": 9479700,
+   "ratePercent": 28
+  }
+ ],
+ "situations": {
+  "NO_PAYMENT": 315,
+  "PARTIAL": 59,
+  "SETTLED": 104
+ },
+ "feeRates": [
+  {
+   "feeCode": "TUITION",
+   "label": "Frais de scolarité",
+   "currency": "USD",
+   "dueInCents": 13092000,
+   "paidInCents": 3612300,
+   "outstandingInCents": 9479700,
+   "ratePercent": 28,
+   "billedStudents": 478
+  }
+ ],
+ "classRankings": [
+  {
+   "feeCode": "TUITION",
+   "currency": "USD",
+   "ranked": [
+    {
+     "classroomId": "c1",
+     "classroomName": "1ère maternelle",
+     "cycleName": "Maternel",
+     "billedStudents": 30,
+     "settledStudents": 14,
+     "noPaymentStudents": 5,
+     "dueInCents": 821670,
+     "outstandingInCents": 180767,
+     "ratePercent": 78
+    },
+    {
+     "classroomId": "c2",
+     "classroomName": "2ème maternelle",
+     "cycleName": "Maternel",
+     "billedStudents": 32,
+     "settledStudents": 14,
+     "noPaymentStudents": 7,
+     "dueInCents": 876448,
+     "outstandingInCents": 254170,
+     "ratePercent": 71
+    },
+    {
+     "classroomId": "c3",
+     "classroomName": "1ère primaire",
+     "cycleName": "Primaire",
+     "billedStudents": 40,
+     "settledStudents": 15,
+     "noPaymentStudents": 12,
+     "dueInCents": 1095560,
+     "outstandingInCents": 394402,
+     "ratePercent": 64
+    },
+    {
+     "classroomId": "c4",
+     "classroomName": "2ème primaire",
+     "cycleName": "Primaire",
+     "billedStudents": 38,
+     "settledStudents": 13,
+     "noPaymentStudents": 13,
+     "dueInCents": 1040782,
+     "outstandingInCents": 437128,
+     "ratePercent": 58
+    },
+    {
+     "classroomId": "c5",
+     "classroomName": "3ème primaire",
+     "cycleName": "Primaire",
+     "billedStudents": 36,
+     "settledStudents": 11,
+     "noPaymentStudents": 14,
+     "dueInCents": 986004,
+     "outstandingInCents": 473282,
+     "ratePercent": 52
+    },
+    {
+     "classroomId": "c6",
+     "classroomName": "4ème primaire",
+     "cycleName": "Primaire",
+     "billedStudents": 37,
+     "settledStudents": 11,
+     "noPaymentStudents": 15,
+     "dueInCents": 1013393,
+     "outstandingInCents": 516830,
+     "ratePercent": 49
+    },
+    {
+     "classroomId": "c7",
+     "classroomName": "5ème primaire",
+     "cycleName": "Primaire",
+     "billedStudents": 35,
+     "settledStudents": 9,
+     "noPaymentStudents": 15,
+     "dueInCents": 958615,
+     "outstandingInCents": 527238,
+     "ratePercent": 45
+    },
+    {
+     "classroomId": "c8",
+     "classroomName": "6ème primaire",
+     "cycleName": "Primaire",
+     "billedStudents": 39,
+     "settledStudents": 10,
+     "noPaymentStudents": 18,
+     "dueInCents": 1068171,
+     "outstandingInCents": 630221,
+     "ratePercent": 41
+    },
+    {
+     "classroomId": "c9",
+     "classroomName": "7ème EB",
+     "cycleName": "Éducation de base",
+     "billedStudents": 48,
+     "settledStudents": 11,
+     "noPaymentStudents": 24,
+     "dueInCents": 1314672,
+     "outstandingInCents": 828243,
+     "ratePercent": 37
+    },
+    {
+     "classroomId": "c10",
+     "classroomName": "8ème EB",
+     "cycleName": "Éducation de base",
+     "billedStudents": 42,
+     "settledStudents": 8,
+     "noPaymentStudents": 24,
+     "dueInCents": 1150338,
+     "outstandingInCents": 805237,
+     "ratePercent": 30
+    },
+    {
+     "classroomId": "c11",
+     "classroomName": "1ère humanités",
+     "cycleName": "Humanités",
+     "billedStudents": 34,
+     "settledStudents": 4,
+     "noPaymentStudents": 21,
+     "dueInCents": 931226,
+     "outstandingInCents": 726356,
+     "ratePercent": 22
+    },
+    {
+     "classroomId": "c12",
+     "classroomName": "2ème humanités",
+     "cycleName": "Humanités",
+     "billedStudents": 33,
+     "settledStudents": 3,
+     "noPaymentStudents": 22,
+     "dueInCents": 903837,
+     "outstandingInCents": 768261,
+     "ratePercent": 15
+    },
+    {
+     "classroomId": "c13",
+     "classroomName": "3ème humanités",
+     "cycleName": "Humanités",
+     "billedStudents": 34,
+     "settledStudents": 2,
+     "noPaymentStudents": 24,
+     "dueInCents": 931226,
+     "outstandingInCents": 828791,
+     "ratePercent": 11
+    }
+   ],
+   "unassigned": {
+    "classroomId": null,
+    "classroomName": "Non affectés",
+    "cycleName": null,
+    "billedStudents": 6,
+    "settledStudents": 1,
+    "noPaymentStudents": 4,
+    "dueInCents": 164334,
+    "outstandingInCents": 130000,
+    "ratePercent": 21
+   }
+  }
+ ],
+ "ruleCounts": {
+  "SOME_PAYMENT": 163,
+  "FULLY_SETTLED": 104,
+  "AT_LEAST": null
+ },
+ "simulation": {
+  "rows": [
+   {
+    "classroomId": "c12",
+    "classroomName": "2ème humanités",
+    "cycleName": "Humanités",
+    "headcount": 33,
+    "billedStudents": 33,
+    "targetedStudents": 32,
+    "remainingHeadcount": 1,
+    "lostCollected": [
+     {
+      "amountInCents": 0,
+      "currency": "USD"
+     }
+    ],
+    "abandonedOutstanding": [
+     {
+      "amountInCents": 768000,
+      "currency": "USD"
+     }
+    ]
+   },
+   {
+    "classroomId": "c13",
+    "classroomName": "3ème humanités",
+    "cycleName": "Humanités",
+    "headcount": 34,
+    "billedStudents": 34,
+    "targetedStudents": 32,
+    "remainingHeadcount": 2,
+    "lostCollected": [
+     {
+      "amountInCents": 0,
+      "currency": "USD"
+     }
+    ],
+    "abandonedOutstanding": [
+     {
+      "amountInCents": 768000,
+      "currency": "USD"
+     }
+    ]
+   },
+   {
+    "classroomId": "c11",
+    "classroomName": "1ère humanités",
+    "cycleName": "Humanités",
+    "headcount": 34,
+    "billedStudents": 34,
+    "targetedStudents": 30,
+    "remainingHeadcount": 4,
+    "lostCollected": [
+     {
+      "amountInCents": 0,
+      "currency": "USD"
+     }
+    ],
+    "abandonedOutstanding": [
+     {
+      "amountInCents": 720000,
+      "currency": "USD"
+     }
+    ]
+   },
+   {
+    "classroomId": "c10",
+    "classroomName": "8ème EB",
+    "cycleName": "Éducation de base",
+    "headcount": 42,
+    "billedStudents": 42,
+    "targetedStudents": 28,
+    "remainingHeadcount": 14,
+    "lostCollected": [
+     {
+      "amountInCents": 0,
+      "currency": "USD"
+     }
+    ],
+    "abandonedOutstanding": [
+     {
+      "amountInCents": 672000,
+      "currency": "USD"
+     }
+    ]
+   },
+   {
+    "classroomId": "c9",
+    "classroomName": "7ème EB",
+    "cycleName": "Éducation de base",
+    "headcount": 48,
+    "billedStudents": 48,
+    "targetedStudents": 25,
+    "remainingHeadcount": 23,
+    "lostCollected": [
+     {
+      "amountInCents": 0,
+      "currency": "USD"
+     }
+    ],
+    "abandonedOutstanding": [
+     {
+      "amountInCents": 600000,
+      "currency": "USD"
+     }
+    ]
+   },
+   {
+    "classroomId": "c8",
+    "classroomName": "6ème primaire",
+    "cycleName": "Primaire",
+    "headcount": 39,
+    "billedStudents": 39,
+    "targetedStudents": 20,
+    "remainingHeadcount": 19,
+    "lostCollected": [
+     {
+      "amountInCents": 0,
+      "currency": "USD"
+     }
+    ],
+    "abandonedOutstanding": [
+     {
+      "amountInCents": 480000,
+      "currency": "USD"
+     }
+    ]
+   },
+   {
+    "classroomId": "c7",
+    "classroomName": "5ème primaire",
+    "cycleName": "Primaire",
+    "headcount": 35,
+    "billedStudents": 35,
+    "targetedStudents": 16,
+    "remainingHeadcount": 19,
+    "lostCollected": [
+     {
+      "amountInCents": 0,
+      "currency": "USD"
+     }
+    ],
+    "abandonedOutstanding": [
+     {
+      "amountInCents": 384000,
+      "currency": "USD"
+     }
+    ]
+   },
+   {
+    "classroomId": "c6",
+    "classroomName": "4ème primaire",
+    "cycleName": "Primaire",
+    "headcount": 37,
+    "billedStudents": 37,
+    "targetedStudents": 14,
+    "remainingHeadcount": 23,
+    "lostCollected": [
+     {
+      "amountInCents": 0,
+      "currency": "USD"
+     }
+    ],
+    "abandonedOutstanding": [
+     {
+      "amountInCents": 336000,
+      "currency": "USD"
+     }
+    ]
+   },
+   {
+    "classroomId": "c5",
+    "classroomName": "3ème primaire",
+    "cycleName": "Primaire",
+    "headcount": 36,
+    "billedStudents": 36,
+    "targetedStudents": 12,
+    "remainingHeadcount": 24,
+    "lostCollected": [
+     {
+      "amountInCents": 0,
+      "currency": "USD"
+     }
+    ],
+    "abandonedOutstanding": [
+     {
+      "amountInCents": 288000,
+      "currency": "USD"
+     }
+    ]
+   },
+   {
+    "classroomId": "c4",
+    "classroomName": "2ème primaire",
+    "cycleName": "Primaire",
+    "headcount": 38,
+    "billedStudents": 38,
+    "targetedStudents": 10,
+    "remainingHeadcount": 28,
+    "lostCollected": [
+     {
+      "amountInCents": 0,
+      "currency": "USD"
+     }
+    ],
+    "abandonedOutstanding": [
+     {
+      "amountInCents": 240000,
+      "currency": "USD"
+     }
+    ]
+   },
+   {
+    "classroomId": "c3",
+    "classroomName": "1ère primaire",
+    "cycleName": "Primaire",
+    "headcount": 40,
+    "billedStudents": 40,
+    "targetedStudents": 8,
+    "remainingHeadcount": 32,
+    "lostCollected": [
+     {
+      "amountInCents": 0,
+      "currency": "USD"
+     }
+    ],
+    "abandonedOutstanding": [
+     {
+      "amountInCents": 192000,
+      "currency": "USD"
+     }
+    ]
+   },
+   {
+    "classroomId": "c2",
+    "classroomName": "2ème maternelle",
+    "cycleName": "Maternel",
+    "headcount": 32,
+    "billedStudents": 32,
+    "targetedStudents": 5,
+    "remainingHeadcount": 27,
+    "lostCollected": [
+     {
+      "amountInCents": 0,
+      "currency": "USD"
+     }
+    ],
+    "abandonedOutstanding": [
+     {
+      "amountInCents": 120000,
+      "currency": "USD"
+     }
+    ]
+   },
+   {
+    "classroomId": "c1",
+    "classroomName": "1ère maternelle",
+    "cycleName": "Maternel",
+    "headcount": 30,
+    "billedStudents": 30,
+    "targetedStudents": 3,
+    "remainingHeadcount": 27,
+    "lostCollected": [
+     {
+      "amountInCents": 0,
+      "currency": "USD"
+     }
+    ],
+    "abandonedOutstanding": [
+     {
+      "amountInCents": 72000,
+      "currency": "USD"
+     }
+    ]
+   }
+  ],
+  "headcount": 478,
+  "targetedStudents": 235,
+  "remainingHeadcount": 243,
+  "lostCollected": [
+   {
+    "amountInCents": 0,
+    "currency": "USD"
+   }
+  ],
+  "abandonedOutstanding": [
+   {
+    "amountInCents": 5640000,
+    "currency": "USD"
+   }
+  ]
+ }
+}

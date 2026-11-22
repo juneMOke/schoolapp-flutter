@@ -14,15 +14,15 @@ import 'package:school_app_flutter/l10n/app_localizations.dart';
 /// échappatoire. Tant que rien n'est coché, elle n'occupe aucune place : une
 /// barre d'actions vide apprend à ne plus la regarder.
 ///
-/// ⚠️ La spec en compte une troisième, « Notifier les parents ». Elle n'est pas
-/// rendue : le numéro d'un payeur n'a pas de source locale pour un élève déjà
-/// inscrit (`guardian_phone` ne vit que sur les tables de candidats), et il n'y
-/// a pas de canal d'envoi. Un bouton qui n'aboutit pas serait pire que son
-/// absence — la relance en lot demande une route serveur, elle est demandée à
-/// part.
+/// Ordre de la spec (§4.6 D) : liste d'appel, relance des parents, marquage,
+/// désélection.
 class FeeControlActionBar extends StatelessWidget {
   /// Édite la liste d'appel des élèves cochés.
   final VoidCallback? onCallList;
+
+  /// Ouvre la relance des parents des cochés (O4) ; `null` hors ligne — la
+  /// relance attend le réseau (Q2), le bouton reste visible mais inactif.
+  final VoidCallback? onNotify;
 
   /// Ajoute les cochés à la liste de travail des renvois.
   final VoidCallback onMark;
@@ -30,6 +30,7 @@ class FeeControlActionBar extends StatelessWidget {
   const FeeControlActionBar({
     super.key,
     required this.onCallList,
+    this.onNotify,
     required this.onMark,
   });
 
@@ -85,6 +86,16 @@ class FeeControlActionBar extends StatelessWidget {
                           label: l10n.feeControlCallListAction,
                           icon: Icons.print_outlined,
                           onPressed: onCallList,
+                          fullWidth: false,
+                          size: EteeloButtonSize.compact,
+                        ),
+                        EteeloButton.ghost(
+                          label: l10n.feeControlNotifyAction,
+                          icon: Icons.chat_bubble_outline,
+                          onPressed: onNotify,
+                          tooltip: onNotify == null
+                              ? l10n.feeControlNotifyOfflineTooltip
+                              : null,
                           fullWidth: false,
                           size: EteeloButtonSize.compact,
                         ),

@@ -183,6 +183,53 @@ class AppConstants {
   static const String financeRecoveryStatsEndpoint =
       '/api/v1/finance-stats/recovery';
 
+  /// Recouvrement v2 ▸ Tableau de bord : les chiffres (blocs B à F), calculés
+  /// par le serveur sur la question posée, sous `finance.stats.read`.
+  static const String recoveryDashboardEndpoint =
+      '/api/v1/finance-stats/recovery/dashboard';
+
+  /// La liste nominative du tableau de bord (bloc E, fiche de classe O2).
+  /// ⚠️ **Deux permissions** : `finance.stats.read` **et**
+  /// `finance.charge.read` — des noms d'élèves et leurs créances.
+  static const String recoveryStudentsEndpoint =
+      '/api/v1/finance-stats/recovery/students';
+
+  /// Export PDF de la liste (pièce `ER`, numérotée à CHAQUE appel, scellée,
+  /// non archivée) et export Excel (non numéroté). Mêmes droits que la liste.
+  static const String recoveryStudentsPdfEndpoint =
+      '/api/v1/finance-stats/recovery/students.pdf';
+  static const String recoveryStudentsXlsxEndpoint =
+      '/api/v1/finance-stats/recovery/students.xlsx';
+
+  /// `Accept` de l'export Excel : le classeur, ou le JSON d'un refus.
+  static const String xlsxAcceptHeader =
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, '
+      'application/json';
+
+  /// Simulation de renvoi (R12) : classe « ingérable » sous ce pourcentage de
+  /// l'effectif conservé — défaut 60, de 30 à 90 par pas de 5 ; « fragile »
+  /// jusqu'à 15 points au-dessus.
+  static const int recoveryUnmanageableDefault = 60;
+  static const int recoveryUnmanageableMin = 30;
+  static const int recoveryUnmanageableMax = 90;
+  static const int recoveryUnmanageableStep = 5;
+  static const int recoveryFragileBand = 15;
+
+  /// Encre du taux de recouvrement d'un frais (bloc C, `FinBarRows`) : vert
+  /// dès ce taux…
+  static const int recoveryRateHealthyFromPercent = 80;
+
+  /// … ambre dès celui-ci, rouge en deçà.
+  static const int recoveryRateWatchFromPercent = 45;
+
+  /// Pause après la dernière frappe du montant « a payé au moins » avant de
+  /// relire le tableau de bord (I8 : le compteur suit sans un calcul serveur
+  /// par chiffre).
+  static const Duration recoveryAmountDebounce = Duration(milliseconds: 400);
+
+  /// Taille d'une page de la liste nominative (R9).
+  static const int recoveryStudentsPageSize = 10;
+
   /// Le flux : ce qui est entré en caisse sur la fenêtre — frais scolaires
   /// **et ventes boutique**. `period` (`day` par défaut) `day|week|month|year`,
   /// et une ancre facultative (`date`, `month`, `week`) que le serveur REFUSE
@@ -911,7 +958,10 @@ class AppConstants {
   // `cal_framework_items.replaceable`, `cal_frameworks.document_*`,
   // `school_calendar_events.replaces_item_id`. Re-tirage du cadre. Palier
   // d'école.
-  static const int offlineDbSchemaVersion = 86;
+  // v87 (2026-11-22) : la photo hors ligne du tableau de bord du Recouvrement
+  // v2 (`recouvrement_dashboard_cache`), calculé par le serveur. Création
+  // pure, sans reprise. Palier d'école.
+  static const int offlineDbSchemaVersion = 87;
 
   /// Dernière version de la base unique HÉRITÉE : là où l'escalier
   /// `migrateOfflineDatabase` s'arrête pour toujours.

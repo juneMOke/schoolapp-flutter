@@ -41,7 +41,6 @@ import 'package:school_app_flutter/features/enrollment/presentation/pages/pre_re
 import 'package:school_app_flutter/features/finance/presentation/pages/facturation_page.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/pages/fee_control_feature_scope.dart';
 import 'package:school_app_flutter/features/recouvrement/presentation/pages/recouvrement_dashboard_page.dart';
-import 'package:school_app_flutter/features/recouvrement/presentation/pages/fee_control_page.dart';
 import 'package:school_app_flutter/features/finance/presentation/pages/finance_feature_scope.dart';
 import 'package:school_app_flutter/features/finance/presentation/pages/finance_stats_dashboard_page.dart';
 import 'package:school_app_flutter/features/finance/presentation/pages/finance_stats_dashboard_scope.dart';
@@ -67,6 +66,7 @@ import 'package:school_app_flutter/router/return_location.dart';
 import 'package:school_app_flutter/router/router_extra_codec.dart';
 import 'package:school_app_flutter/router/boutique_sale_routes.dart';
 import 'package:school_app_flutter/router/hr_agent_routes.dart';
+import 'package:school_app_flutter/router/legacy_fee_control_redirect.dart';
 import 'package:school_app_flutter/router/student_record_routes.dart';
 import 'package:school_app_flutter/features/attendances/presentation/register/pages/class_presence_page.dart';
 import 'package:school_app_flutter/features/attendances/presentation/justifications/pages/justification_queue_page.dart';
@@ -472,11 +472,11 @@ class AppRouter {
         ),
         GoRoute(
           path: AppRoutesNames.recouvrementControl,
-          // `extra` porte les critères quand l'écran est ouvert depuis le
-          // tableau de bord ; vide, l'écran s'ouvre vierge comme par le menu.
-          // Hors de la coquille, l'écran porte sa propre barre, avec le retour.
-          builder: (context, state) =>
-              FeeControlPage.fromRoute(state.extra, state.uri.queryParameters),
+          // L'écran ne s'ouvre plus hors de la coquille (spec v2, R15) :
+          // l'ancienne adresse renvoie au sous-menu, question comprise,
+          // traduite dans le vocabulaire de la v2.
+          redirect: (context, state) =>
+              legacyFeeControlRedirect(state.uri.queryParameters),
         ),
       ],
     ),
