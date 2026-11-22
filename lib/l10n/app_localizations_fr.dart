@@ -26450,4 +26450,112 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get classTimetableDistributionSubtitle => 'Heures placées / prévues';
+
+  @override
+  String get desktopUpdateEyebrow => 'Mise à jour';
+
+  @override
+  String desktopUpdateAvailableTitle(String version) {
+    return 'La version $version est disponible';
+  }
+
+  @override
+  String get desktopUpdateMandatoryTitle => 'Mise à jour obligatoire';
+
+  @override
+  String desktopUpdateMandatoryBody(String version) {
+    return 'Cette version n\'est plus acceptée par le serveur. Installez la version $version pour continuer.';
+  }
+
+  @override
+  String desktopUpdateAvailableBody(String size) {
+    return 'Téléchargement de $size Mo. L\'application se fermera puis se relancera ; vos données restent sur ce poste.';
+  }
+
+  @override
+  String get desktopUpdateNotesTitle => 'Nouveautés';
+
+  @override
+  String desktopUpdateNotesVersion(String version) {
+    return 'Version $version';
+  }
+
+  @override
+  String get desktopUpdateNoNotes => 'Aucune note pour cette version.';
+
+  @override
+  String get desktopUpdateLater => 'Plus tard';
+
+  @override
+  String get desktopUpdateNow => 'Mettre à jour';
+
+  @override
+  String get desktopUpdateQuit => 'Quitter';
+
+  @override
+  String get desktopUpdatePreparing => 'Envoi des opérations en attente…';
+
+  @override
+  String desktopUpdatePendingBody(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          '$count opérations ne sont pas encore envoyées. Elles seront conservées et envoyées après la mise à jour.',
+      one:
+          '1 opération n\'est pas encore envoyée. Elle sera conservée et envoyée après la mise à jour.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get desktopUpdateContinue => 'Continuer';
+
+  @override
+  String get desktopUpdateCancel => 'Annuler';
+
+  @override
+  String desktopUpdateDownloading(int percent) {
+    return 'Téléchargement… $percent %';
+  }
+
+  @override
+  String get desktopUpdateInstalling =>
+      'Installation en cours. L\'application va se fermer puis se relancer.';
+
+  @override
+  String get desktopUpdateErrorNetwork =>
+      'Le téléchargement n\'a pas abouti. Vérifiez la connexion et réessayez.';
+
+  @override
+  String get desktopUpdateErrorIntegrity =>
+      'Le fichier téléchargé n\'a pas passé le contrôle. Il a été effacé ; la version actuelle reste installée.';
+
+  @override
+  String get desktopUpdateErrorInstall =>
+      'L\'installation n\'a pas pu se lancer. La version actuelle reste installée.';
+
+  @override
+  String get desktopUpdateErrorStorage =>
+      'Le fichier n\'a pas pu être enregistré sur ce poste.';
+
+  @override
+  String get desktopUpdateErrorUnknown =>
+      'La mise à jour a échoué. La version actuelle reste installée.';
+
+  @override
+  String get desktopUpdateRetry => 'Réessayer';
+
+  @override
+  String get desktopUpdateClose => 'Fermer';
+
+  @override
+  String desktopUpdateMenuEntry(String version) {
+    return 'Mise à jour disponible ($version)';
+  }
+
+  @override
+  String desktopUpdateJustUpdated(String version) {
+    return 'Application mise à jour en version $version.';
+  }
 }

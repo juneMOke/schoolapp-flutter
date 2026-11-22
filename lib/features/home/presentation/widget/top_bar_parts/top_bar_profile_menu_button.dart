@@ -8,6 +8,9 @@ import 'package:school_app_flutter/core/constants/menu_constants.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart' as tokens;
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:school_app_flutter/features/auth/presentation/bloc/auth_event.dart';
+import 'package:school_app_flutter/features/desktop_update/presentation/cubit/desktop_update_cubit.dart';
+import 'package:school_app_flutter/features/desktop_update/presentation/cubit/desktop_update_state.dart';
+import 'package:school_app_flutter/features/desktop_update/presentation/widgets/desktop_update_scope.dart';
 import 'package:school_app_flutter/features/home/presentation/helpers/screen_exit.dart';
 import 'package:school_app_flutter/features/home/presentation/bloc/navigation_bloc.dart';
 import 'package:school_app_flutter/features/home/presentation/widget/home_navigation_ui_tokens.dart';
@@ -32,6 +35,22 @@ class TopBarProfileMenuButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Poste de bureau : la version proposée, ou `null` ; ailleurs, rien.
+    final updates = maybeDesktopUpdateCubit(context);
+    if (updates == null) return _build(context, null);
+    return BlocSelector<DesktopUpdateCubit, DesktopUpdateState, String?>(
+      bloc: updates,
+      selector: (state) =>
+          state.hasOffer ? '${state.offer!.release.version}' : null,
+      builder: (context, version) => _build(context, version, updates),
+    );
+  }
+
+  Widget _build(
+    BuildContext context,
+    String? updateVersion, [
+    DesktopUpdateCubit? updates,
+  ]) {
     final l10n = AppLocalizations.of(context)!;
     final canConfigure = context.select<AuthBloc, bool>(
       (bloc) => canAccessSubMenu(
@@ -45,6 +64,10 @@ class TopBarProfileMenuButton extends StatelessWidget {
       onSelected: (value) async {
         // Déconnexion ou réglages : l'écran affiché disparaît, sa saisie en
         // cours pose la question d'abord.
+        if (value == 'update') {
+          updates?.reopen();
+          return;
+        }
         final mayLeave = switch (value) {
           'logout' => RouteExitGuard.mayLeave(context),
           'settings' => mayLeaveScreenFor(
@@ -74,6 +97,22 @@ class TopBarProfileMenuButton extends StatelessWidget {
       },
       itemBuilder: (BuildContext context) {
         return [
+          if (updateVersion != null) ...[
+            PopupMenuItem(
+              value: 'update',
+              child: Row(
+                children: [
+                  const Icon(
+                    Icons.system_update_alt_rounded,
+                    color: AppColors.info,
+                  ),
+                  const SizedBox(width: 8),
+                  Text(l10n.desktopUpdateMenuEntry(updateVersion)),
+                ],
+              ),
+            ),
+            const PopupMenuDivider(),
+          ],
           PopupMenuItem(
             value: 'profile',
             child: Row(
@@ -125,10 +164,16 @@ class TopBarProfileMenuButton extends StatelessWidget {
               color: tokens.AppColors.textOnDark.withValues(alpha: 0.18),
             ),
           ),
-          child: const Icon(
-            Icons.person,
-            color: tokens.AppColors.textOnDark,
-            size: 20,
+          child: Badge(
+            // Une version est proposée : la pastille le signale sans rien
+            // ouvrir.
+            isLabelVisible: updateVersion != null,
+            backgroundColor: AppColors.info,
+            child: const Icon(
+              Icons.person,
+              color: tokens.AppColors.textOnDark,
+              size: 20,
+            ),
           ),
         ),
       ),

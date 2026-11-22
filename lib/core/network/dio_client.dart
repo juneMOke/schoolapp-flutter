@@ -1,6 +1,16 @@
 import 'package:dio/dio.dart';
 import 'package:school_app_flutter/core/config/env_config.dart';
 
+/// En-têtes qui disent au back quelle version de poste de bureau l'appelle
+/// (`X-Client-Version`, `X-Client-Platform`). Posés une fois au démarrage par
+/// [configureClientHeaders] ; vides hors d'un poste de bureau ou tant que la
+/// version est inconnue. Le back les ignore puis les journalise (lot L4).
+Map<String, String> _clientHeaders = const {};
+
+void configureClientHeaders(Map<String, String> headers) {
+  _clientHeaders = Map.unmodifiable(headers);
+}
+
 Dio createDioClient(EnvConfig envConfig) {
   return Dio(
     BaseOptions(
@@ -16,6 +26,7 @@ Dio createDioClient(EnvConfig envConfig) {
       headers: <String, String>{
         'Content-Type': 'application/json',
         'Accept': 'application/json',
+        ..._clientHeaders,
       },
     ),
   );

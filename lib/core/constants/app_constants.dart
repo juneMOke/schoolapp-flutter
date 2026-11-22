@@ -1927,4 +1927,33 @@ class AppConstants {
   /// Cadence à laquelle un onglet ouvert regarde si une nouvelle version a été
   /// déployée : un poste de caisse reste ouvert des jours.
   static const Duration webVersionCheckInterval = Duration(minutes: 10);
+
+  // ── Mise à jour des postes de bureau ────────────────────────────────────
+  /// Dernière version publiée pour la plateforme ; lecture publique, le
+  /// canal est celui du back.
+  static const String desktopReleaseLatestEndpoint =
+      '/api/v1/app-releases/desktop/latest';
+
+  /// Seul préfixe de téléchargement accepté : les releases du dépôt.
+  static const String desktopUpdateDownloadPrefix =
+      'https://github.com/juneMOke/schoolapp-flutter/releases/download/';
+
+  /// Clés publiques Ed25519 (32 octets, base64) qui signent les fiches de
+  /// version. La clé privée ne vit que dans les secrets de la CI
+  /// (`DESKTOP_UPDATE_SIGNING_KEY`). Une nouvelle clé s'ajoute ici une
+  /// version AVANT de signer avec elle.
+  static const List<String> desktopUpdatePublicKeys = [
+    // Clé n° 1, 2026-11-22.
+    'A+lBnwmZ0JoLvcRpZ3qN46OC8C4yI3mdN0/Xns48c4Q=',
+  ];
+
+  /// Cadence de vérification tant que l'application reste ouverte.
+  static const Duration desktopUpdateCheckInterval = Duration(hours: 6);
+
+  /// Attente maximale de la synchronisation avant d'installer.
+  static const Duration desktopUpdateOutboxDrainTimeout = Duration(seconds: 30);
+
+  /// Délai de téléchargement d'un installateur (20 à 35 Mo sur la connexion
+  /// d'une école).
+  static const Duration desktopUpdateDownloadTimeout = Duration(minutes: 15);
 }

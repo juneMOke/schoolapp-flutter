@@ -39809,6 +39809,162 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Hours placed / planned'**
   String get classTimetableDistributionSubtitle;
+
+  /// No description provided for @desktopUpdateEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Update'**
+  String get desktopUpdateEyebrow;
+
+  /// No description provided for @desktopUpdateAvailableTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Version {version} is available'**
+  String desktopUpdateAvailableTitle(String version);
+
+  /// No description provided for @desktopUpdateMandatoryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Update required'**
+  String get desktopUpdateMandatoryTitle;
+
+  /// No description provided for @desktopUpdateMandatoryBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The server no longer accepts this version. Install version {version} to continue.'**
+  String desktopUpdateMandatoryBody(String version);
+
+  /// No description provided for @desktopUpdateAvailableBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{size} MB download. The app will close and restart; your data stays on this computer.'**
+  String desktopUpdateAvailableBody(String size);
+
+  /// No description provided for @desktopUpdateNotesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'What\'s new'**
+  String get desktopUpdateNotesTitle;
+
+  /// No description provided for @desktopUpdateNotesVersion.
+  ///
+  /// In en, this message translates to:
+  /// **'Version {version}'**
+  String desktopUpdateNotesVersion(String version);
+
+  /// No description provided for @desktopUpdateNoNotes.
+  ///
+  /// In en, this message translates to:
+  /// **'No notes for this version.'**
+  String get desktopUpdateNoNotes;
+
+  /// No description provided for @desktopUpdateLater.
+  ///
+  /// In en, this message translates to:
+  /// **'Later'**
+  String get desktopUpdateLater;
+
+  /// No description provided for @desktopUpdateNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Update'**
+  String get desktopUpdateNow;
+
+  /// No description provided for @desktopUpdateQuit.
+  ///
+  /// In en, this message translates to:
+  /// **'Quit'**
+  String get desktopUpdateQuit;
+
+  /// No description provided for @desktopUpdatePreparing.
+  ///
+  /// In en, this message translates to:
+  /// **'Sending pending operations…'**
+  String get desktopUpdatePreparing;
+
+  /// No description provided for @desktopUpdatePendingBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 operation has not been sent yet. It will be kept and sent after the update.} other{{count} operations have not been sent yet. They will be kept and sent after the update.}}'**
+  String desktopUpdatePendingBody(int count);
+
+  /// No description provided for @desktopUpdateContinue.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue'**
+  String get desktopUpdateContinue;
+
+  /// No description provided for @desktopUpdateCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get desktopUpdateCancel;
+
+  /// No description provided for @desktopUpdateDownloading.
+  ///
+  /// In en, this message translates to:
+  /// **'Downloading… {percent}%'**
+  String desktopUpdateDownloading(int percent);
+
+  /// No description provided for @desktopUpdateInstalling.
+  ///
+  /// In en, this message translates to:
+  /// **'Installing. The app will close and restart.'**
+  String get desktopUpdateInstalling;
+
+  /// No description provided for @desktopUpdateErrorNetwork.
+  ///
+  /// In en, this message translates to:
+  /// **'The download did not complete. Check the connection and try again.'**
+  String get desktopUpdateErrorNetwork;
+
+  /// No description provided for @desktopUpdateErrorIntegrity.
+  ///
+  /// In en, this message translates to:
+  /// **'The downloaded file failed verification. It was deleted; the current version stays installed.'**
+  String get desktopUpdateErrorIntegrity;
+
+  /// No description provided for @desktopUpdateErrorInstall.
+  ///
+  /// In en, this message translates to:
+  /// **'The installer could not start. The current version stays installed.'**
+  String get desktopUpdateErrorInstall;
+
+  /// No description provided for @desktopUpdateErrorStorage.
+  ///
+  /// In en, this message translates to:
+  /// **'The file could not be saved on this computer.'**
+  String get desktopUpdateErrorStorage;
+
+  /// No description provided for @desktopUpdateErrorUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'The update failed. The current version stays installed.'**
+  String get desktopUpdateErrorUnknown;
+
+  /// No description provided for @desktopUpdateRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again'**
+  String get desktopUpdateRetry;
+
+  /// No description provided for @desktopUpdateClose.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get desktopUpdateClose;
+
+  /// No description provided for @desktopUpdateMenuEntry.
+  ///
+  /// In en, this message translates to:
+  /// **'Update available ({version})'**
+  String desktopUpdateMenuEntry(String version);
+
+  /// No description provided for @desktopUpdateJustUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'App updated to version {version}.'**
+  String desktopUpdateJustUpdated(String version);
 }
 
 class _AppLocalizationsDelegate
