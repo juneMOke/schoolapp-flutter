@@ -17,6 +17,7 @@ import 'package:school_app_flutter/core/database/tenant/offline_database_files.d
 import 'package:school_app_flutter/core/database/tenant/tenant_database.dart';
 import 'package:school_app_flutter/core/database/tenant/tenant_scope.dart';
 import 'package:school_app_flutter/core/database/tenant/tenant_session.dart';
+import 'package:school_app_flutter/core/di/offline_modules/recouvrement_v2_di.dart';
 import 'package:school_app_flutter/core/di/offline_modules/school_calendar_di.dart';
 import 'package:school_app_flutter/core/di/offline_modules/cotes_di.dart';
 import 'package:school_app_flutter/core/di/offline_modules/communication_di.dart';
@@ -357,6 +358,7 @@ void registerOfflineModules(GetIt getIt) {
   ); // Dépenses — registre des frais de fonctionnement
   registerStaffOffline(getIt); // RH — fichier du personnel
   registerEnrollmentFinanceOffline(getIt); // branche A
+  registerRecouvrementV2(getIt); // Recouvrement v2 — tableau de bord serveur
   registerStudentIdentity(getIt); // Fiches rouvertes par leur adresse
   registerClassroomAttendanceOffline(getIt); // branche B
   registerClassPresence(getIt); // Présences des élèves v2 — registre d'appel

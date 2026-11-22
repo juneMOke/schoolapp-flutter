@@ -38031,6 +38031,1467 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'The document could not be fetched. Try again in a moment.'**
   String get classTimetablePrintFailed;
+
+  /// No description provided for @recouvrementControlEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Collections · {year}'**
+  String recouvrementControlEyebrow(String year);
+
+  /// No description provided for @recouvrementControlTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Who has paid, who hasn’t?'**
+  String get recouvrementControlTitle;
+
+  /// No description provided for @recouvrementControlSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Fee by fee, class by class: settled, partial or nothing paid — with call list, reminder and student record.'**
+  String get recouvrementControlSubtitle;
+
+  /// No description provided for @recouvrementClassLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Class'**
+  String get recouvrementClassLabel;
+
+  /// No description provided for @recouvrementClassPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a class'**
+  String get recouvrementClassPlaceholder;
+
+  /// No description provided for @recouvrementUnassigned.
+  ///
+  /// In en, this message translates to:
+  /// **'Not assigned'**
+  String get recouvrementUnassigned;
+
+  /// No description provided for @recouvrementFeesQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'Which fees to analyse?'**
+  String get recouvrementFeesQuestion;
+
+  /// No description provided for @recouvrementFeesForWhich.
+  ///
+  /// In en, this message translates to:
+  /// **'For which fees?'**
+  String get recouvrementFeesForWhich;
+
+  /// No description provided for @recouvrementFeesOneOrMore.
+  ///
+  /// In en, this message translates to:
+  /// **'· one or more'**
+  String get recouvrementFeesOneOrMore;
+
+  /// No description provided for @recouvrementFeesEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Change'**
+  String get recouvrementFeesEdit;
+
+  /// No description provided for @recouvrementFeesMore.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{+1 other} other{+{count} others}}'**
+  String recouvrementFeesMore(int count);
+
+  /// No description provided for @recouvrementFeesMixedNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'Francs and dollars ticked together: each currency reads on its own, never added up or converted. Comparing with an amount is then not offered.'**
+  String get recouvrementFeesMixedNotice;
+
+  /// No description provided for @recouvrementFeesCheckedFooter.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 fee ticked} other{{count} fees ticked}} · at least one stays ticked.'**
+  String recouvrementFeesCheckedFooter(int count);
+
+  /// No description provided for @recouvrementFeesAllOfThese.
+  ///
+  /// In en, this message translates to:
+  /// **'All of these'**
+  String get recouvrementFeesAllOfThese;
+
+  /// No description provided for @recouvrementFeesGroupUsd.
+  ///
+  /// In en, this message translates to:
+  /// **'Fees in dollars'**
+  String get recouvrementFeesGroupUsd;
+
+  /// No description provided for @recouvrementFeesGroupCdf.
+  ///
+  /// In en, this message translates to:
+  /// **'Fees in francs'**
+  String get recouvrementFeesGroupCdf;
+
+  /// No description provided for @recouvrementFeesGroupOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Fees in {currency}'**
+  String recouvrementFeesGroupOther(String currency);
+
+  /// No description provided for @recouvrementAtLeastMixed.
+  ///
+  /// In en, this message translates to:
+  /// **'Unavailable: francs and dollars ticked together'**
+  String get recouvrementAtLeastMixed;
+
+  /// No description provided for @recouvrementClose.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get recouvrementClose;
+
+  /// No description provided for @recoveryDashboardTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'How much is left to collect?'**
+  String get recoveryDashboardTitle;
+
+  /// No description provided for @recoveryDashboardSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Position at {date} · each fee in its own currency, francs and dollars never added together.'**
+  String recoveryDashboardSubtitle(String date);
+
+  /// No description provided for @recoveryDashboardSubtitleNoDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Each fee in its own currency, francs and dollars never added together.'**
+  String get recoveryDashboardSubtitleNoDate;
+
+  /// No description provided for @recoveryOfflineBanner.
+  ///
+  /// In en, this message translates to:
+  /// **'Offline · figures from {date} at {time}. Exports need the network.'**
+  String recoveryOfflineBanner(String date, String time);
+
+  /// No description provided for @recoveryExportsAwaitNetwork.
+  ///
+  /// In en, this message translates to:
+  /// **'Exports need the network.'**
+  String get recoveryExportsAwaitNetwork;
+
+  /// No description provided for @recoveryEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No fee configured for this year'**
+  String get recoveryEmptyTitle;
+
+  /// No description provided for @recoveryEmptyDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'The collection dashboard is computed from the year\'s fees and enrolled students. Configure the fees, then enrol at least one student.'**
+  String get recoveryEmptyDescription;
+
+  /// No description provided for @recoveryEmptyAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Open the configuration'**
+  String get recoveryEmptyAction;
+
+  /// No description provided for @recoveryScopeCycle.
+  ///
+  /// In en, this message translates to:
+  /// **'{cycle} cycle'**
+  String recoveryScopeCycle(String cycle);
+
+  /// No description provided for @recoveryPerimeterFooter.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No student} =1{1 student} other{{count} students}} · every figure on this page is about these fees'**
+  String recoveryPerimeterFooter(int count);
+
+  /// No description provided for @recoveryExportReference.
+  ///
+  /// In en, this message translates to:
+  /// **'Collection'**
+  String get recoveryExportReference;
+
+  /// No description provided for @recoveryExportReferenceNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Collection · {number}'**
+  String recoveryExportReferenceNumber(String number);
+
+  /// No description provided for @recoveryStudentSheetUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'{name}\'s record is not on this device yet: synchronise, then try again.'**
+  String recoveryStudentSheetUnavailable(String name);
+
+  /// No description provided for @recoveryErrorNetworkTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cannot connect'**
+  String get recoveryErrorNetworkTitle;
+
+  /// No description provided for @recoveryErrorNetwork.
+  ///
+  /// In en, this message translates to:
+  /// **'The collection dashboard is computed on the server. Check the connection, then try again.'**
+  String get recoveryErrorNetwork;
+
+  /// No description provided for @recoveryErrorUnauthorizedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Session expired'**
+  String get recoveryErrorUnauthorizedTitle;
+
+  /// No description provided for @recoveryErrorUnauthorized.
+  ///
+  /// In en, this message translates to:
+  /// **'Your session has expired. Sign in again to view collection.'**
+  String get recoveryErrorUnauthorized;
+
+  /// No description provided for @recoveryErrorForbiddenTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Access denied'**
+  String get recoveryErrorForbiddenTitle;
+
+  /// No description provided for @recoveryErrorForbidden.
+  ///
+  /// In en, this message translates to:
+  /// **'Your account is not allowed to view collection. Ask your school\'s administrator for access.'**
+  String get recoveryErrorForbidden;
+
+  /// No description provided for @recoveryErrorForbiddenList.
+  ///
+  /// In en, this message translates to:
+  /// **'Your account can read the figures, but not the named list of students. Ask your school\'s administrator for access.'**
+  String get recoveryErrorForbiddenList;
+
+  /// No description provided for @recoveryErrorServerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Server error'**
+  String get recoveryErrorServerTitle;
+
+  /// No description provided for @recoveryErrorServer.
+  ///
+  /// In en, this message translates to:
+  /// **'The collection figures could not be computed. Try again in a moment; if the problem persists, contact support.'**
+  String get recoveryErrorServer;
+
+  /// No description provided for @recoveryErrorIncident.
+  ///
+  /// In en, this message translates to:
+  /// **'Incident code: {code}'**
+  String recoveryErrorIncident(String code);
+
+  /// No description provided for @recoveryClassesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Leading classes and classes to chase'**
+  String get recoveryClassesTitle;
+
+  /// No description provided for @recoveryClassesSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'One fee at a time · tap a class to see its students'**
+  String get recoveryClassesSubtitle;
+
+  /// No description provided for @recoveryClassesFeeField.
+  ///
+  /// In en, this message translates to:
+  /// **'Ranked fee'**
+  String get recoveryClassesFeeField;
+
+  /// No description provided for @recoveryClassesFeeOption.
+  ///
+  /// In en, this message translates to:
+  /// **'{label} ({symbol})'**
+  String recoveryClassesFeeOption(String label, String symbol);
+
+  /// No description provided for @recoveryClassesTop.
+  ///
+  /// In en, this message translates to:
+  /// **'Leading'**
+  String get recoveryClassesTop;
+
+  /// No description provided for @recoveryClassesBottom.
+  ///
+  /// In en, this message translates to:
+  /// **'Chase first'**
+  String get recoveryClassesBottom;
+
+  /// No description provided for @recoveryClassesCounts.
+  ///
+  /// In en, this message translates to:
+  /// **'{settled}/{billed} settled · {noPayment} without payment'**
+  String recoveryClassesCounts(int settled, int billed, int noPayment);
+
+  /// No description provided for @recoveryClassesRate.
+  ///
+  /// In en, this message translates to:
+  /// **'{percent}%'**
+  String recoveryClassesRate(int percent);
+
+  /// No description provided for @recoveryClassesRateNone.
+  ///
+  /// In en, this message translates to:
+  /// **'—'**
+  String get recoveryClassesRateNone;
+
+  /// No description provided for @recoveryClassesOutstanding.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} left'**
+  String recoveryClassesOutstanding(String amount);
+
+  /// No description provided for @recoveryClassesSingle.
+  ///
+  /// In en, this message translates to:
+  /// **'Only one class in the scope.'**
+  String get recoveryClassesSingle;
+
+  /// No description provided for @recoveryClassesNone.
+  ///
+  /// In en, this message translates to:
+  /// **'No class in the scope.'**
+  String get recoveryClassesNone;
+
+  /// No description provided for @recoveryClassesUnassignedHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'Unassigned · not ranked'**
+  String get recoveryClassesUnassignedHeading;
+
+  /// No description provided for @recoveryClassesView.
+  ///
+  /// In en, this message translates to:
+  /// **'View class {name}'**
+  String recoveryClassesView(String name);
+
+  /// No description provided for @recoveryClassSheetEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'{cycle} · {fee}'**
+  String recoveryClassSheetEyebrow(String cycle, String fee);
+
+  /// No description provided for @recoveryClassSheetSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No students} =1{1 student} other{{count} students}} · as of {date}'**
+  String recoveryClassSheetSubtitle(int count, DateTime date);
+
+  /// No description provided for @recoveryClassSheetRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Collection rate'**
+  String get recoveryClassSheetRate;
+
+  /// No description provided for @recoveryClassSheetDueOf.
+  ///
+  /// In en, this message translates to:
+  /// **'of {amount} expected'**
+  String recoveryClassSheetDueOf(String amount);
+
+  /// No description provided for @recoveryClassSheetOutstanding.
+  ///
+  /// In en, this message translates to:
+  /// **'Outstanding'**
+  String get recoveryClassSheetOutstanding;
+
+  /// No description provided for @recoveryClassSheetAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get recoveryClassSheetAll;
+
+  /// No description provided for @recoveryClassSheetNoPayment.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing paid'**
+  String get recoveryClassSheetNoPayment;
+
+  /// No description provided for @recoveryClassSheetPartial.
+  ///
+  /// In en, this message translates to:
+  /// **'Partial'**
+  String get recoveryClassSheetPartial;
+
+  /// No description provided for @recoveryClassSheetSettled.
+  ///
+  /// In en, this message translates to:
+  /// **'Settled'**
+  String get recoveryClassSheetSettled;
+
+  /// No description provided for @recoveryClassSheetFilterLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Filter students'**
+  String get recoveryClassSheetFilterLabel;
+
+  /// No description provided for @recoveryClassSheetFilterA11y.
+  ///
+  /// In en, this message translates to:
+  /// **'{label}, {count} students'**
+  String recoveryClassSheetFilterA11y(String label, int count);
+
+  /// No description provided for @recoveryClassSheetEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No student in this filter.'**
+  String get recoveryClassSheetEmpty;
+
+  /// No description provided for @recoveryClassSheetLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading the class\'s students'**
+  String get recoveryClassSheetLoading;
+
+  /// No description provided for @recoveryClassSheetOpenControl.
+  ///
+  /// In en, this message translates to:
+  /// **'Open in fee control'**
+  String get recoveryClassSheetOpenControl;
+
+  /// No description provided for @recoveryClassSheetPaidOf.
+  ///
+  /// In en, this message translates to:
+  /// **'paid {paid} / {due}'**
+  String recoveryClassSheetPaidOf(String paid, String due);
+
+  /// No description provided for @recoveryClassSheetViewStudent.
+  ///
+  /// In en, this message translates to:
+  /// **'View {name}\'s record'**
+  String recoveryClassSheetViewStudent(String name);
+
+  /// No description provided for @recoveryStudentsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Where does each student stand?'**
+  String get recoveryStudentsTitle;
+
+  /// No description provided for @recoveryStudentsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose the rule, then the tab: the list and the exports follow.'**
+  String get recoveryStudentsSubtitle;
+
+  /// No description provided for @recoveryStudentsFeesPill.
+  ///
+  /// In en, this message translates to:
+  /// **'On {fees}'**
+  String recoveryStudentsFeesPill(String fees);
+
+  /// No description provided for @recoveryStudentsRuleHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'A student is in good standing who…'**
+  String get recoveryStudentsRuleHeading;
+
+  /// No description provided for @recoveryStudentsRuleHint.
+  ///
+  /// In en, this message translates to:
+  /// **'one choice · also applies to the exports and the simulation'**
+  String get recoveryStudentsRuleHint;
+
+  /// No description provided for @recoveryStudentsRuleSomePayment.
+  ///
+  /// In en, this message translates to:
+  /// **'has paid something'**
+  String get recoveryStudentsRuleSomePayment;
+
+  /// No description provided for @recoveryStudentsRuleFullySettled.
+  ///
+  /// In en, this message translates to:
+  /// **'has settled everything'**
+  String get recoveryStudentsRuleFullySettled;
+
+  /// No description provided for @recoveryStudentsRuleAtLeast.
+  ///
+  /// In en, this message translates to:
+  /// **'has paid at least'**
+  String get recoveryStudentsRuleAtLeast;
+
+  /// No description provided for @recoveryStudentsRuleAmountLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Minimum amount'**
+  String get recoveryStudentsRuleAmountLabel;
+
+  /// No description provided for @recoveryStudentsRuleInOrderCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} in good standing'**
+  String recoveryStudentsRuleInOrderCount(int count);
+
+  /// No description provided for @recoveryStudentsRuleEnterAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'enter an amount'**
+  String get recoveryStudentsRuleEnterAmount;
+
+  /// No description provided for @recoveryStudentsRuleContrarySomePayment.
+  ///
+  /// In en, this message translates to:
+  /// **'So not in good standing: has paid nothing at all.'**
+  String get recoveryStudentsRuleContrarySomePayment;
+
+  /// No description provided for @recoveryStudentsRuleContraryFullySettled.
+  ///
+  /// In en, this message translates to:
+  /// **'So not in good standing: has paid nothing or only part.'**
+  String get recoveryStudentsRuleContraryFullySettled;
+
+  /// No description provided for @recoveryStudentsRuleContraryAtLeast.
+  ///
+  /// In en, this message translates to:
+  /// **'So not in good standing: has paid less than the amount entered ({amount}).'**
+  String recoveryStudentsRuleContraryAtLeast(String amount);
+
+  /// No description provided for @recoveryStudentsRuleContraryAtLeastEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'So not in good standing: has paid less than the amount entered.'**
+  String get recoveryStudentsRuleContraryAtLeastEmpty;
+
+  /// No description provided for @recoveryStudentsTabToChase.
+  ///
+  /// In en, this message translates to:
+  /// **'To chase'**
+  String get recoveryStudentsTabToChase;
+
+  /// No description provided for @recoveryStudentsTabToChaseSub.
+  ///
+  /// In en, this message translates to:
+  /// **'outstanding {amount}'**
+  String recoveryStudentsTabToChaseSub(String amount);
+
+  /// No description provided for @recoveryStudentsTabInOrder.
+  ///
+  /// In en, this message translates to:
+  /// **'In good standing'**
+  String get recoveryStudentsTabInOrder;
+
+  /// No description provided for @recoveryStudentsTabInOrderSub.
+  ///
+  /// In en, this message translates to:
+  /// **'{percent}% of the headcount'**
+  String recoveryStudentsTabInOrderSub(int percent);
+
+  /// No description provided for @recoveryStudentsTabAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get recoveryStudentsTabAll;
+
+  /// No description provided for @recoveryStudentsTabAllSub.
+  ///
+  /// In en, this message translates to:
+  /// **'green + red'**
+  String get recoveryStudentsTabAllSub;
+
+  /// No description provided for @recoveryStudentsVerbOkSomePayment.
+  ///
+  /// In en, this message translates to:
+  /// **'have paid something'**
+  String get recoveryStudentsVerbOkSomePayment;
+
+  /// No description provided for @recoveryStudentsVerbKoSomePayment.
+  ///
+  /// In en, this message translates to:
+  /// **'have paid nothing'**
+  String get recoveryStudentsVerbKoSomePayment;
+
+  /// No description provided for @recoveryStudentsVerbOkFullySettled.
+  ///
+  /// In en, this message translates to:
+  /// **'have settled everything'**
+  String get recoveryStudentsVerbOkFullySettled;
+
+  /// No description provided for @recoveryStudentsVerbKoFullySettled.
+  ///
+  /// In en, this message translates to:
+  /// **'have not settled everything'**
+  String get recoveryStudentsVerbKoFullySettled;
+
+  /// No description provided for @recoveryStudentsVerbOkAtLeast.
+  ///
+  /// In en, this message translates to:
+  /// **'have paid at least {amount}'**
+  String recoveryStudentsVerbOkAtLeast(String amount);
+
+  /// No description provided for @recoveryStudentsVerbKoAtLeast.
+  ///
+  /// In en, this message translates to:
+  /// **'have paid less than {amount}'**
+  String recoveryStudentsVerbKoAtLeast(String amount);
+
+  /// No description provided for @recoveryStudentsHelpToChase.
+  ///
+  /// In en, this message translates to:
+  /// **'These students {verb}: to chase.'**
+  String recoveryStudentsHelpToChase(String verb);
+
+  /// No description provided for @recoveryStudentsHelpInOrder.
+  ///
+  /// In en, this message translates to:
+  /// **'These students {verb}: nothing to claim.'**
+  String recoveryStudentsHelpInOrder(String verb);
+
+  /// No description provided for @recoveryStudentsHelpAllGreen.
+  ///
+  /// In en, this message translates to:
+  /// **'Green'**
+  String get recoveryStudentsHelpAllGreen;
+
+  /// No description provided for @recoveryStudentsHelpAllRed.
+  ///
+  /// In en, this message translates to:
+  /// **'Red'**
+  String get recoveryStudentsHelpAllRed;
+
+  /// No description provided for @recoveryStudentsHelpAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Green: {okVerb} · Red: {koVerb}.'**
+  String recoveryStudentsHelpAll(String okVerb, String koVerb);
+
+  /// No description provided for @recoveryStudentsListCount.
+  ///
+  /// In en, this message translates to:
+  /// **'· {count}'**
+  String recoveryStudentsListCount(int count);
+
+  /// No description provided for @recoveryStudentsSearch.
+  ///
+  /// In en, this message translates to:
+  /// **'Name, registration number or parent'**
+  String get recoveryStudentsSearch;
+
+  /// No description provided for @recoveryStudentsColStudent.
+  ///
+  /// In en, this message translates to:
+  /// **'Student'**
+  String get recoveryStudentsColStudent;
+
+  /// No description provided for @recoveryStudentsColClass.
+  ///
+  /// In en, this message translates to:
+  /// **'Class'**
+  String get recoveryStudentsColClass;
+
+  /// No description provided for @recoveryStudentsColPaid.
+  ///
+  /// In en, this message translates to:
+  /// **'Paid'**
+  String get recoveryStudentsColPaid;
+
+  /// No description provided for @recoveryStudentsColOutstanding.
+  ///
+  /// In en, this message translates to:
+  /// **'Outstanding'**
+  String get recoveryStudentsColOutstanding;
+
+  /// No description provided for @recoveryStudentsColSituation.
+  ///
+  /// In en, this message translates to:
+  /// **'Status'**
+  String get recoveryStudentsColSituation;
+
+  /// No description provided for @recoveryStudentsColStudentClass.
+  ///
+  /// In en, this message translates to:
+  /// **'Student · class'**
+  String get recoveryStudentsColStudentClass;
+
+  /// No description provided for @recoveryStudentsColOutstandingPaid.
+  ///
+  /// In en, this message translates to:
+  /// **'Outstanding · paid'**
+  String get recoveryStudentsColOutstandingPaid;
+
+  /// No description provided for @recoveryStudentsSituationNone.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing paid'**
+  String get recoveryStudentsSituationNone;
+
+  /// No description provided for @recoveryStudentsSituationPartial.
+  ///
+  /// In en, this message translates to:
+  /// **'Partial'**
+  String get recoveryStudentsSituationPartial;
+
+  /// No description provided for @recoveryStudentsSituationSettled.
+  ///
+  /// In en, this message translates to:
+  /// **'Settled'**
+  String get recoveryStudentsSituationSettled;
+
+  /// No description provided for @recoveryStudentsInOrder.
+  ///
+  /// In en, this message translates to:
+  /// **'In good standing'**
+  String get recoveryStudentsInOrder;
+
+  /// No description provided for @recoveryStudentsToChase.
+  ///
+  /// In en, this message translates to:
+  /// **'To chase'**
+  String get recoveryStudentsToChase;
+
+  /// No description provided for @recoveryStudentsViewSheet.
+  ///
+  /// In en, this message translates to:
+  /// **'View {name}\'s record'**
+  String recoveryStudentsViewSheet(String name);
+
+  /// No description provided for @recoveryStudentsPaidUnder.
+  ///
+  /// In en, this message translates to:
+  /// **'paid {amount}'**
+  String recoveryStudentsPaidUnder(String amount);
+
+  /// No description provided for @recoveryStudentsCardPaid.
+  ///
+  /// In en, this message translates to:
+  /// **'Paid'**
+  String get recoveryStudentsCardPaid;
+
+  /// No description provided for @recoveryStudentsCardOutstanding.
+  ///
+  /// In en, this message translates to:
+  /// **'Outstanding'**
+  String get recoveryStudentsCardOutstanding;
+
+  /// No description provided for @recoveryStudentsRange.
+  ///
+  /// In en, this message translates to:
+  /// **'{from}–{to} of {total} students'**
+  String recoveryStudentsRange(int from, int to, int total);
+
+  /// No description provided for @recoveryStudentsPage.
+  ///
+  /// In en, this message translates to:
+  /// **'Page {page} / {total}'**
+  String recoveryStudentsPage(int page, int total);
+
+  /// No description provided for @recoveryStudentsEmptyToChase.
+  ///
+  /// In en, this message translates to:
+  /// **'Every student is in good standing under this rule.'**
+  String get recoveryStudentsEmptyToChase;
+
+  /// No description provided for @recoveryStudentsEmptyInOrder.
+  ///
+  /// In en, this message translates to:
+  /// **'No student is in good standing under this rule.'**
+  String get recoveryStudentsEmptyInOrder;
+
+  /// No description provided for @recoveryStudentsEmptyAll.
+  ///
+  /// In en, this message translates to:
+  /// **'No students.'**
+  String get recoveryStudentsEmptyAll;
+
+  /// No description provided for @recoveryStudentsEmptySearch.
+  ///
+  /// In en, this message translates to:
+  /// **'No student matches “{search}”.'**
+  String recoveryStudentsEmptySearch(String search);
+
+  /// No description provided for @recoveryStudentsLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading students…'**
+  String get recoveryStudentsLoading;
+
+  /// No description provided for @recoveryStudentsExportLead.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Export this student} other{Export these {count} students}}'**
+  String recoveryStudentsExportLead(int count);
+
+  /// No description provided for @recoveryStudentsExportRest.
+  ///
+  /// In en, this message translates to:
+  /// **' — one section per class, green in good standing, red to chase'**
+  String get recoveryStudentsExportRest;
+
+  /// No description provided for @recoveryStudentsExportEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No student to export in this tab.'**
+  String get recoveryStudentsExportEmpty;
+
+  /// No description provided for @recoveryFiguresA11yLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Recovery key figures'**
+  String get recoveryFiguresA11yLabel;
+
+  /// No description provided for @recoveryFiguresExpected.
+  ///
+  /// In en, this message translates to:
+  /// **'Expected'**
+  String get recoveryFiguresExpected;
+
+  /// No description provided for @recoveryFiguresExpectedSubline.
+  ///
+  /// In en, this message translates to:
+  /// **'Fees due in {currency, select, USD{dollars} CDF{francs} other{{currency}}}'**
+  String recoveryFiguresExpectedSubline(String currency);
+
+  /// No description provided for @recoveryFiguresExpectedMixedSubline.
+  ///
+  /// In en, this message translates to:
+  /// **'Francs and dollars, never added together'**
+  String get recoveryFiguresExpectedMixedSubline;
+
+  /// No description provided for @recoveryFiguresCollected.
+  ///
+  /// In en, this message translates to:
+  /// **'Collected to date'**
+  String get recoveryFiguresCollected;
+
+  /// No description provided for @recoveryFiguresSettledSubline.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No student has fully paid} =1{1 student has fully paid} other{{count} students have fully paid}}'**
+  String recoveryFiguresSettledSubline(int count);
+
+  /// No description provided for @recoveryFiguresRemaining.
+  ///
+  /// In en, this message translates to:
+  /// **'Still to collect'**
+  String get recoveryFiguresRemaining;
+
+  /// No description provided for @recoveryFiguresRemainingSubline.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{Every student has fully paid} =1{From 1 student not fully paid} other{From {count} students not fully paid}}'**
+  String recoveryFiguresRemainingSubline(int count);
+
+  /// No description provided for @recoveryFiguresRateRing.
+  ///
+  /// In en, this message translates to:
+  /// **'{rate}%'**
+  String recoveryFiguresRateRing(int rate);
+
+  /// No description provided for @recoveryFiguresRateRingA11y.
+  ///
+  /// In en, this message translates to:
+  /// **'{rate}% of the expected amount collected'**
+  String recoveryFiguresRateRingA11y(int rate);
+
+  /// No description provided for @recoveryFiguresSituationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Status of the student} other{Status of the {count} students}}'**
+  String recoveryFiguresSituationTitle(int count);
+
+  /// No description provided for @recoveryFiguresSituationNoPayment.
+  ///
+  /// In en, this message translates to:
+  /// **'Paid nothing'**
+  String get recoveryFiguresSituationNoPayment;
+
+  /// No description provided for @recoveryFiguresSituationPartial.
+  ///
+  /// In en, this message translates to:
+  /// **'Partly paid'**
+  String get recoveryFiguresSituationPartial;
+
+  /// No description provided for @recoveryFiguresSituationSettled.
+  ///
+  /// In en, this message translates to:
+  /// **'Fully paid'**
+  String get recoveryFiguresSituationSettled;
+
+  /// No description provided for @recoveryFiguresSituationRowHint.
+  ///
+  /// In en, this message translates to:
+  /// **'See these students in fee control'**
+  String get recoveryFiguresSituationRowHint;
+
+  /// No description provided for @recoveryFiguresSituationRowA11y.
+  ///
+  /// In en, this message translates to:
+  /// **'{label}: {count, plural, =1{1 student} other{{count} students}}'**
+  String recoveryFiguresSituationRowA11y(String label, int count);
+
+  /// No description provided for @recoveryFiguresSituationBarA11y.
+  ///
+  /// In en, this message translates to:
+  /// **'Paid nothing: {none} · partly paid: {partial} · fully paid: {settled}'**
+  String recoveryFiguresSituationBarA11y(int none, int partial, int settled);
+
+  /// No description provided for @recoveryRatesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Recovery rate by fee'**
+  String get recoveryRatesTitle;
+
+  /// No description provided for @recoveryRatesSubtitleOne.
+  ///
+  /// In en, this message translates to:
+  /// **'A single fee selected · each currency reads on its own'**
+  String get recoveryRatesSubtitleOne;
+
+  /// No description provided for @recoveryRatesSubtitleMany.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} fees selected · each currency reads on its own'**
+  String recoveryRatesSubtitleMany(int count);
+
+  /// No description provided for @recoveryRatesSubtitleAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All {count} fees · each currency reads on its own'**
+  String recoveryRatesSubtitleAll(int count);
+
+  /// No description provided for @recoveryRatesCurrencyChip.
+  ///
+  /// In en, this message translates to:
+  /// **'Fees in {currency, select, USD{dollars} CDF{francs} other{{currency}}}'**
+  String recoveryRatesCurrencyChip(String currency);
+
+  /// No description provided for @recoveryRatesGroupSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'{collected} of {expected} · {rate}% recovered'**
+  String recoveryRatesGroupSummary(String collected, String expected, int rate);
+
+  /// No description provided for @recoveryRatesGroupSummaryNoDue.
+  ///
+  /// In en, this message translates to:
+  /// **'{collected} of {expected} · —'**
+  String recoveryRatesGroupSummaryNoDue(String collected, String expected);
+
+  /// No description provided for @recoveryRatesRowRateOf.
+  ///
+  /// In en, this message translates to:
+  /// **'{rate}% of {expected}'**
+  String recoveryRatesRowRateOf(int rate, String expected);
+
+  /// No description provided for @recoveryRatesRowRemaining.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} left'**
+  String recoveryRatesRowRemaining(String amount);
+
+  /// No description provided for @recoveryRatesRowA11y.
+  ///
+  /// In en, this message translates to:
+  /// **'{label}: {collected} collected of {expected}, {rate}%, {remaining} left'**
+  String recoveryRatesRowA11y(
+    String label,
+    String collected,
+    String expected,
+    int rate,
+    String remaining,
+  );
+
+  /// No description provided for @recoveryRatesRowNotBilledA11y.
+  ///
+  /// In en, this message translates to:
+  /// **'{label}: billed to no student'**
+  String recoveryRatesRowNotBilledA11y(String label);
+
+  /// No description provided for @recoverySimulationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Simulation: if students not in good standing were sent home'**
+  String get recoverySimulationTitle;
+
+  /// No description provided for @recoverySimulationSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Current headcount → remaining headcount, class by class. Nothing is applied: this is a trade-off calculation.'**
+  String get recoverySimulationSubtitle;
+
+  /// No description provided for @recoverySimulationCriterionHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'Criterion (the same as above)'**
+  String get recoverySimulationCriterionHeading;
+
+  /// No description provided for @recoverySimulationChange.
+  ///
+  /// In en, this message translates to:
+  /// **'Change'**
+  String get recoverySimulationChange;
+
+  /// No description provided for @recoverySimulationChangeA11y.
+  ///
+  /// In en, this message translates to:
+  /// **'Change the “in good standing” rule, higher up the page'**
+  String get recoverySimulationChangeA11y;
+
+  /// No description provided for @recoverySimulationCriterionNoPayment.
+  ///
+  /// In en, this message translates to:
+  /// **'Have paid nothing'**
+  String get recoverySimulationCriterionNoPayment;
+
+  /// No description provided for @recoverySimulationCriterionNotSettled.
+  ///
+  /// In en, this message translates to:
+  /// **'Have not settled everything'**
+  String get recoverySimulationCriterionNotSettled;
+
+  /// No description provided for @recoverySimulationCriterionBelow.
+  ///
+  /// In en, this message translates to:
+  /// **'Have paid less than {amount}'**
+  String recoverySimulationCriterionBelow(String amount);
+
+  /// No description provided for @recoverySimulationTargetedNoPayment.
+  ///
+  /// In en, this message translates to:
+  /// **'No payment on the selected fees'**
+  String get recoverySimulationTargetedNoPayment;
+
+  /// No description provided for @recoverySimulationTargetedNotSettled.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing paid or partly paid'**
+  String get recoverySimulationTargetedNotSettled;
+
+  /// No description provided for @recoverySimulationTargetedBelow.
+  ///
+  /// In en, this message translates to:
+  /// **'Below a minimum amount'**
+  String get recoverySimulationTargetedBelow;
+
+  /// No description provided for @recoverySimulationUnmanageableSlider.
+  ///
+  /// In en, this message translates to:
+  /// **'Class unmanageable below {percent} of its headcount'**
+  String recoverySimulationUnmanageableSlider(String percent);
+
+  /// No description provided for @recoverySimulationPercent.
+  ///
+  /// In en, this message translates to:
+  /// **'{percent}%'**
+  String recoverySimulationPercent(int percent);
+
+  /// No description provided for @recoverySimulationHeadcount.
+  ///
+  /// In en, this message translates to:
+  /// **'Headcount today'**
+  String get recoverySimulationHeadcount;
+
+  /// No description provided for @recoverySimulationHeadcountSub.
+  ///
+  /// In en, this message translates to:
+  /// **'enrolled students'**
+  String get recoverySimulationHeadcountSub;
+
+  /// No description provided for @recoverySimulationTargeted.
+  ///
+  /// In en, this message translates to:
+  /// **'Students targeted'**
+  String get recoverySimulationTargeted;
+
+  /// No description provided for @recoverySimulationRemaining.
+  ///
+  /// In en, this message translates to:
+  /// **'Remaining headcount'**
+  String get recoverySimulationRemaining;
+
+  /// No description provided for @recoverySimulationRemainingSub.
+  ///
+  /// In en, this message translates to:
+  /// **'{percent}% of the headcount kept'**
+  String recoverySimulationRemainingSub(int percent);
+
+  /// No description provided for @recoverySimulationUnmanageable.
+  ///
+  /// In en, this message translates to:
+  /// **'Unmanageable classes'**
+  String get recoverySimulationUnmanageable;
+
+  /// No description provided for @recoverySimulationUnmanageableNone.
+  ///
+  /// In en, this message translates to:
+  /// **'none below the threshold'**
+  String get recoverySimulationUnmanageableNone;
+
+  /// No description provided for @recoverySimulationUnmanageableTwo.
+  ///
+  /// In en, this message translates to:
+  /// **'{first}, {second}'**
+  String recoverySimulationUnmanageableTwo(String first, String second);
+
+  /// No description provided for @recoverySimulationUnmanageableMore.
+  ///
+  /// In en, this message translates to:
+  /// **'{names}…'**
+  String recoverySimulationUnmanageableMore(String names);
+
+  /// No description provided for @recoverySimulationColClass.
+  ///
+  /// In en, this message translates to:
+  /// **'Class'**
+  String get recoverySimulationColClass;
+
+  /// No description provided for @recoverySimulationColHeadcount.
+  ///
+  /// In en, this message translates to:
+  /// **'Headcount'**
+  String get recoverySimulationColHeadcount;
+
+  /// No description provided for @recoverySimulationColLeaving.
+  ///
+  /// In en, this message translates to:
+  /// **'Sent home'**
+  String get recoverySimulationColLeaving;
+
+  /// No description provided for @recoverySimulationColRemaining.
+  ///
+  /// In en, this message translates to:
+  /// **'Remaining'**
+  String get recoverySimulationColRemaining;
+
+  /// No description provided for @recoverySimulationColKept.
+  ///
+  /// In en, this message translates to:
+  /// **'Headcount kept'**
+  String get recoverySimulationColKept;
+
+  /// No description provided for @recoverySimulationColVerdict.
+  ///
+  /// In en, this message translates to:
+  /// **'Verdict'**
+  String get recoverySimulationColVerdict;
+
+  /// No description provided for @recoverySimulationLeaving.
+  ///
+  /// In en, this message translates to:
+  /// **'−{count}'**
+  String recoverySimulationLeaving(int count);
+
+  /// No description provided for @recoverySimulationCardHeadcount.
+  ///
+  /// In en, this message translates to:
+  /// **'Headcount'**
+  String get recoverySimulationCardHeadcount;
+
+  /// No description provided for @recoverySimulationCardLeaving.
+  ///
+  /// In en, this message translates to:
+  /// **'Sent home'**
+  String get recoverySimulationCardLeaving;
+
+  /// No description provided for @recoverySimulationCardRemaining.
+  ///
+  /// In en, this message translates to:
+  /// **'Remaining'**
+  String get recoverySimulationCardRemaining;
+
+  /// No description provided for @recoveryVerdictUnmanageable.
+  ///
+  /// In en, this message translates to:
+  /// **'Unmanageable'**
+  String get recoveryVerdictUnmanageable;
+
+  /// No description provided for @recoveryVerdictFragile.
+  ///
+  /// In en, this message translates to:
+  /// **'Fragile'**
+  String get recoveryVerdictFragile;
+
+  /// No description provided for @recoveryVerdictTenable.
+  ///
+  /// In en, this message translates to:
+  /// **'Tenable'**
+  String get recoveryVerdictTenable;
+
+  /// No description provided for @recoverySimulationShowMore.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Show the other class} other{Show the {count} other classes}}'**
+  String recoverySimulationShowMore(int count);
+
+  /// No description provided for @recoverySimulationShowLess.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep only the {count} most affected classes'**
+  String recoverySimulationShowLess(int count);
+
+  /// No description provided for @recoverySimulationOpenList.
+  ///
+  /// In en, this message translates to:
+  /// **'Show the named list for {classroom}'**
+  String recoverySimulationOpenList(String classroom);
+
+  /// No description provided for @recoverySimulationRowA11y.
+  ///
+  /// In en, this message translates to:
+  /// **'{classroom}: {headcount} → {remaining} students, {percent}% of the headcount kept'**
+  String recoverySimulationRowA11y(
+    String classroom,
+    int headcount,
+    int remaining,
+    int percent,
+  );
+
+  /// No description provided for @recoverySimulationNoteLead.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap a class to open the named list to be signed.'**
+  String get recoverySimulationNoteLead;
+
+  /// No description provided for @recoverySimulationNoteNothingLost.
+  ///
+  /// In en, this message translates to:
+  /// **'These students have paid nothing: sending them home would lose no collected revenue, but it gives up the {amount} expected from them.'**
+  String recoverySimulationNoteNothingLost(String amount);
+
+  /// No description provided for @recoverySimulationNoteWithLoss.
+  ///
+  /// In en, this message translates to:
+  /// **'Sending them home would also lose {lost} already collected from these families, without recovering the {missing} still missing.'**
+  String recoverySimulationNoteWithLoss(String lost, String missing);
+
+  /// No description provided for @recoveryAmountsAnd.
+  ///
+  /// In en, this message translates to:
+  /// **'{first} and {second}'**
+  String recoveryAmountsAnd(String first, String second);
+
+  /// No description provided for @recoverySimulationCallListPrint.
+  ///
+  /// In en, this message translates to:
+  /// **'Print'**
+  String get recoverySimulationCallListPrint;
+
+  /// No description provided for @recoverySimulationCallListSignature.
+  ///
+  /// In en, this message translates to:
+  /// **'Parent\'s signature'**
+  String get recoverySimulationCallListSignature;
+
+  /// No description provided for @recoverySimulationCallListCollectorVisa.
+  ///
+  /// In en, this message translates to:
+  /// **'Bursar\'s approval'**
+  String get recoverySimulationCallListCollectorVisa;
+
+  /// No description provided for @recoverySimulationCallListDirectionVisa.
+  ///
+  /// In en, this message translates to:
+  /// **'Management\'s approval'**
+  String get recoverySimulationCallListDirectionVisa;
+
+  /// No description provided for @recoveryInsightWorstFeeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'The most overdue fee'**
+  String get recoveryInsightWorstFeeTitle;
+
+  /// No description provided for @recoveryInsightWorstFeeBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{fee} tops out at {percent}% recovery: {amount} is still missing.'**
+  String recoveryInsightWorstFeeBody(String fee, int percent, String amount);
+
+  /// No description provided for @recoveryInsightControl.
+  ///
+  /// In en, this message translates to:
+  /// **'Check the students'**
+  String get recoveryInsightControl;
+
+  /// No description provided for @recoveryInsightSpreadTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Gap between classes'**
+  String get recoveryInsightSpreadTitle;
+
+  /// No description provided for @recoveryInsightSpreadBody.
+  ///
+  /// In en, this message translates to:
+  /// **'On {fee}, from {bestPercent}% ({bestClass}) to {worstPercent}% ({worstClass}): the gap owes more to follow-up than to families.'**
+  String recoveryInsightSpreadBody(
+    String fee,
+    int bestPercent,
+    String bestClass,
+    int worstPercent,
+    String worstClass,
+  );
+
+  /// No description provided for @recoveryInsightSimulationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'What the simulation says'**
+  String get recoveryInsightSimulationTitle;
+
+  /// No description provided for @recoveryInsightSimulationUnmanageable.
+  ///
+  /// In en, this message translates to:
+  /// **'Sending them home would push {count, plural, =1{1 class} other{{count} classes}} below {percent}% of its headcount. A staggered follow-up costs less there than an emptied class.'**
+  String recoveryInsightSimulationUnmanageable(int count, int percent);
+
+  /// No description provided for @recoveryInsightSimulationTenable.
+  ///
+  /// In en, this message translates to:
+  /// **'No class would fall below {percent}%: the measure would remain tenable, with {remaining} of {headcount} students kept.'**
+  String recoveryInsightSimulationTenable(
+    int percent,
+    int remaining,
+    int headcount,
+  );
+
+  /// No description provided for @feeControlExportTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Fee control · {question}'**
+  String feeControlExportTitle(String question);
+
+  /// No description provided for @feeControlExportReference.
+  ///
+  /// In en, this message translates to:
+  /// **'Fee control'**
+  String get feeControlExportReference;
+
+  /// No description provided for @feeControlNotifyAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Notify parents'**
+  String get feeControlNotifyAction;
+
+  /// No description provided for @feeControlNotifyOfflineTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'The reminder needs the network.'**
+  String get feeControlNotifyOfflineTooltip;
+
+  /// No description provided for @feeControlNotifyEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Reminder'**
+  String get feeControlNotifyEyebrow;
+
+  /// No description provided for @feeControlNotifyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Notify 1 parent} other{Notify {count} parents}}'**
+  String feeControlNotifyTitle(int count);
+
+  /// No description provided for @feeControlNotifyMessageLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Message'**
+  String get feeControlNotifyMessageLabel;
+
+  /// No description provided for @feeControlNotifyCharacterCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 character} other{{count} characters}}'**
+  String feeControlNotifyCharacterCount(int count);
+
+  /// Message prérempli de la relance (spec contrôle des frais §7 relance.message). context = frais · classe ; date = aujourd'hui + 7 jours, jj/mm/aaaa.
+  ///
+  /// In en, this message translates to:
+  /// **'Dear parent, the {context} fees for your child are not settled. Please come to the school\'s cash desk before {date}. The management of {school}.'**
+  String feeControlNotifyMessage(String context, String date, String school);
+
+  /// Même message quand le nom de l'école n'est pas encore connu de l'appareil.
+  ///
+  /// In en, this message translates to:
+  /// **'Dear parent, the {context} fees for your child are not settled. Please come to the school\'s cash desk before {date}. The school management.'**
+  String feeControlNotifyMessageNoSchool(String context, String date);
+
+  /// No description provided for @feeControlNotifyRecipients.
+  ///
+  /// In en, this message translates to:
+  /// **'Recipients'**
+  String get feeControlNotifyRecipients;
+
+  /// No description provided for @feeControlNotifyRecipientFor.
+  ///
+  /// In en, this message translates to:
+  /// **'for {student}'**
+  String feeControlNotifyRecipientFor(String student);
+
+  /// No description provided for @feeControlNotifyUnknownParent.
+  ///
+  /// In en, this message translates to:
+  /// **'Parent not recorded'**
+  String get feeControlNotifyUnknownParent;
+
+  /// No description provided for @feeControlNotifyWithoutPhone.
+  ///
+  /// In en, this message translates to:
+  /// **'No known phone ({count})'**
+  String feeControlNotifyWithoutPhone(int count);
+
+  /// No description provided for @feeControlNotifyWithoutPhoneNote.
+  ///
+  /// In en, this message translates to:
+  /// **'No number is known on this device for these parents: the reminder names them, but they will have to be reached another way.'**
+  String get feeControlNotifyWithoutPhoneNote;
+
+  /// No description provided for @feeControlNotifyShareNote.
+  ///
+  /// In en, this message translates to:
+  /// **'“Send” hands the reminder to the device\'s share sheet: pick the app that sends it there.'**
+  String get feeControlNotifyShareNote;
+
+  /// No description provided for @feeControlNotifySend.
+  ///
+  /// In en, this message translates to:
+  /// **'Send'**
+  String get feeControlNotifySend;
+
+  /// No description provided for @feeControlNotifySending.
+  ///
+  /// In en, this message translates to:
+  /// **'Sending…'**
+  String get feeControlNotifySending;
+
+  /// No description provided for @feeControlNotifyFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Sharing did not go through. Your message is kept: try again.'**
+  String get feeControlNotifyFailed;
+
+  /// No description provided for @feeControlNotifySent.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Reminder sent to 1 parent.} other{Reminder sent to {count} parents.}}'**
+  String feeControlNotifySent(int count);
+
+  /// No description provided for @feeControlNotifyPdfTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Parent reminder'**
+  String get feeControlNotifyPdfTitle;
+
+  /// No description provided for @feeControlNotifyPdfParent.
+  ///
+  /// In en, this message translates to:
+  /// **'Parent'**
+  String get feeControlNotifyPdfParent;
+
+  /// No description provided for @feeControlNotifyPdfPhone.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone'**
+  String get feeControlNotifyPdfPhone;
+
+  /// No description provided for @recouvrementAmountHintFrancs.
+  ///
+  /// In en, this message translates to:
+  /// **'50,000'**
+  String get recouvrementAmountHintFrancs;
+
+  /// No description provided for @recouvrementAmountHintDollars.
+  ///
+  /// In en, this message translates to:
+  /// **'120'**
+  String get recouvrementAmountHintDollars;
 }
 
 class _AppLocalizationsDelegate

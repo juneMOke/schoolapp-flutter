@@ -6,6 +6,7 @@ import 'package:school_app_flutter/core/database/schema/academics_offline_schema
 import 'package:school_app_flutter/core/database/schema/attendance_justification_schema.dart';
 import 'package:school_app_flutter/core/database/schema/evaluation_depot_schema.dart';
 import 'package:school_app_flutter/core/database/schema/boutique_dashboard_cache_schema.dart';
+import 'package:school_app_flutter/core/database/schema/recouvrement_dashboard_cache_schema.dart';
 import 'package:school_app_flutter/core/database/schema/class_journal_schema.dart';
 import 'package:school_app_flutter/core/database/schema/cote_saisie_schema.dart';
 import 'package:school_app_flutter/core/database/schema/course_programme_schema.dart';
@@ -226,6 +227,11 @@ Future<void> migrateTenantDatabase(
     await _addColumnIfTable(db, 'cal_frameworks', 'document_uploaded_at');
     await _addColumnIfTable(db, 'school_calendar_events', 'replaces_item_id');
     await _repullCalendarFramework(db);
+  }
+  if (upTo(87)) {
+    // Recouvrement v2 : la photo hors ligne du tableau de bord, calculé par
+    // le serveur. Création pure, sans reprise.
+    await _createTables(db, recouvrementDashboardCacheTables);
   }
 }
 
