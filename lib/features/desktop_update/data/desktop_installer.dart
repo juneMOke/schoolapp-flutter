@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:path/path.dart' as p;
+import 'package:school_app_flutter/core/constants/app_constants.dart';
 import 'package:school_app_flutter/features/desktop_update/domain/repositories/desktop_update_repository.dart';
 
 /// L'installation n'a pas pu aller au bout ; l'ancienne version reste.
@@ -37,6 +38,9 @@ class SystemProcessLauncher implements ProcessLauncher {
 /// l'application : c'est le processus lancé ici qui ramène la nouvelle.
 abstract class DesktopInstaller {
   Future<void> install(VerifiedInstaller installer);
+
+  /// Après un lancement réussi, l'application se ferme-t-elle elle-même ?
+  bool get appMustQuit;
 }
 
 /// Windows : l'installateur Inno Setup, silencieux. `/UPDATE` lui fait
@@ -58,6 +62,12 @@ class WindowsDesktopInstaller implements DesktopInstaller {
     '/CLOSEAPPLICATIONS',
     '/UPDATE',
   ];
+
+  /// Non : Inno Setup la ferme (`/CLOSEAPPLICATIONS`) au moment où il est
+  /// prêt à copier. Si l'installateur échoue avant — élévation refusée,
+  /// antivirus —, l'application reste ouverte au lieu de disparaître.
+  @override
+  bool get appMustQuit => false;
 
   @override
   Future<void> install(VerifiedInstaller installer) =>
@@ -88,6 +98,9 @@ class LinuxDesktopInstaller implements DesktopInstaller {
   }
 
   @override
+  bool get appMustQuit => true;
+
+  @override
   Future<void> install(VerifiedInstaller installer) async {
     final extractDir = Directory(p.join(p.dirname(installer.path), 'extract'));
     if (await extractDir.exists()) await extractDir.delete(recursive: true);
@@ -107,7 +120,11 @@ class LinuxDesktopInstaller implements DesktopInstaller {
   }
 
   Future<void> _check(String executable, List<String> arguments) async {
-    final result = await _launcher.run(executable, arguments);
+    // Un `install.sh` qui ne rend jamais la main (disque réseau gelé) ne doit
+    // pas laisser la fenêtre en « Installation » à vie.
+    final result = await _launcher
+        .run(executable, arguments)
+        .timeout(AppConstants.desktopUpdateInstallTimeout);
     if (result.exitCode != 0) {
       throw DesktopInstallException(
         '$executable (${result.exitCode}) : ${result.stderr}',

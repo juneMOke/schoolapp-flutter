@@ -23,9 +23,16 @@ class DesktopReleaseVerifier {
     required this.platform,
     required this.channel,
     List<String>? publicKeys,
-  }) : publicKeys = publicKeys ?? AppConstants.desktopUpdatePublicKeys;
+  }) : publicKeys =
+           publicKeys ??
+           AppConstants.desktopUpdatePublicKeys[channel] ??
+           const [];
 
   static final _sha256 = RegExp(r'^[0-9a-f]{64}$');
+
+  /// Le nom du fichier devient un chemin sur le poste : aucune barre, aucun
+  /// `..`, rien d'encodé.
+  static final _fileName = RegExp(r'^[A-Za-z0-9][A-Za-z0-9._-]*$');
   static final _ed25519 = Ed25519();
 
   /// La version signée, ou une [FormatException] qui dit pourquoi non.
@@ -134,6 +141,13 @@ class DesktopReleaseVerifier {
         // `…/download/<tag>/<fichier>` : exactement deux segments après le
         // préfixe.
         url.pathSegments.length ==
-            allowed.pathSegments.where((s) => s.isNotEmpty).length + 2;
+            allowed.pathSegments.where((s) => s.isNotEmpty).length + 2 &&
+        !url.path.contains('%') &&
+        url.pathSegments
+            .skip(url.pathSegments.length - 2)
+            .every(
+              (segment) =>
+                  _fileName.hasMatch(segment) && !segment.contains('..'),
+            );
   }
 }

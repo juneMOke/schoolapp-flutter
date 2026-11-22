@@ -26381,4 +26381,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String desktopUpdateJustUpdated(String version) {
     return 'App updated to version $version.';
   }
+
+  @override
+  String get desktopUpdatePendingUnknown =>
+      'Pending operations could not be checked. If there are any, they will be kept and sent after the update.';
+
+  @override
+  String get desktopUpdateWaitingInstaller =>
+      'The installer is running. It will close the app and restart it; Windows may first ask for an administrator\'s approval.';
 }

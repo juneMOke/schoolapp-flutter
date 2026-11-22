@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
+import 'package:school_app_flutter/core/navigation/route_exit_guard.dart';
 import 'package:school_app_flutter/features/desktop_update/domain/entities/app_version.dart';
 import 'package:school_app_flutter/features/desktop_update/domain/entities/desktop_release.dart';
 import 'package:school_app_flutter/features/desktop_update/domain/repositories/desktop_update_repository.dart';
@@ -32,8 +33,8 @@ class _Repo implements DesktopUpdateRepository {
   }) => Completer<Either<Failure, VerifiedInstaller>>().future;
 
   @override
-  Future<Either<Failure, void>> install(VerifiedInstaller installer) async =>
-      const Right(null);
+  Future<Either<Failure, bool>> install(VerifiedInstaller installer) async =>
+      const Right(true);
 }
 
 class _Store implements LastRunVersionStore {
@@ -72,8 +73,21 @@ void main() {
           builder: (_, _) => const Scaffold(body: Text('accueil')),
         ),
         GoRoute(
-          path: '/encaissement',
-          builder: (_, _) => const Scaffold(body: Text('saisie')),
+          path: '/home/:screen',
+          builder: (_, state) => Scaffold(
+            body: state.pathParameters['screen'] == 'facturations'
+                // Une saisie en cours : la garde de sortie le dit.
+                ? RouteExitGuard(
+                    hasUnsavedWork: () => true,
+                    confirmExit: () async => true,
+                    child: const Text('saisie'),
+                  )
+                : Text(state.pathParameters['screen']!),
+          ),
+        ),
+        GoRoute(
+          path: '/login',
+          builder: (_, _) => const Scaffold(body: Text('connexion')),
         ),
       ],
     );
@@ -119,10 +133,31 @@ void main() {
     expect(cubit.state.hasOffer, isTrue);
   });
 
+  testWidgets('écran de saisie sous l’accueil : rien', (tester) async {
+    await pump(tester, initial: '/home/resultats-saisie');
+    expect(find.text('La version 1.9.0 est disponible'), findsNothing);
+  });
+
+  testWidgets('tableau de bord : la fenêtre s’ouvre', (tester) async {
+    await pump(tester, initial: '/home/finances-dashboard');
+    expect(find.text('La version 1.9.0 est disponible'), findsOneWidget);
+  });
+
+  testWidgets('connexion : seulement si la mise à jour est obligatoire', (
+    tester,
+  ) async {
+    await pump(tester, initial: '/login');
+    expect(find.text('La version 1.9.0 est disponible'), findsNothing);
+    repo.next = offer(minimum: const AppVersion(1, 9, 0));
+    await cubit.check();
+    await tester.pumpAndSettle();
+    expect(find.text('Mise à jour obligatoire'), findsOneWidget);
+  });
+
   testWidgets('pendant une saisie : rien, jusqu’au retour à l’accueil', (
     tester,
   ) async {
-    await pump(tester, initial: '/encaissement');
+    await pump(tester, initial: '/home/facturations');
     expect(find.text('La version 1.9.0 est disponible'), findsNothing);
     router.go('/home');
     await tester.pumpAndSettle();
@@ -132,7 +167,7 @@ void main() {
   testWidgets('demandée depuis le menu : s’ouvre même hors de l’accueil', (
     tester,
   ) async {
-    await pump(tester, initial: '/encaissement');
+    await pump(tester, initial: '/home/resultats-saisie');
     cubit.reopen();
     await tester.pumpAndSettle();
     expect(find.text('La version 1.9.0 est disponible'), findsOneWidget);

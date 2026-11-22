@@ -13733,5 +13733,7 @@
   "@desktopUpdatePendingBody": {"placeholders": {"count": {"type": "int"}}},
   "@desktopUpdateDownloading": {"placeholders": {"percent": {"type": "int"}}},
   "@desktopUpdateMenuEntry": {"placeholders": {"version": {"type": "String"}}},
-  "@desktopUpdateJustUpdated": {"placeholders": {"version": {"type": "String"}}}
+  "@desktopUpdateJustUpdated": {"placeholders": {"version": {"type": "String"}}},
+  "desktopUpdatePendingUnknown": "Pending operations could not be checked. If there are any, they will be kept and sent after the update.",
+  "desktopUpdateWaitingInstaller": "The installer is running. It will close the app and restart it; Windows may first ask for an administrator's approval."
 }

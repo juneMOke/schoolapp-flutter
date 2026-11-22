@@ -39965,6 +39965,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'App updated to version {version}.'**
   String desktopUpdateJustUpdated(String version);
+
+  /// No description provided for @desktopUpdatePendingUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending operations could not be checked. If there are any, they will be kept and sent after the update.'**
+  String get desktopUpdatePendingUnknown;
+
+  /// No description provided for @desktopUpdateWaitingInstaller.
+  ///
+  /// In en, this message translates to:
+  /// **'The installer is running. It will close the app and restart it; Windows may first ask for an administrator\'s approval.'**
+  String get desktopUpdateWaitingInstaller;
 }
 
 class _AppLocalizationsDelegate

@@ -64,7 +64,8 @@ abstract class DesktopUpdateRepository {
     DownloadCancellation? cancellation,
   });
 
-  /// Lance l'installation. En cas de succès, l'application doit se fermer :
-  /// c'est l'installateur (ou l'appelant sous Linux) qui relance.
-  Future<Either<Failure, void>> install(VerifiedInstaller installer);
+  /// Lance l'installation. Rend `true` quand l'application doit se fermer
+  /// tout de suite (Linux : la nouvelle version est posée et relancée),
+  /// `false` quand l'installateur la fermera lui-même (Windows).
+  Future<Either<Failure, bool>> install(VerifiedInstaller installer);
 }

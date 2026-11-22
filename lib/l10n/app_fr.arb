@@ -13903,5 +13903,7 @@
   "desktopUpdateMenuEntry": "Mise à jour disponible ({version})",
   "@desktopUpdateMenuEntry": {"placeholders": {"version": {"type": "String"}}},
   "desktopUpdateJustUpdated": "Application mise à jour en version {version}.",
-  "@desktopUpdateJustUpdated": {"placeholders": {"version": {"type": "String"}}}
+  "@desktopUpdateJustUpdated": {"placeholders": {"version": {"type": "String"}}},
+  "desktopUpdatePendingUnknown": "Les opérations en attente n'ont pas pu être vérifiées. S'il y en a, elles seront conservées et envoyées après la mise à jour.",
+  "desktopUpdateWaitingInstaller": "L'installateur est lancé. Il fermera l'application puis la relancera ; Windows peut d'abord demander l'autorisation d'un administrateur."
 }

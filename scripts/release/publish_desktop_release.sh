@@ -92,29 +92,55 @@ if [[ -n "$REMOTE_TAG_SHA" && "$REMOTE_TAG_SHA" != "$GITHUB_SHA" ]]; then
   exit 1
 fi
 
+# ── Fiches signées, AVANT toute publication ────────────────────────────────
+# Une clé absente ou qui n'est pas celle de l'application arrête tout ici,
+# sans laisser de release orpheline.
+DOWNLOAD_BASE="https://github.com/$REPOSITORY/releases/download/$TAG"
+for platform in windows linux; do
+  if [[ "$platform" == "windows" ]]; then file="$WINDOWS_FILE"; else file="$LINUX_FILE"; fi
+  name="$(basename "$file")"
+  bash "$SCRIPT_DIR/sign_desktop_payload.sh" \
+    "$WORK_DIR/$name" "$platform" "$APP_ENV" "$BUILD_NAME" \
+    "$DOWNLOAD_BASE/$name" "$NOTES_FR" "$NOTES_EN" > "$WORK_DIR/$platform.body.json"
+done
+: "${APP_RELEASES_TOKEN:?APP_RELEASES_TOKEN manquant}"
+: "${API_BASE_URL:?API_BASE_URL manquant}"
+
+# ── Release GitHub ─────────────────────────────────────────────────────────
 if gh release view "$TAG" --repo "$REPOSITORY" >/dev/null 2>&1; then
-  # Relance : on ne remplace JAMAIS un fichier publié par un fichier
-  # différent. Une version déjà enregistrée sur le back pointe vers ces
-  # octets : les remplacer ferait refuser la mise à jour à tous les postes
-  # (empreinte qui ne concorde plus). Seule une relance du job `publish` sur
-  # les MÊMES artefacts passe ; une reconstruction demande une nouvelle
-  # version.
+  # Relance : on ne remplace JAMAIS un fichier publié. Une version déjà
+  # enregistrée sur le back pointe vers ces octets ; les remplacer par une
+  # reconstruction (empreinte différente) ferait refuser la mise à jour par
+  # tous les postes. Un fichier déjà présent doit avoir la MÊME empreinte,
+  # lue en ligne — sinon, ou si on ne peut pas la lire, on s'arrête. Seuls
+  # les fichiers manquants sont ajoutés.
+  mapfile -t REMOTE_ASSETS < <(gh release view "$TAG" --repo "$REPOSITORY" \
+    --json assets --jq '.assets[].name')
   REMOTE_DIR="$WORK_DIR/remote"
   mkdir -p "$REMOTE_DIR"
-  if gh release download "$TAG" --repo "$REPOSITORY" --pattern '*.sha256' \
-      --dir "$REMOTE_DIR" >/dev/null 2>&1; then
-    for sum in "$REMOTE_DIR"/*.sha256; do
-      [[ -e "$sum" ]] || continue
-      local_sum="$WORK_DIR/$(basename "$sum")"
-      if [[ -f "$local_sum" ]] && ! cmp -s "$sum" "$local_sum"; then
-        echo "Release $TAG : $(basename "$sum" .sha256) déjà publié avec une autre empreinte." >&2
+  MISSING=()
+  for asset in "${ASSETS[@]}"; do
+    name="$(basename "$asset")"
+    if printf '%s\n' "${REMOTE_ASSETS[@]}" | grep -qxF "$name"; then
+      [[ "$name" == *.sha256 ]] && continue
+      if ! gh release download "$TAG" --repo "$REPOSITORY" --pattern "$name.sha256" \
+          --dir "$REMOTE_DIR" --clobber >/dev/null; then
+        echo "Release $TAG : empreinte en ligne de $name illisible ; rien n'est remplacé." >&2
+        exit 1
+      fi
+      if ! cmp -s "$REMOTE_DIR/$name.sha256" "$WORK_DIR/$name.sha256"; then
+        echo "Release $TAG : $name déjà publié avec une autre empreinte." >&2
         echo "Une reconstruction demande une nouvelle version (version_tag)." >&2
         exit 1
       fi
-    done
+    else
+      MISSING+=("$asset")
+    fi
+  done
+  if (( ${#MISSING[@]} > 0 )); then
+    gh release upload "$TAG" "${MISSING[@]}" --repo "$REPOSITORY"
   fi
-  echo "Release $TAG déjà présente, mêmes empreintes : fichiers repris."
-  gh release upload "$TAG" "${ASSETS[@]}" --repo "$REPOSITORY" --clobber
+  echo "Release $TAG déjà présente, mêmes empreintes."
 else
   PRERELEASE=()
   [[ "$APP_ENV" == "staging" ]] && PRERELEASE=(--prerelease)
@@ -126,14 +152,8 @@ else
     "${PRERELEASE[@]}"
 fi
 
-# ── Fiches signées et enregistrement ───────────────────────────────────────
-DOWNLOAD_BASE="https://github.com/$REPOSITORY/releases/download/$TAG"
+# ── Enregistrement auprès du back ──────────────────────────────────────────
 for platform in windows linux; do
-  if [[ "$platform" == "windows" ]]; then file="$WINDOWS_FILE"; else file="$LINUX_FILE"; fi
-  name="$(basename "$file")"
-  bash "$SCRIPT_DIR/sign_desktop_payload.sh" \
-    "$WORK_DIR/$name" "$platform" "$APP_ENV" "$BUILD_NAME" \
-    "$DOWNLOAD_BASE/$name" "$NOTES_FR" "$NOTES_EN" > "$WORK_DIR/$platform.body.json"
   bash "$SCRIPT_DIR/register_desktop_release.sh" "$APP_ENV" "$platform" "$WORK_DIR/$platform.body.json"
 done
 

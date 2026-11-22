@@ -98,10 +98,10 @@ class DesktopUpdateRepositoryImpl implements DesktopUpdateRepository {
   }
 
   @override
-  Future<Either<Failure, void>> install(VerifiedInstaller installer) async {
+  Future<Either<Failure, bool>> install(VerifiedInstaller installer) async {
     try {
       await _installer.install(installer);
-      return const Right(null);
+      return Right(_installer.appMustQuit);
     } on DesktopInstallException catch (e) {
       return Left(InstallFailure(e.message));
     } catch (e) {

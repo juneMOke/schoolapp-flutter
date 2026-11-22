@@ -24,7 +24,18 @@ class DesktopUpdateDialog extends StatelessWidget {
     return BlocConsumer<DesktopUpdateCubit, DesktopUpdateState>(
       listenWhen: (previous, current) =>
           previous.wantsDialog && !current.wantsDialog,
-      listener: (context, _) => Navigator.of(context).pop(),
+      // Retire SA route, pas forcément celle du dessus : une autre page a pu
+      // s'ouvrir par-dessus entre-temps.
+      listener: (context, _) {
+        final route = ModalRoute.of(context);
+        if (route == null || !route.isActive) return;
+        final navigator = Navigator.of(context);
+        if (route.isCurrent) {
+          navigator.pop();
+        } else {
+          navigator.removeRoute(route);
+        }
+      },
       builder: (context, state) {
         final cubit = context.read<DesktopUpdateCubit>();
         final offer = state.offer;
@@ -37,9 +48,12 @@ class DesktopUpdateDialog extends StatelessWidget {
             title: state.mandatory
                 ? l10n.desktopUpdateMandatoryTitle
                 : l10n.desktopUpdateAvailableTitle(version),
-            // La croix vaut « Plus tard », sans effet quand c'est obligatoire
-            // ou qu'un geste est en cours.
-            onClose: cubit.later,
+            // La croix vaut « Plus tard », ou « Annuler » d'une étape qui
+            // s'annule ; sans effet quand c'est obligatoire ou en cours
+            // d'envoi / d'installation.
+            onClose: state.status == DesktopUpdateStatus.available
+                ? cubit.later
+                : cubit.cancel,
             onSubmit: state.status == DesktopUpdateStatus.available
                 ? cubit.update
                 : null,
@@ -97,6 +111,12 @@ class DesktopUpdateDialog extends StatelessWidget {
       EteeloButton.primary(
         label: l10n.desktopUpdateRetry,
         onPressed: cubit.update,
+      ),
+    ],
+    DesktopUpdateStatus.waitingForInstaller => [
+      EteeloButton.ghost(
+        label: l10n.desktopUpdateClose,
+        onPressed: cubit.cancel,
       ),
     ],
     DesktopUpdateStatus.preparing || DesktopUpdateStatus.installing => const [],

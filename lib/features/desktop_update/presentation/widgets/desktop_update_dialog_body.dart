@@ -26,7 +26,9 @@ class DesktopUpdateDialogBody extends StatelessWidget {
         value: null,
       ),
       DesktopUpdateStatus.confirmPending => _Text(
-        l10n.desktopUpdatePendingBody(state.pendingOperations),
+        state.pendingOperations > 0
+            ? l10n.desktopUpdatePendingBody(state.pendingOperations)
+            : l10n.desktopUpdatePendingUnknown,
       ),
       DesktopUpdateStatus.downloading => _Progress(
         label: l10n.desktopUpdateDownloading((state.progress * 100).round()),
@@ -34,6 +36,10 @@ class DesktopUpdateDialogBody extends StatelessWidget {
       ),
       DesktopUpdateStatus.installing => _Progress(
         label: l10n.desktopUpdateInstalling,
+        value: null,
+      ),
+      DesktopUpdateStatus.waitingForInstaller => _Progress(
+        label: l10n.desktopUpdateWaitingInstaller,
         value: null,
       ),
       DesktopUpdateStatus.failed => _Text(switch (state.error) {

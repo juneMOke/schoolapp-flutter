@@ -102,5 +102,18 @@ openssl pkey -in "$KEY_FILE" -pubout -out "$TMP_DIR/pub.pem"
 openssl pkeyutl -verify -rawin -pubin -inkey "$TMP_DIR/pub.pem" \
   -in "$TMP_DIR/payload.json" -sigfile "$TMP_DIR/payload.sig" >/dev/null
 
+# Et c'est bien la clé que l'application embarque pour ce canal : un mauvais
+# PEM versé dans le secret signerait des fiches que tous les postes
+# ignoreraient sans un mot. `public_keys/<canal>.b64` est la copie de
+# `AppConstants.desktopUpdatePublicKeys` (vérifiée par un test).
+EXPECTED_KEY_FILE="${EXPECTED_PUBLIC_KEY_FILE:-$(dirname "${BASH_SOURCE[0]}")/public_keys/$CHANNEL.b64}"
+[[ -f "$EXPECTED_KEY_FILE" ]] || { echo "Clé publique attendue introuvable : $EXPECTED_KEY_FILE" >&2; exit 1; }
+DERIVED_KEY="$(openssl pkey -in "$KEY_FILE" -pubout -outform DER | tail -c 32 | base64 | tr -d '\n')"
+EXPECTED_KEY="$(tr -d ' \n\r' < "$EXPECTED_KEY_FILE")"
+if [[ "$DERIVED_KEY" != "$EXPECTED_KEY" ]]; then
+  echo "La clé de signature ne correspond pas à celle que l'application embarque pour '$CHANNEL'." >&2
+  exit 1
+fi
+
 jq -cn --arg signedPayload "$PAYLOAD" --arg signature "$SIGNATURE" \
   '{signedPayload: $signedPayload, signature: $signature}'

@@ -91,4 +91,45 @@ void main() {
     final dir = Directory('${temp.path}/eteelo-update/1.9.0');
     expect(dir.listSync(), isEmpty);
   });
+
+  test(
+    'plus d’octets que la fiche n’en annonce : arrêt, rien ne reste',
+    () async {
+      final sha = await digestOf(body.sublist(0, 10));
+      await expectLater(
+        downloader().download(release(sha256: sha, size: 10, url: url())),
+        throwsA(isA<DownloadIntegrityException>()),
+      );
+      final dir = Directory('${temp.path}/eteelo-update/1.9.0');
+      expect(dir.listSync(), isEmpty);
+    },
+  );
+
+  test('les versions précédentes sont nettoyées', () async {
+    final old = Directory('${temp.path}/eteelo-update/1.8.0')
+      ..createSync(recursive: true);
+    File('${old.path}/setup.exe').writeAsStringSync('ancien');
+    final sha = await digestOf(body);
+    await downloader().download(
+      release(sha256: sha, size: body.length, url: url()),
+    );
+    expect(old.existsSync(), isFalse);
+  });
+
+  test(
+    'Linux : le dossier de travail est fermé aux autres comptes',
+    () async {
+      final sha = await digestOf(body);
+      await downloader().download(
+        release(sha256: sha, size: body.length, url: url()),
+      );
+      final mode = Process.runSync('stat', [
+        '-c',
+        '%a',
+        '${temp.path}/eteelo-update',
+      ]);
+      expect('${mode.stdout}'.trim(), '700');
+    },
+    skip: !Platform.isLinux,
+  );
 }

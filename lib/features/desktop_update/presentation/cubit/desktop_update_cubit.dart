@@ -13,6 +13,9 @@ typedef PendingOperationsProbe = Future<int> Function();
 /// Mise à jour du poste de bureau : vérifie au démarrage puis à chaque top de
 /// [ticks] (en ligne seulement : un échec de lecture ne change rien), propose,
 /// et après l'accord pousse l'outbox, télécharge, contrôle, installe, ferme.
+/// [DesktopUpdateState.pendingOperations] quand la file n'a pas pu être lue.
+const int unknownPendingOperations = -1;
+
 class DesktopUpdateCubit extends Cubit<DesktopUpdateState> {
   final DesktopUpdateRepository _repository;
   final AppVersion? _installed;
@@ -53,15 +56,16 @@ class DesktopUpdateCubit extends Cubit<DesktopUpdateState> {
   /// Relit la dernière version. Sans effet pendant un geste en cours.
   Future<void> check() async {
     final installed = _installed;
-    if (installed == null || _checking || state.busy || isClosed) return;
-    if (state.status == DesktopUpdateStatus.confirmPending ||
-        state.status == DesktopUpdateStatus.failed) {
+    if (installed == null || _checking || isClosed || !_idleOrOffering) {
       return;
     }
     _checking = true;
     try {
       final result = await _repository.fetchOffer(installed);
-      if (isClosed) return;
+      // Un geste a commencé pendant la lecture (« Mettre à jour » cliqué
+      // entre-temps) : la réponse ne doit ni le recouvrir ni fermer sa
+      // fenêtre.
+      if (isClosed || !_idleOrOffering) return;
       result.fold((_) {}, (offer) {
         if (offer == null) {
           emit(
@@ -86,6 +90,10 @@ class DesktopUpdateCubit extends Cubit<DesktopUpdateState> {
     }
   }
 
+  bool get _idleOrOffering =>
+      state.status == DesktopUpdateStatus.idle ||
+      state.status == DesktopUpdateStatus.available;
+
   /// « Plus tard » — refusé quand la mise à jour est obligatoire.
   void later() {
     if (state.mandatory || state.status != DesktopUpdateStatus.available) {
@@ -100,13 +108,25 @@ class DesktopUpdateCubit extends Cubit<DesktopUpdateState> {
     emit(state.copyWith(dismissed: false, requested: true));
   }
 
+  /// La fenêtre s'est fermée : une demande du menu est servie.
+  void dialogClosed() {
+    if (state.requested) emit(state.copyWith(requested: false));
+  }
+
   /// « Mettre à jour » : l'outbox d'abord.
   Future<void> update() async {
     if (!state.hasOffer || state.busy) return;
     emit(state.copyWith(status: DesktopUpdateStatus.preparing, error: null));
-    final pending = await _pendingOperations();
+    int pending;
+    try {
+      pending = await _pendingOperations();
+    } catch (_) {
+      // File illisible (aucune école ouverte, base indisponible) : on ne sait
+      // pas, on le dit et l'utilisateur décide.
+      pending = unknownPendingOperations;
+    }
     if (isClosed) return;
-    if (pending > 0) {
+    if (pending != 0) {
       emit(
         state.copyWith(
           status: DesktopUpdateStatus.confirmPending,
@@ -131,7 +151,8 @@ class DesktopUpdateCubit extends Cubit<DesktopUpdateState> {
       return;
     }
     if (state.status == DesktopUpdateStatus.confirmPending ||
-        state.status == DesktopUpdateStatus.failed) {
+        state.status == DesktopUpdateStatus.failed ||
+        state.status == DesktopUpdateStatus.waitingForInstaller) {
       emit(
         state.copyWith(
           status: DesktopUpdateStatus.available,
@@ -145,8 +166,18 @@ class DesktopUpdateCubit extends Cubit<DesktopUpdateState> {
 
   /// L'annonce « Mis à jour » a été montrée.
   void acknowledgeJustUpdated() {
-    if (state.justUpdatedTo == null) return;
+    final version = state.justUpdatedTo;
+    if (version == null) return;
     emit(state.copyWith(justUpdatedTo: null));
+    // Mémorisé seulement une fois montré : un poste fermé avant l'accueil
+    // l'annoncera au lancement suivant.
+    unawaited(_remember(version));
+  }
+
+  Future<void> _remember(AppVersion version) async {
+    try {
+      await _lastRun.write('$version');
+    } catch (_) {}
   }
 
   Future<void> _downloadAndInstall() async {
@@ -179,10 +210,28 @@ class DesktopUpdateCubit extends Cubit<DesktopUpdateState> {
         _fail(failure);
       },
       (installer) async {
+        // Annulé pendant le contrôle de l'empreinte : on n'installe pas.
+        if (cancellation.isCancelled) {
+          emit(
+            state.copyWith(status: DesktopUpdateStatus.available, progress: 0),
+          );
+          return;
+        }
         emit(state.copyWith(status: DesktopUpdateStatus.installing));
-        final installed = await _repository.install(installer);
+        final launched = await _repository.install(installer);
         if (isClosed) return;
-        installed.fold(_fail, (_) => _exitApp());
+        launched.fold(_fail, (mustQuit) {
+          if (mustQuit) {
+            _exitApp();
+          } else {
+            // Windows : l'installateur fermera l'application quand il sera
+            // prêt. S'il échoue (élévation refusée), elle reste ouverte et
+            // l'utilisateur peut fermer la fenêtre.
+            emit(
+              state.copyWith(status: DesktopUpdateStatus.waitingForInstaller),
+            );
+          }
+        });
       },
     );
   }
@@ -190,16 +239,7 @@ class DesktopUpdateCubit extends Cubit<DesktopUpdateState> {
   void _fail(Failure failure) => emit(
     state.copyWith(
       status: DesktopUpdateStatus.failed,
-      error: switch (failure) {
-        NetworkFailure() ||
-        UncertainOutcomeFailure() ||
-        TooManyRequestsFailure() ||
-        ServerFailure() => DesktopUpdateError.network,
-        IntegrityFailure() => DesktopUpdateError.integrity,
-        InstallFailure() => DesktopUpdateError.install,
-        StorageFailure() => DesktopUpdateError.storage,
-        _ => DesktopUpdateError.unknown,
-      },
+      error: DesktopUpdateError.of(failure),
     ),
   );
 
@@ -208,6 +248,7 @@ class DesktopUpdateCubit extends Cubit<DesktopUpdateState> {
       final previous = AppVersion.tryParseStrict(await _lastRun.read());
       if (previous != null && installed > previous && !isClosed) {
         emit(state.copyWith(justUpdatedTo: installed));
+        return;
       }
       if (previous != installed) await _lastRun.write('$installed');
     } catch (_) {

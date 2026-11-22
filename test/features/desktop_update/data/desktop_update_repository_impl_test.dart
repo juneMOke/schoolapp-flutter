@@ -1,6 +1,5 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/features/desktop_update/data/desktop_installer.dart';
 import 'package:school_app_flutter/features/desktop_update/data/desktop_release_api.dart';
 import 'package:school_app_flutter/features/desktop_update/data/desktop_release_verifier.dart';
@@ -32,6 +31,9 @@ class _Api extends DesktopReleaseApi {
 
 class _Installer implements DesktopInstaller {
   Object? error;
+
+  @override
+  bool appMustQuit = true;
 
   @override
   Future<void> install(VerifiedInstaller installer) async {
@@ -148,11 +150,13 @@ void main() {
     expect(result.fold((f) => f, (_) => null), isA<InstallFailure>());
   });
 
-  test('installation lancée : succès', () async {
-    final result = await repository.install(
-      VerifiedInstaller(path: '/x', release: release()),
-    );
-    expect(result.isRight(), isTrue);
-    expect(result.fold((f) => f, (_) => null), isNot(isA<Failure>()));
+  test('installation lancée : dit si l’application doit se fermer', () async {
+    for (final mustQuit in [true, false]) {
+      installer.appMustQuit = mustQuit;
+      final result = await repository.install(
+        VerifiedInstaller(path: '/x', release: release()),
+      );
+      expect(result.fold((f) => f, (quit) => quit), mustQuit);
+    }
   });
 }

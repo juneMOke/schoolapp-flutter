@@ -122,6 +122,11 @@ void main() {
       expect(allowed('$base/t/../../../../autre/f'), isFalse);
       expect(allowed('$base/f'), isFalse);
       expect(allowed('$base/t/sous/f'), isFalse);
+      // Le nom devient un chemin sur le poste : rien d'encodé, pas de `..`.
+      expect(allowed('$base/t/..%2F..%2F.bashrc'), isFalse);
+      expect(allowed('$base/t/..%5Ca.exe'), isFalse);
+      expect(allowed('$base/t/a%00.exe'), isFalse);
+      expect(allowed('$base/t/.hidden'), isFalse);
     });
   });
 }

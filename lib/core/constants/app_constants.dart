@@ -1939,13 +1939,16 @@ class AppConstants {
       'https://github.com/juneMOke/schoolapp-flutter/releases/download/';
 
   /// Clés publiques Ed25519 (32 octets, base64) qui signent les fiches de
-  /// version. La clé privée ne vit que dans les secrets de la CI
-  /// (`DESKTOP_UPDATE_SIGNING_KEY`). Une nouvelle clé s'ajoute ici une
-  /// version AVANT de signer avec elle.
-  static const List<String> desktopUpdatePublicKeys = [
-    // Clé n° 1, 2026-11-22.
-    'A+lBnwmZ0JoLvcRpZ3qN46OC8C4yI3mdN0/Xns48c4Q=',
-  ];
+  /// version, PAR CANAL : une clé de staging, plus exposée, ne peut pas signer
+  /// pour la prod. Les clés privées ne vivent que dans les secrets de
+  /// l'environnement GitHub correspondant (`DESKTOP_UPDATE_SIGNING_KEY`) ;
+  /// la CI vérifie sa signature contre `scripts/release/public_keys/<canal>.b64`,
+  /// copie de ces valeurs. Une nouvelle clé s'ajoute ici une version AVANT de
+  /// signer avec elle.
+  static const Map<String, List<String>> desktopUpdatePublicKeys = {
+    'prod': ['A+lBnwmZ0JoLvcRpZ3qN46OC8C4yI3mdN0/Xns48c4Q='],
+    'staging': ['RtSxJuTchxKab2nnQ62BDPnR/jWLMHBEs1yZJn3rsWQ='],
+  };
 
   /// Cadence de vérification tant que l'application reste ouverte.
   static const Duration desktopUpdateCheckInterval = Duration(hours: 6);
@@ -1956,4 +1959,8 @@ class AppConstants {
   /// Délai de téléchargement d'un installateur (20 à 35 Mo sur la connexion
   /// d'une école).
   static const Duration desktopUpdateDownloadTimeout = Duration(minutes: 15);
+
+  /// Délai maximal de chaque étape de l'installation sous Linux (décompression,
+  /// `install.sh`).
+  static const Duration desktopUpdateInstallTimeout = Duration(minutes: 5);
 }

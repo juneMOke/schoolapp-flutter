@@ -14,9 +14,10 @@ import '../fixtures.dart';
 
 class _Repo implements DesktopUpdateRepository {
   Either<Failure, DesktopUpdateOffer?> offerResult = Right(offer());
+  Completer<Either<Failure, DesktopUpdateOffer?>>? pendingFetch;
   Either<Failure, VerifiedInstaller>? downloadResult;
   Completer<Either<Failure, VerifiedInstaller>>? pendingDownload;
-  Either<Failure, void> installResult = const Right(null);
+  Either<Failure, bool> installResult = const Right(true);
   int fetches = 0, downloads = 0, installs = 0;
   DownloadCancellation? lastCancellation;
 
@@ -25,6 +26,7 @@ class _Repo implements DesktopUpdateRepository {
     AppVersion installed,
   ) async {
     fetches++;
+    if (pendingFetch != null) return pendingFetch!.future;
     return offerResult;
   }
 
@@ -44,7 +46,7 @@ class _Repo implements DesktopUpdateRepository {
   }
 
   @override
-  Future<Either<Failure, void>> install(VerifiedInstaller installer) async {
+  Future<Either<Failure, bool>> install(VerifiedInstaller installer) async {
     installs++;
     return installResult;
   }
@@ -66,6 +68,7 @@ void main() {
   late _Store store;
   late StreamController<void> ticks;
   late int pending;
+  Object? probeError;
   late int exits;
 
   setUp(() {
@@ -73,6 +76,7 @@ void main() {
     store = _Store('1.8.0');
     ticks = StreamController<void>.broadcast();
     pending = 0;
+    probeError = null;
     exits = 0;
   });
 
@@ -83,7 +87,10 @@ void main() {
   }) => DesktopUpdateCubit(
     repository: repo,
     installed: installed,
-    pendingOperations: () async => pending,
+    pendingOperations: () async {
+      if (probeError != null) throw probeError!;
+      return pending;
+    },
     lastRun: store,
     ticks: ticks.stream,
     exitApp: () => exits++,
@@ -266,9 +273,12 @@ void main() {
       final c = cubit();
       await c.start();
       expect(c.state.justUpdatedTo, const AppVersion(1, 8, 0));
-      expect(store.value, '1.8.0');
+      // Pas encore montrée : rien n'est mémorisé.
+      expect(store.value, '1.7.0');
       c.acknowledgeJustUpdated();
+      await Future<void>.delayed(Duration.zero);
       expect(c.state.justUpdatedTo, isNull);
+      expect(store.value, '1.8.0');
       await c.close();
     },
   );
@@ -279,6 +289,85 @@ void main() {
     await c.start();
     expect(c.state.justUpdatedTo, isNull);
     expect(store.value, '1.8.0');
+    await c.close();
+  });
+
+  test(
+    'Windows : l’installateur ferme lui-même ; l’application attend',
+    () async {
+      repo.installResult = const Right(false);
+      final c = cubit();
+      await c.start();
+      await c.update();
+      expect(c.state.status, DesktopUpdateStatus.waitingForInstaller);
+      expect(exits, 0);
+      // Élévation refusée : on peut refermer la fenêtre.
+      c.cancel();
+      expect(c.state.status, DesktopUpdateStatus.available);
+      expect(c.state.wantsDialog, isFalse);
+      await c.close();
+    },
+  );
+
+  test(
+    'une lecture en vol ne recouvre pas un téléchargement commencé',
+    () async {
+      final c = cubit();
+      await c.start();
+      repo.pendingFetch = Completer();
+      final checking = c.check();
+      repo.pendingDownload = Completer();
+      final updating = c.update();
+      await Future<void>.delayed(Duration.zero);
+      expect(c.state.status, DesktopUpdateStatus.downloading);
+      // La version disparaît côté back pendant le téléchargement.
+      repo.pendingFetch!.complete(const Right(null));
+      await checking;
+      expect(c.state.status, DesktopUpdateStatus.downloading);
+      expect(c.state.wantsDialog, isTrue);
+      repo.pendingDownload!.complete(const Left(DownloadCancelledFailure()));
+      await updating;
+      await c.close();
+    },
+  );
+
+  test('file illisible : on demande, on ne fige pas', () async {
+    probeError = StateError('aucune école ouverte');
+    final c = cubit();
+    await c.start();
+    await c.update();
+    expect(c.state.status, DesktopUpdateStatus.confirmPending);
+    expect(c.state.pendingOperations, unknownPendingOperations);
+    await c.close();
+  });
+
+  test(
+    'annulé pendant le contrôle de l’empreinte : rien n’est installé',
+    () async {
+      repo.pendingDownload = Completer();
+      final c = cubit();
+      await c.start();
+      final updating = c.update();
+      await Future<void>.delayed(Duration.zero);
+      c.cancel();
+      repo.pendingDownload!.complete(
+        Right(VerifiedInstaller(path: '/x', release: release())),
+      );
+      await updating;
+      expect(repo.installs, 0);
+      expect(c.state.status, DesktopUpdateStatus.available);
+      await c.close();
+    },
+  );
+
+  test('fenêtre fermée : la demande du menu est servie', () async {
+    final c = cubit();
+    await c.start();
+    c.later();
+    c.reopen();
+    expect(c.state.requested, isTrue);
+    c.dialogClosed();
+    expect(c.state.requested, isFalse);
     await c.close();
   });
 }

@@ -9,6 +9,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:school_app_flutter/core/config/env_config.dart';
 import 'package:school_app_flutter/core/constants/app_constants.dart';
 import 'package:school_app_flutter/core/network/dio_client.dart';
+import 'package:school_app_flutter/core/offline/connectivity_service.dart';
 import 'package:school_app_flutter/core/offline/outbox_dao.dart';
 import 'package:school_app_flutter/features/desktop_update/data/desktop_installer.dart';
 import 'package:school_app_flutter/features/desktop_update/data/desktop_release_api.dart';
@@ -36,7 +37,8 @@ class DesktopUpdateContext {
     required String? packageVersion,
   }) {
     if (kIsWeb || !kReleaseMode || env.isDevelopment) return null;
-    if (AppConstants.desktopUpdatePublicKeys.isEmpty) return null;
+    final keys = AppConstants.desktopUpdatePublicKeys[env.environment.label];
+    if (keys == null || keys.isEmpty) return null;
     final platform = switch (defaultTargetPlatform) {
       TargetPlatform.windows => DesktopPlatform.windows,
       TargetPlatform.linux => DesktopPlatform.linux,
@@ -66,7 +68,8 @@ void registerDesktopUpdate(GetIt getIt, DesktopUpdateContext context) {
             receiveTimeout: AppConstants.desktopUpdateDownloadTimeout,
           ),
         ),
-        baseDirectory: getTemporaryDirectory,
+        // Cache propre à l'utilisateur, et non `/tmp` partagé entre comptes.
+        baseDirectory: getApplicationCacheDirectory,
       ),
       installer: context.platform == DesktopPlatform.windows
           ? const WindowsDesktopInstaller()
@@ -89,7 +92,12 @@ DesktopUpdateCubit createDesktopUpdateCubit(
   repository: getIt<DesktopUpdateRepository>(),
   installed: context.installed,
   lastRun: getIt<LastRunVersionStore>(),
-  ticks: Stream<void>.periodic(AppConstants.desktopUpdateCheckInterval),
+  // Toutes les 6 h, et à chaque retour du réseau : un poste allumé avant le
+  // Wi-Fi de l'école ne doit pas attendre le top suivant.
+  ticks: _merge([
+    Stream<void>.periodic(AppConstants.desktopUpdateCheckInterval),
+    getIt<ConnectivityService>().onStatusChange.where((online) => online),
+  ]),
   exitApp: quitDesktopApp,
   pendingOperations: () async {
     try {
@@ -97,10 +105,32 @@ DesktopUpdateCubit createDesktopUpdateCubit(
     } catch (_) {
       // Délai dépassé ou cycle en échec : on compte ce qui reste.
     }
-    return getIt<OutboxDao>().pendingCount();
+    // Les rejets en attente de décision comptent aussi : ils survivent à la
+    // mise à jour, mais l'utilisateur doit savoir qu'ils sont là.
+    final outbox = getIt<OutboxDao>();
+    return await outbox.pendingCount() + await outbox.errorCount();
   },
 );
 
 /// Ferme l'application (après le lancement de l'installateur, ou « Quitter »
 /// d'une mise à jour obligatoire).
 void quitDesktopApp() => exit(0);
+
+/// Les tops de plusieurs flux en un seul (sans dépendre du paquet `async`).
+Stream<void> _merge(List<Stream<void>> streams) {
+  final subscriptions = <StreamSubscription<void>>[];
+  late final StreamController<void> controller;
+  controller = StreamController<void>(
+    onListen: () {
+      for (final stream in streams) {
+        subscriptions.add(stream.listen(controller.add, onError: (_) {}));
+      }
+    },
+    onCancel: () async {
+      for (final subscription in subscriptions) {
+        await subscription.cancel();
+      }
+    },
+  );
+  return controller.stream;
+}

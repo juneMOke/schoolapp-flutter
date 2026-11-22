@@ -71,13 +71,11 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 [Tasks]
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"
 
-; Avant la copie : aucun fichier d'une version précédente ne doit rester dans
-; le programme (assets Flutter, `app.so`, bibliothèques natives renommées ou
-; retirées). Les données de l'utilisateur ne sont PAS ici : elles vivent dans
-; %APPDATA% et ne sont jamais touchées.
-[InstallDelete]
-Type: filesandordirs; Name: "{app}\data"
-Type: files; Name: "{app}\*.dll"
+; Pas de [InstallDelete] : une suppression faite avant la copie n'est pas
+; annulée si l'installation échoue ensuite (antivirus, disque plein), et le
+; poste resterait sans programme. Les fichiers d'une version précédente que la
+; nouvelle ne réécrit pas sont inertes (`app.so` et `flutter_assets` sont
+; toujours réécrits).
 
 [Files]
 Source: "{#BundleDir}\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs

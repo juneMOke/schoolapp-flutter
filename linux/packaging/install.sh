@@ -27,13 +27,24 @@ if [[ "$SHARED_LIBS" != *libgstapp-1.0.so.0* ]]; then
   echo "⚠ GStreamer absent : installez-le (Debian/Ubuntu : sudo apt install gstreamer1.0-plugins-base gstreamer1.0-plugins-good)." >&2
 fi
 
-rm -rf "$INSTALL_DIR"
-mkdir -p "$INSTALL_DIR" "$APPLICATIONS_DIR"
-cp -r "$SOURCE_DIR/." "$INSTALL_DIR/"
-rm -f "$INSTALL_DIR/install.sh" "$INSTALL_DIR/eteelo-connect.desktop"
+# Remplacement en deux temps : la nouvelle version est copiée À CÔTÉ, puis
+# prend la place de l'ancienne par renommage. Une copie qui échoue (disque
+# plein) laisse l'ancienne version intacte et lançable — l'application lance ce
+# script toute seule lors d'une mise à jour.
+NEW_DIR="$INSTALL_DIR.new"
+OLD_DIR="$INSTALL_DIR.old"
+rm -rf "$NEW_DIR" "$OLD_DIR"
+mkdir -p "$NEW_DIR" "$APPLICATIONS_DIR"
+cp -r "$SOURCE_DIR/." "$NEW_DIR/"
+rm -f "$NEW_DIR/install.sh" "$NEW_DIR/eteelo-connect.desktop"
+chmod +x "$NEW_DIR/school_app_flutter"
+if [[ -d "$INSTALL_DIR" ]]; then
+  mv "$INSTALL_DIR" "$OLD_DIR"
+fi
+mv "$NEW_DIR" "$INSTALL_DIR"
+rm -rf "$OLD_DIR"
 
 sed "s|@INSTALL_DIR@|$INSTALL_DIR|g" "$SOURCE_DIR/eteelo-connect.desktop" \
   > "$APPLICATIONS_DIR/eteelo-connect.desktop"
-chmod +x "$INSTALL_DIR/school_app_flutter"
 
 echo "✓ ETEELO CONNECT installé dans $INSTALL_DIR (menu des applications)."

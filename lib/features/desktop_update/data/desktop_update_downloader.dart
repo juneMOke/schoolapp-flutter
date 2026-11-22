@@ -36,14 +36,13 @@ class DesktopUpdateDownloader {
     void Function(int received, int total)? onProgress,
     DownloadCancellation? cancellation,
   }) async {
-    final dir = Directory(
-      p.join(
-        (await _baseDirectory()).path,
-        'eteelo-update',
-        '${release.version}',
-      ),
+    final root = Directory(
+      p.join((await _baseDirectory()).path, 'eteelo-update'),
     );
-    await dir.create(recursive: true);
+    await _ensurePrivate(root);
+    await _purgeExcept(root, '${release.version}');
+    final dir = Directory(p.join(root.path, '${release.version}'));
+    await dir.create();
     final target = File(p.join(dir.path, release.fileName));
     if (await target.exists()) {
       if (await _matches(target, release)) return target.path;
@@ -58,17 +57,62 @@ class DesktopUpdateDownloader {
         partial.path,
         cancelToken: cancelToken,
         deleteOnError: true,
-        onReceiveProgress: (received, total) =>
-            onProgress?.call(received, total > 0 ? total : release.size),
+        onReceiveProgress: (received, total) {
+          // Plus d'octets que la fiche signée n'en annonce : inutile d'aller
+          // au bout, le contrôle échouera.
+          if (received > release.size) {
+            cancelToken.cancel(_oversized);
+            return;
+          }
+          onProgress?.call(received, total > 0 ? total : release.size);
+        },
       );
       if (!await _matches(partial, release)) {
         throw const DownloadIntegrityException('taille ou empreinte');
       }
       await partial.rename(target.path);
       return target.path;
+    } on DioException catch (e) {
+      if (await partial.exists()) await partial.delete();
+      if (CancelToken.isCancel(e) && e.error == _oversized) {
+        throw const DownloadIntegrityException('taille dépassée');
+      }
+      rethrow;
     } catch (_) {
       if (await partial.exists()) await partial.delete();
       rethrow;
+    }
+  }
+
+  static const _oversized = 'oversized';
+
+  /// Le dossier de travail est propre à l'utilisateur ; sous Linux, il est
+  /// de plus fermé aux autres comptes (0700) et doit lui appartenir : un
+  /// dossier posé d'avance par quelqu'un d'autre permettrait de remplacer
+  /// l'archive ou `install.sh` entre le contrôle et le lancement.
+  static Future<void> _ensurePrivate(Directory root) async {
+    await root.create(recursive: true);
+    if (!Platform.isLinux) return;
+    await Process.run('chmod', ['700', root.path]);
+    final stat = await Process.run('stat', ['-c', '%u %a', root.path]);
+    final uid = await Process.run('id', ['-u']);
+    final parts = '${stat.stdout}'.trim().split(' ');
+    if (parts.length != 2 ||
+        parts.first != '${uid.stdout}'.trim() ||
+        parts.last != '700') {
+      throw FileSystemException('dossier de mise à jour non privé', root.path);
+    }
+  }
+
+  /// Les versions précédentes (20 à 100 Mo chacune) ne servent plus.
+  static Future<void> _purgeExcept(Directory root, String keep) async {
+    await for (final entry in root.list(followLinks: false)) {
+      if (p.basename(entry.path) == keep) continue;
+      try {
+        await entry.delete(recursive: true);
+      } catch (_) {
+        // Un fichier verrouillé (Windows) partira la prochaine fois.
+      }
     }
   }
 

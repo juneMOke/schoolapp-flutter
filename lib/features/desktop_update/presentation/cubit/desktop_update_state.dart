@@ -1,4 +1,6 @@
 import 'package:equatable/equatable.dart';
+import 'package:school_app_flutter/core/error/failures.dart';
+import 'package:school_app_flutter/features/desktop_update/domain/repositories/desktop_update_repository.dart';
 import 'package:school_app_flutter/features/desktop_update/domain/entities/app_version.dart';
 import 'package:school_app_flutter/features/desktop_update/domain/entities/desktop_release.dart';
 
@@ -18,11 +20,32 @@ enum DesktopUpdateStatus {
 
   /// L'installateur est lancé ; l'application va se fermer.
   installing,
+
+  /// Windows : l'installateur tourne et fermera l'application lui-même
+  /// (il peut d'abord demander l'autorisation administrateur).
+  waitingForInstaller,
   failed,
 }
 
 /// Pourquoi la mise à jour a échoué — chaque cas a son message.
-enum DesktopUpdateError { network, integrity, install, storage, unknown }
+enum DesktopUpdateError {
+  network,
+  integrity,
+  install,
+  storage,
+  unknown;
+
+  static DesktopUpdateError of(Failure failure) => switch (failure) {
+    NetworkFailure() ||
+    UncertainOutcomeFailure() ||
+    TooManyRequestsFailure() ||
+    ServerFailure() => DesktopUpdateError.network,
+    IntegrityFailure() => DesktopUpdateError.integrity,
+    InstallFailure() => DesktopUpdateError.install,
+    StorageFailure() => DesktopUpdateError.storage,
+    _ => DesktopUpdateError.unknown,
+  };
+}
 
 class DesktopUpdateState extends Equatable {
   final DesktopUpdateStatus status;

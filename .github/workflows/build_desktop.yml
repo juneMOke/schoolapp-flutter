@@ -212,6 +212,11 @@ jobs:
     if: ${{ (inputs.environment == 'staging' || inputs.environment == 'prod') && inputs.version_tag != '' }}
     runs-on: ubuntu-latest
     environment: ${{ inputs.environment }}
+    # Deux publications du même canal ne se croisent jamais : la seconde
+    # attend, puis retrouve la release et ses empreintes.
+    concurrency:
+      group: desktop-publish-${{ inputs.environment }}
+      cancel-in-progress: false
     permissions:
       contents: write
     steps:

@@ -135,6 +135,18 @@ class RouteExitGuard extends StatefulWidget {
 
   static bool _routerRefreshing = false;
 
+  /// Une page montée a une saisie en cours ou une écriture en vol. Lecture
+  /// seule, pour qui doit attendre un moment calme avant d'interrompre
+  /// (la fenêtre de mise à jour du poste de bureau).
+  static bool get anyUnsavedWork => _mounted.any(
+    (guard) =>
+        guard.mounted &&
+        !guard._released &&
+        // Une page qui sort (animation de retrait) n'a plus rien à protéger.
+        (guard._route?.isActive ?? true) &&
+        (guard.widget.isBusy() || guard.widget.hasUnsavedWork()),
+  );
+
   /// Notifie le routeur ([notify]) en signalant aux gardes que les sorties
   /// qui suivent viennent de ce rafraîchissement, jusqu'à l'image suivante.
   static void duringRouterRefresh(VoidCallback notify) {
