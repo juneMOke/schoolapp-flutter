@@ -49,3 +49,6 @@ app.*.map.json
 /android/key.properties
 *.jks
 *.keystore
+
+# Captures du banc screenshot_test (hors CI)
+screenshot_test/goldens/
