@@ -58,7 +58,11 @@ UninstallDisplayName={#AppName}
 Compression=lzma2
 SolidCompression=yes
 WizardStyle=modern
+; L'installation ferme l'application ouverte (Restart Manager)…
 CloseApplications=yes
+; … mais ne la relance pas elle-même : la mise à jour automatique la relance
+; par l'entrée [Run] « IsUpdate » ci-dessous, une seule fois.
+RestartApplications=no
 
 [Languages]
 Name: "french"; MessagesFile: "compiler:Languages\French.isl"
@@ -66,6 +70,14 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 
 [Tasks]
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"
+
+; Avant la copie : aucun fichier d'une version précédente ne doit rester dans
+; le programme (assets Flutter, `app.so`, bibliothèques natives renommées ou
+; retirées). Les données de l'utilisateur ne sont PAS ici : elles vivent dans
+; %APPDATA% et ne sont jamais touchées.
+[InstallDelete]
+Type: filesandordirs; Name: "{app}\data"
+Type: files; Name: "{app}\*.dll"
 
 [Files]
 Source: "{#BundleDir}\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
@@ -76,3 +88,23 @@ Name: "{autodesktop}\{#AppName}"; Filename: "{app}\{#AppExe}"; Tasks: desktopico
 
 [Run]
 Filename: "{app}\{#AppExe}"; Description: "{cm:LaunchProgram,{#AppName}}"; Flags: nowait postinstall skipifsilent
+; Mise à jour automatique : l'application lance l'installateur en silence avec
+; `/UPDATE` (paramètre propre, que Setup ignore et que seul IsUpdate lit), puis
+; se ferme. L'entrée ci-dessus est sautée en silence (`skipifsilent`) ; celle-ci
+; relance l'application, avec les droits de l'utilisateur qui l'avait lancée.
+Filename: "{app}\{#AppExe}"; Flags: nowait runasoriginaluser; Check: IsUpdate
+
+[Code]
+// Vrai si Setup a été lancé avec le paramètre `/UPDATE` (casse indifférente).
+function IsUpdate: Boolean;
+var
+  I: Integer;
+begin
+  Result := False;
+  for I := 1 to ParamCount do
+    if CompareText(ParamStr(I), '/UPDATE') = 0 then
+    begin
+      Result := True;
+      Exit;
+    end;
+end;
