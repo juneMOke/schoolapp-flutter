@@ -23640,6 +23640,22 @@ class AppLocalizationsEn extends AppLocalizations {
   String get schoolCalendarUpcomingSection => 'Coming up';
 
   @override
+  String get schoolCalendarDraftNotPublished =>
+      'Not published yet: teachers, students and parents cannot see it.';
+
+  @override
+  String schoolCalendarModifiedLine(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'modified $count days ago',
+      one: 'modified yesterday',
+      zero: 'modified today',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get schoolCalendarFutureSection => 'Upcoming';
 
   @override
@@ -23740,9 +23756,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get schoolCalendarMoreActions => 'More actions';
 
   @override
-  String get schoolCalendarFilters => 'Filters';
-
-  @override
   String schoolCalendarVerifyNotice(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
@@ -23827,6 +23840,104 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String schoolCalendarDetailInDays(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'In $count days',
+      one: 'Tomorrow',
+      zero: 'Today',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String schoolCalendarFormEyebrow(String year) {
+    return 'Calendar $year';
+  }
+
+  @override
+  String get schoolCalendarFormNoteLabel => 'Note';
+
+  @override
+  String get schoolCalendarFormOptional => '(optional)';
+
+  @override
+  String schoolCalendarFormTitleHint(String nature) {
+    String _temp0 = intl.Intl.selectLogic(nature, {
+      'ASSESSMENT': 'P2 tests',
+      'EXAM': 'Mock exams',
+      'other': 'Parents\' meeting',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String get schoolCalendarNewEyebrow => 'School calendar';
+
+  @override
+  String schoolCalendarPrintEyebrow(String year) {
+    return 'Calendar $year · published version';
+  }
+
+  @override
+  String get schoolCalendarPrintIntro =>
+      'One landscape A4 page: the eleven months of the year, the legend of the kinds and the key dates.';
+
+  @override
+  String schoolCalendarPublishFramework(String state) {
+    String _temp0 = intl.Intl.selectLogic(state, {
+      'yes': 'national framework included',
+      'other': 'no national framework',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String get schoolCalendarPublishAudience =>
+      'Teachers, students and parents will see this calendar.';
+
+  @override
+  String schoolCalendarPublishRelay(
+    String current,
+    String end,
+    String year,
+    String start,
+  ) {
+    return '$current stays in force until $end; $year takes over on $start.';
+  }
+
+  @override
+  String get schoolCalendarPublishReference =>
+      'Its periods, tests and exams become the reference for assessments, report cards and the timetable.';
+
+  @override
+  String get schoolCalendarDuplicateShift =>
+      'Dates move 52 weeks: a Friday event stays on a Friday. Each carried-over element is marked to check.';
+
+  @override
+  String schoolCalendarDuplicateFramework(String state, String year) {
+    String _temp0 = intl.Intl.selectLogic(state, {
+      'integrated':
+          'The $year national framework is not copied: the official version published by ETEELO is included.',
+      'awaited':
+          'The $year national framework is not published yet. It will be added automatically once published.',
+      'other':
+          'The $year national framework is not copied: the official version is included once published.',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String schoolCalendarDuplicateDraft(String state, String year) {
+    String _temp0 = intl.Intl.selectLogic(state, {
+      'inForce': 'The result is a draft: $year stays in force.',
+      'other': 'The result is a draft: $year is not changed.',
+    });
+    return '$_temp0';
+  }
+
+  @override
   String get schoolCalendarToVerify => 'To check';
 
   @override
@@ -23886,9 +23997,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String schoolCalendarScopeCatalog(String codes) {
     return 'Levels $codes';
   }
-
-  @override
-  String get schoolCalendarPending => 'Waiting to be sent';
 
   @override
   String schoolCalendarRejected(String reason) {
@@ -24081,6 +24189,103 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String schoolCalendarPublishedLine(String date) {
+    return 'published on $date';
+  }
+
+  @override
+  String schoolCalendarPublishedBy(String date, String name) {
+    return 'published on $date by $name';
+  }
+
+  @override
+  String schoolCalendarActorRole(String role) {
+    String _temp0 = intl.Intl.selectLogic(role, {
+      'DIRECTOR': 'Principal',
+      'ACADEMIC_ADMIN': 'Academic advisor',
+      'SUPER_ADMIN': 'Administrator',
+      'other': '',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String get schoolCalendarProgressMarkers => 'marks: start of each period';
+
+  @override
+  String schoolCalendarUntil(String date) {
+    return 'until $date';
+  }
+
+  @override
+  String schoolCalendarMoreOthers(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '+ $count others',
+      one: '+ 1 other',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String schoolCalendarItemDays(String nature, int count) {
+    return '$nature · $count d';
+  }
+
+  @override
+  String schoolCalendarDueIn(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'In $count days',
+      one: 'Tomorrow',
+      zero: 'Today',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get schoolCalendarShow => 'Show';
+
+  @override
+  String get schoolCalendarHide => 'Hide';
+
+  @override
+  String schoolCalendarModifiedAgo(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Modified $count days ago',
+      one: 'Modified yesterday',
+      zero: 'Modified today',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String schoolCalendarSchoolItems(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count school items',
+      one: '1 school item',
+      zero: 'no school item',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String schoolCalendarTip(String year) {
+    return 'Tip: duplicate $year to prepare the next year.';
+  }
+
+  @override
+  String schoolCalendarPercent(int percent) {
+    return '$percent%';
+  }
+
+  @override
   String get schoolCalendarLoading => 'Loading the school calendar';
 
   @override
@@ -24175,11 +24380,6 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String schoolCalendarDuplicateRule(String year) {
-    return 'Dates move 52 weeks: a Friday event stays on a Friday. Each carried-over element is marked to check. The new year\'s national framework is not copied: the official version is included once published. The result is a draft: $year stays in force.';
-  }
-
-  @override
   String get schoolCalendarNewYear => 'School year';
 
   @override
@@ -24237,10 +24437,6 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get schoolCalendarPublishConsequence =>
-      'The whole school will see this calendar. Its periods, tests and exams become the reference for assessments, report cards and the timetable.';
-
-  @override
   String get accueilModuleAgendaDescription =>
       'The year\'s calendar: periods, exams, holidays and school events.';
 
@@ -24271,6 +24467,85 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get schoolCalendarPrintFailed => 'The print could not be prepared.';
+
+  @override
+  String schoolCalendarWeeksCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count weeks',
+      one: '1 week',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String schoolCalendarNationalCountLabel(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'national',
+      one: 'national',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String schoolCalendarInternalCountLabel(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'internal',
+      one: 'internal',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get schoolCalendarKeyNational => 'national';
+
+  @override
+  String get schoolCalendarKeyInternal => 'internal';
+
+  @override
+  String get schoolCalendarKeyNationalSolid => 'national (solid)';
+
+  @override
+  String get schoolCalendarKeyInternalDashed => 'internal (dashed)';
+
+  @override
+  String get schoolCalendarToday => 'Today';
+
+  @override
+  String get schoolCalendarDuplicateNextYear => 'Duplicate for next year';
+
+  @override
+  String calendarWeekdayName(String weekday) {
+    String _temp0 = intl.Intl.selectLogic(weekday, {
+      '1': 'Monday',
+      '2': 'Tuesday',
+      '3': 'Wednesday',
+      '4': 'Thursday',
+      '5': 'Friday',
+      '6': 'Saturday',
+      'other': 'Sunday',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String calendarWeekdayTwo(String weekday) {
+    String _temp0 = intl.Intl.selectLogic(weekday, {
+      '1': 'Mo',
+      '2': 'Tu',
+      '3': 'We',
+      '4': 'Th',
+      '5': 'Fr',
+      '6': 'Sa',
+      'other': 'Su',
+    });
+    return '$_temp0';
+  }
 
   @override
   String get subMenuClassTimetable => 'Timetable';
@@ -24393,13 +24668,6 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get classTimetableHelpDraft =>
       'Tap a slot in the grid to place a course.';
-
-  @override
-  String get classTimetableHelpDraftDay =>
-      'Tap a slot of the day to place a course there.';
-
-  @override
-  String get classTimetableFreeSlot => 'Free slot';
 
   @override
   String get classTimetableReserveTitle => 'Courses to place';
@@ -24834,9 +25102,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get classTimetableTapHint => 'Tap a course to find it in the grid';
 
   @override
-  String get classTimetableChangeClass => 'Change class';
-
-  @override
   String get classTimetableAllDomains => 'All domains';
 
   @override
@@ -24890,4 +25155,61 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get classTimetablePrintFailed =>
       'The document could not be fetched. Try again in a moment.';
+
+  @override
+  String classTimetablePickerSummary(String name, String cycle, String level) {
+    return '$name · $cycle › $level';
+  }
+
+  @override
+  String get classTimetableChange => 'Change';
+
+  @override
+  String get classTimetableAbandonDraft => 'Abandon the draft';
+
+  @override
+  String get classTimetablePrintIcon => 'Print the timetable';
+
+  @override
+  String classTimetableDraftTraceKept(String when) {
+    return 'The published version stays in force until publication · edited $when';
+  }
+
+  @override
+  String classTimetableDraftTraceNew(String when) {
+    return 'Never published · edited $when';
+  }
+
+  @override
+  String get classTimetableWhenJustNow => 'just now';
+
+  @override
+  String classTimetableWhenToday(String time) {
+    return 'today · $time';
+  }
+
+  @override
+  String classTimetableWhenYesterday(String time) {
+    return 'yesterday · $time';
+  }
+
+  @override
+  String classTimetableWhenOn(String date, String time) {
+    return 'on $date · $time';
+  }
+
+  @override
+  String get classTimetableGridMore => 'More';
+
+  @override
+  String get classTimetableGridMoreHint => 'See the rest of the week';
+
+  @override
+  String get classTimetableDayNoClass => 'No class';
+
+  @override
+  String get classTimetableViewSession => 'View the session';
+
+  @override
+  String get classTimetableDistributionSubtitle => 'Hours placed / planned';
 }

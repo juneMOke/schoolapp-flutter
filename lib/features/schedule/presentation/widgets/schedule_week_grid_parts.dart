@@ -103,6 +103,13 @@ class _SlotRow extends StatelessWidget {
   final ScheduleGridDrag? drag;
   final bool firstRow;
 
+  /// Habillage classe : le défilement de côté, qui fige la gouttière des
+  /// heures ; `null` : habillage historique.
+  final ScrollController? frozen;
+
+  /// Habillage classe : une ligne sur deux est teintée.
+  final bool zebra;
+
   const _SlotRow({
     required this.row,
     required this.days,
@@ -117,49 +124,87 @@ class _SlotRow extends StatelessWidget {
     required this.marks,
     required this.drag,
     required this.firstRow,
+    this.frozen,
+    this.zebra = false,
   });
 
   @override
   Widget build(BuildContext context) {
+    final frozen = this.frozen;
+    final start = ScheduleTimeFormat.hourMinute(row.timeSlot.startTime);
+    final end = ScheduleTimeFormat.hourMinute(row.timeSlot.endTime);
+    final background = frozen == null
+        ? null
+        : zebra
+        ? ColorMix.mix(
+            AppColors.surfaceRaised,
+            AppColors.terreCuite,
+            AppDimensions.timetableZebraShare,
+          )
+        : AppColors.surfaceRaised;
+    final content = IntrinsicHeight(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          SizedBox(
+            width: gutter,
+            child: frozen == null ? _TimeGutter(start: start, end: end) : null,
+          ),
+          for (final day in days)
+            SizedBox(
+              width: columnWidth,
+              child: _Cell(
+                cell: row.cellFor(day),
+                day: day,
+                timeSlot: row.timeSlot,
+                isToday: day == today,
+                firstRow: firstRow,
+                minHeight: minHeight,
+                width: columnWidth,
+                palette: palette,
+                l10n: l10n,
+                onOpenCell: onOpenCell,
+                onTapSlot: onTapSlot,
+                marks: marks,
+                drag: drag,
+                classLook: frozen != null,
+              ),
+            ),
+        ],
+      ),
+    );
     return DecoratedBox(
-      decoration: const BoxDecoration(
-        border: Border(top: BorderSide(color: AppColors.border)),
+      decoration: BoxDecoration(
+        color: background,
+        border: const Border(top: BorderSide(color: AppColors.border)),
       ),
       // IntrinsicHeight borne la hauteur de la ligne (sinon `stretch` force une
       // hauteur infinie dans un parent scrollable verticalement).
-      child: IntrinsicHeight(
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            SizedBox(
-              width: gutter,
-              child: _TimeGutter(
-                start: ScheduleTimeFormat.hourMinute(row.timeSlot.startTime),
-                end: ScheduleTimeFormat.hourMinute(row.timeSlot.endTime),
-              ),
-            ),
-            for (final day in days)
-              SizedBox(
-                width: columnWidth,
-                child: _Cell(
-                  cell: row.cellFor(day),
-                  day: day,
-                  timeSlot: row.timeSlot,
-                  isToday: day == today,
-                  firstRow: firstRow,
-                  minHeight: minHeight,
-                  width: columnWidth,
-                  palette: palette,
-                  l10n: l10n,
-                  onOpenCell: onOpenCell,
-                  onTapSlot: onTapSlot,
-                  marks: marks,
-                  drag: drag,
+      child: frozen == null
+          ? content
+          : Stack(
+              children: [
+                content,
+                Positioned(
+                  left: 0,
+                  top: 0,
+                  bottom: 0,
+                  width: gutter,
+                  child: _Frozen(
+                    controller: frozen,
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        color: background,
+                        border: const Border(
+                          right: BorderSide(color: AppColors.border),
+                        ),
+                      ),
+                      child: _ClassGutter(start: start, end: end),
+                    ),
+                  ),
                 ),
-              ),
-          ],
-        ),
-      ),
+              ],
+            ),
     );
   }
 }

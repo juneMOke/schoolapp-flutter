@@ -174,6 +174,11 @@ void main() {
               ),
               today: Weekday.wed,
               keepSaturday: true,
+              look: ScheduleGridLook.classTimetable,
+              dates: {
+                for (final day in Weekday.values)
+                  day: DateTime.utc(2026, 6, 8 + day.index),
+              },
             ),
             ClassTimetableDistribution(view: view, cells: view.published),
           ],
@@ -423,7 +428,16 @@ void main() {
         ),
       ),
     );
+    // La légende est teintée par domaine ; « Tous les domaines » n'apparaît
+    // qu'avec un filtre, et l'efface (I6).
+    expect(find.text('Tous les domaines'), findsNothing);
+    await tester.ensureVisible(find.text('sci'));
+    await tester.tap(find.text('sci'));
+    await tester.pumpAndSettle();
     expect(find.text('Tous les domaines'), findsOneWidget);
+    await tester.tap(find.text('Tous les domaines'));
+    await tester.pumpAndSettle();
+    expect(find.text('Tous les domaines'), findsNothing);
   });
 
   testWidgets('un jour férié : en-tête nommé, séances barrées (A23)', (

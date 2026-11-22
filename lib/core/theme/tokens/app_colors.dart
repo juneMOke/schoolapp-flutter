@@ -773,6 +773,118 @@ class AppColors {
   static const calendarHoliday = coteDomainPrune;
   static const calendarHolidaySoft = coteDomainPruneSoft;
 
+  // La liste des calendriers (maquette Calendrier.jsx, CalList / CalCard).
+  /// Le bandeau « Année en cours » finit en brun (dégradé 105°).
+  static const calendarHeroEnd = Color(0xFF7A4A2E);
+
+  /// La pastille « En vigueur » sur le bandeau : vert savane voilé.
+  static const calendarHeroLiveFill = Color(0x593D6B4A);
+  static const calendarHeroLiveBorder = Color(0x598CC8A0);
+
+  /// L'avancement de l'année : or, piste et repères de période.
+  static const calendarProgressStart = orDoux;
+  static const calendarProgressEnd = Color(0xFFE9C27F);
+  static const calendarProgressTrack = Color(0x26FAFAF7);
+  static const calendarProgressMarker = Color(0x8CFAFAF7);
+
+  /// Le texte secondaire du bandeau, dosé comme la maquette.
+  static const calendarHeroMuted = Color(0xB8FAFAF7);
+  static const calendarHeroFaint = Color(0x8CFAFAF7);
+
+  /// « Prochains rendez-vous » : panneau terre cuite pâle vers ardoise pâle.
+  static const calendarUpcomingStart = Color(0xFFFBF1E7);
+  static const calendarUpcomingMid = Color(0xFFFBF6EF);
+  static const calendarUpcomingEnd = Color(0xFFEEF3F6);
+  static const calendarUpcomingBorder = Color(0xFFE8D3C4);
+
+  /// L'ascenseur fin d'une rangée qui défile de côté.
+  static const calendarScrollThumb = Color(0xFFC9B8A6);
+
+  /// Une carte de calendrier, selon son statut : fond, bord, filet du haut.
+  static const calendarCardDraftSurface = Color(0xFFFBF3E2);
+  static const calendarCardDraftBorder = Color(0xFFE8D9B0);
+  static const calendarCardDraftAccent = orDoux;
+  static const calendarCardArchivedSurface = papier;
+  static const calendarCardArchivedBorder = border;
+  static const calendarCardArchivedAccent = borderStrong;
+  static const calendarCardPublishedSurface = bleuArdoiseSoft;
+  static const calendarCardPublishedBorder = Color(0xFFCFE0EA);
+  static const calendarCardPublishedAccent = bleuArdoise;
+
+  /// Les pastilles de statut : brouillon et « à vérifier » en ambre,
+  /// « En vigueur » en savane.
+  static const calendarDraftInk = Color(0xFF8A5A0B);
+  static const calendarLiveInk = vertSavane;
+
+  // Un calendrier ouvert (maquette Calendrier.jsx, CalDetail).
+  /// Le bandeau d'un brouillon (terre cuite) et d'un calendrier archivé.
+  static const calendarDraftBannerStart = Color(0xFF5E3A1E);
+  static const calendarDraftBannerMid = Color(0xFF9A4A20);
+  static const calendarDraftBannerEnd = terreCuite;
+  static const calendarArchivedBannerStart = Color(0xFF3A3833);
+  static const calendarArchivedBannerEnd = textSecondary;
+
+  /// Les voiles du bandeau : médaillon, tuiles, pastille du cadre.
+  static const calendarBannerVeil = Color(0x1FFAFAF7);
+  static const calendarBannerVeilBorder = Color(0x33FAFAF7);
+  static const calendarBannerTile = Color(0x17FAFAF7);
+  static const calendarBannerTileBorder = Color(0x24FAFAF7);
+  static const calendarBannerChip = Color(0x24FAFAF7);
+  static const calendarBannerIcon = Color(0xFFF3E2C4);
+  static const calendarBannerTileLabel = Color(0xB3FAFAF7);
+
+  /// Les pastilles de statut du bandeau : fond doux opaque.
+  static const calendarLiveSoft = Color(0xFFEBF2ED);
+  static const calendarDraftSoft = Color(0xFFFBF1DF);
+
+  /// L'avis « à vérifier ».
+  static const calendarVerifyInk = Color(0xFF6B5836);
+  static const calendarVerifySoft = Color(0xFFFBF6EA);
+  static const calendarVerifyBorder = calendarCardDraftBorder;
+
+  /// La marque « à vérifier » d'une bande du mois.
+  static const calendarVerifyDot = warning;
+
+  /// Les onglets de vue : crème, actif en terre cuite.
+  static const calendarTabsSurface = Color(0xFFF8F0E5);
+  static const calendarTabsBorder = calendarUpcomingBorder;
+  static const calendarTabsInk = calendarHeroEnd;
+  static const calendarTabsShadow = Color(0xCCB85C2C);
+
+  /// Les boutons de mois : fond crème, bord terre cuite pâle.
+  static const calendarNavSurface = calendarUpcomingMid;
+
+  /// La grille du mois : bandeau des jours, week-end, hors mois, aujourd'hui,
+  /// jour touché.
+  static const calendarMonthHeader = Color(0xFF965330);
+  static const calendarMonthHeaderWeekend = Color(0x9EFFFFFF);
+  static const calendarMonthHeaderDivider = Color(0x1FFFFFFF);
+  static const calendarWeekendSurface = Color(0xFFF8F5F1);
+  static const calendarOutOfMonthHatch = Color(0x0D8C8478);
+  static const calendarTodaySurface = Color(0x1FD9A24E);
+  static const calendarTodayRing = Color(0x80B85C2C);
+
+  /// Grille du mois renforcée (recette du 2026-11-21) : le trait entre deux
+  /// jours, et le même trait redessiné par-dessus les bandes, voilé, pour
+  /// que chaque jour reste une case distincte sous une période.
+  static const calendarMonthGridLine = borderStrong;
+  static const calendarMonthGridLineOverBand = Color(0x8CC9C3B0);
+
+  /// Le cadre d'aujourd'hui, dessiné au-dessus des bandes.
+  static const calendarTodayRingStrong = terreCuite;
+  static const calendarSelectedSurface = Color(0x141B4D6B);
+  static const calendarHover = Color(0x0FB85C2C);
+
+  /// La liste : en-tête de mois, compteur, ligne en cours, pastille.
+  static const calendarListMonthInk = terreCuite;
+  static const calendarCountSoft = Color(0xFFF6EDE6);
+  static const calendarCountInk = Color(0xFF9A4A20);
+  static const calendarListBorder = Color(0xFFDFCDBE);
+  static const calendarRowAlt = Color(0xFFFEFCFB);
+  static const calendarNowRow = calendarUpcomingStart;
+  static const calendarNowSoft = coteDomainTerreSoft;
+  static const calendarNowInk = calendarCountInk;
+
   // ── Trésorerie (spec Trésorerie V1.5, §05 « Jetons proposés ») ──
   /// Dégradé de la caisse USD, départ (spec Trésorerie §05).
   static const treasuryUsdDeep = Color(0xFF0E2D42);
@@ -857,6 +969,27 @@ class AppColors {
   /// le fond et ses hachures.
   static const timetableClosedDay = Color(0xFFF6F3EC);
   static const timetableClosedHatch = Color(0xFFE4DDCD);
+
+  // ── Emploi du temps par classe : fidélité à la maquette (EDT §4.6) ──
+  /// L'aide du brouillon et la récréation : pastille ambre.
+  static const timetableHintSurface = Color(0xFFFBF6EA);
+  static const timetableHintStripe = Color(0xFFF7EED8);
+  static const timetableHintBorder = Color(0xFFEEDCB4);
+  static const timetableHintInk = Color(0xFF8A6A1F);
+
+  /// Le cadre chaud de la grille, de la journée et de la réserve.
+  static const timetableWarmBorder = Color(0xFFE8D3C4);
+  static const timetableWarmSurface = Color(0xFFFBF6EF);
+  static const timetableWarmSurfaceDeep = Color(0xFFF8EEE6);
+
+  /// L'encre or sur l'en-tête sombre de la grille.
+  static const timetableHeaderInk = Color(0xFFF3D9A6);
+
+  /// Les hachures d'un créneau libre en consultation.
+  static const timetableEmptyHatch = Color(0x0D8C8478);
+
+  /// L'encre terre cuite d'un statut sur fond clair (réserve, « Voir »).
+  static const timetableWarmInk = Color(0xFF9A4A20);
   static const treasuryChartFutureInk = Color(0xFFC9C3B0);
 
   /// Ombre du filtre sélectionné (terre cuite 70 %).

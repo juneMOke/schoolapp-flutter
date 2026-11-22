@@ -18,6 +18,10 @@ class _Cell extends StatelessWidget {
   final ScheduleGridMarks marks;
   final ScheduleGridDrag? drag;
 
+  /// L'habillage d'une classe (EDT §4.6 D) : jour d'or, créneau libre
+  /// hachuré en consultation, « + » discret en brouillon.
+  final bool classLook;
+
   const _Cell({
     required this.cell,
     required this.day,
@@ -32,6 +36,7 @@ class _Cell extends StatelessWidget {
     required this.onTapSlot,
     required this.marks,
     required this.drag,
+    this.classLook = false,
   });
 
   ScheduleClosedDay? get _closed => marks.closedDays[day];
@@ -53,7 +58,11 @@ class _Cell extends StatelessWidget {
         color: closed != null
             ? AppColors.timetableClosedDay
             : isToday
-            ? AppColors.stateHover
+            ? classLook
+                  ? AppColors.orDoux.withValues(
+                      alpha: AppDimensions.timetableTodayCellVeil,
+                    )
+                  : AppColors.stateHover
             : null,
         border: const Border(left: BorderSide(color: AppColors.border)),
       ),
@@ -112,13 +121,31 @@ class _Cell extends StatelessWidget {
       onHover: hover == null
           ? null
           : (inside) => hover(inside ? current.coursId : null),
+      teacherIcon: classLook,
+      badgeDot: classLook,
     );
   }
 
   Widget _readOnly(BuildContext context) {
     final current = cell;
+    if (classLook && current == null && _closed == null) {
+      return const Padding(
+        padding: EdgeInsets.all(AppSpacing.xs),
+        child: ClipRRect(
+          borderRadius: AppRadius.brMd,
+          child: CustomPaint(
+            painter: HatchPainter(
+              color: AppColors.timetableEmptyHatch,
+              gap: AppDimensions.timetableEmptyHatchGap,
+              stroke: AppDimensions.timetableEmptyHatchStroke,
+            ),
+            child: SizedBox.expand(),
+          ),
+        ),
+      );
+    }
     return Padding(
-      padding: const EdgeInsets.all(5),
+      padding: EdgeInsets.all(classLook ? AppSpacing.xs : 5),
       child: current == null
           ? null
           : _chip(
@@ -143,24 +170,30 @@ class _Cell extends StatelessWidget {
           '${ScheduleWeekdayLabels.long(l10n, day)} · $_range'
           '${current == null ? '' : ' · ${current.subjectLabel}'}',
       builder: (context, highlight) => current == null || dropping
-          ? EteeloDashedContainer(
-              backgroundColor: highlight.any || dropping
-                  ? AppColors.terreCuiteSoft
-                  : AppColors.surfaceRaised,
-              borderColor: AppColors.terreCuite,
-              borderRadius: AppRadius.brSm,
-              padding: const EdgeInsets.all(AppSpacing.xs),
-              child: Center(
-                child: dropping
-                    ? Text(
-                        l10n.classTimetableDrop,
-                        style: AppTypography.labelSmall.copyWith(
-                          color: AppColors.terreCuite,
-                        ),
-                      )
-                    : const Icon(Icons.add, color: AppColors.terreCuite),
-              ),
-            )
+          ? classLook
+                ? _QuietFreeSlot(
+                    lit: highlight.any || dropping,
+                    dropping: dropping,
+                    label: l10n.classTimetableDrop,
+                  )
+                : EteeloDashedContainer(
+                    backgroundColor: highlight.any || dropping
+                        ? AppColors.terreCuiteSoft
+                        : AppColors.surfaceRaised,
+                    borderColor: AppColors.terreCuite,
+                    borderRadius: AppRadius.brSm,
+                    padding: const EdgeInsets.all(AppSpacing.xs),
+                    child: Center(
+                      child: dropping
+                          ? Text(
+                              l10n.classTimetableDrop,
+                              style: AppTypography.labelSmall.copyWith(
+                                color: AppColors.terreCuite,
+                              ),
+                            )
+                          : const Icon(Icons.add, color: AppColors.terreCuite),
+                    ),
+                  )
           : IgnorePointer(child: _chip(current)),
     );
     final padded = Padding(

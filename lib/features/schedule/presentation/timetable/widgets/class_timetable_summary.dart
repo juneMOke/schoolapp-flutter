@@ -1,45 +1,69 @@
 import 'package:flutter/material.dart';
-import 'package:school_app_flutter/core/components/charts/eteelo_kpi_band.dart';
 import 'package:school_app_flutter/core/components/charts/eteelo_kpi_card_data.dart';
-import 'package:school_app_flutter/core/components/status/status_badge.dart';
 import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
-import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
+import 'package:school_app_flutter/core/theme/dashboard_tones.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
-import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/features/schedule/domain/entities/timetable/class_timetable.dart';
 import 'package:school_app_flutter/features/schedule/domain/entities/timetable/class_timetable_view.dart';
 import 'package:school_app_flutter/features/schedule/domain/services/timetable_metrics.dart';
 import 'package:school_app_flutter/features/schedule/presentation/timetable/timetable_marks.dart';
+import 'package:school_app_flutter/features/schedule/presentation/timetable/widgets/class_timetable_identity.dart';
+import 'package:school_app_flutter/features/schedule/presentation/timetable/widgets/timetable_kpi_band.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
-/// L'identité et la synthèse d'une classe (EDT §4.6 B) : le nom et la salle,
-/// le statut et la traçabilité, puis les pavés. Sous 600 reçus, « Séances » et
-/// « Enseignants » passent en une ligne de texte. « Placé / prévu » n'apparaît
-/// pas tant que les volumes sont inconnus (B2).
+/// L'identité et la synthèse d'une classe (EDT §4.6 B) : l'identité, puis
+/// les pavés pleins — Heures placées, Séances, Enseignants, Conflits et, en
+/// consultation un jour de semaine, « En cours » sur deux colonnes. Sous 600
+/// reçus, « Séances » et « Enseignants » passent en une ligne de texte et
+/// « En cours » prend toute la ligne.
 class ClassTimetableSummary extends StatelessWidget {
   final ClassTimetableView view;
   final List<ClassTimetableCell> cells;
+
+  /// Le brouillon est à l'écran (statut « Brouillon », traçabilité du
+  /// brouillon) ; sinon la version publiée.
+  final bool draft;
 
   /// Consultation, cette semaine, un jour de semaine : le pavé « En cours »
   /// (R11, D9).
   final TimetableNow? now;
 
-  /// Brouillon : les conflits professeur (R4, D8).
-  final int? conflicts;
+  /// Les conflits professeur des cases montrées (R4, D8).
+  final int conflicts;
 
   const ClassTimetableSummary({
     super.key,
     required this.view,
     required this.cells,
+    this.draft = false,
     this.now,
-    this.conflicts,
+    this.conflicts = 0,
   });
 
   static String _clock(int minutes) =>
       '${(minutes ~/ 60).toString().padLeft(2, '0')}:'
       '${(minutes % 60).toString().padLeft(2, '0')}';
 
-  EteeloKpiCardData _nowCard(AppLocalizations l10n, TimetableNow now) {
+  static Color _pave(Color sense) =>
+      DashboardTones.pave(DashboardTones.paveAccentSur(sense));
+
+  static EteeloKpiCardData _card({
+    required String label,
+    required String value,
+    required Color sense,
+    required IconData icon,
+    String? subline,
+  }) => EteeloKpiCardData(
+    label: label,
+    valueText: value,
+    subline: subline,
+    accent: sense,
+    accentSoft: DashboardTones.teinte(sense, DashboardTones.forceDe(sense)),
+    icon: icon,
+    filledBackground: _pave(sense),
+  );
+
+  Widget _nowPave(AppLocalizations l10n, TimetableNow now) {
     final current = now.current;
     final next = now.next;
     final closedBy = now.closedBy;
@@ -55,28 +79,27 @@ class ClassTimetableSummary extends StatelessWidget {
           ? l10n.classTimetableNoMoreToday
           : l10n.classTimetableNoClassNow;
     }
-    if (closedBy == null && next != null) {
-      subline = l10n.classTimetableNext(
-        next.subjectLabel ?? '',
-        _clock(next.range.startMinute),
-      );
+    if (closedBy == null) {
+      subline = next == null
+          ? (current == null ? null : l10n.classTimetableNoMoreToday)
+          : l10n.classTimetableNext(
+              next.subjectLabel ?? '',
+              _clock(next.range.startMinute),
+            );
     }
-    return EteeloKpiCardData(
+    return TimetableNowPave(
       label: current == null
           ? l10n.classTimetableNow
           : l10n.classTimetableNowAt(_clock(current.range.startMinute)),
-      valueText: value,
+      value: value,
       subline: subline,
-      accent: AppColors.terreCuite,
-      accentSoft: AppColors.terreCuiteSoft,
-      icon: Icons.play_circle_outline,
+      live: current != null,
     );
   }
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final header = view.header;
     final placed = [
       for (final c in cells)
         if (!c.isEmpty) c,
@@ -89,100 +112,66 @@ class ClassTimetableSummary extends StatelessWidget {
       placedCoursIds: [for (final c in placed) c.coursId],
     );
     final (hours, planned) = PlacedHours.totals(volumes);
-    final room = view.classroom.room;
-    final publishedAt = header?.publishedAt;
-    final trace = publishedAt == null
-        ? l10n.classTimetableNeverPublished
-        : l10n.classTimetablePublishedOn(
-            MaterialLocalizations.of(context).formatMediumDate(publishedAt),
-            header?.publishedBy?.name ?? '—',
-          );
+    final complete = planned == null || hours == planned;
+    final now = this.now;
     return LayoutBuilder(
       builder: (context, constraints) {
         final narrow = constraints.maxWidth < AppBreakpoints.dataTableCardsMax;
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Wrap(
-              spacing: AppSpacing.sm,
-              runSpacing: AppSpacing.xs,
-              crossAxisAlignment: WrapCrossAlignment.center,
-              children: [
-                Text(
-                  room == null
-                      ? view.classroom.name
-                      : '${view.classroom.name} · $room',
-                  style: AppTypography.titleLarge,
-                ),
-                if (header?.isPublished ?? false)
-                  StatusBadge.paid(
-                    label: l10n.classTimetablePublished,
-                    size: StatusBadgeSize.small,
-                  ),
-                if (view.hasDraft)
-                  StatusBadge.draft(
-                    label: l10n.classTimetableDraft,
-                    size: StatusBadgeSize.small,
-                  ),
-              ],
+        final cards = [
+          _card(
+            label: l10n.classTimetableKpiHours,
+            value: planned == null ? '$hours' : '$hours / $planned',
+            sense: complete ? DashboardSense.encaisse : DashboardSense.attente,
+            icon: Icons.schedule_outlined,
+            subline: planned == null
+                ? null
+                : planned > hours
+                ? l10n.classTimetableKpiRemaining(planned - hours)
+                : planned == hours
+                ? l10n.classTimetableKpiComplete
+                : l10n.classTimetableOver(hours - planned),
+          ),
+          if (!narrow) ...[
+            _card(
+              label: l10n.classTimetableKpiSessions,
+              value: '${placed.length}',
+              sense: DashboardSense.attendu,
+              icon: Icons.calendar_today_outlined,
             ),
-            Text(trace, style: AppTypography.bodySmall),
-            if (view.hasDraft)
-              Text(
-                l10n.classTimetableDraftOpen,
-                style: AppTypography.bodySmall,
-              ),
-            if (narrow)
-              Text(
-                l10n.classTimetableTextCounts(placed.length, teachers),
-                style: AppTypography.bodySmall,
-              ),
+            _card(
+              label: l10n.classTimetableKpiTeachers,
+              value: '$teachers',
+              sense: DashboardSense.attendu,
+              icon: Icons.groups_outlined,
+            ),
+          ],
+          _card(
+            label: l10n.classTimetableConflictsKpi,
+            value: '$conflicts',
+            sense: conflicts > 0
+                ? DashboardSense.manquant
+                : DashboardSense.encaisse,
+            icon: Icons.warning_amber_rounded,
+            subline: conflicts > 0
+                ? l10n.classTimetableKpiConflictsOpen
+                : l10n.classTimetableKpiConflictsNone,
+          ),
+        ];
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            ClassTimetableIdentity(
+              view: view,
+              draft: draft,
+              counts: narrow
+                  ? l10n.classTimetableTextCounts(placed.length, teachers)
+                  : null,
+            ),
             const SizedBox(height: AppSpacing.md),
-            EteeloKpiBand(
-              cards: [
-                EteeloKpiCardData(
-                  label: l10n.classTimetableKpiHours,
-                  valueText: planned == null ? '$hours' : '$hours / $planned',
-                  subline: planned == null
-                      ? null
-                      : planned - hours > 0
-                      ? l10n.classTimetableKpiRemaining(planned - hours)
-                      : l10n.classTimetableKpiComplete,
-                  accent: AppColors.bleuArdoise,
-                  accentSoft: AppColors.bleuArdoiseSoft,
-                  icon: Icons.schedule_outlined,
-                ),
-                if (conflicts case final count?)
-                  EteeloKpiCardData(
-                    label: l10n.classTimetableConflictsKpi,
-                    value: count,
-                    subline: count > 0
-                        ? l10n.classTimetableKpiConflictsOpen
-                        : l10n.classTimetableKpiConflictsNone,
-                    accent: count > 0 ? AppColors.error : AppColors.vertSavane,
-                    accentSoft: count > 0
-                        ? AppColors.feeStatusDueSoft
-                        : AppColors.hrTeachersSoft,
-                    icon: Icons.warning_amber_rounded,
-                  ),
-                if (now case final now?) _nowCard(l10n, now),
-                if (!narrow) ...[
-                  EteeloKpiCardData(
-                    label: l10n.classTimetableKpiSessions,
-                    value: placed.length,
-                    accent: AppColors.terreCuite,
-                    accentSoft: AppColors.terreCuiteSoft,
-                    icon: Icons.grid_view_outlined,
-                  ),
-                  EteeloKpiCardData(
-                    label: l10n.classTimetableKpiTeachers,
-                    value: teachers,
-                    accent: AppColors.hrTeachersAccent,
-                    accentSoft: AppColors.hrTeachersSoft,
-                    icon: Icons.person_outline,
-                  ),
-                ],
-              ],
+            TimetableKpiBand(
+              cards: cards,
+              wide: now == null ? null : _nowPave(l10n, now),
+              wideFullRow: narrow,
             ),
           ],
         );

@@ -47,6 +47,7 @@ class SchoolCalendarCubit extends Cubit<SchoolCalendarState>
         final month = _defaultMonthOf(year);
         if (month != null) emit(state.copyWith(month: month));
       }
+      await _reloadLibraryEvents();
       await _reloadEvents();
     } catch (e) {
       if (isClosed) return;
@@ -57,6 +58,19 @@ class SchoolCalendarCubit extends Cubit<SchoolCalendarState>
         ),
       );
     }
+  }
+
+  /// Les événements de chaque calendrier, pour les cartes de la liste (au
+  /// plus une dizaine de calendriers, tous lus en local).
+  Future<void> _reloadLibraryEvents() async {
+    final events = <String, List<SchoolEventRecord>>{};
+    final pending = <String, int>{};
+    for (final c in state.library.calendars) {
+      events[c.id] = await _repository.events(c.id);
+      pending[c.id] = await _repository.pendingCount(c.id);
+    }
+    if (isClosed) return;
+    emit(state.copyWith(libraryEvents: events, libraryPending: pending));
   }
 
   /// Ouvre un calendrier (CAL-I1) : au mois en cours s'il est dans l'année,
@@ -102,6 +116,8 @@ class SchoolCalendarCubit extends Cubit<SchoolCalendarState>
         openYear: year,
         events: changedYear ? const [] : state.events,
         pendingCount: state.pendingCount,
+        libraryEvents: state.libraryEvents,
+        libraryPending: state.libraryPending,
         view: view,
         month: month ?? (year == null ? null : _defaultMonthOf(year)),
         selectedDay: day,
@@ -167,20 +183,27 @@ class SchoolCalendarCubit extends Cubit<SchoolCalendarState>
   Future<Either<Failure, SchoolCalendar>> create(String yearLabel) =>
       _online(() => _repository.create(yearLabel));
 
+  /// Duplique le calendrier ouvert, ou [source] (une carte de la liste).
   Future<Either<Failure, SchoolCalendar>> duplicate(
-    List<CalendarNature> natures,
-  ) {
-    final calendar = state.calendar;
+    List<CalendarNature> natures, {
+    SchoolCalendar? source,
+  }) {
+    final calendar = source ?? state.calendar;
     if (calendar == null) return Future.value(const Left(StorageFailure()));
     return _online(
       () => _repository.duplicate(source: calendar, natures: natures),
     );
   }
 
-  Future<Either<Failure, SchoolCalendar>> publish() {
-    final calendar = state.calendar;
+  /// Publie le calendrier ouvert, ou [source] (le bandeau de la liste) :
+  /// depuis la liste, on y reste, et le bandeau passe « En vigueur ».
+  Future<Either<Failure, SchoolCalendar>> publish({SchoolCalendar? source}) {
+    final calendar = source ?? state.calendar;
     if (calendar == null) return Future.value(const Left(StorageFailure()));
-    return _online(() => _repository.publish(calendar));
+    return _online(
+      () => _repository.publish(calendar),
+      openAfter: source == null,
+    );
   }
 
   /// Un geste en ligne réussi rouvre la bibliothèque, puis le calendrier rendu.
@@ -188,8 +211,9 @@ class SchoolCalendarCubit extends Cubit<SchoolCalendarState>
   bool _inFlight = false;
 
   Future<Either<Failure, SchoolCalendar>> _online(
-    Future<Either<Failure, SchoolCalendar>> Function() call,
-  ) async {
+    Future<Either<Failure, SchoolCalendar>> Function() call, {
+    bool openAfter = true,
+  }) async {
     if (_inFlight) return const Left(StorageFailure());
     _inFlight = true;
     final Either<Failure, SchoolCalendar> result;
@@ -201,7 +225,7 @@ class SchoolCalendarCubit extends Cubit<SchoolCalendarState>
     final calendar = result.toOption().toNullable();
     if (calendar != null && !isClosed) {
       await load();
-      await open(calendar.yearLabel);
+      if (openAfter) await open(calendar.yearLabel);
     }
     return result;
   }
@@ -213,7 +237,15 @@ class SchoolCalendarCubit extends Cubit<SchoolCalendarState>
       final events = await _repository.events(calendar.id);
       final pending = await _repository.pendingCount(calendar.id);
       if (isClosed) return;
-      emit(state.copyWith(events: events, pendingCount: pending));
+      emit(
+        state.copyWith(
+          events: events,
+          pendingCount: pending,
+          // La carte du calendrier suit ses gestes, sans relire la liste.
+          libraryEvents: {...state.libraryEvents, calendar.id: events},
+          libraryPending: {...state.libraryPending, calendar.id: pending},
+        ),
+      );
     } catch (e) {
       if (isClosed) return;
       emit(

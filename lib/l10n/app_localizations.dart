@@ -36304,6 +36304,18 @@ abstract class AppLocalizations {
   /// **'Coming up'**
   String get schoolCalendarUpcomingSection;
 
+  /// No description provided for @schoolCalendarDraftNotPublished.
+  ///
+  /// In en, this message translates to:
+  /// **'Not published yet: teachers, students and parents cannot see it.'**
+  String get schoolCalendarDraftNotPublished;
+
+  /// No description provided for @schoolCalendarModifiedLine.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{modified today} =1{modified yesterday} other{modified {count} days ago}}'**
+  String schoolCalendarModifiedLine(int count);
+
   /// No description provided for @schoolCalendarFutureSection.
   ///
   /// In en, this message translates to:
@@ -36448,12 +36460,6 @@ abstract class AppLocalizations {
   /// **'More actions'**
   String get schoolCalendarMoreActions;
 
-  /// No description provided for @schoolCalendarFilters.
-  ///
-  /// In en, this message translates to:
-  /// **'Filters'**
-  String get schoolCalendarFilters;
-
   /// No description provided for @schoolCalendarVerifyNotice.
   ///
   /// In en, this message translates to:
@@ -36580,6 +36586,101 @@ abstract class AppLocalizations {
   /// **'{state, select, now{In progress} past{Ended} other{}}'**
   String schoolCalendarWhen(String state);
 
+  /// No description provided for @schoolCalendarDetailInDays.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{Today} =1{Tomorrow} other{In {count} days}}'**
+  String schoolCalendarDetailInDays(int count);
+
+  /// No description provided for @schoolCalendarFormEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Calendar {year}'**
+  String schoolCalendarFormEyebrow(String year);
+
+  /// No description provided for @schoolCalendarFormNoteLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Note'**
+  String get schoolCalendarFormNoteLabel;
+
+  /// No description provided for @schoolCalendarFormOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'(optional)'**
+  String get schoolCalendarFormOptional;
+
+  /// No description provided for @schoolCalendarFormTitleHint.
+  ///
+  /// In en, this message translates to:
+  /// **'{nature, select, ASSESSMENT{P2 tests} EXAM{Mock exams} other{Parents\' meeting}}'**
+  String schoolCalendarFormTitleHint(String nature);
+
+  /// No description provided for @schoolCalendarNewEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'School calendar'**
+  String get schoolCalendarNewEyebrow;
+
+  /// No description provided for @schoolCalendarPrintEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Calendar {year} · published version'**
+  String schoolCalendarPrintEyebrow(String year);
+
+  /// No description provided for @schoolCalendarPrintIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'One landscape A4 page: the eleven months of the year, the legend of the kinds and the key dates.'**
+  String get schoolCalendarPrintIntro;
+
+  /// No description provided for @schoolCalendarPublishFramework.
+  ///
+  /// In en, this message translates to:
+  /// **'{state, select, yes{national framework included} other{no national framework}}'**
+  String schoolCalendarPublishFramework(String state);
+
+  /// No description provided for @schoolCalendarPublishAudience.
+  ///
+  /// In en, this message translates to:
+  /// **'Teachers, students and parents will see this calendar.'**
+  String get schoolCalendarPublishAudience;
+
+  /// No description provided for @schoolCalendarPublishRelay.
+  ///
+  /// In en, this message translates to:
+  /// **'{current} stays in force until {end}; {year} takes over on {start}.'**
+  String schoolCalendarPublishRelay(
+    String current,
+    String end,
+    String year,
+    String start,
+  );
+
+  /// No description provided for @schoolCalendarPublishReference.
+  ///
+  /// In en, this message translates to:
+  /// **'Its periods, tests and exams become the reference for assessments, report cards and the timetable.'**
+  String get schoolCalendarPublishReference;
+
+  /// No description provided for @schoolCalendarDuplicateShift.
+  ///
+  /// In en, this message translates to:
+  /// **'Dates move 52 weeks: a Friday event stays on a Friday. Each carried-over element is marked to check.'**
+  String get schoolCalendarDuplicateShift;
+
+  /// No description provided for @schoolCalendarDuplicateFramework.
+  ///
+  /// In en, this message translates to:
+  /// **'{state, select, integrated{The {year} national framework is not copied: the official version published by ETEELO is included.} awaited{The {year} national framework is not published yet. It will be added automatically once published.} other{The {year} national framework is not copied: the official version is included once published.}}'**
+  String schoolCalendarDuplicateFramework(String state, String year);
+
+  /// No description provided for @schoolCalendarDuplicateDraft.
+  ///
+  /// In en, this message translates to:
+  /// **'{state, select, inForce{The result is a draft: {year} stays in force.} other{The result is a draft: {year} is not changed.}}'**
+  String schoolCalendarDuplicateDraft(String state, String year);
+
   /// No description provided for @schoolCalendarToVerify.
   ///
   /// In en, this message translates to:
@@ -36657,12 +36758,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Levels {codes}'**
   String schoolCalendarScopeCatalog(String codes);
-
-  /// No description provided for @schoolCalendarPending.
-  ///
-  /// In en, this message translates to:
-  /// **'Waiting to be sent'**
-  String get schoolCalendarPending;
 
   /// No description provided for @schoolCalendarRejected.
   ///
@@ -36946,6 +37041,90 @@ abstract class AppLocalizations {
   /// **'Create the {year} calendar'**
   String schoolCalendarEmptyCreate(String year);
 
+  /// No description provided for @schoolCalendarPublishedLine.
+  ///
+  /// In en, this message translates to:
+  /// **'published on {date}'**
+  String schoolCalendarPublishedLine(String date);
+
+  /// No description provided for @schoolCalendarPublishedBy.
+  ///
+  /// In en, this message translates to:
+  /// **'published on {date} by {name}'**
+  String schoolCalendarPublishedBy(String date, String name);
+
+  /// No description provided for @schoolCalendarActorRole.
+  ///
+  /// In en, this message translates to:
+  /// **'{role, select, DIRECTOR{Principal} ACADEMIC_ADMIN{Academic advisor} SUPER_ADMIN{Administrator} other{}}'**
+  String schoolCalendarActorRole(String role);
+
+  /// No description provided for @schoolCalendarProgressMarkers.
+  ///
+  /// In en, this message translates to:
+  /// **'marks: start of each period'**
+  String get schoolCalendarProgressMarkers;
+
+  /// No description provided for @schoolCalendarUntil.
+  ///
+  /// In en, this message translates to:
+  /// **'until {date}'**
+  String schoolCalendarUntil(String date);
+
+  /// No description provided for @schoolCalendarMoreOthers.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{+ 1 other} other{+ {count} others}}'**
+  String schoolCalendarMoreOthers(int count);
+
+  /// No description provided for @schoolCalendarItemDays.
+  ///
+  /// In en, this message translates to:
+  /// **'{nature} · {count} d'**
+  String schoolCalendarItemDays(String nature, int count);
+
+  /// No description provided for @schoolCalendarDueIn.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{Today} =1{Tomorrow} other{In {count} days}}'**
+  String schoolCalendarDueIn(int count);
+
+  /// No description provided for @schoolCalendarShow.
+  ///
+  /// In en, this message translates to:
+  /// **'Show'**
+  String get schoolCalendarShow;
+
+  /// No description provided for @schoolCalendarHide.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide'**
+  String get schoolCalendarHide;
+
+  /// No description provided for @schoolCalendarModifiedAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{Modified today} =1{Modified yesterday} other{Modified {count} days ago}}'**
+  String schoolCalendarModifiedAgo(int count);
+
+  /// No description provided for @schoolCalendarSchoolItems.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{no school item} =1{1 school item} other{{count} school items}}'**
+  String schoolCalendarSchoolItems(int count);
+
+  /// No description provided for @schoolCalendarTip.
+  ///
+  /// In en, this message translates to:
+  /// **'Tip: duplicate {year} to prepare the next year.'**
+  String schoolCalendarTip(String year);
+
+  /// No description provided for @schoolCalendarPercent.
+  ///
+  /// In en, this message translates to:
+  /// **'{percent}%'**
+  String schoolCalendarPercent(int percent);
+
   /// No description provided for @schoolCalendarLoading.
   ///
   /// In en, this message translates to:
@@ -37036,12 +37215,6 @@ abstract class AppLocalizations {
   /// **'{count, plural, =1{1 window set by the academic adviser} other{{count} windows set by the academic adviser}}'**
   String schoolCalendarDuplicateWindowsCount(int count);
 
-  /// No description provided for @schoolCalendarDuplicateRule.
-  ///
-  /// In en, this message translates to:
-  /// **'Dates move 52 weeks: a Friday event stays on a Friday. Each carried-over element is marked to check. The new year\'s national framework is not copied: the official version is included once published. The result is a draft: {year} stays in force.'**
-  String schoolCalendarDuplicateRule(String year);
-
   /// No description provided for @schoolCalendarNewYear.
   ///
   /// In en, this message translates to:
@@ -37114,12 +37287,6 @@ abstract class AppLocalizations {
   /// **'{count, plural, =1{1 element still to check. It will be published as is.} other{{count} elements still to check. They will be published as is.}}'**
   String schoolCalendarPublishToVerify(int count);
 
-  /// No description provided for @schoolCalendarPublishConsequence.
-  ///
-  /// In en, this message translates to:
-  /// **'The whole school will see this calendar. Its periods, tests and exams become the reference for assessments, report cards and the timetable.'**
-  String get schoolCalendarPublishConsequence;
-
   /// No description provided for @accueilModuleAgendaDescription.
   ///
   /// In en, this message translates to:
@@ -37167,6 +37334,72 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'The print could not be prepared.'**
   String get schoolCalendarPrintFailed;
+
+  /// No description provided for @schoolCalendarWeeksCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 week} other{{count} weeks}}'**
+  String schoolCalendarWeeksCount(int count);
+
+  /// No description provided for @schoolCalendarNationalCountLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{national} other{national}}'**
+  String schoolCalendarNationalCountLabel(int count);
+
+  /// No description provided for @schoolCalendarInternalCountLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{internal} other{internal}}'**
+  String schoolCalendarInternalCountLabel(int count);
+
+  /// No description provided for @schoolCalendarKeyNational.
+  ///
+  /// In en, this message translates to:
+  /// **'national'**
+  String get schoolCalendarKeyNational;
+
+  /// No description provided for @schoolCalendarKeyInternal.
+  ///
+  /// In en, this message translates to:
+  /// **'internal'**
+  String get schoolCalendarKeyInternal;
+
+  /// No description provided for @schoolCalendarKeyNationalSolid.
+  ///
+  /// In en, this message translates to:
+  /// **'national (solid)'**
+  String get schoolCalendarKeyNationalSolid;
+
+  /// No description provided for @schoolCalendarKeyInternalDashed.
+  ///
+  /// In en, this message translates to:
+  /// **'internal (dashed)'**
+  String get schoolCalendarKeyInternalDashed;
+
+  /// No description provided for @schoolCalendarToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get schoolCalendarToday;
+
+  /// No description provided for @schoolCalendarDuplicateNextYear.
+  ///
+  /// In en, this message translates to:
+  /// **'Duplicate for next year'**
+  String get schoolCalendarDuplicateNextYear;
+
+  /// No description provided for @calendarWeekdayName.
+  ///
+  /// In en, this message translates to:
+  /// **'{weekday, select, 1{Monday} 2{Tuesday} 3{Wednesday} 4{Thursday} 5{Friday} 6{Saturday} other{Sunday}}'**
+  String calendarWeekdayName(String weekday);
+
+  /// No description provided for @calendarWeekdayTwo.
+  ///
+  /// In en, this message translates to:
+  /// **'{weekday, select, 1{Mo} 2{Tu} 3{We} 4{Th} 5{Fr} 6{Sa} other{Su}}'**
+  String calendarWeekdayTwo(String weekday);
 
   /// No description provided for @subMenuClassTimetable.
   ///
@@ -37377,18 +37610,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Tap a slot in the grid to place a course.'**
   String get classTimetableHelpDraft;
-
-  /// No description provided for @classTimetableHelpDraftDay.
-  ///
-  /// In en, this message translates to:
-  /// **'Tap a slot of the day to place a course there.'**
-  String get classTimetableHelpDraftDay;
-
-  /// No description provided for @classTimetableFreeSlot.
-  ///
-  /// In en, this message translates to:
-  /// **'Free slot'**
-  String get classTimetableFreeSlot;
 
   /// No description provided for @classTimetableReserveTitle.
   ///
@@ -37936,12 +38157,6 @@ abstract class AppLocalizations {
   /// **'Tap a course to find it in the grid'**
   String get classTimetableTapHint;
 
-  /// No description provided for @classTimetableChangeClass.
-  ///
-  /// In en, this message translates to:
-  /// **'Change class'**
-  String get classTimetableChangeClass;
-
   /// No description provided for @classTimetableAllDomains.
   ///
   /// In en, this message translates to:
@@ -38031,6 +38246,96 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'The document could not be fetched. Try again in a moment.'**
   String get classTimetablePrintFailed;
+
+  /// No description provided for @classTimetablePickerSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} · {cycle} › {level}'**
+  String classTimetablePickerSummary(String name, String cycle, String level);
+
+  /// No description provided for @classTimetableChange.
+  ///
+  /// In en, this message translates to:
+  /// **'Change'**
+  String get classTimetableChange;
+
+  /// No description provided for @classTimetableAbandonDraft.
+  ///
+  /// In en, this message translates to:
+  /// **'Abandon the draft'**
+  String get classTimetableAbandonDraft;
+
+  /// No description provided for @classTimetablePrintIcon.
+  ///
+  /// In en, this message translates to:
+  /// **'Print the timetable'**
+  String get classTimetablePrintIcon;
+
+  /// No description provided for @classTimetableDraftTraceKept.
+  ///
+  /// In en, this message translates to:
+  /// **'The published version stays in force until publication · edited {when}'**
+  String classTimetableDraftTraceKept(String when);
+
+  /// No description provided for @classTimetableDraftTraceNew.
+  ///
+  /// In en, this message translates to:
+  /// **'Never published · edited {when}'**
+  String classTimetableDraftTraceNew(String when);
+
+  /// No description provided for @classTimetableWhenJustNow.
+  ///
+  /// In en, this message translates to:
+  /// **'just now'**
+  String get classTimetableWhenJustNow;
+
+  /// No description provided for @classTimetableWhenToday.
+  ///
+  /// In en, this message translates to:
+  /// **'today · {time}'**
+  String classTimetableWhenToday(String time);
+
+  /// No description provided for @classTimetableWhenYesterday.
+  ///
+  /// In en, this message translates to:
+  /// **'yesterday · {time}'**
+  String classTimetableWhenYesterday(String time);
+
+  /// No description provided for @classTimetableWhenOn.
+  ///
+  /// In en, this message translates to:
+  /// **'on {date} · {time}'**
+  String classTimetableWhenOn(String date, String time);
+
+  /// No description provided for @classTimetableGridMore.
+  ///
+  /// In en, this message translates to:
+  /// **'More'**
+  String get classTimetableGridMore;
+
+  /// No description provided for @classTimetableGridMoreHint.
+  ///
+  /// In en, this message translates to:
+  /// **'See the rest of the week'**
+  String get classTimetableGridMoreHint;
+
+  /// No description provided for @classTimetableDayNoClass.
+  ///
+  /// In en, this message translates to:
+  /// **'No class'**
+  String get classTimetableDayNoClass;
+
+  /// No description provided for @classTimetableViewSession.
+  ///
+  /// In en, this message translates to:
+  /// **'View the session'**
+  String get classTimetableViewSession;
+
+  /// No description provided for @classTimetableDistributionSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Hours placed / planned'**
+  String get classTimetableDistributionSubtitle;
 }
 
 class _AppLocalizationsDelegate

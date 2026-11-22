@@ -17,6 +17,13 @@ class AppConfirmationDialog extends StatelessWidget {
   final Color? confirmButtonColor;
   final Color? confirmForegroundColor;
 
+  /// Ce qui suit le message (décompte, blocages, avertissements), posé sous
+  /// lui dans la même zone défilante. `null` : le message seul.
+  final Widget? details;
+
+  /// Faux : « Confirmer » est inactif (un blocage est montré dans [details]).
+  final bool confirmEnabled;
+
   const AppConfirmationDialog({
     super.key,
     required this.title,
@@ -30,6 +37,8 @@ class AppConfirmationDialog extends StatelessWidget {
     this.confirmIcon,
     this.confirmButtonColor,
     this.confirmForegroundColor,
+    this.details,
+    this.confirmEnabled = true,
   });
 
   @override
@@ -120,13 +129,7 @@ class AppConfirmationDialog extends StatelessWidget {
             ),
           ],
         ),
-        content: Text(
-          message,
-          style: AppTextStyles.body.copyWith(
-            color: AppColors.textSecondary,
-            height: 1.45,
-          ),
-        ),
+        content: _content(),
         actionsAlignment: MainAxisAlignment.center,
         actionsPadding: const EdgeInsets.fromLTRB(
           AppDimensions.detailCardPadding,
@@ -165,13 +168,15 @@ class AppConfirmationDialog extends StatelessWidget {
                 const SizedBox(width: AppDimensions.spacingS),
                 Expanded(
                   child: FilledButton.icon(
-                    autofocus: !isDestructive,
+                    autofocus: !isDestructive && confirmEnabled,
                     style: FilledButton.styleFrom(
                       minimumSize: const Size(0, AppDimensions.minTouchTarget),
                       backgroundColor: resolvedConfirmButtonColor,
                       foregroundColor: resolvedConfirmForegroundColor,
                     ),
-                    onPressed: () => Navigator.of(context).pop(true),
+                    onPressed: confirmEnabled
+                        ? () => Navigator.of(context).pop(true)
+                        : null,
                     icon: Icon(
                       resolvedConfirmIcon,
                       size: AppDimensions.spacingM,
@@ -179,7 +184,9 @@ class AppConfirmationDialog extends StatelessWidget {
                     label: Text(
                       confirmLabel,
                       style: AppTextStyles.action.copyWith(
-                        color: resolvedConfirmForegroundColor,
+                        color: confirmEnabled
+                            ? resolvedConfirmForegroundColor
+                            : AppColors.textMuted,
                       ),
                     ),
                   ),
@@ -187,6 +194,29 @@ class AppConfirmationDialog extends StatelessWidget {
               ],
             ),
           ),
+        ],
+      ),
+    );
+  }
+
+  Widget _content() {
+    final text = Text(
+      message,
+      style: AppTextStyles.body.copyWith(
+        color: AppColors.textSecondary,
+        height: 1.45,
+      ),
+    );
+    final more = details;
+    if (more == null) return text;
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          text,
+          const SizedBox(height: AppDimensions.spacingS),
+          more,
         ],
       ),
     );

@@ -6,8 +6,9 @@ import 'package:school_app_flutter/features/school_calendar/domain/entities/cale
 import 'package:school_app_flutter/features/school_calendar/domain/entities/calendar_scope_options.dart';
 import 'package:school_app_flutter/features/school_calendar/domain/entities/school_calendar.dart';
 import 'package:school_app_flutter/features/school_calendar/domain/repositories/school_calendar_repository.dart';
-import 'package:school_app_flutter/features/school_calendar/domain/services/calendar_replacements.dart';
+import 'package:school_app_flutter/features/school_calendar/domain/services/calendar_days.dart';
 import 'package:school_app_flutter/features/school_calendar/domain/services/calendar_phase_rule.dart';
+import 'package:school_app_flutter/features/school_calendar/presentation/bloc/calendar_summary.dart';
 
 enum SchoolCalendarStatus { loading, ready, failure }
 
@@ -28,6 +29,13 @@ class SchoolCalendarState extends Equatable {
   final String? openYear;
   final List<SchoolEventRecord> events;
   final int pendingCount;
+
+  /// Les événements de l'école de chaque calendrier, par son id : les cartes
+  /// et le bandeau de la liste en comptent les éléments (CAL D5).
+  final Map<String, List<SchoolEventRecord>> libraryEvents;
+
+  /// Les gestes encore sur l'appareil, par calendrier.
+  final Map<String, int> libraryPending;
 
   final CalendarView view;
 
@@ -53,6 +61,8 @@ class SchoolCalendarState extends Equatable {
     this.openYear,
     this.events = const [],
     this.pendingCount = 0,
+    this.libraryEvents = const {},
+    this.libraryPending = const {},
     this.view = CalendarView.month,
     this.month,
     this.selectedDay,
@@ -85,6 +95,20 @@ class SchoolCalendarState extends Equatable {
     return null;
   }
 
+  /// Sans calendrier en vigueur, le brouillon dont l'année couvre aujourd'hui
+  /// (décision B du 2026-11-21 : une école qui arrive en cours d'année) ; il
+  /// prend le bandeau de la liste.
+  SchoolCalendar? get currentDraft {
+    if (inForce != null) return null;
+    for (final c in library.calendars) {
+      if (phaseOf(c) == CalendarPhase.draft &&
+          CalendarDays.within(today, c.startDate, c.endDate)) {
+        return c;
+      }
+    }
+    return null;
+  }
+
   /// Le rythme effectif : le choix, sinon celui du plus grand nombre de
   /// cycles ; `null` si l'école n'en déclare aucun.
   PeriodRhythm? get effectiveRhythm {
@@ -93,34 +117,24 @@ class SchoolCalendarState extends Equatable {
     return rhythms.isEmpty ? null : rhythms.first;
   }
 
-  /// Tous les éléments du calendrier ouvert : le cadre de son année, puis les
-  /// événements de l'école, remplacements résolus sur la liste entière ;
-  /// périodes du cadre limitées au rythme effectif. Un remplacement refusé à
-  /// sa création reste montré, marqué, sans masquer l'élément national qu'il
-  /// visait ; une modification refusée masque toujours (le serveur garde la
-  /// version acceptée).
+  /// Tous les éléments du calendrier ouvert (`resolveCalendarElements`).
   List<CalendarElement> get allElements {
     final c = calendar;
-    if (c == null) return const [];
-    final rhythm = effectiveRhythm;
-    final resolved = CalendarReplacements.resolveForDisplay(
-      [
-        ...?library.frameworkOf(c.yearLabel)?.items,
-        for (final record in events) record.element,
-      ],
-      inert: {
-        for (final r in events)
-          if (r.isRejectedCreation) r.element.id,
-      },
+    return c == null ? const [] : summaryOf(c).elements;
+  }
+
+  /// Ce que la liste dit d'un calendrier : le calendrier ouvert se lit sur
+  /// [events], les autres sur [libraryEvents].
+  CalendarSummary summaryOf(SchoolCalendar c) {
+    final isOpen = c.yearLabel == openYear;
+    return CalendarSummary(
+      elements: resolveCalendarElements(
+        national: library.frameworkOf(c.yearLabel)?.items ?? const [],
+        events: isOpen ? events : (libraryEvents[c.id] ?? const []),
+        rhythm: effectiveRhythm,
+      ),
+      pendingCount: isOpen ? pendingCount : (libraryPending[c.id] ?? 0),
     );
-    return [
-      for (final e in resolved)
-        if (e.nature != CalendarNature.period ||
-            rhythm == null ||
-            e.rhythm == null ||
-            e.rhythm == rhythm)
-          e,
-    ];
   }
 
   /// L'élément national du cadre de l'année, par son id.
@@ -134,13 +148,18 @@ class SchoolCalendarState extends Equatable {
   }
 
   /// Ce que montrent les vues, après légende, source et « à vérifier ».
-  List<CalendarElement> get visibleElements => [
+  /// Les éléments de la source retenue (Tout | National | Interne) : les
+  /// compteurs de la légende les suivent (CAL-I9).
+  List<CalendarElement> get sourcedElements => [
     for (final e in allElements)
-      if (!hiddenNatures.contains(e.nature) &&
-          (source == CalendarSourceFilter.all ||
-              (source == CalendarSourceFilter.national) == e.isNational) &&
-          (!verifyOnly || e.toVerify))
+      if (source == CalendarSourceFilter.all ||
+          (source == CalendarSourceFilter.national) == e.isNational)
         e,
+  ];
+
+  List<CalendarElement> get visibleElements => [
+    for (final e in sourcedElements)
+      if (!hiddenNatures.contains(e.nature) && (!verifyOnly || e.toVerify)) e,
   ];
 
   SchoolEventRecord? recordOf(String elementId) {
@@ -161,6 +180,8 @@ class SchoolCalendarState extends Equatable {
     bool closeCalendar = false,
     List<SchoolEventRecord>? events,
     int? pendingCount,
+    Map<String, List<SchoolEventRecord>>? libraryEvents,
+    Map<String, int>? libraryPending,
     CalendarView? view,
     DateTime? month,
     DateTime? selectedDay,
@@ -178,6 +199,8 @@ class SchoolCalendarState extends Equatable {
     openYear: closeCalendar ? null : (openYear ?? this.openYear),
     events: events ?? this.events,
     pendingCount: pendingCount ?? this.pendingCount,
+    libraryEvents: libraryEvents ?? this.libraryEvents,
+    libraryPending: libraryPending ?? this.libraryPending,
     view: view ?? this.view,
     month: month ?? this.month,
     selectedDay: clearSelectedDay ? null : (selectedDay ?? this.selectedDay),
@@ -198,6 +221,8 @@ class SchoolCalendarState extends Equatable {
     openYear,
     events,
     pendingCount,
+    libraryEvents,
+    libraryPending,
     view,
     month,
     selectedDay,

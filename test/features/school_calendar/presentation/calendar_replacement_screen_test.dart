@@ -4,7 +4,7 @@ import 'package:dartz/dartz.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:school_app_flutter/core/components/buttons/primary_button.dart';
+import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
 import 'package:school_app_flutter/core/components/documents/printable_document.dart';
 import 'package:school_app_flutter/core/offline/record_sync_state.dart';
 import 'package:school_app_flutter/features/school_calendar/domain/entities/calendar_element.dart';
@@ -73,6 +73,7 @@ Future<ElementDetailChoice?> _openSheet(
                 element: element,
                 scopes: const CalendarScopeOptions(),
                 canEdit: canEdit,
+                today: d(2026, 6, 10),
                 replaced: replaced,
               ),
             ),
@@ -138,6 +139,7 @@ void main() {
                 context,
                 EventFormDialog(
                   newId: 'new',
+                  yearLabel: '2025-2026',
                   replacing: _proclamation,
                   natures: const {CalendarNature.schoolLife},
                   scopes: const CalendarScopeOptions(),
@@ -157,7 +159,7 @@ void main() {
       expect(find.textContaining('vaut pour votre école'), findsOneWidget);
       // Le remplacé ne s'avertit pas lui-même.
       expect(find.textContaining('chevauche'), findsNothing);
-      await tester.tap(find.widgetWithText(PrimaryButton, 'Remplacer'));
+      await tester.tap(find.widgetWithText(EteeloButton, 'Remplacer'));
       await tester.pumpAndSettle();
       expect(saved?.id, 'new');
       expect(saved?.replaces, 'proclamation-p1');

@@ -3,11 +3,11 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/components/keyboard/page_action_shortcut.dart';
-import 'package:school_app_flutter/core/components/buttons/eteelo_fab.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
 import 'package:school_app_flutter/core/components/skeletons/eteelo_list_skeleton.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/layout/page_content_width.dart';
 import 'package:school_app_flutter/features/school_calendar/presentation/pages/calendar_location.dart';
 import 'package:school_app_flutter/core/offline/online_only.dart';
@@ -19,6 +19,8 @@ import 'package:school_app_flutter/features/school_calendar/presentation/helpers
 import 'package:school_app_flutter/features/school_calendar/presentation/pages/school_calendar_page_actions.dart';
 import 'package:school_app_flutter/features/school_calendar/presentation/pages/school_calendar_print.dart';
 import 'package:school_app_flutter/features/school_calendar/presentation/widgets/calendar/calendar_detail_view.dart';
+import 'package:school_app_flutter/features/school_calendar/presentation/widgets/list/calendars_list_header.dart';
+import 'package:school_app_flutter/features/school_calendar/presentation/widgets/list/calendars_list_skeleton.dart';
 import 'package:school_app_flutter/features/school_calendar/presentation/widgets/list/calendars_list_view.dart';
 import 'package:school_app_flutter/features/school_calendar/presentation/widgets/states/school_calendar_error_state.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
@@ -64,33 +66,10 @@ class _Screen extends StatelessWidget {
           cubit,
           AppPageBackground(
             width: PageContentWidth.wide,
-            floatingActionButton: _addFab(context, state),
             child: _content(context, state, cubit),
           ),
         ),
       ),
-    );
-  }
-
-  /// Sur un téléphone, « Ajouter » d'un calendrier ouvert est le bouton
-  /// flottant : à portée du pouce, sans rangée de boutons avant la grille.
-  Widget? _addFab(BuildContext context, SchoolCalendarState state) {
-    final calendar = state.calendar;
-    if (state.status != SchoolCalendarStatus.ready || calendar == null) {
-      return null;
-    }
-    if (!CalendarActionsRow.addAsFab(context)) return null;
-    final rights = CalendarRights.of(context);
-    if (!rights.canWrite || state.phaseOf(calendar).isReadOnly) return null;
-    final actions = SchoolCalendarPageActions(
-      context,
-      context.read<SchoolCalendarCubit>(),
-      rights,
-    );
-    return EteeloFab(
-      label: AppLocalizations.of(context)!.schoolCalendarAdd,
-      icon: Icons.add_rounded,
-      onPressed: () => unawaited(actions.edit(day: state.selectedDay)),
     );
   }
 
@@ -138,27 +117,57 @@ class _Screen extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final rights = CalendarRights.of(context);
     final actions = SchoolCalendarPageActions(context, cubit, rights);
+    final canCreate = rights.canPublish && online;
+    // La liste garde son en-tête pendant le chargement et l'erreur (§5).
+    Widget withHeader(Widget body) => state.openYear != null
+        ? body
+        : Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              CalendarsListHeader(
+                onCreate: canCreate ? () => unawaited(actions.create()) : null,
+              ),
+              const SizedBox(height: AppSpacing.lg),
+              body,
+            ],
+          );
     switch (state.status) {
       case SchoolCalendarStatus.loading:
-        return EteeloListSkeleton(
-          rowCount: 3,
-          pillCount: 2,
-          showAvatar: false,
-          semanticsLabel: l10n.schoolCalendarLoading,
+        return withHeader(
+          state.openYear != null
+              ? EteeloListSkeleton(
+                  rowCount: 3,
+                  pillCount: 2,
+                  showAvatar: false,
+                  semanticsLabel: l10n.schoolCalendarLoading,
+                )
+              : CalendarsListSkeleton(
+                  semanticsLabel: l10n.schoolCalendarLoading,
+                ),
         );
       case SchoolCalendarStatus.failure:
-        return SchoolCalendarErrorState(
-          failure: state.failure ?? const StorageFailure(),
-          onRetry: () => unawaited(cubit.load(pull: true)),
+        return withHeader(
+          SchoolCalendarErrorState(
+            failure: state.failure ?? const StorageFailure(),
+            onRetry: () => unawaited(cubit.load(pull: true)),
+          ),
         );
       case SchoolCalendarStatus.ready:
         final calendar = state.calendar;
         if (calendar == null) {
           return CalendarsListView(
             state: state,
-            canCreate: rights.canPublish && online,
+            canCreate: canCreate,
+            canDuplicate: canCreate,
+            online: online,
             onCreate: () => unawaited(actions.create()),
             onOpen: (year) => unawaited(cubit.open(year)),
+            onDuplicate: (c) => unawaited(actions.duplicate(source: c)),
+            // Un brouillon n'est servi qu'avec un droit d'écriture (K10).
+            canSeeDrafts: rights.canWrite || rights.canPublish,
+            canPublish: canCreate,
+            onPublish: (c) =>
+                unawaited(actions.publish(online: online, source: c)),
           );
         }
         final phase = state.phaseOf(calendar);

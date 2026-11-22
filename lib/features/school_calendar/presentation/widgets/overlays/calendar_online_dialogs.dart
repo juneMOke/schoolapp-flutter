@@ -1,14 +1,12 @@
-import 'package:school_app_flutter/features/school_calendar/presentation/widgets/overlays/publish_calendar_dialog.dart';
 import 'package:flutter/material.dart';
-import 'package:school_app_flutter/core/components/buttons/primary_button.dart';
-import 'package:school_app_flutter/core/components/buttons/secondary_button.dart';
-import 'package:school_app_flutter/core/components/dialogs/eteelo_form_dialog.dart';
-import 'package:school_app_flutter/core/components/selection/checkable_row.dart';
-import 'package:school_app_flutter/core/components/status/eteelo_notice.dart';
+import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
+import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_select_input.dart';
 import 'package:school_app_flutter/features/school_calendar/domain/entities/calendar_enums.dart';
+import 'package:school_app_flutter/features/school_calendar/presentation/widgets/overlays/calendar_overlay_frame.dart';
+import 'package:school_app_flutter/features/school_calendar/presentation/widgets/overlays/calendar_dialog_parts.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// O3 — dupliquer vers l'année suivante (CAL-R8). Rend les natures à
@@ -19,12 +17,20 @@ class DuplicateCalendarDialog extends StatefulWidget {
   final int eventCount;
   final int windowCount;
 
+  /// Le cadre national de l'année visée, s'il est connu.
+  final FrameworkState? targetFramework;
+
+  /// La source est l'année en vigueur : elle « reste en vigueur ».
+  final bool sourceInForce;
+
   const DuplicateCalendarDialog({
     super.key,
     required this.sourceYear,
     required this.targetYear,
     required this.eventCount,
     required this.windowCount,
+    this.targetFramework,
+    this.sourceInForce = false,
   });
 
   /// Les événements de l'école ; les interrogations ont leur propre case.
@@ -47,49 +53,56 @@ class _DuplicateState extends State<DuplicateCalendarDialog> {
     if (_windows) CalendarNature.assessment,
   ];
 
-  void _submit() => Navigator.of(context).pop(_natures);
+  /// Rien de coché : rien à dupliquer, le bouton s'éteint.
+  VoidCallback? get _submit =>
+      _natures.isEmpty ? null : () => Navigator.of(context).pop(_natures);
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    return EteeloFormDialog(
+    return CalendarOverlayDialog(
       eyebrow: l10n.schoolCalendarDuplicateEyebrow(widget.sourceYear),
       title: l10n.schoolCalendarDuplicateFor(widget.targetYear),
       onSubmit: _submit,
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          CheckableRow(
+          CalendarCheckTile(
             value: _events,
             onChanged: (v) => setState(() => _events = v),
-            child: CalendarDialogLine(
-              l10n.schoolCalendarDuplicateEvents,
-              l10n.schoolCalendarDuplicateEventsCount(widget.eventCount),
-            ),
+            title: l10n.schoolCalendarDuplicateEvents,
+            detail: l10n.schoolCalendarDuplicateEventsCount(widget.eventCount),
           ),
-          CheckableRow(
+          const SizedBox(height: AppSpacing.md),
+          CalendarCheckTile(
             value: _windows,
             onChanged: (v) => setState(() => _windows = v),
-            child: CalendarDialogLine(
-              l10n.schoolCalendarDuplicateWindows,
-              l10n.schoolCalendarDuplicateWindowsCount(widget.windowCount),
+            title: l10n.schoolCalendarDuplicateWindows,
+            detail: l10n.schoolCalendarDuplicateWindowsCount(
+              widget.windowCount,
             ),
           ),
           const SizedBox(height: AppSpacing.md),
-          EteeloNotice.warning(
-            l10n.schoolCalendarDuplicateRule(widget.sourceYear),
+          DuplicateCalendarNotice(
+            sourceYear: widget.sourceYear,
+            targetYear: widget.targetYear,
+            targetFramework: widget.targetFramework,
+            sourceInForce: widget.sourceInForce,
           ),
         ],
       ),
       actions: [
-        SecondaryButton(
+        EteeloButton.ghost(
           label: l10n.schoolCalendarFormCancel,
           fullWidth: false,
+          size: EteeloButtonSize.regular,
           onPressed: () => Navigator.of(context).pop(),
         ),
-        PrimaryButton(
+        EteeloButton.primary(
           label: l10n.schoolCalendarDuplicate,
+          icon: Icons.copy_rounded,
           fullWidth: false,
+          size: EteeloButtonSize.regular,
           onPressed: _submit,
         ),
       ],
@@ -127,7 +140,8 @@ class _NewState extends State<NewCalendarDialog> {
       for (final y in widget.years)
         if (y.yearLabel == _year) y,
     ];
-    return EteeloFormDialog(
+    return CalendarOverlayDialog(
+      eyebrow: l10n.schoolCalendarNewEyebrow,
       title: l10n.schoolCalendarNew,
       onSubmit: _year == null ? null : _submit,
       body: Column(
@@ -146,28 +160,34 @@ class _NewState extends State<NewCalendarDialog> {
               ],
             ),
           const SizedBox(height: AppSpacing.md),
-          if (selected.isNotEmpty)
-            EteeloNotice.warning(
-              selected.single.framework == FrameworkState.integrated
-                  ? l10n.schoolCalendarNewFrameworkReady(
-                      selected.single.yearLabel,
-                    )
-                  : l10n.schoolCalendarNewFrameworkAwaited(
-                      selected.single.yearLabel,
-                    ),
+          if (selected.isNotEmpty) ...[
+            CalendarFrameworkNotice(
+              year: selected.single.yearLabel,
+              integrated:
+                  selected.single.framework == FrameworkState.integrated,
             ),
-          Text(l10n.schoolCalendarNewTip, style: AppTypography.bodySmall),
+            const SizedBox(height: AppSpacing.md),
+          ],
+          Text(
+            l10n.schoolCalendarNewTip,
+            style: AppTypography.bodySmall.copyWith(
+              color: AppColors.textSecondary,
+            ),
+          ),
         ],
       ),
       actions: [
-        SecondaryButton(
+        EteeloButton.ghost(
           label: l10n.schoolCalendarFormCancel,
           fullWidth: false,
+          size: EteeloButtonSize.regular,
           onPressed: () => Navigator.of(context).pop(),
         ),
-        PrimaryButton(
+        EteeloButton.primary(
           label: l10n.schoolCalendarNewCreate,
+          icon: Icons.add_rounded,
           fullWidth: false,
+          size: EteeloButtonSize.regular,
           onPressed: _year == null ? null : _submit,
         ),
       ],

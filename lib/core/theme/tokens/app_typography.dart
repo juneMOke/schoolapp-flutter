@@ -164,6 +164,72 @@ class AppTypography {
   );
 
   // Numéro de pastille du stepper — chiffres tabulaires (largeur stable).
+  /// L'année du bandeau « Année en cours » (maquette : serif 600 30).
+  static const calendarHeroYear = TextStyle(
+    fontFamily: 'Lora',
+    fontSize: 30,
+    fontWeight: FontWeight.w600,
+    height: 1,
+  );
+
+  /// L'année d'une carte de calendrier (maquette : serif 600 18).
+  static const calendarCardYear = TextStyle(
+    fontFamily: 'Lora',
+    fontSize: 18,
+    fontWeight: FontWeight.w600,
+    height: 1.1,
+  );
+
+  /// Le titre d'un calendrier ouvert (maquette : serif 600 26 ; replié 21).
+  static const calendarDetailTitle = TextStyle(
+    fontFamily: 'Lora',
+    fontSize: 26,
+    fontWeight: FontWeight.w600,
+    height: 1.1,
+  );
+  static const calendarDetailTitleCompact = TextStyle(
+    fontFamily: 'Lora',
+    fontSize: 21,
+    fontWeight: FontWeight.w600,
+    height: 1.15,
+  );
+
+  /// Le chiffre d'une tuile du bandeau (maquette : serif 600 20).
+  static const calendarTileValue = TextStyle(
+    fontFamily: 'Lora',
+    fontSize: 20,
+    fontWeight: FontWeight.w600,
+    height: 1,
+  );
+
+  /// Un compteur à chiffres fixes (légende, listes).
+  static const calendarCount = TextStyle(
+    fontFamily: 'Inter',
+    fontSize: 10,
+    fontWeight: FontWeight.w700,
+    fontFeatures: [FontFeature.tabularFigures()],
+  );
+
+  /// L'intitulé d'une ligne d'élément : liste du mois (600 13), vue Liste
+  /// (600 14).
+  static const calendarRowTitleSmall = TextStyle(
+    fontFamily: 'Inter',
+    fontSize: 13,
+    fontWeight: FontWeight.w600,
+  );
+  static const calendarRowTitle = TextStyle(
+    fontFamily: 'Inter',
+    fontSize: 14,
+    fontWeight: FontWeight.w600,
+  );
+
+  /// Le libellé d'une bande du mois (maquette : 600 11).
+  static const calendarBand = TextStyle(
+    fontFamily: 'Inter',
+    fontSize: 11,
+    fontWeight: FontWeight.w600,
+  );
+
   static const stepNumber = TextStyle(
     fontFamily: 'Inter',
     fontSize: 14,

@@ -36,9 +36,13 @@ class AppBreakpoints {
   static const double calendarMonthCompactMax = dataTableCardsMax;
 
   /// Hauteur de fenêtre sous laquelle le bandeau d'une année du calendrier
-  /// passe en compact, comme sous [calendarMonthCompactMax] de large : sur un
-  /// téléphone en paysage (360 dp), le bandeau complet remplissait l'écran.
+  /// passe en replié, comme sous [calendarMonthCompactMax] de large : la
+  /// fenêtre basse de la spec (téléphone en paysage).
   static const double calendarBannerCompactMaxHeight = 480.0;
+
+  /// Largeur reçue sous laquelle le mois du calendrier abrège les jours
+  /// (« Lun. ») et baisse ses cases.
+  static const double calendarMonthNarrowMax = 900.0;
 
   /// Fenêtre sous laquelle une modale de saisie (`EteeloFormDialog`) prend
   /// tout l'écran : centrée, elle gardait 40 dp de marge par côté, soit
@@ -81,6 +85,12 @@ class AppBreakpoints {
   /// [formGridThreeColMin].
   static const double formGridTwoColMin = 560.0;
 
+  /// Deux dates d'une même saisie (Du · Au) côte à côte dès que chacune
+  /// garde 164 dp (maquette Calendrier : `minmax(160px, 1fr)`, empilées au
+  /// téléphone de 390), mesuré sur la
+  /// rangée elle-même.
+  static const double datePairSideBySideMin = 340.0;
+
   /// Sous ce seuil, un filtre segmenté de période prend ses libellés courts
   /// (Trésorerie ▸ Clôture : Jour · Semaine · Mois, spec B1).
   static const double periodFilterShortLabelsMax = 560.0;
@@ -93,6 +103,11 @@ class AppBreakpoints {
   /// hauteur basse : un téléphone en paysage (360 dp) n'a pas 230 dp à lui
   /// donner sans cacher son en-tête chiffré.
   static const double treasuryChartLowHeightMax = 480.0;
+
+  /// Fenêtre basse (téléphone couché) : le choix de la classe d'un emploi du
+  /// temps se replie en une ligne + « Changer » (EDT §4.6 A, même seuil).
+  static const double timetablePickerCollapseMaxHeight =
+      treasuryChartLowHeightMax;
   static const double formGridThreeColMin = 880.0;
 
   /// En-tête de page à chiffres (Classes) : en deçà, le titre passe au-dessus

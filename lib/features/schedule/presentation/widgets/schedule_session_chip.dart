@@ -38,6 +38,12 @@ class ScheduleSessionChip extends StatelessWidget {
   /// Survol ou focus : la séance repère son cours (I5).
   final ValueChanged<bool>? onHover;
 
+  /// Habillage d'une classe (EDT §4.6 D) : une icône « personne » devant
+  /// l'enseignant, et « En cours » en pastille terre cuite au coin plutôt
+  /// qu'en texte. Désactivés par défaut : la vue enseignant ne change pas.
+  final bool teacherIcon;
+  final bool badgeDot;
+
   const ScheduleSessionChip({
     super.key,
     required this.cell,
@@ -49,6 +55,8 @@ class ScheduleSessionChip extends StatelessWidget {
     this.alert,
     this.badge,
     this.onHover,
+    this.teacherIcon = false,
+    this.badgeDot = false,
   });
 
   @override
@@ -165,18 +173,46 @@ class ScheduleSessionChip extends StatelessWidget {
                                         .merge(decoration),
                                   ),
                                 ),
+                                if (badge != null && badgeDot) ...[
+                                  const SizedBox(width: AppSpacing.xs),
+                                  Container(
+                                    width: AppDimensions.timetableNowDot,
+                                    height: AppDimensions.timetableNowDot,
+                                    decoration: const BoxDecoration(
+                                      color: AppColors.terreCuite,
+                                      shape: BoxShape.circle,
+                                    ),
+                                  ),
+                                ],
                               ],
                             ),
                             const SizedBox(height: 1),
-                            Text(
-                              cell.classroomLabel,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: AppTypography.labelSmall
-                                  .copyWith(color: AppColors.textSecondary)
-                                  .merge(decoration),
+                            Row(
+                              children: [
+                                if (teacherIcon &&
+                                    cell.classroomLabel.trim().isNotEmpty) ...[
+                                  const Icon(
+                                    Icons.person_outline,
+                                    size: AppSpacing.md,
+                                    color: AppColors.textSecondary,
+                                  ),
+                                  const SizedBox(width: AppSpacing.xs),
+                                ],
+                                Expanded(
+                                  child: Text(
+                                    cell.classroomLabel,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: AppTypography.labelSmall
+                                        .copyWith(
+                                          color: AppColors.textSecondary,
+                                        )
+                                        .merge(decoration),
+                                  ),
+                                ),
+                              ],
                             ),
-                            if (badge != null)
+                            if (badge != null && !badgeDot)
                               Text(
                                 badge,
                                 maxLines: 1,
