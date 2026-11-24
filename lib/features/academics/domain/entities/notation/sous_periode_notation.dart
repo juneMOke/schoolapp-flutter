@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:school_app_flutter/features/academics/domain/entities/notation/evaluation_groupe.dart';
+import 'package:school_app_flutter/features/academics/domain/entities/notation/intitule_colonne.dart';
 import 'package:school_app_flutter/features/academics/domain/entities/notation/moyenne_eleve.dart';
 import 'package:school_app_flutter/features/academics/domain/entities/notation/statut_periode.dart';
 
@@ -19,6 +20,10 @@ class SousPeriodeNotation extends Equatable {
   final List<MoyenneEleve> moyennesEleves;
   final List<EvaluationGroupe> evaluationsParType;
 
+  /// Le nom que la grille donne à la sous-période (« Étape 3 ») ; `null` d'un
+  /// serveur plus ancien.
+  final IntituleColonne? intitule;
+
   const SousPeriodeNotation({
     required this.sousPeriodeId,
     required this.ordre,
@@ -28,6 +33,7 @@ class SousPeriodeNotation extends Equatable {
     required this.nombreEleves50,
     required this.moyennesEleves,
     required this.evaluationsParType,
+    this.intitule,
   });
 
   @override
@@ -40,5 +46,6 @@ class SousPeriodeNotation extends Equatable {
     nombreEleves50,
     moyennesEleves,
     evaluationsParType,
+    intitule,
   ];
 }

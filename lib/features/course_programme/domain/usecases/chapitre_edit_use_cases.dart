@@ -69,7 +69,11 @@ class LoadSousPeriodesUseCase {
           for (final sp in [
             ...periode.sousPeriodes,
           ]..sort((a, b) => a.ordre.compareTo(b.ordre)))
-            SousPeriodeOption(id: sp.sousPeriodeId, ordre: sp.ordre),
+            SousPeriodeOption(
+              id: sp.sousPeriodeId,
+              ordre: sp.ordre,
+              intitule: sp.intitule,
+            ),
       ];
     });
   }

@@ -73,4 +73,58 @@ void main() {
 
     expect(classe.allCours.first.hasExamen, isFalse);
   });
+
+  group('intitulés des colonnes', () {
+    Map<String, dynamic> periode(Map<String, dynamic> json) =>
+        (json['periodes'] as List).first as Map<String, dynamic>;
+
+    test('un serveur ancien : ni nom ni avis sur l\'examen', () {
+      final classe = CoteClasseDto.fromJson(coteClasseJson()).toEntity();
+
+      final p = classe.periodes.single;
+      expect(p.examen.exists, isTrue);
+      expect(p.examen.intitule, isNull);
+      expect(p.sousPeriodes.first.intitule, isNull);
+    });
+
+    test('les noms de la grille, et un examen nommé', () {
+      final json = coteClasseJson();
+      final p = periode(json);
+      final sp = (p['sousPeriodes'] as List).first as Map<String, dynamic>;
+      sp['libelle'] = 'Étape 3';
+      sp['libelleCourt'] = 'É3';
+      p['examen'] = {'libelle': 'Examen', 'libelleCourt': 'Exam.'};
+
+      final classe = CoteClasseDto.fromJson(json).toEntity();
+
+      final entity = classe.periodes.single;
+      expect(entity.sousPeriodes.first.intitule?.libelle, 'Étape 3');
+      expect(entity.sousPeriodes.first.intitule?.libelleCourt, 'É3');
+      expect(entity.examen.exists, isTrue);
+      expect(entity.examen.intitule?.libelleCourt, 'Exam.');
+    });
+
+    test('examen à null : la période n\'en a pas', () {
+      final json = coteClasseJson();
+      periode(json)['examen'] = null;
+
+      final classe = CoteClasseDto.fromJson(json).toEntity();
+
+      expect(classe.periodes.single.examen.exists, isFalse);
+    });
+
+    test('un seul des deux noms sert pour les deux', () {
+      final json = coteClasseJson();
+      final sp =
+          (periode(json)['sousPeriodes'] as List).first as Map<String, dynamic>;
+      sp['libelleCourt'] = ' É1 ';
+
+      final intitule = CoteClasseDto.fromJson(
+        json,
+      ).toEntity().periodes.single.sousPeriodes.first.intitule;
+
+      expect(intitule?.libelle, 'É1');
+      expect(intitule?.libelleCourt, 'É1');
+    });
+  });
 }

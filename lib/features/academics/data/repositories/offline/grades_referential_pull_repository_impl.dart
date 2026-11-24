@@ -64,10 +64,15 @@ class GradesReferentialPullRepositoryImpl {
     final owner = _currentUser?.uid;
     final resource = scopedResource(kGradesReferentialResource, owner);
     final storedEtag = await _syncMetaDao.getCursor(resource);
+    // Une copie sans grilles se relit en entier : un serveur passé aux
+    // intitulés sans changer d'ETag la laisserait sinon sans noms.
+    final sentEtag = await _refLocal.lacksGrilles(ownerUid: owner)
+        ? null
+        : storedEtag;
     try {
       final response = await _api.pullGradesReferential(
         _requiredAuth,
-        storedEtag,
+        sentEtag,
       );
       final bundle = response.data;
       await _refLocal.replaceGradesReferential(bundle, ownerUid: owner);
@@ -83,7 +88,8 @@ class GradesReferentialPullRepositoryImpl {
           bundle.branches.length +
           bundle.ligneBaremes.length +
           bundle.periodes.length +
-          bundle.sousPeriodes.length;
+          bundle.sousPeriodes.length +
+          bundle.grilles.length;
       return Right(
         CoursPullOutcome(
           upserted: upserted,

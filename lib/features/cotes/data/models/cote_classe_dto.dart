@@ -1,4 +1,5 @@
 import 'package:school_app_flutter/core/helpers/epoch_iso_helper.dart';
+import 'package:school_app_flutter/features/academics/data/models/notation/intitule_colonne_json.dart';
 import 'package:school_app_flutter/features/cotes/domain/entities/cote_classe.dart';
 import 'package:school_app_flutter/features/resultats/domain/entities/decoupage.dart';
 
@@ -108,12 +109,14 @@ CotePeriode _periode(Map<String, dynamic> json) => CotePeriode(
   courant: json['courant'] == true,
   locked: json['locked'] == true,
   sousPeriodes: _list(json['sousPeriodes'], _sousPeriode),
+  examen: colonneExamenFromJson(json, 'examen'),
 );
 
 CoteSousPeriode _sousPeriode(Map<String, dynamic> json) => CoteSousPeriode(
   id: _id(json, 'id'),
   ordre: _int(json['ordre']),
   locked: json['locked'] == true,
+  intitule: intituleColonneFromJson(json),
 );
 
 CoteRubrique _rubrique(Map<String, dynamic> json) => CoteRubrique(

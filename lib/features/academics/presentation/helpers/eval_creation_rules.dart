@@ -113,14 +113,17 @@ class EvalCreationRules {
       isExamen ? _examenPlafondReached : _journalierPlafondReached;
 
   /// Type EXAMEN grisé si la branche n'a pas d'examen
-  /// (`maxExamenParPeriodeScolaire` à 0, ou `null` avant la bascule du barème) ;
-  /// plafonds pas encore en cache → pas de grisage.
+  /// (`maxExamenParPeriodeScolaire` à 0, ou `null` avant la bascule du barème),
+  /// ou si le serveur dit qu'aucune période du cours n'en a
+  /// (`intituleExamen: null`, seul signe disponible en ligne, sans plafonds).
+  /// Plafonds pas encore en cache et serveur muet → pas de grisage.
   Set<TypeEvaluation> get disabledTypes {
     final plafonds = detail.plafonds;
-    if (plafonds == null || !plafonds.sansExamen) {
-      return const {};
-    }
-    return const {TypeEvaluation.examen};
+    final sansExamen =
+        (plafonds != null && plafonds.sansExamen) ||
+        (detail.periodes.isNotEmpty &&
+            detail.periodes.every((p) => !p.intituleExamen.exists));
+    return sansExamen ? const {TypeEvaluation.examen} : const {};
   }
 
   /// Rattachement présent pour le type choisi.

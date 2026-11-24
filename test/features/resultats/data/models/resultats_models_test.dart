@@ -162,6 +162,31 @@ void main() {
         expect(nonClassee.moyenneGroupe, isNull);
       },
     );
+
+    test('intitulés des colonnes : ceux de la grille, sinon aucun', () {
+      final named = <String, dynamic>{
+        ...json,
+        'sousPeriodes': [
+          {
+            'sousPeriodeId': 'sp-3',
+            'ordre': 1,
+            'statut': 'OUVERTE',
+            'libelle': 'Étape 3',
+            'libelleCourt': 'É3',
+          },
+        ],
+      };
+
+      final colonne = ResultatsClasseModel.fromJson(
+        named,
+      ).toEntity().sousPeriodes.single;
+      expect(colonne.intitule?.libelle, 'Étape 3');
+      expect(colonne.intitule?.libelleCourt, 'É3');
+
+      // Serveur ancien : rien, l'écran garde « P1 ».
+      final ancien = ResultatsClasseModel.fromJson(json).toEntity();
+      expect(ancien.sousPeriodes.first.intitule, isNull);
+    });
   });
 
   group('ResultatFocusModel (vue focus)', () {

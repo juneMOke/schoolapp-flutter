@@ -186,6 +186,10 @@ class RefSousPeriodeRow extends Equatable {
   final String? startDate;
   final String? endDate;
 
+  /// Rang dans l'année (1 à 4 pour deux semestres de deux étapes), le numéro
+  /// que porte la colonne ; `null` d'un bundle d'avant la v88.
+  final int? rang;
+
   const RefSousPeriodeRow({
     required this.id,
     required this.periodeScolaireId,
@@ -193,6 +197,7 @@ class RefSousPeriodeRow extends Equatable {
     required this.statut,
     this.startDate,
     this.endDate,
+    this.rang,
   });
 
   factory RefSousPeriodeRow.fromMap(Map<String, Object?> map) =>
@@ -203,6 +208,7 @@ class RefSousPeriodeRow extends Equatable {
         statut: (map['statut'] as String?) ?? 'UNKNOWN',
         startDate: map['start_date'] as String?,
         endDate: map['end_date'] as String?,
+        rang: _asIntOrNull(map['rang']),
       );
 
   Map<String, Object?> toMap() => <String, Object?>{
@@ -212,6 +218,7 @@ class RefSousPeriodeRow extends Equatable {
     'statut': statut,
     'start_date': startDate,
     'end_date': endDate,
+    'rang': rang,
   };
 
   @override
@@ -222,5 +229,48 @@ class RefSousPeriodeRow extends Equatable {
     statut,
     startDate,
     endDate,
+    rang,
+  ];
+}
+
+/// `ref_grille` — les motifs d'intitulés d'une grille (« Étape {n} »…).
+class RefGrilleRow extends Equatable {
+  final String id;
+  final String intituleSousPeriode;
+  final String intituleCourtSousPeriode;
+  final String intituleExamen;
+  final String intituleCourtExamen;
+
+  const RefGrilleRow({
+    required this.id,
+    required this.intituleSousPeriode,
+    required this.intituleCourtSousPeriode,
+    required this.intituleExamen,
+    required this.intituleCourtExamen,
+  });
+
+  factory RefGrilleRow.fromMap(Map<String, Object?> map) => RefGrilleRow(
+    id: map['id'] as String,
+    intituleSousPeriode: map['intitule_sous_periode'] as String,
+    intituleCourtSousPeriode: map['intitule_court_sous_periode'] as String,
+    intituleExamen: map['intitule_examen'] as String,
+    intituleCourtExamen: map['intitule_court_examen'] as String,
+  );
+
+  Map<String, Object?> toMap() => <String, Object?>{
+    'id': id,
+    'intitule_sous_periode': intituleSousPeriode,
+    'intitule_court_sous_periode': intituleCourtSousPeriode,
+    'intitule_examen': intituleExamen,
+    'intitule_court_examen': intituleCourtExamen,
+  };
+
+  @override
+  List<Object?> get props => [
+    id,
+    intituleSousPeriode,
+    intituleCourtSousPeriode,
+    intituleExamen,
+    intituleCourtExamen,
   ];
 }

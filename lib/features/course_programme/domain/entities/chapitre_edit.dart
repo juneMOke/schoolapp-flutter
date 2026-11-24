@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:school_app_flutter/features/academics/domain/entities/notation/intitule_colonne.dart';
 import 'package:school_app_flutter/features/course_programme/domain/entities/chapitre.dart';
 import 'package:school_app_flutter/features/course_programme/domain/entities/ressource_draft.dart';
 
@@ -34,10 +35,18 @@ class SousPeriodeOption extends Equatable {
   final String id;
   final int ordre;
 
-  const SousPeriodeOption({required this.id, required this.ordre});
+  /// Le nom que la grille donne à la sous-période ; `null` d'un serveur plus
+  /// ancien.
+  final IntituleColonne? intitule;
+
+  const SousPeriodeOption({
+    required this.id,
+    required this.ordre,
+    this.intitule,
+  });
 
   @override
-  List<Object?> get props => [id, ordre];
+  List<Object?> get props => [id, ordre, intitule];
 }
 
 /// L'issue d'un enregistrement : la fiche est gardée ; [ressourcesKept] dit

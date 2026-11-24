@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:school_app_flutter/features/academics/domain/entities/notation/intitule_colonne.dart';
 import 'package:school_app_flutter/features/cotes/domain/entities/cote_classe.dart';
 
 /// Ce que l'écran montre : une colonne, un groupe (semestre ou trimestre), ou
@@ -19,8 +20,10 @@ class CoteScope extends Equatable {
   List<Object?> get props => [portee, cibleId];
 }
 
-/// Une colonne de la grille. [numero] : P1…P6 en continu sur l'année pour une
-/// période, l'ordre du groupe pour un examen ou un total.
+/// Une colonne de la grille. [numero] : son rang dans l'année pour une
+/// période (P1…P6 en continu), l'ordre du groupe pour un examen ou un total.
+/// [intitule] : le nom donné par la grille, `null` d'un serveur plus ancien ou
+/// pour un total.
 class CoteColumn extends Equatable {
   final String id;
   final CoteColumnKind kind;
@@ -31,6 +34,12 @@ class CoteColumn extends Equatable {
   /// Nombre de sous-périodes du groupe : le maximum d'un total en dépend.
   final int sousPeriodeCount;
 
+  /// Faux quand le groupe n'a pas de colonne d'examen : son total ne compte
+  /// alors que ses sous-périodes.
+  final bool groupHasExamen;
+
+  final IntituleColonne? intitule;
+
   const CoteColumn({
     required this.id,
     required this.kind,
@@ -38,6 +47,8 @@ class CoteColumn extends Equatable {
     required this.numero,
     required this.locked,
     required this.sousPeriodeCount,
+    this.groupHasExamen = true,
+    this.intitule,
   });
 
   bool get isInput => kind != CoteColumnKind.totalGroupe;
@@ -51,7 +62,8 @@ class CoteColumn extends Equatable {
     CoteColumnKind.periode => cours.maxJournalier,
     CoteColumnKind.examen => cours.maxExamen,
     CoteColumnKind.totalGroupe =>
-      sousPeriodeCount * cours.maxJournalier + cours.maxExamen,
+      sousPeriodeCount * cours.maxJournalier +
+          (groupHasExamen ? cours.maxExamen : 0),
   };
 
   @override
@@ -62,5 +74,7 @@ class CoteColumn extends Equatable {
     numero,
     locked,
     sousPeriodeCount,
+    groupHasExamen,
+    intitule,
   ];
 }

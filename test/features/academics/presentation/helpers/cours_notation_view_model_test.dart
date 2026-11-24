@@ -1,15 +1,19 @@
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:school_app_flutter/features/academics/domain/entities/notation/cours_notation_detail.dart';
 import 'package:school_app_flutter/features/academics/domain/entities/notation/evaluation_groupe.dart';
 import 'package:school_app_flutter/features/academics/domain/entities/notation/evaluation_summary.dart';
 import 'package:school_app_flutter/features/academics/domain/entities/notation/examen_notation.dart';
+import 'package:school_app_flutter/features/academics/domain/entities/notation/intitule_colonne.dart';
 import 'package:school_app_flutter/features/academics/domain/entities/notation/periode_notation.dart';
 import 'package:school_app_flutter/features/academics/domain/entities/notation/sous_periode_notation.dart';
 import 'package:school_app_flutter/features/academics/domain/entities/notation/statut_periode.dart';
 import 'package:school_app_flutter/features/academics/domain/entities/notation/statut_saisie_evaluation.dart';
 import 'package:school_app_flutter/features/academics/domain/entities/notation/type_evaluation.dart';
 import 'package:school_app_flutter/features/academics/presentation/helpers/academics_notation_visuals.dart';
+import 'package:school_app_flutter/features/academics/presentation/helpers/cours_notation_labels.dart';
 import 'package:school_app_flutter/features/academics/presentation/helpers/cours_notation_view_model.dart';
+import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 void main() {
   EvaluationSummary eval({
@@ -264,5 +268,89 @@ void main() {
 
     expect(eval.withProgress(saisies: 28, total: 28).state, EvalState.complete);
     expect(eval.withProgress(saisies: 0, total: 28).state, EvalState.upcoming);
+  });
+
+  group('intitulés de la grille', () {
+    PeriodeNotation renamed(PeriodeNotation p, ColonneExamen examen) =>
+        PeriodeNotation(
+          periodeScolaireId: p.periodeScolaireId,
+          ordre: p.ordre,
+          statut: p.statut,
+          examen: p.examen,
+          intituleExamen: examen,
+          sousPeriodes: [
+            for (final sp in p.sousPeriodes)
+              SousPeriodeNotation(
+                sousPeriodeId: sp.sousPeriodeId,
+                ordre: sp.ordre,
+                statut: sp.statut,
+                moyenneClasse: sp.moyenneClasse,
+                nombreElevesNotes: sp.nombreElevesNotes,
+                nombreEleves50: sp.nombreEleves50,
+                moyennesEleves: sp.moyennesEleves,
+                evaluationsParType: sp.evaluationsParType,
+                intitule: const IntituleColonne(
+                  libelle: 'Étape 3',
+                  libelleCourt: 'É3',
+                ),
+              ),
+          ],
+        );
+
+    CoursNotationDetail withExamen(ColonneExamen examen) {
+      final detail = buildDetail();
+      return CoursNotationDetail(
+        coursId: detail.coursId,
+        classroomId: detail.classroomId,
+        brancheNom: detail.brancheNom,
+        effectif: detail.effectif,
+        periodes: [for (final p in detail.periodes) renamed(p, examen)],
+      );
+    }
+
+    test('les pas portent le nom de la grille', () {
+      final vm = CoursNotationViewModel.fromDetail(
+        withExamen(
+          const ColonneExamen.nommee(
+            IntituleColonne(libelle: 'Composition', libelleCourt: 'Compo.'),
+          ),
+        ),
+        now: now,
+      );
+
+      final buckets = vm.periodes[1].buckets;
+      expect(buckets[0].intitule?.libelle, 'Étape 3');
+      // Le médaillon porte le rang dans l'année, pas l'`ordre` (1).
+      expect(buckets[0].ordre, 1);
+      expect(buckets[0].numero, 2);
+      expect(buckets[1].intitule?.libelle, 'Composition');
+    });
+
+    test('un cours sans examen ne montre pas de bloc examen', () {
+      final vm = CoursNotationViewModel.fromDetail(
+        withExamen(const ColonneExamen.absente()),
+        now: now,
+      );
+
+      expect(vm.periodes[1].buckets.map((b) => b.kind), [
+        BucketKind.sousPeriode,
+      ]);
+    });
+
+    test('bucketLabel : le nom de la grille, sinon celui d\'avant', () async {
+      final l10n = await AppLocalizations.delegate.load(const Locale('fr'));
+      final named = CoursNotationViewModel.fromDetail(
+        withExamen(const ColonneExamen.inconnue()),
+        now: now,
+      ).periodes[1].buckets;
+      final ancien = CoursNotationViewModel.fromDetail(
+        buildDetail(),
+        now: now,
+      ).periodes[1].buckets;
+
+      expect(bucketLabel(l10n, named[0]), 'Étape 3');
+      expect(bucketLabel(l10n, named[1]), 'Examen');
+      expect(bucketLabel(l10n, ancien[0]), 'Période 1');
+    });
   });
 }

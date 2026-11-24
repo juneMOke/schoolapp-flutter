@@ -12,6 +12,8 @@ SousPeriodeColonneModel _$SousPeriodeColonneModelFromJson(
   sousPeriodeId: json['sousPeriodeId'] as String,
   ordre: (json['ordre'] as num).toInt(),
   statut: json['statut'] as String,
+  libelle: json['libelle'] as String?,
+  libelleCourt: json['libelleCourt'] as String?,
 );
 
 Map<String, dynamic> _$SousPeriodeColonneModelToJson(
@@ -20,4 +22,6 @@ Map<String, dynamic> _$SousPeriodeColonneModelToJson(
   'sousPeriodeId': instance.sousPeriodeId,
   'ordre': instance.ordre,
   'statut': instance.statut,
+  'libelle': instance.libelle,
+  'libelleCourt': instance.libelleCourt,
 };

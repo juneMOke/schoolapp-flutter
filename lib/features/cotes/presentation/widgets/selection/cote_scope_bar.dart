@@ -101,9 +101,13 @@ class CoteScopeBar extends StatelessWidget {
       CotePortee.groupe => CoteScope(portee: portee, cibleId: group),
       CotePortee.colonne => CoteScope(
         portee: portee,
+        // Aucune colonne saisissable : la cible reste vide, et le BLoC
+        // ignore une portée sans colonne.
         cibleId: inputs
-            .firstWhere((c) => c.periodeId == group, orElse: () => inputs.first)
-            .id,
+            .where((c) => c.periodeId == group)
+            .followedBy(inputs)
+            .firstOrNull
+            ?.id,
       ),
     });
   }

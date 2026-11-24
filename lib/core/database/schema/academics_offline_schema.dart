@@ -371,6 +371,7 @@ const TableSchema refSousPeriodeTable = TableSchema(
       statut TEXT NOT NULL,
       start_date TEXT,
       end_date TEXT,
+      rang INTEGER,
       PRIMARY KEY (id, owner_uid)
     )
   ''',
@@ -378,6 +379,28 @@ const TableSchema refSousPeriodeTable = TableSchema(
     'CREATE INDEX idx_ref_sous_periode_parent '
         'ON ref_sous_periode(periode_scolaire_id)',
   ],
+);
+
+/// `ref_grille` — les intitulés des colonnes de notes d'une grille (v88) :
+/// quatre motifs jamais nuls (« Étape {n} », « É{n} », « Examen »,
+/// « Exam. »), reliés aux cours par `ref_ligne_bareme.grille_id`. La tablette
+/// n'en tire qu'un calcul : `{n}` remplacé par le rang de la sous-période, ou
+/// par l'ordre de la période pour l'examen. Bundle `grades-referential`,
+/// remplacement d'ensemble, clé composite `(id, owner_uid)` comme
+/// [refBrancheTable].
+const TableSchema refGrilleTable = TableSchema(
+  name: 'ref_grille',
+  createTableSql: '''
+    CREATE TABLE ref_grille (
+      id TEXT NOT NULL,
+      owner_uid TEXT NOT NULL DEFAULT '',
+      intitule_sous_periode TEXT NOT NULL,
+      intitule_court_sous_periode TEXT NOT NULL,
+      intitule_examen TEXT NOT NULL,
+      intitule_court_examen TEXT NOT NULL,
+      PRIMARY KEY (id, owner_uid)
+    )
+  ''',
 );
 
 /// Contribution de schéma de la branche Notes / Cours, insérée dans
@@ -395,4 +418,5 @@ const List<TableSchema> academicsOfflineTables = [
   refChapitreTable,
   refPeriodeTable,
   refSousPeriodeTable,
+  refGrilleTable,
 ];

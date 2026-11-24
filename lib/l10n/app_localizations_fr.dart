@@ -21573,6 +21573,16 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
+  String coteColumnNamedOf(String label, String group) {
+    return '$label $group';
+  }
+
+  @override
+  String coteColumnNamedLong(String label, String group) {
+    return '$label · $group';
+  }
+
+  @override
   String coteColumnTotalOf(String group) {
     return 'Tot. $group';
   }

@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:school_app_flutter/core/offline/sync_state.dart';
+import 'package:school_app_flutter/features/academics/domain/entities/notation/intitule_colonne.dart';
 import 'package:school_app_flutter/features/cotes/domain/entities/cote_cell.dart';
 import 'package:school_app_flutter/features/cotes/domain/entities/cote_classe.dart';
 import 'package:school_app_flutter/features/cotes/domain/services/cote_calculator.dart';
@@ -270,5 +271,60 @@ void main() {
     expect(progress.filled, 4);
     expect(progress.cells, 6);
     expect(progress.complets, 1);
+  });
+
+  group('une grille sans examen', () {
+    const sansExamen = CoteClasse(
+      classroomId: 'c',
+      decoupage: Decoupage.semestre,
+      periodes: [
+        CotePeriode(
+          id: 'S1',
+          ordre: 1,
+          libelle: 'Semestre 1',
+          courant: true,
+          locked: false,
+          examen: ColonneExamen.absente(),
+          sousPeriodes: [
+            CoteSousPeriode(id: 'P1', ordre: 1, locked: false),
+            CoteSousPeriode(id: 'P2', ordre: 2, locked: false),
+          ],
+        ),
+      ],
+      rubriques: [
+        CoteRubrique(id: 'r', cours: [_fr]),
+      ],
+      eleves: [],
+    );
+
+    test('une cote d\'examen d\'avant n\'est ni comptée ni attendue', () {
+      final year = yearColumns(sansExamen);
+      final cells = CoteCellTable.of([
+        _cell('P1', cote: 14),
+        _cell('P2', cote: 16),
+        _cell('S1', cote: 31),
+      ]);
+
+      final result = calculator.calcEleve(
+        studentId: 'e',
+        cours: const [_fr],
+        columns: columnsFor(sansExamen, defaultScope(sansExamen)),
+        cells: cells,
+      );
+      expect(result.total, 3000);
+      expect(result.maxScope, 4000);
+      expect(result.complete, isTrue);
+
+      final total = year.firstWhere((c) => !c.isInput);
+      final score = calculator.columnScore(
+        studentId: 'e',
+        cours: const [_fr],
+        column: total,
+        year: year,
+        cells: cells,
+      );
+      expect(score.total, 3000);
+      expect(calculator.columnMax(const [_fr], total), 40);
+    });
   });
 }

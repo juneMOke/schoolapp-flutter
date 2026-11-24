@@ -2,6 +2,7 @@ import 'package:equatable/equatable.dart';
 import 'package:school_app_flutter/features/academics/domain/entities/notation/cours_notation_detail.dart';
 import 'package:school_app_flutter/features/academics/domain/entities/notation/evaluation_summary.dart';
 import 'package:school_app_flutter/features/academics/domain/entities/notation/examen_notation.dart';
+import 'package:school_app_flutter/features/academics/domain/entities/notation/intitule_colonne.dart';
 import 'package:school_app_flutter/features/academics/domain/entities/notation/moyenne_eleve.dart';
 import 'package:school_app_flutter/features/academics/domain/entities/notation/periode_notation.dart';
 import 'package:school_app_flutter/features/academics/domain/entities/notation/sous_periode_notation.dart';
@@ -76,9 +77,24 @@ class CoursNotationViewModel extends Equatable {
     // Le contrat notation ne porte pas le découpage : on le DÉRIVE du nombre de
     // périodes scolaires (cf. [periodeDecoupageFromCount]).
     final decoupage = periodeDecoupageFromCount(detail.periodes.length);
+    // Le numéro d'un pas court sur l'année (la 1re sous-période du semestre 2
+    // est la 3e), quel que soit son `ordre` dans la période.
+    final ordered = [...detail.periodes]
+      ..sort((a, b) => a.ordre.compareTo(b.ordre));
+    final firstNumero = <String, int>{};
+    var seen = 0;
+    for (final p in ordered) {
+      firstNumero[p.periodeScolaireId] = seen + 1;
+      seen += p.sousPeriodes.length;
+    }
     final periodes = [
       for (final p in detail.periodes)
-        PeriodeVm._fromPeriode(p, effectif, decoupage),
+        PeriodeVm._fromPeriode(
+          p,
+          effectif,
+          decoupage,
+          firstNumero[p.periodeScolaireId] ?? 1,
+        ),
     ];
 
     final allEvals = [
@@ -150,10 +166,21 @@ class PeriodeVm extends Equatable {
     PeriodeNotation p,
     int effectif,
     PeriodeDecoupage decoupage,
+    int firstNumero,
   ) {
+    final sousPeriodes = [...p.sousPeriodes]
+      ..sort((a, b) => a.ordre.compareTo(b.ordre));
+    final numeros = {
+      for (var i = 0; i < sousPeriodes.length; i++)
+        sousPeriodes[i].sousPeriodeId: firstNumero + i,
+    };
+    // Un cours sans examen sur cette période n'en montre pas, même si une
+    // évaluation EXAMEN traîne d'avant le changement de grille.
     final buckets = <BucketVm>[
-      for (final sp in p.sousPeriodes) BucketVm._fromSousPeriode(sp, effectif),
-      if (p.examen != null) BucketVm._fromExamen(p.examen!, effectif),
+      for (final sp in p.sousPeriodes)
+        BucketVm._fromSousPeriode(sp, effectif, numeros[sp.sousPeriodeId]!),
+      if (p.examen != null && p.intituleExamen.exists)
+        BucketVm._fromExamen(p.examen!, effectif, p.intituleExamen.intitule),
     ];
     return PeriodeVm(
       id: p.periodeScolaireId,
@@ -195,6 +222,14 @@ class BucketVm extends Equatable {
   final int saisiesNotes;
   final int totalNotes;
 
+  /// Le nom que la grille donne au pas (« Étape 3 », « Examen ») ; `null`
+  /// d'un serveur plus ancien : l'écran garde le sien.
+  final IntituleColonne? intitule;
+
+  /// Le numéro du pas dans l'année (médaillon de la frise) : 3 pour la 1re
+  /// sous-période du semestre 2. Sans objet pour un examen.
+  final int numero;
+
   const BucketVm({
     required this.key,
     required this.kind,
@@ -208,7 +243,9 @@ class BucketVm extends Equatable {
     required this.supportsReleve,
     required this.saisiesNotes,
     required this.totalNotes,
-  });
+    this.intitule,
+    int? numero,
+  }) : numero = numero ?? ordre;
 
   int get evalCount => evaluations.length;
 
@@ -216,7 +253,11 @@ class BucketVm extends Equatable {
   bool get isProvisoire =>
       evaluations.any((e) => e.state != EvalState.complete);
 
-  factory BucketVm._fromSousPeriode(SousPeriodeNotation sp, int effectif) {
+  factory BucketVm._fromSousPeriode(
+    SousPeriodeNotation sp,
+    int effectif,
+    int numero,
+  ) {
     final evals =
         sp.evaluationsParType
             .expand((g) => g.evaluations)
@@ -242,10 +283,16 @@ class BucketVm extends Equatable {
       supportsReleve: true,
       saisiesNotes: evals.fold(0, (s, e) => s + e.saisies),
       totalNotes: evals.length * effectif,
+      intitule: sp.intitule,
+      numero: numero,
     );
   }
 
-  factory BucketVm._fromExamen(ExamenNotation e, int effectif) {
+  factory BucketVm._fromExamen(
+    ExamenNotation e,
+    int effectif,
+    IntituleColonne? intitule,
+  ) {
     final eval = EvalVm._fromExamen(e, effectif);
     return BucketVm(
       key: 'exam:${e.evaluationId}',
@@ -264,6 +311,7 @@ class BucketVm extends Equatable {
       supportsReleve: false,
       saisiesNotes: eval.saisies,
       totalNotes: effectif,
+      intitule: intitule,
     );
   }
 
@@ -281,6 +329,8 @@ class BucketVm extends Equatable {
     supportsReleve,
     saisiesNotes,
     totalNotes,
+    intitule,
+    numero,
   ];
 }
 

@@ -3,12 +3,15 @@ import 'package:school_app_flutter/features/cotes/domain/entities/cote_scope.dar
 
 /// Toutes les colonnes de l'année, totaux de groupe compris, dans l'ordre du
 /// bulletin. Le numéro de période court sur l'année, quel que soit l'`ordre`
-/// serveur de la sous-période.
+/// serveur de la sous-période. Un groupe dont le serveur dit qu'il n'a pas
+/// d'examen n'a pas de colonne d'examen : son total vaut la somme de ses
+/// sous-périodes.
 List<CoteColumn> yearColumns(CoteClasse classe) {
   final columns = <CoteColumn>[];
   var numero = 0;
   for (final periode in classe.periodes) {
     final count = periode.sousPeriodes.length;
+    final hasExamen = periode.examen.exists;
     for (final sousPeriode in periode.sousPeriodes) {
       numero++;
       columns.add(
@@ -19,11 +22,13 @@ List<CoteColumn> yearColumns(CoteClasse classe) {
           numero: numero,
           locked: sousPeriode.locked,
           sousPeriodeCount: count,
+          groupHasExamen: hasExamen,
+          intitule: sousPeriode.intitule,
         ),
       );
     }
-    columns
-      ..add(
+    if (hasExamen) {
+      columns.add(
         CoteColumn(
           id: periode.id,
           kind: CoteColumnKind.examen,
@@ -31,18 +36,21 @@ List<CoteColumn> yearColumns(CoteClasse classe) {
           numero: periode.ordre,
           locked: periode.locked,
           sousPeriodeCount: count,
-        ),
-      )
-      ..add(
-        CoteColumn(
-          id: 'TOT:${periode.id}',
-          kind: CoteColumnKind.totalGroupe,
-          periodeId: periode.id,
-          numero: periode.ordre,
-          locked: true,
-          sousPeriodeCount: count,
+          intitule: periode.examen.intitule,
         ),
       );
+    }
+    columns.add(
+      CoteColumn(
+        id: 'TOT:${periode.id}',
+        kind: CoteColumnKind.totalGroupe,
+        periodeId: periode.id,
+        numero: periode.ordre,
+        locked: true,
+        sousPeriodeCount: count,
+        groupHasExamen: hasExamen,
+      ),
+    );
   }
   return columns;
 }
@@ -79,6 +87,11 @@ CoteScope defaultScope(CoteClasse classe, {bool singleColumn = false}) {
   final columns = yearColumns(
     classe,
   ).where((c) => c.isInput && c.periodeId == periode.id);
+  // Un groupe sans étape ni examen n'a aucune colonne : le groupe, vide, plutôt
+  // qu'une colonne qui n'existe pas.
+  if (columns.isEmpty) {
+    return CoteScope(portee: CotePortee.groupe, cibleId: periode.id);
+  }
   final open = columns.where((c) => !c.locked);
   final column = open.isEmpty ? columns.first : open.first;
   return CoteScope(portee: CotePortee.colonne, cibleId: column.id);

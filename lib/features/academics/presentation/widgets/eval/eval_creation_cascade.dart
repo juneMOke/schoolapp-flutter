@@ -57,7 +57,10 @@ class EvalCreationCascade extends StatelessWidget {
             label: l10n.evalCreateFieldSousPeriode,
             value: isExamen ? null : rules.sousPeriodeId,
             enabled: !isExamen,
-            placeholder: isExamen ? l10n.evalCreateExamPlaceholder : null,
+            placeholder: isExamen
+                ? rules.periode?.intituleExamen.intitule?.libelle ??
+                      l10n.evalCreateExamPlaceholder
+                : null,
             // Erreur affichée ici seulement si le blocage vient de la
             // sous-période (sinon il est déjà signalé sur la période scolaire).
             errorText:
@@ -71,7 +74,7 @@ class EvalCreationCascade extends StatelessWidget {
               for (final sp in rules.periode?.sousPeriodes ?? const [])
                 EteeloSelectItem<String>(
                   value: sp.sousPeriodeId,
-                  label: l10n.courseDetailPeriodLabel(sp.ordre),
+                  label: sousPeriodeLabel(l10n, sp.ordre, sp.intitule),
                   // Verrou de clôture (bundle, DF-M) : idem période, une
                   // sous-période CLOTUREE est grisée dans le picker.
                   enabled: sp.statut != StatutPeriode.cloturee,

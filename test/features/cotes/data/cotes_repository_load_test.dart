@@ -124,7 +124,7 @@ void main() {
   test('sans copie locale, l\'ETag restant n\'est pas envoyé', () async {
     await SyncMetaDao(
       db,
-    ).setCursor('cotes_classe:c1', cursor: 'x', syncedAt: 1);
+    ).setCursor('$kCotesClasseResourcePrefix:c1', cursor: 'x', syncedAt: 1);
 
     await repository.load('c1');
 
