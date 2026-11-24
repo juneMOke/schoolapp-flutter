@@ -1,8 +1,8 @@
 import 'dart:io';
 
 import 'package:cryptography/cryptography.dart';
-import 'package:dio/dio.dart';
 import 'package:path/path.dart' as p;
+import 'package:school_app_flutter/features/desktop_update/data/installer_transfer.dart';
 import 'package:school_app_flutter/features/desktop_update/domain/entities/desktop_release.dart';
 import 'package:school_app_flutter/features/desktop_update/domain/repositories/desktop_update_repository.dart';
 
@@ -22,13 +22,13 @@ class DownloadIntegrityException implements Exception {
 /// laisse jamais un fichier qui aurait l'air complet. Un fichier final déjà
 /// présent et intact (téléchargement d'une séance précédente) est réutilisé.
 class DesktopUpdateDownloader {
-  final Dio _dio;
+  final InstallerTransfer _transfer;
   final Future<Directory> Function() _baseDirectory;
 
   DesktopUpdateDownloader({
-    required Dio dio,
+    required InstallerTransfer transfer,
     required Future<Directory> Function() baseDirectory,
-  }) : _dio = dio,
+  }) : _transfer = transfer,
        _baseDirectory = baseDirectory;
 
   Future<String> download(
@@ -49,42 +49,25 @@ class DesktopUpdateDownloader {
       await target.delete();
     }
     final partial = File('${target.path}.part');
-    final cancelToken = CancelToken();
-    cancellation?.onCancel(() => cancelToken.cancel());
+    if (await partial.exists()) await partial.delete();
     try {
-      await _dio.downloadUri(
+      await _transfer.fetch(
         release.url,
         partial.path,
-        cancelToken: cancelToken,
-        deleteOnError: true,
-        onReceiveProgress: (received, total) {
-          // Plus d'octets que la fiche signée n'en annonce : inutile d'aller
-          // au bout, le contrôle échouera.
-          if (received > release.size) {
-            cancelToken.cancel(_oversized);
-            return;
-          }
-          onProgress?.call(received, total > 0 ? total : release.size);
-        },
+        maxBytes: release.size,
+        onProgress: (received) => onProgress?.call(received, release.size),
+        cancellation: cancellation,
       );
       if (!await _matches(partial, release)) {
         throw const DownloadIntegrityException('taille ou empreinte');
       }
       await partial.rename(target.path);
       return target.path;
-    } on DioException catch (e) {
-      if (await partial.exists()) await partial.delete();
-      if (CancelToken.isCancel(e) && e.error == _oversized) {
-        throw const DownloadIntegrityException('taille dépassée');
-      }
-      rethrow;
     } catch (_) {
       if (await partial.exists()) await partial.delete();
       rethrow;
     }
   }
-
-  static const _oversized = 'oversized';
 
   /// Le dossier de travail est propre à l'utilisateur ; sous Linux, il est
   /// de plus fermé aux autres comptes (0700) et doit lui appartenir : un

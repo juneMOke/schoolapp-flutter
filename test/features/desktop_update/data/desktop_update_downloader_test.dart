@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:school_app_flutter/features/desktop_update/data/desktop_update_downloader.dart';
+import 'package:school_app_flutter/features/desktop_update/data/installer_transfer.dart';
 import 'package:school_app_flutter/features/desktop_update/domain/repositories/desktop_update_repository.dart';
 
 import '../fixtures.dart';
@@ -32,8 +33,10 @@ void main() {
     await temp.delete(recursive: true);
   });
 
-  DesktopUpdateDownloader downloader() =>
-      DesktopUpdateDownloader(dio: Dio(), baseDirectory: () async => temp);
+  DesktopUpdateDownloader downloader() => DesktopUpdateDownloader(
+    transfer: DioInstallerTransfer(Dio()),
+    baseDirectory: () async => temp,
+  );
 
   Future<String> digestOf(List<int> bytes) async {
     final file = File('${temp.path}/digest')..writeAsBytesSync(bytes);

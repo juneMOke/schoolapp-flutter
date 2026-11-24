@@ -1,10 +1,15 @@
+import 'dart:io';
+
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/features/desktop_update/data/desktop_installer.dart';
 import 'package:school_app_flutter/features/desktop_update/data/desktop_release_api.dart';
 import 'package:school_app_flutter/features/desktop_update/data/desktop_release_verifier.dart';
 import 'package:school_app_flutter/features/desktop_update/data/desktop_update_downloader.dart';
+import 'package:school_app_flutter/features/desktop_update/data/desktop_update_log.dart';
 import 'package:school_app_flutter/features/desktop_update/data/desktop_update_repository_impl.dart';
+import 'package:school_app_flutter/features/desktop_update/data/installer_transfer.dart';
 import 'package:school_app_flutter/features/desktop_update/domain/entities/app_version.dart';
 import 'package:school_app_flutter/features/desktop_update/domain/entities/desktop_release.dart';
 import 'package:school_app_flutter/features/desktop_update/domain/repositories/desktop_update_repository.dart';
@@ -61,11 +66,15 @@ DesktopReleaseNotes notesOf(String version) => DesktopReleaseNotes(
 void main() {
   late _Api api;
   late _Installer installer;
+  late _Transfer transfer;
+  late Directory temp;
   late DesktopUpdateRepositoryImpl repository;
 
-  setUp(() {
+  setUp(() async {
     api = _Api();
     installer = _Installer();
+    transfer = _Transfer();
+    temp = await Directory.systemTemp.createTemp('eteelo-repo');
     repository = DesktopUpdateRepositoryImpl(
       api: api,
       verifier: DesktopReleaseVerifier(
@@ -74,12 +83,18 @@ void main() {
         publicKeys: [testPublicKey],
       ),
       downloader: DesktopUpdateDownloader(
-        dio: Dio(),
-        baseDirectory: () => throw UnimplementedError(),
+        transfer: transfer,
+        baseDirectory: () async => temp,
       ),
       installer: installer,
+      log: DesktopUpdateLog(baseDirectory: () async => temp),
     );
   });
+
+  tearDown(() async => temp.delete(recursive: true));
+
+  String journal() =>
+      File('${temp.path}/${DesktopUpdateLog.fileName}').readAsStringSync();
 
   test('aucune version publiée : rien à proposer', () async {
     api.answer = null;
@@ -159,4 +174,48 @@ void main() {
       expect(result.fold((f) => f, (quit) => quit), mustQuit);
     }
   });
+
+  test(
+    'transfert refusé : échec réseau, et la vraie cause au journal',
+    () async {
+      transfer.error = const DownloadTransferException(
+        'powershell (1) : Could not establish trust relationship',
+      );
+      final result = await repository.download(release());
+      expect(result.fold((f) => f, (_) => null), isA<NetworkFailure>());
+      expect(journal(), contains('Could not establish trust relationship'));
+    },
+  );
+
+  test('disque en échec : échec de stockage, pas de réseau', () async {
+    transfer.error = const FileSystemException('accès refusé', r'C:\x.part');
+    final result = await repository.download(release());
+    expect(result.fold((f) => f, (_) => null), isA<StorageFailure>());
+    expect(journal(), contains('accès refusé'));
+  });
+
+  test('annulation : ni échec affiché, ni journal', () async {
+    transfer.error = const DownloadCancelledException();
+    final result = await repository.download(release());
+    expect(result.fold((f) => f, (_) => null), isA<DownloadCancelledFailure>());
+    expect(
+      File('${temp.path}/${DesktopUpdateLog.fileName}').existsSync(),
+      isFalse,
+    );
+  });
+}
+
+class _Transfer implements InstallerTransfer {
+  Object? error;
+
+  @override
+  Future<void> fetch(
+    Uri url,
+    String path, {
+    required int maxBytes,
+    void Function(int received)? onProgress,
+    DownloadCancellation? cancellation,
+  }) async {
+    if (error != null) throw error!;
+  }
 }

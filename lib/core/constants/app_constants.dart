@@ -1963,4 +1963,10 @@ class AppConstants {
   /// Délai maximal de chaque étape de l'installation sous Linux (décompression,
   /// `install.sh`).
   static const Duration desktopUpdateInstallTimeout = Duration(minutes: 5);
+
+  /// Cadence à laquelle la progression d'un téléchargement fait par Windows
+  /// (PowerShell) est relue sur le disque.
+  static const Duration desktopUpdateProgressPollInterval = Duration(
+    milliseconds: 500,
+  );
 }
