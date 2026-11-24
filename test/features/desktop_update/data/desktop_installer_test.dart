@@ -56,6 +56,7 @@ void main() {
           channel: 'prod',
           launcher: launcher,
           environment: {'HOME': '/home/agent'},
+          currentPid: 4242,
         );
 
     test(
@@ -85,10 +86,34 @@ void main() {
           'bash',
           '${temp.path}/extract/eteelo-connect/install.sh',
         ]);
-        expect(
-          launcher.detached.single.last,
+        final relaunch = launcher.detached.single;
+        expect(relaunch.sublist(relaunch.length - 2), [
           '/home/agent/.local/share/eteelo-connect/school_app_flutter',
+          '4242',
+        ]);
+      },
+    );
+
+    test(
+      'la relance attend la fin de cette instance avant de démarrer',
+      () async {
+        final launcher = _Launcher()
+          ..onRun = (command) {
+            if (command.first == 'tar') {
+              File('${command.last}/eteelo-connect/install.sh')
+                ..createSync(recursive: true)
+                ..writeAsStringSync('#!/bin/sh');
+            }
+          };
+        await installer(launcher).install(
+          VerifiedInstaller(
+            path: '${temp.path}/eteelo.tar.gz',
+            release: release(),
+          ),
         );
+        final script = launcher.detached.single[2];
+        expect(script, contains('kill -0 "\$1"'));
+        expect(script, endsWith('exec "\$0"'));
       },
     );
 

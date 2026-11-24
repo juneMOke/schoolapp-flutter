@@ -22,6 +22,20 @@ static void first_frame_cb(MyApplication* self, FlView* view) {
 // Implements GApplication::activate.
 static void my_application_activate(GApplication* application) {
   MyApplication* self = MY_APPLICATION(application);
+
+  // Instance unique : un second lancement (double-clic, menu) réveille celle-ci
+  // au lieu d'ouvrir un second moteur sur la même base chiffrée. On ramène la
+  // fenêtre au premier plan ; tant que la première image n'est pas rendue, elle
+  // reste cachée et s'affichera d'elle-même.
+  GList* windows = gtk_application_get_windows(GTK_APPLICATION(application));
+  if (windows != nullptr) {
+    GtkWindow* existing = GTK_WINDOW(windows->data);
+    if (gtk_widget_get_visible(GTK_WIDGET(existing))) {
+      gtk_window_present(existing);
+    }
+    return;
+  }
+
   GtkWindow* window =
       GTK_WINDOW(gtk_application_window_new(GTK_APPLICATION(application)));
 
@@ -102,6 +116,8 @@ static gboolean my_application_local_command_line(GApplication* application,
     return TRUE;
   }
 
+  // Une instance tourne déjà (même identifiant, donc même environnement) :
+  // `activate` lui est transmis par le bus de session, et ce processus s'arrête.
   g_application_activate(application);
   *exit_status = 0;
 
@@ -151,7 +167,19 @@ MyApplication* my_application_new() {
   // the application to be recognized beyond its binary name.
   g_set_prgname(APPLICATION_ID);
 
+  // Instance unique dans les builds publiés. Deux instances lancées ensemble
+  // se bloquaient sur la base et laissaient des processus fantômes, qui
+  // empêchaient ensuite tout lancement. En debug, `flutter run` garde plusieurs
+  // instances possibles : sinon il réveillerait l'application installée sur le
+  // poste au lieu de démarrer.
+#if defined(NDEBUG) && GLIB_CHECK_VERSION(2, 74, 0)
+  const GApplicationFlags flags = G_APPLICATION_DEFAULT_FLAGS;
+#elif defined(NDEBUG)
+  const GApplicationFlags flags = static_cast<GApplicationFlags>(0);
+#else
+  const GApplicationFlags flags = G_APPLICATION_NON_UNIQUE;
+#endif
   return MY_APPLICATION(g_object_new(my_application_get_type(),
                                      "application-id", APPLICATION_ID, "flags",
-                                     G_APPLICATION_NON_UNIQUE, nullptr));
+                                     flags, nullptr));
 }

@@ -19,9 +19,9 @@ set -euo pipefail
 
 APP_ENV="@APP_ENV@"
 case "$APP_ENV" in
-  prod)    SUFFIX="";         APP_NAME="ETEELO CONNECT" ;;
-  staging) SUFFIX="-staging"; APP_NAME="ETEELO CONNECT Staging" ;;
-  dev)     SUFFIX="-dev";     APP_NAME="ETEELO CONNECT Dev" ;;
+  prod)    SUFFIX="";         APP_NAME="ETEELO CONNECT";         APP_ID="com.junethink.school_app_flutter" ;;
+  staging) SUFFIX="-staging"; APP_NAME="ETEELO CONNECT Staging"; APP_ID="com.junethink.school_app_flutter.staging" ;;
+  dev)     SUFFIX="-dev";     APP_NAME="ETEELO CONNECT Dev";     APP_ID="com.junethink.school_app_flutter.dev" ;;
   *)
     echo "Environnement inconnu ($APP_ENV) : archive mal emballée." >&2
     exit 1
@@ -63,7 +63,7 @@ fi
 mv "$NEW_DIR" "$INSTALL_DIR"
 rm -rf "$OLD_DIR"
 
-sed -e "s|@INSTALL_DIR@|$INSTALL_DIR|g" -e "s|@APP_NAME@|$APP_NAME|g" \
+sed -e "s|@INSTALL_DIR@|$INSTALL_DIR|g" -e "s|@APP_NAME@|$APP_NAME|g" -e "s|@APP_ID@|$APP_ID|g" \
   "$SOURCE_DIR/eteelo-connect.desktop" > "$DESKTOP_FILE"
 
 echo "✓ $APP_NAME installé dans $INSTALL_DIR (menu des applications)."
