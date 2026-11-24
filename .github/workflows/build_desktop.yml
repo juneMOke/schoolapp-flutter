@@ -158,7 +158,8 @@ jobs:
             staging) API_BASE_URL="${{ secrets.STAGING_API_BASE_URL }}" ;;
             prod)    API_BASE_URL="${{ secrets.PROD_API_BASE_URL }}" ;;
           esac
-          flutter build windows --release \
+          # ETEELO_APP_ENV nomme l'instance unique (windows/runner/CMakeLists.txt).
+          ETEELO_APP_ENV="${{ inputs.environment }}" flutter build windows --release \
             --build-name "${{ needs.resolve-config.outputs.build_name }}" \
             --build-number "${{ needs.resolve-config.outputs.build_number }}" \
             --dart-define=APP_ENV="${{ inputs.environment }}" \

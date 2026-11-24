@@ -3,10 +3,17 @@
 #include <windows.h>
 
 #include "flutter_window.h"
+#include "single_instance.h"
 #include "utils.h"
 
 int APIENTRY wWinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE prev,
                       _In_ wchar_t *command_line, _In_ int show_command) {
+  // Une instance tourne déjà dans cet environnement : elle passe au premier
+  // plan et ce lancement s'arrête (voir single_instance.h).
+  if (!AcquireSingleInstance()) {
+    return EXIT_SUCCESS;
+  }
+
   // Attach to console when present (e.g., 'flutter run') or create a
   // new console when running with a debugger.
   if (!::AttachConsole(ATTACH_PARENT_PROCESS) && ::IsDebuggerPresent()) {
@@ -49,6 +56,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE prev,
   if (!window.Create(L"ETEELO CONNECT", origin, size)) {
     return EXIT_FAILURE;
   }
+  MarkSingleInstanceWindow(window.GetHandle());
   window.SetQuitOnClose(true);
 
   ::MSG msg;

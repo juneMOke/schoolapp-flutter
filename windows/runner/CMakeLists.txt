@@ -9,6 +9,7 @@ project(runner LANGUAGES CXX)
 add_executable(${BINARY_NAME} WIN32
   "flutter_window.cpp"
   "main.cpp"
+  "single_instance.cpp"
   "utils.cpp"
   "win32_window.cpp"
   "${FLUTTER_MANAGED_DIR}/generated_plugin_registrant.cc"
@@ -19,6 +20,15 @@ add_executable(${BINARY_NAME} WIN32
 # Apply the standard set of build settings. This can be removed for applications
 # that need different build settings.
 apply_standard_settings(${BINARY_NAME})
+
+# Environnement de l'instance unique (single_instance.cpp) : fourni par la CI
+# (ETEELO_APP_ENV), production par défaut.
+if(DEFINED ENV{ETEELO_APP_ENV} AND NOT "$ENV{ETEELO_APP_ENV}" STREQUAL "")
+  set(ETEELO_INSTANCE_ENV "$ENV{ETEELO_APP_ENV}")
+else()
+  set(ETEELO_INSTANCE_ENV "prod")
+endif()
+target_compile_definitions(${BINARY_NAME} PRIVATE "ETEELO_INSTANCE_ENV=\"${ETEELO_INSTANCE_ENV}\"")
 
 # Add preprocessor definitions for the build version.
 target_compile_definitions(${BINARY_NAME} PRIVATE "FLUTTER_VERSION=\"${FLUTTER_VERSION}\"")
