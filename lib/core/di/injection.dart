@@ -111,7 +111,8 @@ import 'package:school_app_flutter/core/offline/outbox_permission_guard.dart';
 import 'package:school_app_flutter/core/offline/connectivity_service.dart';
 import 'package:school_app_flutter/core/auth/current_permissions.dart';
 import 'package:school_app_flutter/core/offline/current_user_context.dart';
-import 'package:school_app_flutter/core/storage/serialized_secure_storage.dart';
+import 'package:school_app_flutter/core/storage/desktop_environment_scope.dart';
+import 'package:school_app_flutter/core/storage/env_scoped_secure_storage.dart';
 import 'package:school_app_flutter/core/storage/shared_document_cache.dart';
 import 'package:school_app_flutter/core/attachments/attachment_availability.dart';
 import 'package:school_app_flutter/core/attachments/attachment_fetcher.dart';
@@ -278,11 +279,14 @@ Future<void> configureDependencies({
 }) async {
   // Windows : le greffon réécrit un fichier unique à chaque écriture, sans
   // verrou — les écritures parallèles de la session s'y effaçaient (voir
-  // `SerializedSecureStorage`).
+  // `SerializedSecureStorage`). Poste hors production : chaque clé est
+  // préfixée par l'environnement, pour ne plus partager le trousseau de la
+  // production (voir `EnvScopedSecureStorage`).
   getIt.registerLazySingleton<FlutterSecureStorage>(
-    () => defaultTargetPlatform == TargetPlatform.windows
-        ? SerializedSecureStorage()
-        : const FlutterSecureStorage(),
+    () => createAppSecureStorage(
+      platform: defaultTargetPlatform,
+      isolatedEnvironment: desktopIsolatedEnvironment(),
+    ),
   );
   getIt.registerLazySingleton<SidebarPreferenceStore>(
     () => SidebarPreferenceStore(getIt<FlutterSecureStorage>()),
