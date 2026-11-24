@@ -51,6 +51,32 @@ test -f "$BUNDLE/lib/libsqlite3mc.so" || {
   exit 1
 }
 
+# L'application lit sa version dans `version.json` (package_info_plus sous
+# Linux) — c'est elle qu'elle compare à la dernière version publiée. Or
+# `flutter build linux --build-name` n'y reporte pas le numéro : le fichier
+# gardait celui du pubspec (1.0.0), et chaque poste se voyait proposer sans fin
+# la version qu'il venait d'installer. On le réécrit, puis on le relit.
+VERSION_JSON="$BUNDLE/data/flutter_assets/version.json"
+if [[ -n "$BUILD_NAME" ]]; then
+  python3 - "$VERSION_JSON" "$BUILD_NAME" "$BUILD_NUMBER" <<'PY'
+import json, sys
+path, name, number = sys.argv[1:4]
+with open(path) as f:
+    data = json.load(f)
+data["version"] = name
+if number:
+    data["build_number"] = number
+with open(path, "w") as f:
+    json.dump(data, f)
+PY
+  ACTUAL="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["version"])' "$VERSION_JSON")"
+  if [[ "$ACTUAL" != "$BUILD_NAME" ]]; then
+    echo "version.json annonce $ACTUAL au lieu de $BUILD_NAME : la mise à jour bouclerait." >&2
+    exit 1
+  fi
+  echo "✓ version.json : $ACTUAL"
+fi
+
 VERSION="${BUILD_NAME:-$(grep '^version:' pubspec.yaml | sed 's/version: *//; s/+.*//')}"
 DIST="build/dist"
 STAGE="$DIST/eteelo-connect"
