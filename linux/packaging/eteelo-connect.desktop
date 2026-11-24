@@ -6,4 +6,4 @@ Exec=@INSTALL_DIR@/school_app_flutter
 Icon=@INSTALL_DIR@/eteelo-connect.png
 Terminal=false
 Categories=Office;Education;
-StartupWMClass=com.junethink.school_app_flutter
+StartupWMClass=@APP_ID@

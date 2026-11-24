@@ -77,11 +77,14 @@ class WindowsDesktopInstaller implements DesktopInstaller {
 /// Linux : l'archive est décompressée à côté d'elle, son `install.sh` remplace
 /// le dossier du canal (`~/.local/share/eteelo-connect` en prod,
 /// `eteelo-connect-staging` en staging) sans toucher à la base, puis la
-/// nouvelle version est relancée — deux secondes plus tard, le temps que
-/// celle-ci se ferme et rende la base.
+/// nouvelle version est relancée dès que celle-ci s'est fermée (au plus
+/// trente secondes) : le programme est à instance unique, une relance qui la
+/// trouverait encore là la réveillerait puis s'arrêterait — et le poste se
+/// retrouverait sans application.
 class LinuxDesktopInstaller implements DesktopInstaller {
   final ProcessLauncher _launcher;
   final Map<String, String> _environment;
+  final int _currentPid;
 
   /// Le canal de ce poste (`prod`, `staging`, `dev`) : il choisit le dossier.
   final String channel;
@@ -90,8 +93,10 @@ class LinuxDesktopInstaller implements DesktopInstaller {
     required this.channel,
     ProcessLauncher launcher = const SystemProcessLauncher(),
     Map<String, String>? environment,
+    int? currentPid,
   }) : _launcher = launcher,
-       _environment = environment ?? Platform.environment;
+       _environment = environment ?? Platform.environment,
+       _currentPid = currentPid ?? pid;
 
   /// Le dossier du programme pour [channel] — même règle que `install.sh` :
   /// la prod garde `eteelo-connect`, les autres canaux y ajoutent leur nom,
@@ -125,10 +130,14 @@ class LinuxDesktopInstaller implements DesktopInstaller {
       throw const DesktopInstallException('install.sh absent de l’archive');
     }
     await _check('bash', [script]);
+    // Attend que ce processus ait rendu la base et son nom sur le bus de
+    // session : 300 × 0,1 s, puis relance quoi qu'il arrive.
     await _launcher.startDetached('sh', [
       '-c',
-      'sleep 2; exec "\$0"',
+      'i=0; while kill -0 "\$1" 2>/dev/null && [ "\$i" -lt 300 ]; '
+          'do sleep 0.1; i=\$((i+1)); done; exec "\$0"',
       installedExecutable,
+      '$_currentPid',
     ]);
   }
 

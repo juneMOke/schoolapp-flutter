@@ -8,6 +8,16 @@ set(BINARY_NAME "school_app_flutter")
 # The unique GTK application identifier for this application. See:
 # https://wiki.gnome.org/HowDoI/ChooseApplicationID
 set(APPLICATION_ID "com.junethink.school_app_flutter")
+# Une instance par environnement : l'identifiant sert aussi de nom unique sur
+# le bus de session (une seule fenêtre à la fois). Hors production, il porte
+# le nom de l'environnement, pour qu'une staging ne réveille pas la production
+# du même poste. `package_linux.sh` le fournit par ETEELO_APP_ENV ; la
+# production garde l'identifiant historique (ses dossiers et son trousseau en
+# dépendent).
+if(DEFINED ENV{ETEELO_APP_ENV} AND NOT "$ENV{ETEELO_APP_ENV}" STREQUAL ""
+   AND NOT "$ENV{ETEELO_APP_ENV}" STREQUAL "prod")
+  set(APPLICATION_ID "${APPLICATION_ID}.$ENV{ETEELO_APP_ENV}")
+endif()
 
 # Explicitly opt in to modern CMake behaviors to avoid warnings with recent
 # versions of CMake.

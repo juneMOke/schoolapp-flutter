@@ -41,7 +41,9 @@ VERSION_ARGS=()
 # l'application s'arrêtait à l'ouverture de la base (« No available native
 # assets »).
 flutter clean
-flutter build linux --release "${VERSION_ARGS[@]}" \
+# ETEELO_APP_ENV choisit l'identifiant de l'application (linux/CMakeLists.txt) :
+# une instance unique par environnement.
+ETEELO_APP_ENV="$APP_ENV" flutter build linux --release "${VERSION_ARGS[@]}" \
   --dart-define=APP_ENV="$APP_ENV" \
   --dart-define=API_BASE_URL="$API_BASE_URL"
 
