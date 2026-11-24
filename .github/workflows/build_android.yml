@@ -24,10 +24,10 @@ on:
         required: false
         type: string
       distribute_firebase:
-        description: 'Distribuer via Firebase App Distribution (démo)'
+        description: 'Distribuer via Firebase App Distribution (staging et prod, APK seulement)'
         required: false
         type: boolean
-        default: false
+        default: true
 
   # Déclenchement automatique sur develop → build dev
   push:
@@ -248,7 +248,10 @@ jobs:
   distribute-demo:
     name: Distribute demo (Firebase)
     needs: [ resolve-config, build-android ]
-    if: ${{ inputs.distribute_firebase == true }}
+    # Cochée par défaut : un build prod lancé sans y penser part quand même
+    # chez les testeurs. Le dev n'a pas d'application Firebase, et un App
+    # Bundle ne se distribue pas ici : sautés plutôt qu'en échec.
+    if: ${{ inputs.distribute_firebase == true && needs.resolve-config.outputs.app_env != 'dev' && needs.resolve-config.outputs.build_type == 'apk' }}
     runs-on: ubuntu-latest
     # L'App ID Firebase est lié à un applicationId précis
     # (`…schoolAppFlutter.staging` ≠ `…schoolAppFlutter`) : les secrets se
