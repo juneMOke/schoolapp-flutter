@@ -75,18 +75,29 @@ class WindowsDesktopInstaller implements DesktopInstaller {
 }
 
 /// Linux : l'archive est décompressée à côté d'elle, son `install.sh` remplace
-/// `~/.local/share/eteelo-connect` sans toucher à la base, puis la nouvelle
-/// version est relancée — deux secondes plus tard, le temps que celle-ci se
-/// ferme et rende la base.
+/// le dossier du canal (`~/.local/share/eteelo-connect` en prod,
+/// `eteelo-connect-staging` en staging) sans toucher à la base, puis la
+/// nouvelle version est relancée — deux secondes plus tard, le temps que
+/// celle-ci se ferme et rende la base.
 class LinuxDesktopInstaller implements DesktopInstaller {
   final ProcessLauncher _launcher;
   final Map<String, String> _environment;
 
+  /// Le canal de ce poste (`prod`, `staging`, `dev`) : il choisit le dossier.
+  final String channel;
+
   LinuxDesktopInstaller({
+    required this.channel,
     ProcessLauncher launcher = const SystemProcessLauncher(),
     Map<String, String>? environment,
   }) : _launcher = launcher,
        _environment = environment ?? Platform.environment;
+
+  /// Le dossier du programme pour [channel] — même règle que `install.sh` :
+  /// la prod garde `eteelo-connect`, les autres canaux y ajoutent leur nom,
+  /// pour qu'une staging ne remplace jamais la prod du poste.
+  static String installDirName(String channel) =>
+      channel == 'prod' ? 'eteelo-connect' : 'eteelo-connect-$channel';
 
   /// Là où `install.sh` pose le programme (même règle que lui).
   String get installedExecutable {
@@ -94,7 +105,7 @@ class LinuxDesktopInstaller implements DesktopInstaller {
     final base = (dataHome == null || dataHome.isEmpty)
         ? p.join(_environment['HOME'] ?? '', '.local', 'share')
         : dataHome;
-    return p.join(base, 'eteelo-connect', 'school_app_flutter');
+    return p.join(base, installDirName(channel), 'school_app_flutter');
   }
 
   @override
@@ -107,6 +118,8 @@ class LinuxDesktopInstaller implements DesktopInstaller {
     await extractDir.create(recursive: true);
 
     await _check('tar', ['-xzf', installer.path, '-C', extractDir.path]);
+    // Le dossier de l'archive reste `eteelo-connect` quel que soit le canal :
+    // les postes déjà installés y cherchent `install.sh`.
     final script = p.join(extractDir.path, 'eteelo-connect', 'install.sh');
     if (!await File(script).exists()) {
       throw const DesktopInstallException('install.sh absent de l’archive');

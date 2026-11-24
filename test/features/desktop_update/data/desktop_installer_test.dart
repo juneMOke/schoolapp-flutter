@@ -53,6 +53,7 @@ void main() {
 
     LinuxDesktopInstaller installer(_Launcher launcher) =>
         LinuxDesktopInstaller(
+          channel: 'prod',
           launcher: launcher,
           environment: {'HOME': '/home/agent'},
         );
@@ -93,12 +94,33 @@ void main() {
 
     test('suit XDG_DATA_HOME comme install.sh', () {
       final linux = LinuxDesktopInstaller(
+        channel: 'prod',
         launcher: _Launcher(),
         environment: {'HOME': '/home/agent', 'XDG_DATA_HOME': '/data'},
       );
       expect(
         linux.installedExecutable,
         '/data/eteelo-connect/school_app_flutter',
+      );
+    });
+
+    test('la staging relance son propre dossier, jamais celui de la prod', () {
+      LinuxDesktopInstaller of(String channel) => LinuxDesktopInstaller(
+        channel: channel,
+        launcher: _Launcher(),
+        environment: {'HOME': '/home/agent'},
+      );
+      expect(
+        of('staging').installedExecutable,
+        '/home/agent/.local/share/eteelo-connect-staging/school_app_flutter',
+      );
+      expect(
+        of('dev').installedExecutable,
+        '/home/agent/.local/share/eteelo-connect-dev/school_app_flutter',
+      );
+      expect(
+        of('prod').installedExecutable,
+        '/home/agent/.local/share/eteelo-connect/school_app_flutter',
       );
     });
 

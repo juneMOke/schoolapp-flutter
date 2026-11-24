@@ -8,11 +8,30 @@
 #
 # Réinstaller par-dessus une version précédente remplace le programme, jamais
 # les données : la base locale vit dans ~/.local/share/com.junethink.school_app_flutter.
+#
+# Une installation par environnement, comme l'installateur Windows : la prod
+# vit dans `eteelo-connect`, la staging dans `eteelo-connect-staging` (dev :
+# `eteelo-connect-dev`), chacune avec son entrée de menu. Installer une
+# staging ne remplace donc jamais la prod du poste. APP_ENV est posé par
+# scripts/package_linux.sh ; la règle des dossiers est reprise par
+# `LinuxDesktopInstaller` (lib/features/desktop_update/data/desktop_installer.dart).
 set -euo pipefail
 
+APP_ENV="@APP_ENV@"
+case "$APP_ENV" in
+  prod)    SUFFIX="";         APP_NAME="ETEELO CONNECT" ;;
+  staging) SUFFIX="-staging"; APP_NAME="ETEELO CONNECT Staging" ;;
+  dev)     SUFFIX="-dev";     APP_NAME="ETEELO CONNECT Dev" ;;
+  *)
+    echo "Environnement inconnu ($APP_ENV) : archive mal emballée." >&2
+    exit 1
+    ;;
+esac
+
 SOURCE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-INSTALL_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/eteelo-connect"
+INSTALL_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/eteelo-connect$SUFFIX"
 APPLICATIONS_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/applications"
+DESKTOP_FILE="$APPLICATIONS_DIR/eteelo-connect$SUFFIX.desktop"
 
 # Le jeton de la session et la clé de la base vivent dans le trousseau du
 # système (Secret Service). Sans lui, l'application ne peut pas démarrer.
@@ -44,7 +63,7 @@ fi
 mv "$NEW_DIR" "$INSTALL_DIR"
 rm -rf "$OLD_DIR"
 
-sed "s|@INSTALL_DIR@|$INSTALL_DIR|g" "$SOURCE_DIR/eteelo-connect.desktop" \
-  > "$APPLICATIONS_DIR/eteelo-connect.desktop"
+sed -e "s|@INSTALL_DIR@|$INSTALL_DIR|g" -e "s|@APP_NAME@|$APP_NAME|g" \
+  "$SOURCE_DIR/eteelo-connect.desktop" > "$DESKTOP_FILE"
 
-echo "✓ ETEELO CONNECT installé dans $INSTALL_DIR (menu des applications)."
+echo "✓ $APP_NAME installé dans $INSTALL_DIR (menu des applications)."
