@@ -15,7 +15,9 @@ import 'package:school_app_flutter/features/desktop_update/data/desktop_installe
 import 'package:school_app_flutter/features/desktop_update/data/desktop_release_api.dart';
 import 'package:school_app_flutter/features/desktop_update/data/desktop_release_verifier.dart';
 import 'package:school_app_flutter/features/desktop_update/data/desktop_update_downloader.dart';
+import 'package:school_app_flutter/features/desktop_update/data/desktop_update_log.dart';
 import 'package:school_app_flutter/features/desktop_update/data/desktop_update_repository_impl.dart';
+import 'package:school_app_flutter/features/desktop_update/data/installer_transfer.dart';
 import 'package:school_app_flutter/features/desktop_update/data/secure_last_run_version_store.dart';
 import 'package:school_app_flutter/features/desktop_update/domain/entities/app_version.dart';
 import 'package:school_app_flutter/features/desktop_update/domain/entities/desktop_release.dart';
@@ -62,15 +64,22 @@ void registerDesktopUpdate(GetIt getIt, DesktopUpdateContext context) {
         channel: env.environment.label,
       ),
       downloader: DesktopUpdateDownloader(
-        dio: Dio(
-          BaseOptions(
-            connectTimeout: const Duration(seconds: 15),
-            receiveTimeout: AppConstants.desktopUpdateDownloadTimeout,
-          ),
-        ),
+        // Windows télécharge lui-même (certificats et proxy du système) ;
+        // Linux passe par Dio.
+        transfer: context.platform == DesktopPlatform.windows
+            ? PowerShellInstallerTransfer()
+            : DioInstallerTransfer(
+                Dio(
+                  BaseOptions(
+                    connectTimeout: const Duration(seconds: 15),
+                    receiveTimeout: AppConstants.desktopUpdateDownloadTimeout,
+                  ),
+                ),
+              ),
         // Cache propre à l'utilisateur, et non `/tmp` partagé entre comptes.
         baseDirectory: getApplicationCacheDirectory,
       ),
+      log: DesktopUpdateLog(baseDirectory: getApplicationCacheDirectory),
       installer: context.platform == DesktopPlatform.windows
           ? const WindowsDesktopInstaller()
           : LinuxDesktopInstaller(channel: env.environment.label),
