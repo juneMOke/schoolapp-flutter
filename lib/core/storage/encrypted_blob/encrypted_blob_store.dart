@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:path_provider/path_provider.dart';
+import 'package:school_app_flutter/core/storage/desktop_environment_scope.dart';
 import 'package:school_app_flutter/core/storage/encrypted_blob/blob_cipher.dart';
 import 'package:school_app_flutter/core/storage/encrypted_blob/blob_directory.dart';
 import 'package:school_app_flutter/core/storage/encrypted_blob/blob_files.dart';
@@ -95,7 +95,9 @@ class EncryptedBlobStore {
            files ??
            BlobDirectory(
              name: directoryName,
-             baseDirectory: baseDirectory ?? getApplicationSupportDirectory,
+             baseDirectory:
+                 baseDirectory ??
+                 () async => Directory(await defaultBlobBaseDirectoryPath()),
            ),
        _onKeyRotated = onKeyRotated ?? _noKeyRotationHandler;
 

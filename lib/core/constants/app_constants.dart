@@ -999,6 +999,11 @@ class AppConstants {
   /// Sous-répertoire (du répertoire de support) où le cache éditique scelle
   /// ses pièces. **Ne se renomme pas** : les tablettes du parc y ont déjà
   /// leurs fichiers, qu'un autre nom rendrait orphelins.
+  /// Sous-dossier du dossier de support où un poste HORS production range
+  /// ses magasins d'octets (`environments/<env>`) — la production garde la
+  /// racine. Cf. `blobBaseDirectoryPath`.
+  static const String desktopEnvironmentsDirectoryName = 'environments';
+
   static const String editiqueCacheDirectoryName = 'editique_cache';
 
   /// Clé du magasin des pièces du personnel (RH), distincte de celle de
