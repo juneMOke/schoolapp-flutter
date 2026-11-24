@@ -7,6 +7,7 @@ import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/features/cotes/domain/entities/cote_scope.dart';
 import 'package:school_app_flutter/features/cotes/presentation/helpers/cote_focus_registry.dart';
+import 'package:school_app_flutter/features/cotes/presentation/helpers/cote_labels.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// La légende des cellules, et ce que fait Entrée. Les pastilles reprennent les
@@ -62,7 +63,7 @@ class CoteBulletinLegend extends StatelessWidget {
                 surface: AppColors.coteExamSurface,
                 border: AppColors.coteExamBorder,
               ),
-              label: l10n.coteLegendExam,
+              label: CoteLabels.examLegend(l10n, columns),
             ),
           _Item(
             swatch: const _DashedSwatch(

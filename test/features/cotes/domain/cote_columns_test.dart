@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:school_app_flutter/features/academics/domain/entities/notation/intitule_colonne.dart';
 import 'package:school_app_flutter/features/cotes/domain/entities/cote_classe.dart';
 import 'package:school_app_flutter/features/cotes/domain/entities/cote_scope.dart';
 import 'package:school_app_flutter/features/cotes/domain/services/cote_columns.dart';
@@ -76,5 +77,80 @@ void main() {
 
   test('la portée d\'ouverture est le groupe en cours', () {
     expect(defaultScope(classe).cibleId, 'S2');
+  });
+
+  group('une grille sans examen', () {
+    final etapes = CoteClasse(
+      classroomId: 'c',
+      decoupage: Decoupage.semestre,
+      periodes: [
+        for (final (id, ordre) in [('S1', 1), ('S2', 2)])
+          CotePeriode(
+            id: id,
+            ordre: ordre,
+            libelle: id,
+            courant: ordre == 1,
+            locked: false,
+            examen: const ColonneExamen.absente(),
+            sousPeriodes: [
+              for (final rang in [1, 2])
+                CoteSousPeriode(
+                  id: '$id-$rang',
+                  ordre: rang,
+                  locked: false,
+                  intitule: IntituleColonne(
+                    libelle: 'Étape ${(ordre - 1) * 2 + rang}',
+                    libelleCourt: 'É${(ordre - 1) * 2 + rang}',
+                  ),
+                ),
+            ],
+          ),
+      ],
+      rubriques: const [],
+      eleves: const [],
+    );
+    const cours = CoteCours(
+      coursId: 'fr',
+      branche: 'Français',
+      maxJournalier: 20,
+      maxExamen: 0,
+    );
+
+    test('aucune colonne d\'examen, un total par groupe', () {
+      final kinds = yearColumns(etapes).map((c) => c.kind).toList();
+
+      expect(kinds.where((k) => k == CoteColumnKind.examen), isEmpty);
+      expect(kinds.where((k) => k == CoteColumnKind.totalGroupe), hasLength(2));
+    });
+
+    test('le groupe ne propose que ses étapes', () {
+      final columns = columnsFor(
+        etapes,
+        const CoteScope(portee: CotePortee.groupe, cibleId: 'S2'),
+      );
+
+      expect(columns.map((c) => c.id), ['S2-1', 'S2-2']);
+      expect(columns.map((c) => c.intitule?.libelleCourt), ['É3', 'É4']);
+    });
+
+    test('le total d\'un groupe vaut la somme de ses étapes', () {
+      final total = yearColumns(
+        etapes,
+      ).firstWhere((c) => c.kind == CoteColumnKind.totalGroupe);
+
+      expect(total.maxFor(cours), 40);
+      // Même si un cours portait un maximum d'examen, le groupe n'en a pas.
+      expect(
+        total.maxFor(
+          const CoteCours(
+            coursId: 'x',
+            branche: 'X',
+            maxJournalier: 20,
+            maxExamen: 40,
+          ),
+        ),
+        40,
+      );
+    });
   });
 }

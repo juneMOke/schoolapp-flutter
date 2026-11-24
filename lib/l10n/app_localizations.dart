@@ -32977,6 +32977,18 @@ abstract class AppLocalizations {
   /// **'Exam · {group}'**
   String coteColumnExamLong(String group);
 
+  /// Intitulé d'une colonne nommée par la grille de l'école, suivi de son groupe (« Examen S1 »).
+  ///
+  /// In en, this message translates to:
+  /// **'{label} {group}'**
+  String coteColumnNamedOf(String label, String group);
+
+  /// Intitulé en toutes lettres d'une colonne nommée par la grille, suivi de sa période (« Examen · Semestre 1 »).
+  ///
+  /// In en, this message translates to:
+  /// **'{label} · {group}'**
+  String coteColumnNamedLong(String label, String group);
+
   /// No description provided for @coteColumnTotalOf.
   ///
   /// In en, this message translates to:

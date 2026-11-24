@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:school_app_flutter/features/academics/domain/entities/notation/intitule_colonne.dart';
 import 'package:school_app_flutter/features/resultats/domain/entities/decoupage.dart';
 
 /// Toute l'année d'une classe, telle que la saisie la charge
@@ -35,7 +36,8 @@ class CoteClasse extends Equatable {
   ];
 }
 
-/// Un semestre ou un trimestre. [locked] vaut pour son examen.
+/// Un semestre ou un trimestre. [locked] vaut pour son examen. [examen] dit
+/// si la période a une colonne d'examen, et comment la grille la nomme.
 class CotePeriode extends Equatable {
   final String id;
   final int ordre;
@@ -43,6 +45,7 @@ class CotePeriode extends Equatable {
   final bool courant;
   final bool locked;
   final List<CoteSousPeriode> sousPeriodes;
+  final ColonneExamen examen;
 
   const CotePeriode({
     required this.id,
@@ -51,6 +54,7 @@ class CotePeriode extends Equatable {
     required this.courant,
     required this.locked,
     required this.sousPeriodes,
+    this.examen = const ColonneExamen.inconnue(),
   });
 
   @override
@@ -61,22 +65,27 @@ class CotePeriode extends Equatable {
     courant,
     locked,
     sousPeriodes,
+    examen,
   ];
 }
 
+/// [intitule] : le nom que la grille donne à la colonne ; `null` d'un serveur
+/// plus ancien, l'écran garde alors le sien.
 class CoteSousPeriode extends Equatable {
   final String id;
   final int ordre;
   final bool locked;
+  final IntituleColonne? intitule;
 
   const CoteSousPeriode({
     required this.id,
     required this.ordre,
     required this.locked,
+    this.intitule,
   });
 
   @override
-  List<Object?> get props => [id, ordre, locked];
+  List<Object?> get props => [id, ordre, locked, intitule];
 }
 
 /// Un nœud de l'arbre du barème. [label] nul sur les grilles plates : le nœud

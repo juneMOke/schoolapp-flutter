@@ -33,14 +33,17 @@ abstract final class CoteLabels {
       .firstWhere((p) => p.id == periodeId, orElse: () => classe.periodes.first)
       .libelle;
 
-  /// L'en-tête de colonne : « P3 », « Exam. », « Tot. S1 ».
+  /// L'en-tête de colonne : « P3 », « Exam. », « Tot. S1 ». Une colonne que la
+  /// grille nomme prend son nom court (« É3 »).
   static String columnShort(
     AppLocalizations l10n,
     Decoupage decoupage,
     CoteColumn column,
   ) => switch (column.kind) {
-    CoteColumnKind.periode => l10n.coteColumnPeriod(column.numero),
-    CoteColumnKind.examen => l10n.coteColumnExam,
+    CoteColumnKind.periode =>
+      column.intitule?.libelleCourt ?? l10n.coteColumnPeriod(column.numero),
+    CoteColumnKind.examen =>
+      column.intitule?.libelleCourt ?? l10n.coteColumnExam,
     CoteColumnKind.totalGroupe => l10n.coteColumnTotalOf(
       groupShort(l10n, decoupage, column.numero),
     ),
@@ -53,7 +56,10 @@ abstract final class CoteLabels {
     CoteColumn column,
   ) => switch (column.kind) {
     CoteColumnKind.periode => l10n.coteColumnMaxPeriod,
-    CoteColumnKind.examen => l10n.coteColumnMaxExam,
+    CoteColumnKind.examen => switch (column.intitule) {
+      final intitule? => l10n.coteColumnMaxOf(intitule.libelleCourt),
+      null => l10n.coteColumnMaxExam,
+    },
     CoteColumnKind.totalGroupe => l10n.coteColumnMaxOf(
       groupShort(l10n, decoupage, column.numero),
     ),
@@ -66,7 +72,10 @@ abstract final class CoteLabels {
     CoteColumn column,
   ) => switch (column.kind) {
     CoteColumnKind.periode => l10n.coteColumnMaxPeriodLong,
-    CoteColumnKind.examen => l10n.coteColumnMaxExamLong,
+    CoteColumnKind.examen => switch (column.intitule) {
+      final intitule? => l10n.coteColumnMaxGroupLong(intitule.libelle),
+      null => l10n.coteColumnMaxExamLong,
+    },
     CoteColumnKind.totalGroupe => l10n.coteColumnMaxGroupLong(
       _periodeLibelle(classe, column.periodeId),
     ),
@@ -77,9 +86,14 @@ abstract final class CoteLabels {
     AppLocalizations l10n,
     Decoupage decoupage,
     CoteColumn column,
-  ) => column.isExamen
-      ? l10n.coteColumnExamOf(groupShort(l10n, decoupage, column.numero))
-      : columnShort(l10n, decoupage, column);
+  ) {
+    if (!column.isExamen) return columnShort(l10n, decoupage, column);
+    final group = groupShort(l10n, decoupage, column.numero);
+    final intitule = column.intitule;
+    return intitule == null
+        ? l10n.coteColumnExamOf(group)
+        : l10n.coteColumnNamedOf(intitule.libelle, group);
+  }
 
   /// L'info-bulle et le lecteur d'écran : « 2e période », « Examen · Semestre 1 ».
   static String columnLong(
@@ -87,10 +101,17 @@ abstract final class CoteLabels {
     CoteClasse classe,
     CoteColumn column,
   ) => switch (column.kind) {
-    CoteColumnKind.periode => l10n.coteColumnPeriodLong(column.numero),
-    CoteColumnKind.examen => l10n.coteColumnExamLong(
-      _periodeLibelle(classe, column.periodeId),
-    ),
+    CoteColumnKind.periode =>
+      column.intitule?.libelle ?? l10n.coteColumnPeriodLong(column.numero),
+    CoteColumnKind.examen => switch (column.intitule) {
+      final intitule? => l10n.coteColumnNamedLong(
+        intitule.libelle,
+        _periodeLibelle(classe, column.periodeId),
+      ),
+      null => l10n.coteColumnExamLong(
+        _periodeLibelle(classe, column.periodeId),
+      ),
+    },
     CoteColumnKind.totalGroupe => l10n.coteColumnTotalLong(
       _periodeLibelle(classe, column.periodeId),
     ),
@@ -111,6 +132,12 @@ abstract final class CoteLabels {
     CotePortee.colonne =>
       columns.isEmpty ? '' : columnLong(l10n, classe, columns.first),
   };
+
+  /// La pastille d'examen de la légende : le nom que la grille donne à
+  /// l'examen, sinon « Examen ».
+  static String examLegend(AppLocalizations l10n, List<CoteColumn> columns) =>
+      columns.where((c) => c.isExamen).firstOrNull?.intitule?.libelle ??
+      l10n.coteLegendExam;
 
   static String rejection(AppLocalizations l10n, String? reason) =>
       switch (reason) {
