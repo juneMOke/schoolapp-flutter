@@ -214,6 +214,83 @@ void main() {
     expect(sousPeriode.rang, 3);
   });
 
+  group('copie sans grilles : pas d\'ETag envoyé', () {
+    Future<void> seed({required bool withGrille}) async {
+      await db.insert('ref_ligne_bareme', {
+        'id': 'lb1',
+        'owner_uid': '',
+        'grille_id': 'g1',
+        'rubrique_id': 'r1',
+        'branche_id': 'b1',
+        'max_journalier_par_sous_periode': 20,
+      });
+      if (withGrille) {
+        await db.insert('ref_grille', {
+          'id': 'g1',
+          'owner_uid': '',
+          'intitule_sous_periode': 'P{n}',
+          'intitule_court_sous_periode': 'P{n}',
+          'intitule_examen': 'Examen',
+          'intitule_court_examen': 'Exam.',
+        });
+      }
+      await syncMeta.setCursor(
+        kGradesReferentialResource,
+        cursor: '"old"',
+        syncedAt: 1,
+      );
+    }
+
+    test('une ligne de barème sans sa grille : relue en entier', () async {
+      await seed(withGrille: false);
+      when(
+        () => api.pullGradesReferential(auth, null),
+      ).thenAnswer((_) async => httpOk(bundle(), etag: '"new"'));
+
+      right(await repo.syncGradesReferential());
+
+      verify(() => api.pullGradesReferential(auth, null)).called(1);
+    });
+
+    test('grilles présentes : l\'ETag part comme avant', () async {
+      await seed(withGrille: true);
+      when(
+        () => api.pullGradesReferential(auth, '"old"'),
+      ).thenThrow(status(304));
+
+      final outcome = right(await repo.syncGradesReferential());
+
+      expect(outcome.notModified, isTrue);
+    });
+  });
+
+  test('getGrille et le remplacement restent bornés au compte', () async {
+    await refLocal.replaceGradesReferential(
+      GradesReferentialBundleDto.fromJson({
+        'grilles': [
+          {
+            'id': 'g1',
+            'intituleSousPeriode': 'Étape {n}',
+            'intituleCourtSousPeriode': 'É{n}',
+            'intituleExamen': 'Examen',
+            'intituleCourtExamen': 'Exam.',
+          },
+        ],
+      }),
+      ownerUid: 'uA',
+    );
+    await refLocal.replaceGradesReferential(
+      GradesReferentialBundleDto.fromJson(const {}),
+      ownerUid: 'uB',
+    );
+
+    expect(await refLocal.getGrille('g1', ownerUid: 'uB'), isNull);
+    expect(
+      (await refLocal.getGrille('g1', ownerUid: 'uA'))?.intituleSousPeriode,
+      'Étape {n}',
+    );
+  });
+
   test('304 : notModified, cache local et ETag conservés', () async {
     await syncMeta.setCursor(
       kGradesReferentialResource,

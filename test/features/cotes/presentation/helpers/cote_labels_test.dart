@@ -2,7 +2,6 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:school_app_flutter/features/academics/domain/entities/notation/intitule_colonne.dart';
 import 'package:school_app_flutter/features/cotes/domain/entities/cote_classe.dart';
-import 'package:school_app_flutter/features/cotes/domain/entities/cote_scope.dart';
 import 'package:school_app_flutter/features/cotes/domain/services/cote_columns.dart';
 import 'package:school_app_flutter/features/cotes/presentation/helpers/cote_labels.dart';
 import 'package:school_app_flutter/features/resultats/domain/entities/decoupage.dart';
@@ -83,12 +82,5 @@ void main() {
     );
     expect(CoteLabels.maxShort(l10n, classe.decoupage, exam), 'Max Compo.');
     expect(CoteLabels.examLegend(l10n, columns), 'Composition');
-  });
-
-  test('sans examen : aucune colonne ni maximum d\'examen', () {
-    final classe = _classe(examen: const ColonneExamen.absente());
-    final columns = yearColumns(classe);
-
-    expect(columns.where((c) => c.kind == CoteColumnKind.examen), isEmpty);
   });
 }

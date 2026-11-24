@@ -320,6 +320,9 @@ void main() {
 
       final buckets = vm.periodes[1].buckets;
       expect(buckets[0].intitule?.libelle, 'Étape 3');
+      // Le médaillon porte le rang dans l'année, pas l'`ordre` (1).
+      expect(buckets[0].ordre, 1);
+      expect(buckets[0].numero, 2);
       expect(buckets[1].intitule?.libelle, 'Composition');
     });
 

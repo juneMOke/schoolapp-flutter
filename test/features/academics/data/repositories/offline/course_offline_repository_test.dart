@@ -579,8 +579,8 @@ void main() {
           'id': 'g1',
           'intitule_sous_periode': 'Étape {n}',
           'intitule_court_sous_periode': 'É{n}',
-          'intitule_examen': 'Examen',
-          'intitule_court_examen': 'Exam.',
+          'intitule_examen': 'Examen {n}',
+          'intitule_court_examen': 'Ex.{n}',
         });
         await db.update('ref_sous_periode', {'rang': 3});
       }
@@ -595,7 +595,9 @@ void main() {
         expect(periode.sousPeriodes.single.intitule?.libelle, 'Étape 3');
         expect(periode.sousPeriodes.single.intitule?.libelleCourt, 'É3');
         expect(periode.intituleExamen.exists, isTrue);
-        expect(periode.intituleExamen.intitule?.libelleCourt, 'Exam.');
+        // L'examen prend l'ordre de la période (1), pas le rang (3).
+        expect(periode.intituleExamen.intitule?.libelle, 'Examen 1');
+        expect(periode.intituleExamen.intitule?.libelleCourt, 'Ex.1');
       });
 
       test('un cours sans examen : l\'examen est absent', () async {

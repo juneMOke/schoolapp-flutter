@@ -18,7 +18,12 @@ import 'package:school_app_flutter/features/cotes/domain/repositories/cotes_repo
 
 /// Préfixe de l'ETag d'une classe dans `sync_meta`. Le contenu ne dépend pas du
 /// compte : toute personne autorisée reçoit la même classe.
-const String kCotesClasseResourcePrefix = 'cotes_classe';
+///
+/// `_v2` depuis les intitulés des colonnes (V229 du back) : une copie gardée
+/// d'avant n'a ni noms ni avis sur l'examen, et un `304` la ferait durer. Le
+/// nouveau préfixe n'envoie aucun ETag au premier chargement, la classe est
+/// relue en entier une fois ; l'ancien curseur reste orphelin, sans effet.
+const String kCotesClasseResourcePrefix = 'cotes_classe_v2';
 
 class CotesRepositoryImpl implements CotesRepository {
   final CotesApi _api;

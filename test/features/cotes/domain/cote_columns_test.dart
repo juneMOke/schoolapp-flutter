@@ -153,4 +153,29 @@ void main() {
       );
     });
   });
+
+  test('téléphone, groupe en cours sans étape ni examen : pas de plantage', () {
+    const vide = CoteClasse(
+      classroomId: 'c',
+      decoupage: Decoupage.trimestre,
+      periodes: [
+        CotePeriode(
+          id: 'T3',
+          ordre: 3,
+          libelle: 'Trimestre 3',
+          courant: true,
+          locked: false,
+          examen: ColonneExamen.absente(),
+          sousPeriodes: [],
+        ),
+      ],
+      rubriques: [],
+      eleves: [],
+    );
+
+    final scope = defaultScope(vide, singleColumn: true);
+
+    expect(scope.portee, CotePortee.groupe);
+    expect(columnsFor(vide, scope), isEmpty);
+  });
 }

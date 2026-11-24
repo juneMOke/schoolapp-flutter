@@ -5,8 +5,8 @@ import 'package:school_app_flutter/core/database/tenant/tenant_migrations.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 /// Palier v88 — les intitulés des colonnes de notes : `ref_grille` naît vide,
-/// `ref_sous_periode` gagne `rang`, et le curseur du bundle repart de zéro
-/// pour que le prochain tirage ne réponde pas 304 sur des grilles vides.
+/// `ref_sous_periode` gagne `rang`. Les curseurs restent : leur présence dit
+/// aussi « référentiel prêt » à Mes cours hors ligne, pour chaque compte.
 void main() {
   sqfliteFfiInit();
 
@@ -69,16 +69,12 @@ void main() {
     expect(sousPeriode['rang'], isNull);
   });
 
-  test('seul le curseur du bundle repart de zéro', () async {
+  test('aucun curseur n\'est touché, d\'aucun compte', () async {
     await migrateTenantDatabase(db, 87, newVersion: 88);
 
-    final resources = [
-      for (final r in await db.query('sync_meta')) r['resource']! as String,
-    ];
-    expect(
-      resources,
-      unorderedEquals(['academics_cours@u1', 'academics_grades_referential_x']),
-    );
+    final rows = await db.query('sync_meta');
+    expect(rows, hasLength(4));
+    expect(rows.every((r) => r['cursor'] == 'etag'), isTrue);
   });
 
   test('rejouer le palier ne casse rien', () async {

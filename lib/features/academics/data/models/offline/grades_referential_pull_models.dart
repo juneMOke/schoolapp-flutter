@@ -167,7 +167,12 @@ class SousPeriodeDto {
     statut: (j['statut'] as String?) ?? 'UNKNOWN',
     startDate: j['startDate'] as String?,
     endDate: j['endDate'] as String?,
-    rang: (j['rang'] as num?)?.toInt(),
+    // Cosmétique : un rang illisible ne doit pas écarter la sous-période
+    // (et son statut de clôture) avec lui.
+    rang: switch (j['rang']) {
+      final num rang => rang.toInt(),
+      _ => null,
+    },
   );
 
   RefSousPeriodeRow toLocalRow() => RefSousPeriodeRow(

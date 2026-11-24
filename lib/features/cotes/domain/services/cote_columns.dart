@@ -87,6 +87,11 @@ CoteScope defaultScope(CoteClasse classe, {bool singleColumn = false}) {
   final columns = yearColumns(
     classe,
   ).where((c) => c.isInput && c.periodeId == periode.id);
+  // Un groupe sans étape ni examen n'a aucune colonne : le groupe, vide, plutôt
+  // qu'une colonne qui n'existe pas.
+  if (columns.isEmpty) {
+    return CoteScope(portee: CotePortee.groupe, cibleId: periode.id);
+  }
   final open = columns.where((c) => !c.locked);
   final column = open.isEmpty ? columns.first : open.first;
   return CoteScope(portee: CotePortee.colonne, cibleId: column.id);

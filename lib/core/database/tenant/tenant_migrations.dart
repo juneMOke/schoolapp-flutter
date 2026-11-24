@@ -235,27 +235,13 @@ Future<void> migrateTenantDatabase(
   }
   if (upTo(88)) {
     // Les intitulés des colonnes de notes (migration back V229) : les motifs
-    // de chaque grille et le rang des sous-périodes dans l'année.
+    // de chaque grille et le rang des sous-périodes dans l'année. Aucun
+    // curseur n'est touché : son existence dit aussi « référentiel prêt »
+    // (Mes cours hors ligne, pour chaque compte). Le tirage se répare seul :
+    // sans grille pour ses lignes de barème, il n'envoie pas d'ETag.
     await _createTables(db, [refGrilleTable]);
     await _addColumnIfTable(db, 'ref_sous_periode', 'rang', type: 'INTEGER');
-    await _repullGradesReferential(db);
   }
-}
-
-/// v88 — le bundle `grades-referential` est sous ETag : un poste déjà à jour
-/// recevrait 304 et garderait des grilles vides tant que l'école ne touche à
-/// rien. Son curseur (exact ou scopé par compte) repart de zéro ; le bundle
-/// est remplacé en entier au tirage suivant.
-Future<void> _repullGradesReferential(DatabaseExecutor db) async {
-  final hasMeta = await db.rawQuery(
-    "SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'sync_meta'",
-  );
-  if (hasMeta.isEmpty) return;
-  const resource = 'academics_grades_referential';
-  await db.execute(
-    'DELETE FROM sync_meta WHERE resource = ? OR substr(resource, 1, ?) = ?',
-    [resource, resource.length + 1, '$resource@'],
-  );
 }
 
 /// v86 — les cadres déjà connus n'ont ni `replaceable` ni document, et un

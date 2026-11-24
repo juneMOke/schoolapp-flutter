@@ -963,7 +963,8 @@ class AppConstants {
   // pure, sans reprise. Palier d'école.
   // v88 (2026-11-24) : les intitulés des colonnes de notes — `ref_grille`
   // (motifs de chaque grille) et `ref_sous_periode.rang` (rang dans l'année).
-  // Re-tirage du bundle `grades-referential`. Palier d'école.
+  // Sans reprise : le tirage du bundle n'envoie pas d'ETag tant qu'une ligne
+  // de barème n'a pas sa grille. Palier d'école.
   static const int offlineDbSchemaVersion = 88;
 
   /// Dernière version de la base unique HÉRITÉE : là où l'escalier

@@ -183,7 +183,7 @@ class _PanelMedallion extends StatelessWidget {
       return Icon(Icons.check_rounded, size: 19, color: color);
     }
     return Text(
-      '${bucket.ordre}',
+      '${bucket.numero}',
       style: AppTypography.titleSmall.copyWith(
         color: color,
         fontFeatures: const [FontFeature.tabularFigures()],
