@@ -83,7 +83,8 @@ class GradesReferentialPullRepositoryImpl {
           bundle.branches.length +
           bundle.ligneBaremes.length +
           bundle.periodes.length +
-          bundle.sousPeriodes.length;
+          bundle.sousPeriodes.length +
+          bundle.grilles.length;
       return Right(
         CoursPullOutcome(
           upserted: upserted,

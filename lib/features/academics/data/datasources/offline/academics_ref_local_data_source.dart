@@ -33,6 +33,7 @@ class AcademicsRefLocalDataSource {
   static const String programmeChapitreTable = 'chapitre';
   static const String periodeTable = 'ref_periode';
   static const String sousPeriodeTable = 'ref_sous_periode';
+  static const String grilleTable = 'ref_grille';
 
   Future<int> applyPulledCours(
     List<RefCoursRow> rows, {
@@ -141,6 +142,7 @@ class AcademicsRefLocalDataSource {
         chapitreTable,
         periodeTable,
         sousPeriodeTable,
+        grilleTable,
       ]) {
         batch.delete(table, where: 'owner_uid = ?', whereArgs: [owner]);
       }
@@ -172,6 +174,7 @@ class AcademicsRefLocalDataSource {
         sousPeriodeTable,
         bundle.sousPeriodes.map((sp) => sp.toLocalRow().toMap()),
       );
+      insertAll(grilleTable, bundle.grilles.map((g) => g.toLocalRow().toMap()));
       await batch.commit(noResult: true);
     });
   }
@@ -191,6 +194,22 @@ class AcademicsRefLocalDataSource {
     );
     if (rows.isEmpty) return null;
     return RefLigneBaremeRow.fromMap(rows.first);
+  }
+
+  /// Les motifs d'intitulés d'une grille (`null` d'un bundle d'avant la v88,
+  /// ou si la grille manque).
+  Future<RefGrilleRow?> getGrille(
+    String id, {
+    required String? ownerUid,
+  }) async {
+    final rows = await _db.query(
+      grilleTable,
+      where: 'id = ? AND owner_uid = ?',
+      whereArgs: [id, ownerKey(ownerUid)],
+      limit: 1,
+    );
+    if (rows.isEmpty) return null;
+    return RefGrilleRow.fromMap(rows.first);
   }
 
   /// Branche par id (`null` si le bundle n'a pas encore cette branche).

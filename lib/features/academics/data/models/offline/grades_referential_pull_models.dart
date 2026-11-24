@@ -1,7 +1,7 @@
 // DTOs du bundle `grades-referential` (`GET /sync/academics/grades-referential`,
 // ETag applicatif, cadré prof, NON paginé). Contrat : `GradesReferentialBundle`
 // = { branches[], ligneBaremes[], chapitres[], periodes[], sousPeriodes[],
-// serverTime }. Parsing tolérant **par élément** (`_lenientList`, patron des
+// grilles[], serverTime }. Parsing tolérant **par élément** (`_lenientList`, patron des
 // autres pulls académiques) : une entrée malformée est écartée sans annuler le
 // reste du bundle — la garde de clôture/plafonds en dépend.
 
@@ -148,6 +148,7 @@ class SousPeriodeDto {
   final String statut;
   final String? startDate;
   final String? endDate;
+  final int? rang;
 
   const SousPeriodeDto({
     required this.id,
@@ -156,6 +157,7 @@ class SousPeriodeDto {
     required this.statut,
     this.startDate,
     this.endDate,
+    this.rang,
   });
 
   factory SousPeriodeDto.fromJson(Map<String, dynamic> j) => SousPeriodeDto(
@@ -165,6 +167,7 @@ class SousPeriodeDto {
     statut: (j['statut'] as String?) ?? 'UNKNOWN',
     startDate: j['startDate'] as String?,
     endDate: j['endDate'] as String?,
+    rang: (j['rang'] as num?)?.toInt(),
   );
 
   RefSousPeriodeRow toLocalRow() => RefSousPeriodeRow(
@@ -174,6 +177,41 @@ class SousPeriodeDto {
     statut: statut,
     startDate: startDate,
     endDate: endDate,
+    rang: rang,
+  );
+}
+
+/// Les motifs d'intitulés d'une grille, jamais nuls : une entrée incomplète
+/// est écartée (`_lenientList`), et ses cours gardent leurs intitulés d'avant.
+class GrilleDto {
+  final String id;
+  final String intituleSousPeriode;
+  final String intituleCourtSousPeriode;
+  final String intituleExamen;
+  final String intituleCourtExamen;
+
+  const GrilleDto({
+    required this.id,
+    required this.intituleSousPeriode,
+    required this.intituleCourtSousPeriode,
+    required this.intituleExamen,
+    required this.intituleCourtExamen,
+  });
+
+  factory GrilleDto.fromJson(Map<String, dynamic> j) => GrilleDto(
+    id: j['id'] as String,
+    intituleSousPeriode: j['intituleSousPeriode'] as String,
+    intituleCourtSousPeriode: j['intituleCourtSousPeriode'] as String,
+    intituleExamen: j['intituleExamen'] as String,
+    intituleCourtExamen: j['intituleCourtExamen'] as String,
+  );
+
+  RefGrilleRow toLocalRow() => RefGrilleRow(
+    id: id,
+    intituleSousPeriode: intituleSousPeriode,
+    intituleCourtSousPeriode: intituleCourtSousPeriode,
+    intituleExamen: intituleExamen,
+    intituleCourtExamen: intituleCourtExamen,
   );
 }
 
@@ -185,12 +223,16 @@ class GradesReferentialBundleDto {
   final List<PeriodeDto> periodes;
   final List<SousPeriodeDto> sousPeriodes;
 
+  /// Vide d'un serveur d'avant les intitulés (V229).
+  final List<GrilleDto> grilles;
+
   const GradesReferentialBundleDto({
     required this.branches,
     required this.ligneBaremes,
     required this.chapitres,
     required this.periodes,
     required this.sousPeriodes,
+    this.grilles = const [],
   });
 
   factory GradesReferentialBundleDto.fromJson(Map<String, dynamic> j) =>
@@ -200,5 +242,6 @@ class GradesReferentialBundleDto {
         chapitres: _lenientList(j['chapitres'], ChapitreDto.fromJson),
         periodes: _lenientList(j['periodes'], PeriodeDto.fromJson),
         sousPeriodes: _lenientList(j['sousPeriodes'], SousPeriodeDto.fromJson),
+        grilles: _lenientList(j['grilles'], GrilleDto.fromJson),
       );
 }

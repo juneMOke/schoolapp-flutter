@@ -168,6 +168,52 @@ void main() {
     expect(await syncMeta.getCursor(kGradesReferentialResource), '"v2"');
   });
 
+  test('200 : les grilles et le rang des sous-périodes sont rangés', () async {
+    when(() => api.pullGradesReferential(auth, null)).thenAnswer(
+      (_) async => httpOk(
+        GradesReferentialBundleDto.fromJson({
+          'branches': [],
+          'ligneBaremes': [],
+          'chapitres': [],
+          'periodes': [],
+          'sousPeriodes': [
+            {
+              'id': 'sp3',
+              'periodeScolaireId': 'p2',
+              'ordre': 1,
+              'statut': 'OUVERTE',
+              'rang': 3,
+            },
+          ],
+          'grilles': [
+            {
+              'id': 'g1',
+              'intituleSousPeriode': 'Étape {n}',
+              'intituleCourtSousPeriode': 'É{n}',
+              'intituleExamen': 'Examen',
+              'intituleCourtExamen': 'Exam.',
+            },
+            // Un motif manquant : la grille est écartée, pas le bundle.
+            {'id': 'g2', 'intituleSousPeriode': 'P{n}'},
+          ],
+        }),
+        etag: '"v229"',
+      ),
+    );
+
+    final outcome = right(await repo.syncGradesReferential());
+
+    expect(outcome.upserted, 2);
+    final grille = await refLocal.getGrille('g1', ownerUid: null);
+    expect(grille?.intituleSousPeriode, 'Étape {n}');
+    expect(grille?.intituleCourtExamen, 'Exam.');
+    expect(await refLocal.getGrille('g2', ownerUid: null), isNull);
+    final sousPeriode = (await refLocal.getSousPeriodesForPeriodes(const [
+      'p2',
+    ], ownerUid: null)).single;
+    expect(sousPeriode.rang, 3);
+  });
+
   test('304 : notModified, cache local et ETag conservés', () async {
     await syncMeta.setCursor(
       kGradesReferentialResource,

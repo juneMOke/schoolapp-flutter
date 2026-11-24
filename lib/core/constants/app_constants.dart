@@ -961,7 +961,10 @@ class AppConstants {
   // v87 (2026-11-22) : la photo hors ligne du tableau de bord du Recouvrement
   // v2 (`recouvrement_dashboard_cache`), calculé par le serveur. Création
   // pure, sans reprise. Palier d'école.
-  static const int offlineDbSchemaVersion = 87;
+  // v88 (2026-11-24) : les intitulés des colonnes de notes — `ref_grille`
+  // (motifs de chaque grille) et `ref_sous_periode.rang` (rang dans l'année).
+  // Re-tirage du bundle `grades-referential`. Palier d'école.
+  static const int offlineDbSchemaVersion = 88;
 
   /// Dernière version de la base unique HÉRITÉE : là où l'escalier
   /// `migrateOfflineDatabase` s'arrête pour toujours.

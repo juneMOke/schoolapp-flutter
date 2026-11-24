@@ -8,6 +8,7 @@ import 'package:school_app_flutter/features/academics/data/datasources/offline/a
 import 'package:school_app_flutter/features/academics/data/models/offline/evaluation_row.dart';
 import 'package:school_app_flutter/features/academics/data/models/offline/grades_referential_rows.dart';
 import 'package:school_app_flutter/features/academics/data/models/offline/note_evaluation_row.dart';
+import 'package:school_app_flutter/features/academics/data/repositories/offline/grille_intitules.dart';
 import 'package:school_app_flutter/features/academics/data/repositories/offline/academics_cours_pull_repository_impl.dart'
     show kAcademicsCoursBootstrapPrefix;
 import 'package:school_app_flutter/features/academics/data/repositories/offline/evaluation_offline_repository_impl.dart';
@@ -236,6 +237,13 @@ class CourseOfflineRepositoryImpl implements CourseRepository {
         ligneBareme.brancheId,
         ownerUid: owner,
       );
+      final intitules = GrilleIntitules(
+        grille: await _academicsRefLocal.getGrille(
+          ligneBareme.grilleId,
+          ownerUid: owner,
+        ),
+        sansExamen: (ligneBareme.maxExamenParPeriodeScolaire ?? 0) == 0,
+      );
 
       final periodeRows = await _academicsRefLocal.getPeriodesForGroup(
         classroom.academicYearId,
@@ -330,6 +338,7 @@ class CourseOfflineRepositoryImpl implements CourseRepository {
                               ),
                             )
                             .toList(growable: false),
+                        intitule: intitules.sousPeriode(sp),
                       );
                     })
                     .toList(growable: false);
@@ -340,6 +349,7 @@ class CourseOfflineRepositoryImpl implements CourseRepository {
               ordre: p.ordre,
               statut: StatutPeriodeX.fromApiValue(p.statut),
               sousPeriodes: sousPeriodes,
+              intituleExamen: intitules.examen(p.ordre),
               examen: examenRow == null
                   ? null
                   : _examen(
