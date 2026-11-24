@@ -73,7 +73,7 @@ void registerDesktopUpdate(GetIt getIt, DesktopUpdateContext context) {
       ),
       installer: context.platform == DesktopPlatform.windows
           ? const WindowsDesktopInstaller()
-          : LinuxDesktopInstaller(),
+          : LinuxDesktopInstaller(channel: env.environment.label),
     ),
   );
   getIt.registerLazySingleton<LastRunVersionStore>(

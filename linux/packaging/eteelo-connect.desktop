@@ -1,6 +1,6 @@
 [Desktop Entry]
 Type=Application
-Name=ETEELO CONNECT
+Name=@APP_NAME@
 Comment=Gestion scolaire ETEELO
 Exec=@INSTALL_DIR@/school_app_flutter
 Icon=@INSTALL_DIR@/eteelo-connect.png

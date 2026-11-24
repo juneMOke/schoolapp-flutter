@@ -60,7 +60,10 @@ rm -rf "$STAGE" "$ARCHIVE"
 mkdir -p "$STAGE"
 cp -r "$BUNDLE/." "$STAGE/"
 cp assets/app-icon/play_store_512.png "$STAGE/eteelo-connect.png"
-cp linux/packaging/eteelo-connect.desktop linux/packaging/install.sh "$STAGE/"
+cp linux/packaging/eteelo-connect.desktop "$STAGE/"
+# install.sh apprend son environnement ici : il en tire son dossier et son
+# entrée de menu, pour que staging et prod cohabitent sur un même poste.
+sed "s|@APP_ENV@|$APP_ENV|" linux/packaging/install.sh > "$STAGE/install.sh"
 
 tar -C "$DIST" -czf "$ARCHIVE" eteelo-connect
 echo "✓ $ARCHIVE"
