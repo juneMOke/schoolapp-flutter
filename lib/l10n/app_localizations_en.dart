@@ -26273,4 +26273,120 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get classTimetableDistributionSubtitle => 'Hours placed / planned';
+
+  @override
+  String get desktopUpdateEyebrow => 'Update';
+
+  @override
+  String desktopUpdateAvailableTitle(String version) {
+    return 'Version $version is available';
+  }
+
+  @override
+  String get desktopUpdateMandatoryTitle => 'Update required';
+
+  @override
+  String desktopUpdateMandatoryBody(String version) {
+    return 'The server no longer accepts this version. Install version $version to continue.';
+  }
+
+  @override
+  String desktopUpdateAvailableBody(String size) {
+    return '$size MB download. The app will close and restart; your data stays on this computer.';
+  }
+
+  @override
+  String get desktopUpdateNotesTitle => 'What\'s new';
+
+  @override
+  String desktopUpdateNotesVersion(String version) {
+    return 'Version $version';
+  }
+
+  @override
+  String get desktopUpdateNoNotes => 'No notes for this version.';
+
+  @override
+  String get desktopUpdateLater => 'Later';
+
+  @override
+  String get desktopUpdateNow => 'Update';
+
+  @override
+  String get desktopUpdateQuit => 'Quit';
+
+  @override
+  String get desktopUpdatePreparing => 'Sending pending operations…';
+
+  @override
+  String desktopUpdatePendingBody(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          '$count operations have not been sent yet. They will be kept and sent after the update.',
+      one:
+          '1 operation has not been sent yet. It will be kept and sent after the update.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get desktopUpdateContinue => 'Continue';
+
+  @override
+  String get desktopUpdateCancel => 'Cancel';
+
+  @override
+  String desktopUpdateDownloading(int percent) {
+    return 'Downloading… $percent%';
+  }
+
+  @override
+  String get desktopUpdateInstalling =>
+      'Installing. The app will close and restart.';
+
+  @override
+  String get desktopUpdateErrorNetwork =>
+      'The download did not complete. Check the connection and try again.';
+
+  @override
+  String get desktopUpdateErrorIntegrity =>
+      'The downloaded file failed verification. It was deleted; the current version stays installed.';
+
+  @override
+  String get desktopUpdateErrorInstall =>
+      'The installer could not start. The current version stays installed.';
+
+  @override
+  String get desktopUpdateErrorStorage =>
+      'The file could not be saved on this computer.';
+
+  @override
+  String get desktopUpdateErrorUnknown =>
+      'The update failed. The current version stays installed.';
+
+  @override
+  String get desktopUpdateRetry => 'Try again';
+
+  @override
+  String get desktopUpdateClose => 'Close';
+
+  @override
+  String desktopUpdateMenuEntry(String version) {
+    return 'Update available ($version)';
+  }
+
+  @override
+  String desktopUpdateJustUpdated(String version) {
+    return 'App updated to version $version.';
+  }
+
+  @override
+  String get desktopUpdatePendingUnknown =>
+      'Pending operations could not be checked. If there are any, they will be kept and sent after the update.';
+
+  @override
+  String get desktopUpdateWaitingInstaller =>
+      'The installer is running. It will close the app and restart it; Windows may first ask for an administrator\'s approval.';
 }

@@ -1,6 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart'
-    show TargetPlatform, defaultTargetPlatform, kDebugMode;
+    show TargetPlatform, defaultTargetPlatform, kDebugMode, kIsWeb;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get_it/get_it.dart';
 import 'package:sqflite_common/sqlite_api.dart';
@@ -244,8 +244,29 @@ import 'package:school_app_flutter/core/database/tenant/tenant_scope.dart';
 import 'package:school_app_flutter/core/database/tenant/tenant_session.dart';
 import 'package:school_app_flutter/features/finance/presentation/bloc/ticket_printer/ticket_printer_settings_cubit.dart';
 import 'package:school_app_flutter/core/device/desktop_platform.dart';
+import 'package:package_info_plus/package_info_plus.dart';
+import 'package:school_app_flutter/features/desktop_update/desktop_update_di.dart';
+import 'package:school_app_flutter/features/desktop_update/domain/entities/app_version.dart';
 
 final GetIt getIt = GetIt.instance;
+
+/// La version de l'application, ou `null` (greffon absent, en test).
+Future<String?> _readPackageVersion() async {
+  try {
+    return (await PackageInfo.fromPlatform()).version;
+  } catch (_) {
+    return null;
+  }
+}
+
+/// `windows` ou `linux` sur un poste de bureau, sinon `null`.
+String? get desktopClientPlatform => kIsWeb
+    ? null
+    : switch (defaultTargetPlatform) {
+        TargetPlatform.windows => 'windows',
+        TargetPlatform.linux => 'linux',
+        _ => null,
+      };
 
 /// Nom d'instance du `Dio` **nu** (sans intercepteur d'auth/refresh) : partagé
 /// par le refresher et par le rejeu de requête, pour éviter toute ré-entrance.
@@ -287,6 +308,26 @@ Future<void> configureDependencies({
 
   final resolvedEnvConfig = envConfig ?? EnvConfig.fromDartDefines();
   getIt.registerLazySingleton<EnvConfig>(() => resolvedEnvConfig);
+
+  // Poste de bureau : sa version voyage sur chaque appel, et la mise à jour
+  // automatique s'enregistre quand le poste est une build livrée.
+  final packageVersion = await _readPackageVersion();
+  final clientPlatform = desktopClientPlatform;
+  final clientVersion = AppVersion.tryParse(packageVersion);
+  if (clientPlatform != null && clientVersion != null) {
+    configureClientHeaders({
+      'X-Client-Version': '$clientVersion',
+      'X-Client-Platform': clientPlatform,
+    });
+  }
+  final desktopUpdate = DesktopUpdateContext.resolve(
+    env: resolvedEnvConfig,
+    packageVersion: packageVersion,
+  );
+  if (desktopUpdate != null) {
+    getIt.registerSingleton<DesktopUpdateContext>(desktopUpdate);
+    registerDesktopUpdate(getIt, desktopUpdate);
+  }
 
   // Dio **nu** (aucun intercepteur d'auth/refresh) : sert au refresh token et
   // au rejeu de la requête d'origine, sans ré-entrance (ADR-010 §7.2).

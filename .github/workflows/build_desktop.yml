@@ -22,6 +22,10 @@ on:
         description: 'Tag SemVer (ex: v1.2.3) — obligatoire en prod, remplace la version du pubspec en dev/staging'
         required: false
         type: string
+      release_notes:
+        description: 'Notes de version (français, 4000 caractères max) — à défaut, titres des PR fusionnées depuis la version précédente du canal'
+        required: false
+        type: string
 
 jobs:
   # ─────────────────────────────────────────────────────────────────
@@ -193,3 +197,57 @@ jobs:
           name: windows-x64-${{ inputs.environment }}-${{ github.sha }}
           path: build/dist/*.exe
           retention-days: 30
+
+  # ─────────────────────────────────────────────────────────────────
+  # Job 4 — Publication et enregistrement de la mise à jour
+  # ─────────────────────────────────────────────────────────────────
+  # Staging et prod seulement, et seulement avec un tag : sans tag, la version
+  # staging retombe sur celle du pubspec et n'identifie pas le build.
+  # Release GitHub `desktop-<env>-v<version>` + fiche signée Ed25519 par
+  # plateforme, enregistrée sur le serveur : c'est elle que les postes
+  # installés interrogent pour se mettre à jour.
+  publish:
+    name: Publish desktop update (${{ inputs.environment }})
+    needs: [resolve-config, build-linux, build-windows]
+    if: ${{ (inputs.environment == 'staging' || inputs.environment == 'prod') && inputs.version_tag != '' }}
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    # Deux publications du même canal ne se croisent jamais : la seconde
+    # attend, puis retrouve la release et ses empreintes.
+    concurrency:
+      group: desktop-publish-${{ inputs.environment }}
+      cancel-in-progress: false
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          # Historique et tags complets : les notes partent du tag
+          # `desktop-<env>-v*` précédent.
+          fetch-depth: 0
+          fetch-tags: true
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v5
+        with:
+          pattern: '*-x64-${{ inputs.environment }}-${{ github.sha }}'
+          path: build/release-artifacts
+
+      - name: Publish release and register update
+        env:
+          APP_ENV: ${{ inputs.environment }}
+          BUILD_NAME: ${{ needs.resolve-config.outputs.build_name }}
+          ARTIFACTS_DIR: build/release-artifacts
+          RELEASE_NOTES: ${{ inputs.release_notes }}
+          GH_TOKEN: ${{ github.token }}
+          STAGING_API_BASE_URL: ${{ secrets.STAGING_API_BASE_URL }}
+          PROD_API_BASE_URL: ${{ secrets.PROD_API_BASE_URL }}
+          APP_RELEASES_TOKEN: ${{ secrets.APP_RELEASES_TOKEN }}
+          DESKTOP_UPDATE_SIGNING_KEY: ${{ secrets.DESKTOP_UPDATE_SIGNING_KEY }}
+        run: |
+          case "$APP_ENV" in
+            staging) API_BASE_URL="$STAGING_API_BASE_URL" ;;
+            prod)    API_BASE_URL="$PROD_API_BASE_URL" ;;
+          esac
+          export API_BASE_URL
+          bash scripts/release/publish_desktop_release.sh
