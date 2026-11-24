@@ -225,4 +225,49 @@ void main() {
       StatutSaisieEvaluation.unknown,
     );
   });
+
+  group('intitulés des colonnes', () {
+    Map<String, dynamic> periode(Map<String, dynamic> json) =>
+        (json['periodes'] as List).first as Map<String, dynamic>;
+
+    test('serveur ancien : ni nom ni avis sur l\'examen', () {
+      final entity = CoursNotationDetailModel.fromJson(buildJson()).toEntity();
+
+      final p = entity.periodes.single;
+      expect(p.intituleExamen.exists, isTrue);
+      expect(p.intituleExamen.intitule, isNull);
+      expect(p.sousPeriodes.single.intitule, isNull);
+    });
+
+    test('les noms de la grille', () {
+      final json = buildJson();
+      final sp =
+          (periode(json)['sousPeriodes'] as List).first as Map<String, dynamic>;
+      sp['libelle'] = 'Étape 2';
+      sp['libelleCourt'] = 'É2';
+      periode(json)['intituleExamen'] = {
+        'libelle': 'Examen',
+        'libelleCourt': 'Exam.',
+      };
+
+      final p = CoursNotationDetailModel.fromJson(
+        json,
+      ).toEntity().periodes.single;
+
+      expect(p.sousPeriodes.single.intitule?.libelle, 'Étape 2');
+      expect(p.intituleExamen.exists, isTrue);
+      expect(p.intituleExamen.intitule?.libelle, 'Examen');
+    });
+
+    test('intituleExamen à null : le cours n\'a pas d\'examen', () {
+      final json = buildJson();
+      periode(json)['intituleExamen'] = null;
+
+      final p = CoursNotationDetailModel.fromJson(
+        json,
+      ).toEntity().periodes.single;
+
+      expect(p.intituleExamen.exists, isFalse);
+    });
+  });
 }

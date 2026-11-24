@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/features/academics/presentation/helpers/cours_notation_labels.dart';
 import 'package:school_app_flutter/core/components/cards/eteelo_chip.dart';
 import 'package:school_app_flutter/core/components/status/status_badge.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_colors.dart';
@@ -43,7 +44,9 @@ class ChapitreHeaderCard extends StatelessWidget {
     final option = sousPeriodes
         .where((sp) => sp.id == chapitre.sousPeriodeId)
         .firstOrNull;
-    return option == null ? null : l10n.courseDetailPeriodLabel(option.ordre);
+    return option == null
+        ? null
+        : sousPeriodeLabel(l10n, option.ordre, option.intitule);
   }
 
   @override

@@ -1,3 +1,4 @@
+import 'package:school_app_flutter/features/academics/domain/entities/notation/intitule_colonne.dart';
 import 'package:school_app_flutter/features/academics/domain/entities/notation/type_evaluation.dart';
 import 'package:school_app_flutter/features/academics/presentation/helpers/academics_notation_visuals.dart';
 import 'package:school_app_flutter/features/academics/presentation/helpers/cours_notation_view_model.dart';
@@ -67,13 +68,22 @@ String noteRejectionLabel(AppLocalizations l10n, String reason) =>
       _ => l10n.noteRejectionGeneric,
     };
 
-/// Libellé d'un pas de la frise : « Période N » pour une sous-période (renommée
-/// côté UI), « Examen » pour l'examen de période.
+/// Libellé d'un pas de la frise : le nom que la grille lui donne (« Étape 3 »),
+/// sinon, d'un serveur plus ancien, « Période N » ou « Examen ».
 String bucketLabel(AppLocalizations l10n, BucketVm bucket) =>
+    bucket.intitule?.libelle ??
     switch (bucket.kind) {
       BucketKind.sousPeriode => l10n.courseDetailPeriodLabel(bucket.ordre),
       BucketKind.examen => l10n.courseDetailExamLabel,
     };
+
+/// Libellé d'une sous-période dans un choix (création d'évaluation, programme
+/// de cours) : le nom de la grille, sinon « Période N ».
+String sousPeriodeLabel(
+  AppLocalizations l10n,
+  int ordre,
+  IntituleColonne? intitule,
+) => intitule?.libelle ?? l10n.courseDetailPeriodLabel(ordre);
 
 String statutLabel(AppLocalizations l10n, BucketStatut statut) =>
     switch (statut) {

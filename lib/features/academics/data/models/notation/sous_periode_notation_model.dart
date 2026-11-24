@@ -2,6 +2,7 @@ import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:school_app_flutter/features/academics/data/models/notation/evaluation_groupe_model.dart';
 import 'package:school_app_flutter/features/academics/data/models/notation/moyenne_eleve_model.dart';
+import 'package:school_app_flutter/features/academics/domain/entities/notation/intitule_colonne.dart';
 import 'package:school_app_flutter/features/academics/domain/entities/notation/sous_periode_notation.dart';
 import 'package:school_app_flutter/features/academics/domain/entities/notation/statut_periode.dart';
 
@@ -20,6 +21,11 @@ class SousPeriodeNotationModel extends Equatable {
   final List<MoyenneEleveModel> moyennesEleves;
   final List<EvaluationGroupeModel> evaluationsParType;
 
+  /// Le nom de la sous-période donné par la grille ; absents d'un serveur
+  /// ancien.
+  final String? libelle;
+  final String? libelleCourt;
+
   const SousPeriodeNotationModel({
     required this.sousPeriodeId,
     required this.ordre,
@@ -29,6 +35,8 @@ class SousPeriodeNotationModel extends Equatable {
     required this.nombreEleves50,
     required this.moyennesEleves,
     required this.evaluationsParType,
+    this.libelle,
+    this.libelleCourt,
   });
 
   factory SousPeriodeNotationModel.fromJson(Map<String, dynamic> json) =>
@@ -49,6 +57,7 @@ class SousPeriodeNotationModel extends Equatable {
     evaluationsParType: evaluationsParType
         .map((groupe) => groupe.toEntity())
         .toList(growable: false),
+    intitule: IntituleColonne.of(libelle, libelleCourt),
   );
 
   @override
@@ -61,5 +70,7 @@ class SousPeriodeNotationModel extends Equatable {
     nombreEleves50,
     moyennesEleves,
     evaluationsParType,
+    libelle,
+    libelleCourt,
   ];
 }

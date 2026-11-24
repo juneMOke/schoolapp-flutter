@@ -21,6 +21,8 @@ SousPeriodeNotationModel _$SousPeriodeNotationModelFromJson(
   evaluationsParType: (json['evaluationsParType'] as List<dynamic>)
       .map((e) => EvaluationGroupeModel.fromJson(e as Map<String, dynamic>))
       .toList(),
+  libelle: json['libelle'] as String?,
+  libelleCourt: json['libelleCourt'] as String?,
 );
 
 Map<String, dynamic> _$SousPeriodeNotationModelToJson(
@@ -36,4 +38,6 @@ Map<String, dynamic> _$SousPeriodeNotationModelToJson(
   'evaluationsParType': instance.evaluationsParType
       .map((e) => e.toJson())
       .toList(),
+  'libelle': instance.libelle,
+  'libelleCourt': instance.libelleCourt,
 };

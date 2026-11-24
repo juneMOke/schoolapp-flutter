@@ -2,6 +2,7 @@ import 'package:equatable/equatable.dart';
 import 'package:school_app_flutter/features/academics/domain/entities/notation/cours_notation_detail.dart';
 import 'package:school_app_flutter/features/academics/domain/entities/notation/evaluation_summary.dart';
 import 'package:school_app_flutter/features/academics/domain/entities/notation/examen_notation.dart';
+import 'package:school_app_flutter/features/academics/domain/entities/notation/intitule_colonne.dart';
 import 'package:school_app_flutter/features/academics/domain/entities/notation/moyenne_eleve.dart';
 import 'package:school_app_flutter/features/academics/domain/entities/notation/periode_notation.dart';
 import 'package:school_app_flutter/features/academics/domain/entities/notation/sous_periode_notation.dart';
@@ -151,9 +152,12 @@ class PeriodeVm extends Equatable {
     int effectif,
     PeriodeDecoupage decoupage,
   ) {
+    // Un cours sans examen sur cette période n'en montre pas, même si une
+    // évaluation EXAMEN traîne d'avant le changement de grille.
     final buckets = <BucketVm>[
       for (final sp in p.sousPeriodes) BucketVm._fromSousPeriode(sp, effectif),
-      if (p.examen != null) BucketVm._fromExamen(p.examen!, effectif),
+      if (p.examen != null && p.intituleExamen.exists)
+        BucketVm._fromExamen(p.examen!, effectif, p.intituleExamen.intitule),
     ];
     return PeriodeVm(
       id: p.periodeScolaireId,
@@ -195,6 +199,10 @@ class BucketVm extends Equatable {
   final int saisiesNotes;
   final int totalNotes;
 
+  /// Le nom que la grille donne au pas (« Étape 3 », « Examen ») ; `null`
+  /// d'un serveur plus ancien : l'écran garde le sien.
+  final IntituleColonne? intitule;
+
   const BucketVm({
     required this.key,
     required this.kind,
@@ -208,6 +216,7 @@ class BucketVm extends Equatable {
     required this.supportsReleve,
     required this.saisiesNotes,
     required this.totalNotes,
+    this.intitule,
   });
 
   int get evalCount => evaluations.length;
@@ -242,10 +251,15 @@ class BucketVm extends Equatable {
       supportsReleve: true,
       saisiesNotes: evals.fold(0, (s, e) => s + e.saisies),
       totalNotes: evals.length * effectif,
+      intitule: sp.intitule,
     );
   }
 
-  factory BucketVm._fromExamen(ExamenNotation e, int effectif) {
+  factory BucketVm._fromExamen(
+    ExamenNotation e,
+    int effectif,
+    IntituleColonne? intitule,
+  ) {
     final eval = EvalVm._fromExamen(e, effectif);
     return BucketVm(
       key: 'exam:${e.evaluationId}',
@@ -264,6 +278,7 @@ class BucketVm extends Equatable {
       supportsReleve: false,
       saisiesNotes: eval.saisies,
       totalNotes: effectif,
+      intitule: intitule,
     );
   }
 
@@ -281,6 +296,7 @@ class BucketVm extends Equatable {
     supportsReleve,
     saisiesNotes,
     totalNotes,
+    intitule,
   ];
 }
 

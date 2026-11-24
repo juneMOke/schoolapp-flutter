@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/features/academics/presentation/helpers/cours_notation_labels.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_select_input.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_text_input.dart';
@@ -38,7 +39,7 @@ class ChapitrePlanningFields extends StatelessWidget {
         for (final option in sousPeriodes)
           EteeloSelectItem<String?>(
             value: option.id,
-            label: l10n.courseDetailPeriodLabel(option.ordre),
+            label: sousPeriodeLabel(l10n, option.ordre, option.intitule),
           ),
       ],
       onChanged: (value) {
