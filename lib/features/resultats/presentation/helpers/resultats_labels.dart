@@ -1,6 +1,7 @@
 import 'package:school_app_flutter/features/classes/domain/entities/classroom_member.dart';
 import 'package:school_app_flutter/features/resultats/domain/entities/decoupage.dart';
 import 'package:school_app_flutter/features/resultats/domain/entities/periode_scolaire.dart';
+import 'package:school_app_flutter/features/resultats/domain/entities/sous_periode_colonne.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Libellés et formats localisés du module résultats (centralisés pour garder
@@ -28,9 +29,14 @@ String resultatsPeriodLong(AppLocalizations l10n, PeriodeScolaire periode) {
   };
 }
 
-/// Libellé d'une colonne sous-période de la table (« P1 », « P2 »…).
-String resultatsSubPeriodColumn(AppLocalizations l10n, int ordre) =>
-    l10n.resultatsSubPeriodColumn(ordre);
+/// Libellé d'une colonne sous-période de la table : le nom court donné par la
+/// grille (« É3 »), sinon « P1 », « P2 »… d'un serveur plus ancien.
+String resultatsSubPeriodColumn(
+  AppLocalizations l10n,
+  SousPeriodeColonne colonne,
+) =>
+    colonne.intitule?.libelleCourt ??
+    l10n.resultatsSubPeriodColumn(colonne.ordre);
 
 /// Genre localisé au singulier (« Garçon » / « Fille » / « Autre »).
 String resultatsGenderLabel(

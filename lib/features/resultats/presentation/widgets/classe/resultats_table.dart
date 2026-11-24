@@ -123,7 +123,7 @@ class _ResultatsTableState extends State<ResultatsTable> {
               child: _SortHeader(
                 label: resultatsSubPeriodColumn(
                   l10n,
-                  widget.resultats.sousPeriodes[i].ordre,
+                  widget.resultats.sousPeriodes[i],
                 ),
                 alignEnd: true,
                 active:
