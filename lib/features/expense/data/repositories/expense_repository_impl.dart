@@ -238,6 +238,7 @@ class ExpenseRepositoryImpl implements ExpenseRepository {
             actorName: actorName,
             at: now,
             reason: body,
+            mode: current.mode,
           ),
           // La première retenue est connue de la tablette dès le paiement :
           // la Paie projette l'avance sans attendre l'accusé.

@@ -18506,6 +18506,42 @@ abstract class AppLocalizations {
   /// **'Message added to the thread for {name}.'**
   String expenseToastCommented(String name);
 
+  /// No description provided for @expenseGestureVisa.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign off'**
+  String get expenseGestureVisa;
+
+  /// No description provided for @expenseGestureFlag.
+  ///
+  /// In en, this message translates to:
+  /// **'Flag'**
+  String get expenseGestureFlag;
+
+  /// No description provided for @expenseGestureCancelDeclaration.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel the declaration'**
+  String get expenseGestureCancelDeclaration;
+
+  /// No description provided for @expenseToastVisaed.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} signed off.'**
+  String expenseToastVisaed(String name);
+
+  /// No description provided for @expenseToastFlagged.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} flagged.'**
+  String expenseToastFlagged(String name);
+
+  /// No description provided for @expenseToastDeclarationCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Declaration {name} cancelled.'**
+  String expenseToastDeclarationCancelled(String name);
+
   /// No description provided for @expenseGestureRefused.
   ///
   /// In en, this message translates to:

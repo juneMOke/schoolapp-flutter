@@ -11838,6 +11838,30 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
+  String get expenseGestureVisa => 'Viser';
+
+  @override
+  String get expenseGestureFlag => 'Signaler';
+
+  @override
+  String get expenseGestureCancelDeclaration => 'Annuler la déclaration';
+
+  @override
+  String expenseToastVisaed(String name) {
+    return '$name est visée.';
+  }
+
+  @override
+  String expenseToastFlagged(String name) {
+    return '$name est signalée.';
+  }
+
+  @override
+  String expenseToastDeclarationCancelled(String name) {
+    return 'La déclaration $name est annulée.';
+  }
+
+  @override
   String get expenseGestureRefused =>
       'Ce geste n\'est plus possible sur cette demande : son état a changé.';
 

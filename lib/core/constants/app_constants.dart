@@ -1259,6 +1259,14 @@ class AppConstants {
       '/api/v1/sync/expenses/{expenseId}/payment';
   static const String syncExpenseReopenEndpoint =
       '/api/v1/sync/expenses/{expenseId}/reopen';
+
+  /// Viser une déclaration — `expense.decide` (v3).
+  static const String syncExpenseVisaEndpoint =
+      '/api/v1/sync/expenses/{expenseId}/visa';
+
+  /// Signaler une déclaration, motif obligatoire — `expense.decide` (v3).
+  static const String syncExpenseFlagEndpoint =
+      '/api/v1/sync/expenses/{expenseId}/flag';
   static const String syncExpenseRetractionEndpoint =
       '/api/v1/sync/expenses/{expenseId}/retraction';
   static const String syncExpenseResubmitEndpoint =

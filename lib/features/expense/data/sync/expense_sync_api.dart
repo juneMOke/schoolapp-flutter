@@ -63,7 +63,25 @@ abstract class ExpenseSyncApi {
     @Body() Map<String, dynamic> body,
   );
 
+  /// Viser une déclaration — `expense.decide` (v3). Terminal.
+  @POST(AppConstants.syncExpenseVisaEndpoint)
+  Future<ExpenseSyncResponseDto> visaExpense(
+    @Extras() Map<String, dynamic> extras,
+    @Path('expenseId') String expenseId,
+    @Body() Map<String, dynamic> body,
+  );
+
+  /// Signaler une déclaration — `expense.decide`, motif dans `message.body`.
+  @POST(AppConstants.syncExpenseFlagEndpoint)
+  Future<ExpenseSyncResponseDto> flagExpense(
+    @Extras() Map<String, dynamic> extras,
+    @Path('expenseId') String expenseId,
+    @Body() Map<String, dynamic> body,
+  );
+
   /// Annuler une décision — `expense.reopen` ; relances remises à zéro.
+  /// Sur une déclaration, l'annule (v3) : sortie de caisse défaite,
+  /// `RETRACTED`, visa effacé.
   @POST(AppConstants.syncExpenseReopenEndpoint)
   Future<ExpenseSyncResponseDto> reopenExpense(
     @Extras() Map<String, dynamic> extras,

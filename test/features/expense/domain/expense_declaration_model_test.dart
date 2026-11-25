@@ -106,13 +106,18 @@ void main() {
       visaStatus: ExpenseVisaStatus.pending,
     );
 
-    test('payée : commenter et annuler, rien du circuit', () {
+    test('payée : commenter, annuler, viser, signaler — rien du circuit', () {
       expect(
         ExpenseGesturePolicy.offeredOn(
           declared(ExpenseStatus.paid),
           accountId: 'u-moi',
         ).toSet(),
-        {ExpenseGesture.comment, ExpenseGesture.reopen},
+        {
+          ExpenseGesture.comment,
+          ExpenseGesture.reopen,
+          ExpenseGesture.visa,
+          ExpenseGesture.flag,
+        },
       );
     });
 

@@ -14,6 +14,16 @@ import 'package:school_app_flutter/core/storage/encrypted_blob/blob_key_service.
 import 'package:school_app_flutter/core/storage/encrypted_blob/encrypted_blob_store.dart';
 import 'package:school_app_flutter/features/expense/data/local/expense_declaration_dao.dart';
 import 'package:school_app_flutter/features/expense/data/local/expense_message_dao.dart';
+import 'package:school_app_flutter/features/expense/data/local/expense_message_local_model.dart';
+import 'package:school_app_flutter/features/expense/data/local/expense_sync_dao.dart';
+import 'package:school_app_flutter/features/expense/data/local/expense_write_dao.dart';
+import 'package:school_app_flutter/features/expense/data/sync/expense_gesture_outbox_handler.dart';
+import 'package:school_app_flutter/features/expense/data/sync/expense_gesture_payload.dart';
+import 'package:school_app_flutter/features/expense/data/sync/expense_sync_api.dart';
+import 'package:school_app_flutter/core/offline/outbox_entry.dart';
+import 'package:school_app_flutter/core/offline/sync_state.dart';
+import 'dart:convert';
+import 'package:school_app_flutter/features/expense/domain/entities/expense_gesture.dart';
 import 'package:school_app_flutter/features/expense/data/local/expense_read_dao.dart';
 import 'package:school_app_flutter/features/expense/data/local/expense_type_dao.dart';
 import 'package:school_app_flutter/features/expense/data/repositories/expense_declaration_repository_impl.dart';
@@ -35,6 +45,8 @@ import '../../../../helpers/permission_denial.dart';
 import '../../../offline_full_db.dart';
 
 class _MockApi extends Mock implements ExpenseDeclarationApi {}
+
+class _MockSyncApi extends Mock implements ExpenseSyncApi {}
 
 class _UuidIds implements IdGenerator {
   @override
@@ -441,4 +453,89 @@ void main() {
       );
     });
   });
+
+  /// Un geste écrit après la déclaration, comme le dépôt l'écrirait.
+  Future<OutboxEntry> gesture(
+    Expense expense,
+    ExpenseGesture g, {
+    required DateTime at,
+  }) async {
+    const messageId = 'm-geste';
+    final payload = ExpenseGesturePayload(
+      expenseId: expense.id,
+      gesture: g,
+      messageId: messageId,
+      body: '',
+      decidedAt: at.toIso8601String(),
+      authorId: 'u-1',
+    );
+    final entry = OutboxEntry(
+      id: ExpenseWriteDao.gestureEntryId(messageId),
+      aggregateType: ExpenseWriteDao.gestureAggregateType,
+      aggregateId: expense.id,
+      operation: OutboxOperation.create,
+      payload: jsonEncode(payload.toJson()),
+      schoolId: 'school-1',
+      createdAt: at.millisecondsSinceEpoch,
+    );
+    await ExpenseMessageDao(db).appendGesture(
+      ExpenseMessageLocalModel.at(
+        at,
+        id: messageId,
+        schoolId: 'school-1',
+        expenseId: expense.id,
+        body: '',
+        act: g.act,
+        authorId: 'u-1',
+      ),
+      entry: entry,
+    );
+    return entry;
+  }
+
+  test('un visa attend la déclaration qui le précède (F38)', () async {
+    final expense = await declare();
+    final entry = await gesture(
+      expense,
+      ExpenseGesture.visa,
+      at: now.add(const Duration(minutes: 1)),
+    );
+    final syncApi = _MockSyncApi();
+
+    final result = await ExpenseGestureOutboxHandler(
+      api: syncApi,
+      dao: ExpenseSyncDao(db),
+      messages: ExpenseMessageDao(db),
+      currentUser: CurrentUserContext()..set('u-1', schoolId: 'school-1'),
+      extras: const {},
+    ).dispatch(entry);
+
+    expect(result.outcome, OutboxDispatchOutcome.blocked);
+    verifyZeroInteractions(syncApi);
+  });
+
+  test(
+    'une annulation en espèces pas encore partie retient la clôture',
+    () async {
+      final expense = await declare();
+      // La déclaration est partie et accusée ; seule l'annulation attend.
+      await OutboxDao(db).markAcked(ExpenseDeclarationDao.entryId(expense.id));
+      await db.update(
+        'expense_messages',
+        {'sync_status': ExpenseSyncState.synced.dbValue},
+        where: 'expense_id = ?',
+        whereArgs: [expense.id],
+      );
+      final probe = CashPendingProbeSql(db);
+      expect(await probe.pendingFor(TreasuryCurrency.usd), 0);
+
+      await gesture(
+        expense,
+        ExpenseGesture.reopen,
+        at: now.add(const Duration(minutes: 1)),
+      );
+
+      expect(await probe.pendingFor(TreasuryCurrency.usd), 1);
+    },
+  );
 }

@@ -2,6 +2,8 @@ import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get_it/get_it.dart';
 import 'package:school_app_flutter/core/constants/app_constants.dart';
+import 'package:school_app_flutter/core/money/cash_closure_reader.dart';
+import 'package:school_app_flutter/features/expense/domain/services/expense_declaration_cancellation.dart';
 import 'package:school_app_flutter/core/storage/encrypted_blob/blob_key_service.dart';
 import 'package:school_app_flutter/core/storage/encrypted_blob/encrypted_blob_store.dart';
 import 'package:school_app_flutter/core/storage/encrypted_blob/platform_blob_files.dart';
@@ -71,6 +73,15 @@ void registerExpenseDeclaration(GetIt getIt) {
       currentUser: getIt<CurrentUserContext>(),
       ids: getIt<IdGenerator>(),
       syncEngine: getIt<SyncEngine>(),
+    ),
+  );
+  // Résolu à l'appel, pas à l'enregistrement : la Trésorerie, qui tient les
+  // clôtures, s'enregistre après ce module.
+  getIt.registerFactory<ExpenseDeclarationCancellation>(
+    () => ExpenseDeclarationCancellation(
+      getIt.isRegistered<CashClosureReader>()
+          ? getIt<CashClosureReader>()
+          : null,
     ),
   );
   getIt.registerFactory<DeclareExpenseUseCase>(

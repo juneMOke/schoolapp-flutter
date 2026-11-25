@@ -39,6 +39,16 @@ abstract final class ExpenseGesturePolicy {
         ExpenseGesture.reopen => ExpenseTransitions.canCancelDeclaration(
           expense.status,
         ),
+        // Le visa ne se donne que sur une déclaration en vigueur. Visée,
+        // elle est terminale ; signalée, elle reste visable — c'est ce qui
+        // lève le signalement.
+        ExpenseGesture.visa =>
+          expense.status == ExpenseStatus.paid &&
+              (expense.visaStatus == ExpenseVisaStatus.pending ||
+                  expense.visaStatus == ExpenseVisaStatus.flagged),
+        ExpenseGesture.flag =>
+          expense.status == ExpenseStatus.paid &&
+              expense.visaStatus == ExpenseVisaStatus.pending,
         _ => false,
       };
 
@@ -68,6 +78,8 @@ abstract final class ExpenseGesturePolicy {
           ExpenseStatus.retracted,
         ),
         ExpenseGesture.remind => from == ExpenseStatus.pending,
+        // Le visa n'existe pas hors déclaration.
+        ExpenseGesture.visa || ExpenseGesture.flag => false,
         // Commenter n'est pas une transition : le fil reste ouvert à tous les
         // états, y compris une demande refusée que l'on veut comprendre.
         ExpenseGesture.comment => true,

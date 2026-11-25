@@ -81,6 +81,21 @@ abstract final class ExpenseErrorCodes {
   static const String advanceCurrencyMismatch = 'ADVANCE_CURRENCY_MISMATCH';
   static const String staffNotOnPayroll = 'STAFF_NOT_ON_PAYROLL';
 
+  // ── Déclaration et visa (v3) ─────────────────────────────────────────────
+  // Tous terminaux (F48). Les cinq premiers refusent la déclaration elle-même
+  // — elle passe « à régulariser » ; les autres refusent un geste sur elle.
+
+  static const String voucherRequired = 'VOUCHER_REQUIRED';
+  static const String voucherUnsupportedType = 'VOUCHER_UNSUPPORTED_TYPE';
+  static const String voucherTooLarge = 'VOUCHER_TOO_LARGE';
+  static const String documentTooLarge = 'DOCUMENT_TOO_LARGE';
+  static const String declarationNotAllowed = 'DECLARATION_NOT_ALLOWED';
+  static const String declarationDateMismatch = 'DECLARATION_DATE_MISMATCH';
+  static const String expenseModeLocked = 'EXPENSE_MODE_LOCKED';
+  static const String notADeclaration = 'NOT_A_DECLARATION';
+  static const String declarationCancelled = 'DECLARATION_CANCELLED';
+  static const String cashDayAlreadyClosed = 'CASH_DAY_ALREADY_CLOSED';
+
   /// Les refus qui viennent d'un **geste**, et non d'une saisie.
   ///
   /// La distinction se paie à deux endroits : l'écran ne conseille pas de
@@ -102,5 +117,8 @@ abstract final class ExpenseErrorCodes {
     invalidAdvance,
     advanceCurrencyMismatch,
     staffNotOnPayroll,
+    notADeclaration,
+    declarationCancelled,
+    cashDayAlreadyClosed,
   };
 }

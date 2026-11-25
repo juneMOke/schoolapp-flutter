@@ -93,33 +93,48 @@ bool expenseRejectionIsGesture(String? code) =>
 /// registre : celui-ci s'appelle « Supprimer » à l'écran (F25). Les
 /// intervertir ferait croire qu'on efface une demande qu'on ne fait que
 /// reprendre.
-String expenseGestureLabel(AppLocalizations l10n, ExpenseGesture gesture) =>
-    switch (gesture) {
-      ExpenseGesture.approve => l10n.expenseGestureApprove,
-      ExpenseGesture.refuse => l10n.expenseGestureRefuse,
-      ExpenseGesture.pay => l10n.expenseGesturePay,
-      ExpenseGesture.retract => l10n.expenseGestureRetract,
-      ExpenseGesture.resubmit => l10n.expenseGestureResubmit,
-      ExpenseGesture.reopen => l10n.expenseGestureReopen,
-      ExpenseGesture.remind => l10n.expenseGestureRemind,
-      ExpenseGesture.comment => l10n.expenseGestureComment,
-    };
+///
+/// [declaration] : sur une déclaration, « annuler la décision » est
+/// l'annulation de la déclaration elle-même (F43), et le dit.
+String expenseGestureLabel(
+  AppLocalizations l10n,
+  ExpenseGesture gesture, {
+  bool declaration = false,
+}) => declaration && gesture == ExpenseGesture.reopen
+    ? l10n.expenseGestureCancelDeclaration
+    : switch (gesture) {
+        ExpenseGesture.approve => l10n.expenseGestureApprove,
+        ExpenseGesture.refuse => l10n.expenseGestureRefuse,
+        ExpenseGesture.pay => l10n.expenseGesturePay,
+        ExpenseGesture.retract => l10n.expenseGestureRetract,
+        ExpenseGesture.resubmit => l10n.expenseGestureResubmit,
+        ExpenseGesture.reopen => l10n.expenseGestureReopen,
+        ExpenseGesture.remind => l10n.expenseGestureRemind,
+        ExpenseGesture.comment => l10n.expenseGestureComment,
+        ExpenseGesture.visa => l10n.expenseGestureVisa,
+        ExpenseGesture.flag => l10n.expenseGestureFlag,
+      };
 
 /// L'accusé d'un geste posé, nommant la demande.
 String expenseGestureToast(
   AppLocalizations l10n,
   ExpenseGesture gesture,
-  String name,
-) => switch (gesture) {
-  ExpenseGesture.approve => l10n.expenseToastApproved(name),
-  ExpenseGesture.refuse => l10n.expenseToastRefused(name),
-  ExpenseGesture.pay => l10n.expenseToastPaid(name),
-  ExpenseGesture.retract => l10n.expenseToastRetracted(name),
-  ExpenseGesture.resubmit => l10n.expenseToastResubmitted(name),
-  ExpenseGesture.reopen => l10n.expenseToastReopened(name),
-  ExpenseGesture.remind => l10n.expenseToastReminded(name),
-  ExpenseGesture.comment => l10n.expenseToastCommented(name),
-};
+  String name, {
+  bool declaration = false,
+}) => declaration && gesture == ExpenseGesture.reopen
+    ? l10n.expenseToastDeclarationCancelled(name)
+    : switch (gesture) {
+        ExpenseGesture.approve => l10n.expenseToastApproved(name),
+        ExpenseGesture.refuse => l10n.expenseToastRefused(name),
+        ExpenseGesture.pay => l10n.expenseToastPaid(name),
+        ExpenseGesture.retract => l10n.expenseToastRetracted(name),
+        ExpenseGesture.resubmit => l10n.expenseToastResubmitted(name),
+        ExpenseGesture.reopen => l10n.expenseToastReopened(name),
+        ExpenseGesture.remind => l10n.expenseToastReminded(name),
+        ExpenseGesture.comment => l10n.expenseToastCommented(name),
+        ExpenseGesture.visa => l10n.expenseToastVisaed(name),
+        ExpenseGesture.flag => l10n.expenseToastFlagged(name),
+      };
 
 /// Les trois lectures de la file.
 String expenseQueueSortLabel(AppLocalizations l10n, ExpenseQueueSort sort) =>

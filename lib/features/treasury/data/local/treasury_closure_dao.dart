@@ -1,5 +1,6 @@
 import 'package:school_app_flutter/core/database/schema/treasury_schema.dart';
 import 'package:school_app_flutter/core/helpers/school_time.dart';
+import 'package:school_app_flutter/core/money/cash_closure_reader.dart';
 import 'package:school_app_flutter/core/money/cash_register_lock.dart';
 import 'package:school_app_flutter/core/money/currency_code.dart';
 import 'package:school_app_flutter/core/offline/current_user_context.dart';
@@ -10,7 +11,7 @@ import 'package:sqflite_common/sqlite_api.dart';
 
 /// Les clôtures de caisse descendues (`treasury_closures`), et le verrou
 /// qu'elles posent sur les encaissements en espèces (R11).
-class TreasuryClosureDao implements CashRegisterLock {
+class TreasuryClosureDao implements CashRegisterLock, CashClosureReader {
   final DatabaseExecutor _db;
   final CurrentUserContext _currentUser;
   final DateTime Function() _now;
@@ -124,5 +125,25 @@ class TreasuryClosureDao implements CashRegisterLock {
       for (final row in rows)
         CurrencyCode.normalize(row['currency']! as String),
     };
+  }
+
+  @override
+  Future<bool> hasLiveClosureFrom(DateTime day, String currency) async {
+    final schoolId = _currentUser.schoolId;
+    if (schoolId == null || schoolId.isEmpty) return false;
+    final rows = await _db.query(
+      table,
+      columns: ['id'],
+      where:
+          'school_id = ? AND UPPER(currency) = ? AND cash_day >= ? '
+          'AND reopened_at IS NULL',
+      whereArgs: [
+        schoolId,
+        CurrencyCode.normalize(currency),
+        TreasuryWire.dayParam(day),
+      ],
+      limit: 1,
+    );
+    return rows.isNotEmpty;
   }
 }

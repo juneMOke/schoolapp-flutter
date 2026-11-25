@@ -46,6 +46,7 @@ class CashPendingProbeSql implements CashPendingProbe {
       _shopSales,
       _cashExpenses,
       _cashDeclarations,
+      _cashDeclarationCancellations,
       _cashPayroll,
       _cashPayrollCancellations,
       _cashAdvances,
@@ -132,6 +133,19 @@ class CashPendingProbeSql implements CashPendingProbe {
       WHERE e.mode = 'DECLARATION' AND e.funding_source = 'CASH'
         AND e.currency = ?
         AND ${_entryPending("'${ExpenseDeclarationDao.aggregateType}:' || e.id")}
+      ''';
+
+  /// (d'') Annulations de déclarations en espèces encore à envoyer : l'argent
+  /// revient au tiroir. Un geste a son entrée à lui (`EXPENSE_GESTURE:{message}`).
+  static String get _cashDeclarationCancellations =>
+      '''
+      SELECT COUNT(*) AS c
+      FROM expense_messages m
+      JOIN expenses e ON e.id = m.expense_id
+      WHERE m.act = 'REOPENING' AND m.sync_status = '$_pendingSync'
+        AND e.mode = 'DECLARATION' AND e.funding_source = 'CASH'
+        AND e.currency = ?
+        AND ${_entryPending("'${ExpenseWriteDao.gestureAggregateType}:' || m.id")}
       ''';
 
   /// (e) Versements de salaire en espèces encore à envoyer. Leur agrégat est

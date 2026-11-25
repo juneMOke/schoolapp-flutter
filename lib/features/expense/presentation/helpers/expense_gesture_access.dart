@@ -20,4 +20,5 @@ ModuleAccess expenseGestureAccess(ExpenseGesture gesture) => switch (gesture) {
   ExpenseGesture.resubmit ||
   ExpenseGesture.remind ||
   ExpenseGesture.comment => kExpenseWriteAccess,
+  ExpenseGesture.visa || ExpenseGesture.flag => kExpenseDecideAccess,
 };
