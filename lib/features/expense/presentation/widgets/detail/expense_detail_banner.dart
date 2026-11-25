@@ -67,7 +67,16 @@ class ExpenseDetailBanner extends StatelessWidget {
               ],
             ),
           ),
-          ExpenseStatusBadge(status: expense.status),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ExpenseStatusBadge.of(expense),
+              if (expense.isDeclaration && !expense.isCancelledDeclaration)
+                const SizedBox(height: AppDimensions.spacingXS),
+              ExpenseVisaBadge(expense: expense, small: false),
+            ],
+          ),
         ],
       ),
     );

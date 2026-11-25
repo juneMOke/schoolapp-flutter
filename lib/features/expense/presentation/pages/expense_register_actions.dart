@@ -147,6 +147,9 @@ class ExpenseRegisterActions {
       // Commenter est le seul geste qui ne ferme pas la fiche : on commente
       // en lisant. Il écrit puis relit le fil, et la fiche le réaffiche.
       onComment: (body) => _comment(expense, body),
+      declaration: expense.isDeclaration
+          ? ExpenseDeclarationActions(context).support
+          : null,
     );
     if (outcome == null || !context.mounted) return;
     // Un pull a pu redescendre la ligne pendant que la fiche était ouverte :
@@ -164,6 +167,13 @@ class ExpenseRegisterActions {
             await duplicate(latest);
           case ExpenseDetailChoice.edit:
             await edit(latest);
+          case ExpenseDetailChoice.redeclare:
+            await ExpenseDeclarationActions(context).redeclare(
+              latest,
+              types: _formTypes(latest.typeId),
+              rate: snapshot.usdToCdf,
+              recordedByName: _agentName(),
+            );
         }
       // « Corriger et renvoyer » est DEUX gestes dans l'ordre (F32) : le
       // contenu, puis le renvoi. La poussée de contenu ne transitionne
@@ -246,7 +256,12 @@ class ExpenseRegisterActions {
         _notifyLocalWrite();
         AppSnackBar.showSuccess(
           context,
-          expenseGestureToast(l10n, gesture, _name(expense)),
+          expenseGestureToast(
+            l10n,
+            gesture,
+            _name(expense),
+            declaration: expense.isDeclaration,
+          ),
         );
       },
     );

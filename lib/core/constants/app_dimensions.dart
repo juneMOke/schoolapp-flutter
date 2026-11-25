@@ -715,6 +715,10 @@ class AppDimensions {
   static const expenseFormTimeMinWidth = 140.0;
   static const expenseFormTimeMaxWidth = 180.0;
   static const expenseVoucherThumbHeight = 120.0;
+  // La photo du bon dans la fiche : le bon se lit sans zoom sur tablette.
+  static const expenseVoucherDetailHeight = 360.0;
+  // La vignette d'une ligne « À viser » : une cible de 48 dp et plus.
+  static const expenseVoucherQueueThumb = 56.0;
 
   // ── Ressources humaines — fichier du personnel ──
   /// Champ de recherche : il prend la place qui reste, jamais moins.

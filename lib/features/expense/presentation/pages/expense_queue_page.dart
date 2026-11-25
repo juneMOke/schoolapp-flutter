@@ -22,6 +22,8 @@ import 'package:school_app_flutter/features/expense/presentation/widgets/queue/e
 import 'package:school_app_flutter/features/expense/presentation/widgets/queue/expense_queue_list.dart';
 import 'package:school_app_flutter/features/expense/presentation/widgets/states/expense_queue_empty_state.dart';
 import 'package:school_app_flutter/features/expense/presentation/widgets/states/expense_results_error_state.dart';
+import 'package:school_app_flutter/features/expense/presentation/widgets/queue/expense_queue_tabs.dart';
+import 'package:school_app_flutter/features/expense/presentation/widgets/queue/expense_visa_queue_list.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Dépenses ▸ Validations — la file des demandes en attente.
@@ -69,17 +71,9 @@ class ExpenseQueueScreen extends StatelessWidget {
     }
     final actions = ExpenseQueueActions(context);
     final view = state.view;
-    return Column(
+    final requests = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        // Le repli dit à qui ne décide pas ce qu'il peut encore faire. Le
-        // taire laisserait croire à une file en lecture seule, alors que le
-        // demandeur y garde la main sur ses propres lignes.
-        PermissionGate.access(
-          kExpenseDecideAccess,
-          fallback: const _ReadOnlyNote(),
-          child: const SizedBox.shrink(),
-        ),
         ExpenseQueueKpiBand(view: view),
         const SizedBox(height: AppDimensions.spacingM),
         if (view.isEmpty)
@@ -129,6 +123,32 @@ class ExpenseQueueScreen extends StatelessWidget {
           onOpenRegister: () => openExpenseRegister(
             context,
             title: AppLocalizations.of(context)!.subMenuExpenseRegister,
+          ),
+        ),
+      ],
+    );
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        // Le repli dit à qui ne décide pas ce qu'il peut encore faire. Le
+        // taire laisserait croire à une file en lecture seule, alors que le
+        // demandeur y garde la main sur ses propres lignes.
+        PermissionGate.access(
+          kExpenseDecideAccess,
+          fallback: const _ReadOnlyNote(),
+          child: const SizedBox.shrink(),
+        ),
+        PermissionGate.access(
+          kExpenseDecideAccess,
+          fallback: requests,
+          child: ExpenseQueueTabs(
+            toVisaCount: view.toVisa.length,
+            requests: requests,
+            visa: ExpenseVisaQueueList(
+              expenses: view.toVisa,
+              typesById: state.snapshot.typesById,
+              onOpen: actions.open,
+            ),
           ),
         ),
       ],

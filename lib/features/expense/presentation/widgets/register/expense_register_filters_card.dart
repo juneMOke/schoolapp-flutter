@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/features/expense/presentation/widgets/register/expense_visa_filter.dart';
 import 'package:school_app_flutter/core/components/keyboard/page_action_shortcut.dart';
 import 'package:school_app_flutter/core/components/keyboard/search_shortcuts.dart';
 import 'package:school_app_flutter/core/auth/module_access_registry.dart';
@@ -36,6 +37,10 @@ class ExpenseRegisterFiltersCard extends StatefulWidget {
   final ValueChanged<String> onToggleType;
   final VoidCallback onClearTypes;
   final ValueChanged<ExpenseStatus?> onStatusChanged;
+
+  /// `null` : l'école n'a aucune déclaration, le filtre de visa n'a rien à
+  /// trier et ne s'affiche pas.
+  final ValueChanged<ExpenseVisaStatus?>? onVisaChanged;
   final ValueChanged<String> onTextChanged;
   final VoidCallback onCreate;
 
@@ -53,6 +58,7 @@ class ExpenseRegisterFiltersCard extends StatefulWidget {
     required this.onToggleType,
     required this.onClearTypes,
     required this.onStatusChanged,
+    this.onVisaChanged,
     required this.onTextChanged,
     required this.onCreate,
   });
@@ -142,6 +148,11 @@ class _ExpenseRegisterFiltersCardState
                 selected: widget.query.status,
                 onChanged: widget.onStatusChanged,
               ),
+              if (widget.onVisaChanged case final onVisa?)
+                ExpenseVisaFilter(
+                  selected: widget.query.visa,
+                  onChanged: onVisa,
+                ),
               ConstrainedBox(
                 constraints: const BoxConstraints(
                   maxWidth: AppDimensions.expenseFormDialogMaxWidth,

@@ -134,6 +134,9 @@ class ExpenseRegisterCubit extends Cubit<ExpenseRegisterState> {
     state.copyWith(query: state.query.withStatus(status), resetLimit: true),
   );
 
+  void setVisaFilter(ExpenseVisaStatus? visa) =>
+      emit(state.copyWith(query: state.query.withVisa(visa), resetLimit: true));
+
   void setText(String text) {
     if (text == state.query.text) return;
     emit(state.copyWith(query: state.query.withText(text), resetLimit: true));

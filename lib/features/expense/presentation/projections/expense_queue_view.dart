@@ -35,6 +35,11 @@ class ExpenseQueueView extends Equatable {
   /// Jours d'attente de la plus ancienne ; `0` quand la file est vide.
   final int oldestWaitDays;
 
+  /// Les déclarations qui attendent le visa (v3) — à viser ou signalées —,
+  /// de la plus ancienne sortie à la plus récente. Une déclaration est déjà
+  /// payée : elle n'entre jamais dans [pending].
+  final List<Expense> toVisa;
+
   const ExpenseQueueView({
     required this.pending,
     required this.approved,
@@ -43,6 +48,7 @@ class ExpenseQueueView extends Equatable {
     required this.overdue,
     required this.reminded,
     required this.oldestWaitDays,
+    this.toVisa = const [],
   });
 
   static const ExpenseQueueView empty = ExpenseQueueView(
@@ -63,9 +69,19 @@ class ExpenseQueueView extends Equatable {
     final reader = snapshot.usdReader;
     final pending = <Expense>[];
     final approved = <Expense>[];
+    final toVisa = <Expense>[];
     for (final expense in snapshot.expenses) {
       // Un retrait quitte le registre : il ne fait pas la queue non plus.
       if (expense.isWithdrawn) continue;
+      if (expense.isDeclaration) {
+        final visa = expense.visaStatus;
+        if (!expense.isCancelledDeclaration &&
+            (visa == ExpenseVisaStatus.pending ||
+                visa == ExpenseVisaStatus.flagged)) {
+          toVisa.add(expense);
+        }
+        continue;
+      }
       switch (expense.status) {
         case ExpenseStatus.pending:
           pending.add(expense);
@@ -98,6 +114,11 @@ class ExpenseQueueView extends Equatable {
       if (ExpenseWait.wasReminded(expense)) reminded++;
     }
     final ordered = ExpenseQueueOrder.apply(pending, sort, reader);
+    DateTime outAt(Expense e) => e.disbursedAt ?? e.expenseDate;
+    toVisa.sort((a, b) {
+      final byDate = outAt(a).compareTo(outAt(b));
+      return byDate != 0 ? byDate : a.id.compareTo(b.id);
+    });
     return ExpenseQueueView(
       pending: ordered,
       approved: approved,
@@ -111,6 +132,7 @@ class ExpenseQueueView extends Equatable {
         final days = ExpenseWait.daysWaiting(expense, today: today);
         return days > longest ? days : longest;
       }),
+      toVisa: toVisa,
     );
   }
 
@@ -125,5 +147,6 @@ class ExpenseQueueView extends Equatable {
     overdue,
     reminded,
     oldestWaitDays,
+    toVisa,
   ];
 }

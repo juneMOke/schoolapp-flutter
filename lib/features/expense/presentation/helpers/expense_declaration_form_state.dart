@@ -19,9 +19,21 @@ class ExpenseDeclarationFormState {
   CapturedDocument? voucher;
   final TextEditingController note = TextEditingController();
 
+  /// La déclaration refusée que celle-ci régularise (F45), ou `null`.
+  final String? replacing;
+
   ExpenseDeclarationFormState({required DateTime now})
     : day = SchoolTime.today(now),
-      time = _timeOf(SchoolTime.wallClock(now));
+      time = _timeOf(SchoolTime.wallClock(now)),
+      replacing = null;
+
+  /// Reprend une déclaration refusée : même heure, même photo, même note
+  /// — un nouvel identifiant à l'écriture.
+  ExpenseDeclarationFormState.redeclaring(ExpenseRedeclaration from)
+    : day = SchoolTime.today(from.disbursedAt),
+      time = _timeOf(SchoolTime.wallClock(from.disbursedAt)),
+      voucher = from.voucher,
+      replacing = from.expenseId;
 
   static TimeOfDay _timeOf(DateTime wall) =>
       TimeOfDay(hour: wall.hour, minute: wall.minute);
@@ -66,8 +78,25 @@ class ExpenseDeclarationFormState {
       voucherContentType: voucher.mimeType.value,
       visaOnDeclare: visaOnDeclare,
       recordedByName: content.recordedByName,
+      replacing: replacing,
     );
   }
 
   void dispose() => note.dispose();
+}
+
+/// Ce qu'une redéclaration reprend de la déclaration refusée (F45).
+class ExpenseRedeclaration {
+  final String expenseId;
+  final DateTime disbursedAt;
+
+  /// `null` quand la photo d'origine ne se relit plus : l'agent en prend une
+  /// autre, la déclaration refusée part quand même du registre.
+  final CapturedDocument? voucher;
+
+  const ExpenseRedeclaration({
+    required this.expenseId,
+    required this.disbursedAt,
+    this.voucher,
+  });
 }

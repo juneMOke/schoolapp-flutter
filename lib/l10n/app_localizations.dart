@@ -18668,6 +18668,168 @@ abstract class AppLocalizations {
   /// **'The declaration could not be saved on this device.'**
   String get expenseDeclareFailed;
 
+  /// No description provided for @expenseFlagTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Flag this declaration'**
+  String get expenseFlagTitle;
+
+  /// No description provided for @expenseFlagReasonLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason for the flag'**
+  String get expenseFlagReasonLabel;
+
+  /// No description provided for @expenseFlagReasonHint.
+  ///
+  /// In en, this message translates to:
+  /// **'What is wrong, for the cashier'**
+  String get expenseFlagReasonHint;
+
+  /// No description provided for @expenseFlagReasonMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'A reason is required to flag.'**
+  String get expenseFlagReasonMissing;
+
+  /// No description provided for @expenseFlagConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Flag'**
+  String get expenseFlagConfirm;
+
+  /// No description provided for @expenseFlagSuggestionQuote.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount above the quote'**
+  String get expenseFlagSuggestionQuote;
+
+  /// No description provided for @expenseFlagSuggestionVoucher.
+  ///
+  /// In en, this message translates to:
+  /// **'Voucher unreadable or incomplete'**
+  String get expenseFlagSuggestionVoucher;
+
+  /// No description provided for @expenseFlagSuggestionApproval.
+  ///
+  /// In en, this message translates to:
+  /// **'No approval given for this expense'**
+  String get expenseFlagSuggestionApproval;
+
+  /// No description provided for @expenseVisaPending.
+  ///
+  /// In en, this message translates to:
+  /// **'To sign off'**
+  String get expenseVisaPending;
+
+  /// No description provided for @expenseVisaVisaed.
+  ///
+  /// In en, this message translates to:
+  /// **'Signed off'**
+  String get expenseVisaVisaed;
+
+  /// No description provided for @expenseVisaFlagged.
+  ///
+  /// In en, this message translates to:
+  /// **'Flagged'**
+  String get expenseVisaFlagged;
+
+  /// No description provided for @expenseVisaFilterTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign-off'**
+  String get expenseVisaFilterTitle;
+
+  /// No description provided for @expenseVisaFilterAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get expenseVisaFilterAll;
+
+  /// No description provided for @expenseStatusCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelled'**
+  String get expenseStatusCancelled;
+
+  /// No description provided for @expenseSyncToRegularize.
+  ///
+  /// In en, this message translates to:
+  /// **'To regularise'**
+  String get expenseSyncToRegularize;
+
+  /// No description provided for @expenseVoucherMissingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No voucher photo'**
+  String get expenseVoucherMissingTitle;
+
+  /// No description provided for @expenseVoucherMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'The server has no photo for this declaration.'**
+  String get expenseVoucherMissing;
+
+  /// No description provided for @expenseVoucherPdf.
+  ///
+  /// In en, this message translates to:
+  /// **'Voucher as PDF'**
+  String get expenseVoucherPdf;
+
+  /// No description provided for @expenseVisaNeedsVoucher.
+  ///
+  /// In en, this message translates to:
+  /// **'The voucher photo must have been loaded on this tablet before signing off.'**
+  String get expenseVisaNeedsVoucher;
+
+  /// No description provided for @expenseFlaggedNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Flagged: {reason}'**
+  String expenseFlaggedNote(String reason);
+
+  /// No description provided for @expenseToRegularizeNote.
+  ///
+  /// In en, this message translates to:
+  /// **'The server refused this declaration: the money is out, but it is not recorded. Declare it again.'**
+  String get expenseToRegularizeNote;
+
+  /// No description provided for @expenseCancelBlockedNote.
+  ///
+  /// In en, this message translates to:
+  /// **'The cash day is closed: this outflow can no longer be cancelled here, it is corrected by a cash adjustment.'**
+  String get expenseCancelBlockedNote;
+
+  /// No description provided for @expenseActionRedeclare.
+  ///
+  /// In en, this message translates to:
+  /// **'Declare again'**
+  String get expenseActionRedeclare;
+
+  /// No description provided for @expenseQueueTabRequests.
+  ///
+  /// In en, this message translates to:
+  /// **'Requests'**
+  String get expenseQueueTabRequests;
+
+  /// No description provided for @expenseQueueTabVisa.
+  ///
+  /// In en, this message translates to:
+  /// **'To sign off'**
+  String get expenseQueueTabVisa;
+
+  /// No description provided for @expenseQueueVisaEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing to sign off'**
+  String get expenseQueueVisaEmptyTitle;
+
+  /// No description provided for @expenseQueueVisaEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Every declaration is signed off.'**
+  String get expenseQueueVisaEmpty;
+
   /// No description provided for @expenseGestureRefused.
   ///
   /// In en, this message translates to:

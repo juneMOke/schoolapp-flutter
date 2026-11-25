@@ -80,6 +80,11 @@ class ExpenseRegisterView extends StatelessWidget {
           onToggleType: cubit.toggleType,
           onClearTypes: cubit.clearTypes,
           onStatusChanged: cubit.setStatusFilter,
+          onVisaChanged:
+              state.snapshot.expenses.any((e) => e.isDeclaration) ||
+                  state.query.visa != null
+              ? cubit.setVisaFilter
+              : null,
           onTextChanged: cubit.setText,
           onCreate: actions.create,
         ),

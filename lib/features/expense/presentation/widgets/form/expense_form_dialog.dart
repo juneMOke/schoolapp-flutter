@@ -40,6 +40,7 @@ Future<ExpenseFormOutcome?> showExpenseFormDialog(
   VoidCallback? onStaffAdvance,
   ExpenseVoucherCapture? captureVoucher,
   bool visaOnDeclare = false,
+  ExpenseRedeclaration? redeclaration,
 }) => showEteeloAdaptiveDialog<ExpenseFormOutcome>(
   context: context,
   barrierDismissible: false,
@@ -53,6 +54,7 @@ Future<ExpenseFormOutcome?> showExpenseFormDialog(
     onStaffAdvance: onStaffAdvance,
     captureVoucher: captureVoucher,
     visaOnDeclare: visaOnDeclare,
+    redeclaration: redeclaration,
   ),
 );
 
@@ -80,6 +82,10 @@ class ExpenseFormDialog extends StatefulWidget {
   /// La session a `expense.decide` : la déclaration naîtra visée (F41).
   final bool visaOnDeclare;
 
+  /// Régulariser une déclaration refusée : le formulaire s'ouvre en
+  /// déclaration, prérempli (F45).
+  final ExpenseRedeclaration? redeclaration;
+
   const ExpenseFormDialog({
     super.key,
     required this.seed,
@@ -91,6 +97,7 @@ class ExpenseFormDialog extends StatefulWidget {
     this.onStaffAdvance,
     this.captureVoucher,
     this.visaOnDeclare = false,
+    this.redeclaration,
   });
 
   @override
@@ -99,13 +106,17 @@ class ExpenseFormDialog extends StatefulWidget {
 
 class _ExpenseFormDialogState extends State<ExpenseFormDialog> {
   late final _form = ExpenseFormModel(widget.seed, types: widget.types);
-  late final _declaration = ExpenseDeclarationFormState(now: DateTime.now());
+  late final _declaration = widget.redeclaration == null
+      ? ExpenseDeclarationFormState(now: DateTime.now())
+      : ExpenseDeclarationFormState.redeclaring(widget.redeclaration!);
   bool _touched = false;
 
   /// Le choix par défaut reste la demande d'autorisation : déclarer fait
   /// sortir l'argent sans accord dans l'application, c'est un geste qu'on
   /// choisit.
-  ExpenseMode _mode = ExpenseMode.authorization;
+  late ExpenseMode _mode = widget.redeclaration == null
+      ? ExpenseMode.authorization
+      : ExpenseMode.declaration;
 
   bool get _canDeclare => widget.captureVoucher != null && !widget.seed.isEdit;
 

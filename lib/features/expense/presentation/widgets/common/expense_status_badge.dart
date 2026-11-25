@@ -17,19 +17,34 @@ class ExpenseStatusBadge extends StatelessWidget {
   final ExpenseStatus status;
   final bool small;
 
+  /// Une déclaration annulée (F43) : `RETRACTED` se dit alors « Annulée »,
+  /// jamais « Retirée » — personne ne l'a reprise, la direction l'a défaite.
+  final bool cancelledDeclaration;
+
   const ExpenseStatusBadge({
     super.key,
     required this.status,
     this.small = false,
+    this.cancelledDeclaration = false,
   });
+
+  /// La pastille de [expense], déclaration comprise.
+  factory ExpenseStatusBadge.of(Expense expense, {bool small = false}) =>
+      ExpenseStatusBadge(
+        status: expense.status,
+        small: small,
+        cancelledDeclaration: expense.isCancelledDeclaration,
+      );
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final visuals = expenseStatusVisuals(status);
     return _Pill(
-      icon: visuals.icon,
-      label: expenseStatusLabel(l10n, status),
+      icon: cancelledDeclaration ? Icons.block : visuals.icon,
+      label: cancelledDeclaration
+          ? l10n.expenseStatusCancelled
+          : expenseStatusLabel(l10n, status),
       color: visuals.color,
       soft: visuals.soft,
       border: visuals.border,
@@ -53,7 +68,11 @@ class ExpenseSyncBadge extends StatelessWidget {
     if (expense.isRejected) {
       return _Pill(
         icon: Icons.error_outline,
-        label: l10n.expenseSyncRejected,
+        // Une déclaration refusée ne se corrige pas, elle se régularise :
+        // l'argent est sorti (F45).
+        label: expense.isDeclarationToRegularize
+            ? l10n.expenseSyncToRegularize
+            : l10n.expenseSyncRejected,
         color: AppColors.error,
         soft: AppColors.financeDetailDangerSoft,
         border: AppColors.feeStatusDueBorder,
@@ -71,6 +90,51 @@ class ExpenseSyncBadge extends StatelessWidget {
       );
     }
     return const SizedBox.shrink();
+  }
+}
+
+/// Le **visa** d'une déclaration (v3) : à viser, visée, signalée. Le second
+/// axe, montré à côté de la pastille d'état et jamais à sa place. Rien hors
+/// déclaration, ni sur une déclaration annulée.
+class ExpenseVisaBadge extends StatelessWidget {
+  final Expense expense;
+  final bool small;
+
+  const ExpenseVisaBadge({super.key, required this.expense, this.small = true});
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final visa = expense.visaStatus;
+    if (visa == null || expense.isCancelledDeclaration) {
+      return const SizedBox.shrink();
+    }
+    return switch (visa) {
+      ExpenseVisaStatus.pending => _Pill(
+        icon: Icons.pending_actions_outlined,
+        label: l10n.expenseVisaPending,
+        color: AppColors.feeStatusPartialInk,
+        soft: AppColors.feeStatusPartialSoft,
+        border: AppColors.feeStatusPartialBorder,
+        small: small,
+      ),
+      ExpenseVisaStatus.visaed => _Pill(
+        icon: Icons.verified_outlined,
+        label: l10n.expenseVisaVisaed,
+        color: AppColors.bleuArdoise,
+        soft: AppColors.bleuArdoiseSoft,
+        border: AppColors.border,
+        small: small,
+      ),
+      ExpenseVisaStatus.flagged => _Pill(
+        icon: Icons.flag_outlined,
+        label: l10n.expenseVisaFlagged,
+        color: AppColors.feeStatusDue,
+        soft: AppColors.feeStatusDueSoft,
+        border: AppColors.feeStatusDueBorder,
+        small: small,
+      ),
+    };
   }
 }
 

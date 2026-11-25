@@ -11,7 +11,8 @@ sealed class ExpenseDetailOutcome {
 }
 
 /// Les gestes d'écran de la V1 : ils ne touchent pas au circuit.
-enum ExpenseDetailChoice { withdraw, duplicate, edit }
+/// [redeclare] : régulariser une déclaration refusée (F45).
+enum ExpenseDetailChoice { withdraw, duplicate, edit, redeclare }
 
 final class ExpenseDetailShortcut extends ExpenseDetailOutcome {
   final ExpenseDetailChoice choice;

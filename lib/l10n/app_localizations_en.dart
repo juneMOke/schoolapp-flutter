@@ -11835,6 +11835,94 @@ class AppLocalizationsEn extends AppLocalizations {
       'The declaration could not be saved on this device.';
 
   @override
+  String get expenseFlagTitle => 'Flag this declaration';
+
+  @override
+  String get expenseFlagReasonLabel => 'Reason for the flag';
+
+  @override
+  String get expenseFlagReasonHint => 'What is wrong, for the cashier';
+
+  @override
+  String get expenseFlagReasonMissing => 'A reason is required to flag.';
+
+  @override
+  String get expenseFlagConfirm => 'Flag';
+
+  @override
+  String get expenseFlagSuggestionQuote => 'Amount above the quote';
+
+  @override
+  String get expenseFlagSuggestionVoucher => 'Voucher unreadable or incomplete';
+
+  @override
+  String get expenseFlagSuggestionApproval =>
+      'No approval given for this expense';
+
+  @override
+  String get expenseVisaPending => 'To sign off';
+
+  @override
+  String get expenseVisaVisaed => 'Signed off';
+
+  @override
+  String get expenseVisaFlagged => 'Flagged';
+
+  @override
+  String get expenseVisaFilterTitle => 'Sign-off';
+
+  @override
+  String get expenseVisaFilterAll => 'All';
+
+  @override
+  String get expenseStatusCancelled => 'Cancelled';
+
+  @override
+  String get expenseSyncToRegularize => 'To regularise';
+
+  @override
+  String get expenseVoucherMissingTitle => 'No voucher photo';
+
+  @override
+  String get expenseVoucherMissing =>
+      'The server has no photo for this declaration.';
+
+  @override
+  String get expenseVoucherPdf => 'Voucher as PDF';
+
+  @override
+  String get expenseVisaNeedsVoucher =>
+      'The voucher photo must have been loaded on this tablet before signing off.';
+
+  @override
+  String expenseFlaggedNote(String reason) {
+    return 'Flagged: $reason';
+  }
+
+  @override
+  String get expenseToRegularizeNote =>
+      'The server refused this declaration: the money is out, but it is not recorded. Declare it again.';
+
+  @override
+  String get expenseCancelBlockedNote =>
+      'The cash day is closed: this outflow can no longer be cancelled here, it is corrected by a cash adjustment.';
+
+  @override
+  String get expenseActionRedeclare => 'Declare again';
+
+  @override
+  String get expenseQueueTabRequests => 'Requests';
+
+  @override
+  String get expenseQueueTabVisa => 'To sign off';
+
+  @override
+  String get expenseQueueVisaEmptyTitle => 'Nothing to sign off';
+
+  @override
+  String get expenseQueueVisaEmpty => 'Every declaration is signed off.';
+
+  @override
   String get expenseGestureRefused =>
       'That gesture is no longer possible on this request: its state has changed.';
 

@@ -14,6 +14,7 @@ import 'package:school_app_flutter/features/expense/presentation/helpers/expense
 import 'package:school_app_flutter/features/expense/presentation/helpers/expense_money_text.dart';
 import 'package:school_app_flutter/features/expense/presentation/widgets/detail/expense_detail_dialog.dart';
 import 'package:school_app_flutter/features/expense/presentation/widgets/detail/expense_thread_composer.dart';
+import 'package:school_app_flutter/features/expense/presentation/pages/expense_declaration_actions.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Les gestes de la file, orchestrés.
@@ -47,10 +48,13 @@ class ExpenseQueueActions {
       // restent au registre, qui est le seul écran d'écriture de contenu.
       allowShortcuts: false,
       onComment: (body) => _comment(expense, body),
+      declaration: expense.isDeclaration
+          ? ExpenseDeclarationActions(context).support
+          : null,
     );
     if (outcome == null || !context.mounted) return;
     // La demande a pu bouger pendant que la fiche était ouverte.
-    final latest = cubit.state.view.pending.firstWhere(
+    final latest = cubit.state.snapshot.expenses.firstWhere(
       (e) => e.id == expense.id,
       orElse: () => expense,
     );
@@ -100,7 +104,12 @@ class ExpenseQueueActions {
         _notifyLocalWrite();
         AppSnackBar.showSuccess(
           context,
-          expenseGestureToast(l10n, gesture, _name(expense)),
+          expenseGestureToast(
+            l10n,
+            gesture,
+            _name(expense),
+            declaration: expense.isDeclaration,
+          ),
         );
       },
     );

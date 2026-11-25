@@ -8,7 +8,16 @@ import 'package:school_app_flutter/core/components/capture/document_capture_flow
 import 'package:school_app_flutter/core/widgets/app_snack_bar.dart';
 import 'package:school_app_flutter/features/auth/presentation/widgets/permission_gate.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense.dart';
+import 'package:school_app_flutter/core/capture/captured_document.dart';
+import 'package:school_app_flutter/core/money/exchange_rate.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_declaration_draft.dart';
+import 'package:school_app_flutter/features/expense/domain/entities/expense_type.dart';
+import 'package:school_app_flutter/features/expense/domain/repositories/expense_voucher_repository.dart';
+import 'package:school_app_flutter/features/expense/domain/services/expense_declaration_cancellation.dart';
+import 'package:school_app_flutter/features/expense/presentation/helpers/expense_declaration_form_state.dart';
+import 'package:school_app_flutter/features/expense/presentation/helpers/expense_declaration_support.dart';
+import 'package:school_app_flutter/features/expense/presentation/helpers/expense_form_outcome.dart';
+import 'package:school_app_flutter/features/expense/presentation/helpers/expense_form_seed.dart';
 import 'package:school_app_flutter/features/expense/presentation/bloc/expense_register_cubit.dart';
 import 'package:school_app_flutter/features/expense/presentation/helpers/expense_money_text.dart';
 import 'package:school_app_flutter/features/expense/presentation/widgets/form/expense_form_dialog.dart';
@@ -68,5 +77,69 @@ class ExpenseDeclarationActions {
         return declared;
       },
     );
+  }
+
+  /// Ce que la fiche d'une déclaration demande ; `null` si le module v3
+  /// n'est pas monté (tests, harnais).
+  ExpenseDeclarationSupport? get support {
+    final getIt = GetIt.instance;
+    if (!getIt.isRegistered<ExpenseVoucherRepository>() ||
+        !getIt.isRegistered<ExpenseDeclarationCancellation>()) {
+      return null;
+    }
+    final vouchers = getIt<ExpenseVoucherRepository>();
+    final cancellation = getIt<ExpenseDeclarationCancellation>();
+    return ExpenseDeclarationSupport(
+      loadVoucher: vouchers.voucherOf,
+      canCancel: cancellation.canCancel,
+      canRedeclare: voucherCapture != null,
+    );
+  }
+
+  /// Régularise une déclaration refusée (F45) : le formulaire s'ouvre en
+  /// déclaration, prérempli de son contenu, de son heure et de sa photo. La
+  /// nouvelle part sous un nouvel identifiant et retire l'ancienne du
+  /// registre, dans la même transaction.
+  Future<void> redeclare(
+    Expense expense, {
+    required List<ExpenseType> types,
+    required ExchangeRate? rate,
+    String? recordedByName,
+  }) async {
+    final support = this.support;
+    final disbursedAt = expense.disbursedAt;
+    if (support == null || disbursedAt == null) return;
+    final image = (await support.loadVoucher(
+      expense,
+    )).fold((_) => null, (image) => image);
+    if (!context.mounted) return;
+    final mime = DocumentMimeType.values
+        .where((m) => m.value == image?.contentType)
+        .firstOrNull;
+    final outcome = await showExpenseFormDialog(
+      context,
+      seed: ExpenseFormSeed.duplicate(expense, today: DateTime.now()),
+      types: types,
+      rate: rate,
+      today: DateTime.now(),
+      recordedByName: recordedByName,
+      captureVoucher: voucherCapture,
+      visaOnDeclare: visaOnDeclare,
+      redeclaration: ExpenseRedeclaration(
+        expenseId: expense.id,
+        disbursedAt: disbursedAt,
+        voucher: image == null || mime == null
+            ? null
+            : CapturedDocument(
+                bytes: image.bytes,
+                mimeType: mime,
+                source: DocumentCaptureSource.import,
+                sha256Hex: '',
+                capturedAt: DateTime.now(),
+              ),
+      ),
+    );
+    if (!context.mounted) return;
+    if (outcome is ExpenseFormDeclaration) await declare(outcome.draft);
   }
 }

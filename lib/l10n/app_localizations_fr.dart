@@ -11935,6 +11935,95 @@ class AppLocalizationsFr extends AppLocalizations {
       'La déclaration n\'a pas pu être enregistrée sur cet appareil.';
 
   @override
+  String get expenseFlagTitle => 'Signaler cette déclaration';
+
+  @override
+  String get expenseFlagReasonLabel => 'Motif du signalement';
+
+  @override
+  String get expenseFlagReasonHint => 'Ce qui ne va pas, pour la caissière';
+
+  @override
+  String get expenseFlagReasonMissing =>
+      'Le motif est obligatoire pour signaler.';
+
+  @override
+  String get expenseFlagConfirm => 'Signaler';
+
+  @override
+  String get expenseFlagSuggestionQuote => 'Montant supérieur au devis';
+
+  @override
+  String get expenseFlagSuggestionVoucher => 'Bon illisible ou incomplet';
+
+  @override
+  String get expenseFlagSuggestionApproval =>
+      'Aucun accord donné pour cette dépense';
+
+  @override
+  String get expenseVisaPending => 'À viser';
+
+  @override
+  String get expenseVisaVisaed => 'Visée';
+
+  @override
+  String get expenseVisaFlagged => 'Signalée';
+
+  @override
+  String get expenseVisaFilterTitle => 'Visa';
+
+  @override
+  String get expenseVisaFilterAll => 'Toutes';
+
+  @override
+  String get expenseStatusCancelled => 'Annulée';
+
+  @override
+  String get expenseSyncToRegularize => 'À régulariser';
+
+  @override
+  String get expenseVoucherMissingTitle => 'Pas de photo du bon';
+
+  @override
+  String get expenseVoucherMissing =>
+      'Le serveur n\'a pas de photo pour cette déclaration.';
+
+  @override
+  String get expenseVoucherPdf => 'Bon en PDF';
+
+  @override
+  String get expenseVisaNeedsVoucher =>
+      'La photo du bon doit avoir été chargée sur cette tablette avant de viser.';
+
+  @override
+  String expenseFlaggedNote(String reason) {
+    return 'Signalée : $reason';
+  }
+
+  @override
+  String get expenseToRegularizeNote =>
+      'Le serveur a refusé cette déclaration : l\'argent est sorti, mais il n\'est pas enregistré. Redéclarez-la.';
+
+  @override
+  String get expenseCancelBlockedNote =>
+      'La journée de caisse est close : cette sortie ne s\'annule plus ici, elle se corrige par un ajustement de caisse.';
+
+  @override
+  String get expenseActionRedeclare => 'Redéclarer';
+
+  @override
+  String get expenseQueueTabRequests => 'Demandes';
+
+  @override
+  String get expenseQueueTabVisa => 'À viser';
+
+  @override
+  String get expenseQueueVisaEmptyTitle => 'Rien à viser';
+
+  @override
+  String get expenseQueueVisaEmpty => 'Toutes les déclarations sont visées.';
+
+  @override
   String get expenseGestureRefused =>
       'Ce geste n\'est plus possible sur cette demande : son état a changé.';
 

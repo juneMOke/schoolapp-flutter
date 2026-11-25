@@ -34,6 +34,11 @@ class ExpenseDetailBody extends StatelessWidget {
   /// Envoie un commentaire ; `null` laisse le fil en lecture seule.
   final Future<ExpenseCommentResult> Function(String body)? onSend;
 
+  /// Pour une déclaration (v3), ce qui prend la place de la chaîne de
+  /// validation — la photo du bon et ce qu'elle attend. Une déclaration n'a
+  /// pas de circuit : la chaîne n'y montrerait que des jalons vides.
+  final Widget? declarationSection;
+
   const ExpenseDetailBody({
     super.key,
     required this.expense,
@@ -42,6 +47,7 @@ class ExpenseDetailBody extends StatelessWidget {
     required this.thread,
     this.accountId,
     this.onSend,
+    this.declarationSection,
   });
 
   @override
@@ -86,8 +92,12 @@ class ExpenseDetailBody extends StatelessWidget {
         const SizedBox(height: AppDimensions.spacingM),
         // La chaîne d'abord, l'encart ensuite : où en est la demande, puis ce
         // qu'elle attend. L'inverse ferait lire la conséquence avant l'état.
-        ExpenseChain(expense: expense),
-        ExpenseSituationNote(expense: expense),
+        if (expense.isDeclaration && declarationSection != null)
+          declarationSection!
+        else ...[
+          ExpenseChain(expense: expense),
+          ExpenseSituationNote(expense: expense),
+        ],
         const SizedBox(height: AppDimensions.spacingM),
         expense.description == null
             ? Text(
