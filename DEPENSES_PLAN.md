@@ -764,6 +764,7 @@ suivent les patrons du module) :
 |---|---|---|---|
 | Q1 | ✅ Tranché (back, 2026-11-25) : journée de la sortie, `cashDay` + `afterClosure` dans le delta (F44) | — | — |
 | Q2 | ✅ Tranché (back, 2026-11-25) : le message revient sous notre id ; visa d'office = message `VISA` d'id uuid5 (F38, F41) | — | — |
+| Q7 | ✅ Vérifié par le back (`ExpenseDeclarationService.declare`, test `replay`) : un rejeu d'un id déjà déclaré rend **toujours** 200 `SUPERSEDED` avant toute validation métier — annulée entre-temps comprise (`RETRACTED`, le poste s'aligne). Seuls passent avant : 403 (permission ou auteur, retenu), 400 / `DOCUMENT_TOO_LARGE` (impossibles sur un envoi identique accepté), `EXPENSE_MODE_LOCKED` (l'id porte une demande : rien d'écrit, terminal) | — | — |
 | Q6 | ✅ Tranché (back, 2026-11-25) : option (b), pas de `awaitsAnswer` ; noms des champs confirmés, `voucher.id` = id de la dépense | — | — |
 | Q5 | ✅ Tranché (back, 2026-11-25) : uuid5 RFC 4122 standard, **espace de noms = l'`expenseId` lui-même**, nom = `"VISA"` seul en UTF-8 (vecteur au §22) | — | — |
 | Q3 | Le rapport de caisse journalier mentionne-t-il les déclarations non visées du jour ? | produit | rien côté poste (rapport serveur) |
