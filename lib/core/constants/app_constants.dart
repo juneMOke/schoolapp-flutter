@@ -965,7 +965,10 @@ class AppConstants {
   // (motifs de chaque grille) et `ref_sous_periode.rang` (rang dans l'année).
   // Sans reprise : le tirage du bundle n'envoie pas d'ETag tant qu'une ligne
   // de barème n'a pas sa grille. Palier d'école.
-  static const int offlineDbSchemaVersion = 88;
+  // v89 (2026-11-25) : la dépense déclarée et son visa — treize colonnes en
+  // fin de `expenses` (mode, visa, journée de caisse, fiche de la photo du
+  // bon). Ajout pur, sans reprise. Palier d'école.
+  static const int offlineDbSchemaVersion = 89;
 
   /// Dernière version de la base unique HÉRITÉE : là où l'escalier
   /// `migrateOfflineDatabase` s'arrête pour toujours.

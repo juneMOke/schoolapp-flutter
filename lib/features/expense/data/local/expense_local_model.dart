@@ -1,4 +1,5 @@
 import 'package:school_app_flutter/features/expense/domain/entities/expense.dart';
+import 'package:school_app_flutter/features/expense/data/local/expense_declaration_row.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_day.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_enums.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_staff_advance.dart';
@@ -48,6 +49,9 @@ class ExpenseLocalModel {
   final String? syncErrorCode;
   final int updatedAt;
 
+  /// Les colonnes de la déclaration (v89), vides en mode autorisation.
+  final ExpenseDeclarationRow declaration;
+
   const ExpenseLocalModel({
     required this.id,
     required this.schoolId,
@@ -81,6 +85,7 @@ class ExpenseLocalModel {
     this.syncError,
     this.syncErrorCode,
     this.updatedAt = 0,
+    this.declaration = ExpenseDeclarationRow.none,
   });
 
   factory ExpenseLocalModel.fromMap(Map<String, Object?> map) =>
@@ -117,6 +122,7 @@ class ExpenseLocalModel {
         syncError: map['sync_error'] as String?,
         syncErrorCode: map['sync_error_code'] as String?,
         updatedAt: (map['updated_at'] as num?)?.toInt() ?? 0,
+        declaration: ExpenseDeclarationRow.fromMap(map),
       );
 
   /// Ligne locale d'une saisie : tout ce que le serveur attribue reste tel
@@ -162,6 +168,9 @@ class ExpenseLocalModel {
     serverUpdatedAt: previous?.serverUpdatedAt,
     syncStatus: ExpenseSyncState.pending.dbValue,
     updatedAt: nowMs,
+    // Le mode est figé, et le visa ne se saisit pas : une écriture de
+    // contenu reprend la déclaration telle que la base la porte.
+    declaration: previous?.declaration ?? ExpenseDeclarationRow.none,
   );
 
   Map<String, Object?> toMap() => <String, Object?>{
@@ -197,6 +206,7 @@ class ExpenseLocalModel {
     'sync_error': syncError,
     'sync_error_code': syncErrorCode,
     'updated_at': updatedAt,
+    ...declaration.toMap(),
   };
 
   /// Ce qu'une saisie réécrit sur une ligne **existante** : le contenu et
@@ -259,6 +269,16 @@ class ExpenseLocalModel {
       deletedAt: deletedAt == null ? null : DateTime.tryParse(deletedAt!),
       syncState: ExpenseSyncState.fromDb(syncStatus),
       syncErrorCode: syncErrorCode,
+      mode: declaration.expenseMode,
+      visaStatus: declaration.expenseVisaStatus,
+      visaById: declaration.visaById,
+      visaByName: declaration.visaByName,
+      visaAt: declaration.visaInstant,
+      flagReason: declaration.flagReason,
+      disbursedAt: declaration.disbursedInstant,
+      cashDay: declaration.cashDate,
+      afterClosure: declaration.afterClosure,
+      voucher: declaration.voucher,
     );
   }
 }

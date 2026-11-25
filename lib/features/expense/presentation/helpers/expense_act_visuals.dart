@@ -40,4 +40,19 @@ ExpenseActVisuals expenseActVisuals(ExpenseAct? act) => switch (act) {
   ),
   ExpenseAct.correction => (ink: AppColors.bleuArdoise, icon: Icons.replay),
   ExpenseAct.edit => (ink: AppColors.bleuArdoise, icon: Icons.edit_outlined),
+  // La déclaration constate un argent déjà sorti : la famille du paiement.
+  ExpenseAct.declaration => (
+    ink: AppColors.feeStatusPaid,
+    icon: Icons.receipt_long_outlined,
+  ),
+  ExpenseAct.visa => (
+    ink: AppColors.bleuArdoise,
+    icon: Icons.verified_outlined,
+  ),
+  // Un signalement alerte sans défaire : l'ambre de la relance, pas le rouge
+  // du refus.
+  ExpenseAct.flag => (
+    ink: AppColors.feeStatusPartialInk,
+    icon: Icons.flag_outlined,
+  ),
 };

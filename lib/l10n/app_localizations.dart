@@ -18992,6 +18992,24 @@ abstract class AppLocalizations {
   /// **'Request edited'**
   String get expenseActEdit;
 
+  /// No description provided for @expenseActDeclaration.
+  ///
+  /// In en, this message translates to:
+  /// **'Expense declared'**
+  String get expenseActDeclaration;
+
+  /// No description provided for @expenseActVisa.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign-off'**
+  String get expenseActVisa;
+
+  /// No description provided for @expenseActFlag.
+  ///
+  /// In en, this message translates to:
+  /// **'Flag'**
+  String get expenseActFlag;
+
   /// No description provided for @expenseFormCreateTitle.
   ///
   /// In en, this message translates to:

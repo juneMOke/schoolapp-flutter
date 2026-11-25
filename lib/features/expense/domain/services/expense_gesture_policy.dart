@@ -25,8 +25,22 @@ abstract final class ExpenseGesturePolicy {
     // pas. La restaurer la remet dans le circuit telle qu'elle était.
     if (expense.isWithdrawn) return false;
     if (!_ownershipAllows(gesture, expense, accountId)) return false;
+    if (expense.isDeclaration) return _declarationAllows(gesture, expense);
     return _statusAllows(gesture, expense.status);
   }
+
+  /// Une déclaration ne suit pas le circuit : elle est déjà payée. On peut
+  /// la commenter, et la direction peut l'annuler tant qu'elle ne l'est pas
+  /// (F43). Le reste — décider, payer, relancer, retirer, renvoyer — n'a
+  /// pas d'objet, et le serveur le refuserait.
+  static bool _declarationAllows(ExpenseGesture gesture, Expense expense) =>
+      switch (gesture) {
+        ExpenseGesture.comment => true,
+        ExpenseGesture.reopen => ExpenseTransitions.canCancelDeclaration(
+          expense.status,
+        ),
+        _ => false,
+      };
 
   static bool _ownershipAllows(
     ExpenseGesture gesture,

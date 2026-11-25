@@ -12222,6 +12222,15 @@ class AppLocalizationsFr extends AppLocalizations {
   String get expenseActEdit => 'Demande modifiée';
 
   @override
+  String get expenseActDeclaration => 'Dépense déclarée';
+
+  @override
+  String get expenseActVisa => 'Visa';
+
+  @override
+  String get expenseActFlag => 'Signalement';
+
+  @override
   String get expenseFormCreateTitle =>
       'Enregistrer une dépense de fonctionnement';
 

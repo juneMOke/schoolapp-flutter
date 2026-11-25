@@ -242,6 +242,36 @@ Future<void> migrateTenantDatabase(
     await _createTables(db, [refGrilleTable]);
     await _addColumnIfTable(db, 'ref_sous_periode', 'rang', type: 'INTEGER');
   }
+  if (upTo(89)) {
+    await _expenseDeclaration(db);
+  }
+}
+
+/// v89 — la dépense **déclarée** et son visa (DEPENSES_PLAN partie III).
+/// Ajout pur, en fin de table : toute dépense existante est une demande
+/// d'autorisation, ce que dit le défaut de `mode`. Aucune reprise, aucun
+/// curseur touché — le delta redescendra les champs neufs à la prochaine
+/// modification côté serveur, et ils sont vides pour toutes les lignes
+/// existantes.
+Future<void> _expenseDeclaration(DatabaseExecutor db) async {
+  const columns = <String, String>{
+    'mode': "TEXT NOT NULL DEFAULT 'AUTHORIZATION'",
+    'visa_status': 'TEXT',
+    'visa_by_id': 'TEXT',
+    'visa_by_name': 'TEXT',
+    'visa_at': 'TEXT',
+    'flag_reason': 'TEXT',
+    'disbursed_at': 'TEXT',
+    'cash_day': 'TEXT',
+    'after_closure': 'INTEGER NOT NULL DEFAULT 0',
+    'voucher_id': 'TEXT',
+    'voucher_content_type': 'TEXT',
+    'voucher_size_bytes': 'INTEGER',
+    'voucher_uploaded_at': 'TEXT',
+  };
+  for (final entry in columns.entries) {
+    await _addColumnIfTable(db, 'expenses', entry.key, type: entry.value);
+  }
 }
 
 /// v86 — les cadres déjà connus n'ont ni `replaceable` ni document, et un

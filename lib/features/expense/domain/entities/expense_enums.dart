@@ -96,7 +96,7 @@ enum ExpenseSyncState {
   }
 }
 
-/// Les neuf actes du fil (F33) — **en anglais**, comme tout ce qui voyage déjà
+/// Les actes du fil (F33, plus les trois de la déclaration en v3) — **en anglais**, comme tout ce qui voyage déjà
 /// dans ce module (`PAID`, `CASH`, `MOBILE_MONEY`). Les libellés affichés
 /// restent en français, dans les `.arb`.
 ///
@@ -126,7 +126,18 @@ enum ExpenseAct {
   correction('CORRECTION'),
 
   /// Modifiée sans changer d'état : elle était déjà en attente.
-  edit('EDIT');
+  edit('EDIT'),
+
+  /// Une dépense **déclarée** (v3) : payée tout de suite, visée ensuite.
+  /// Premier message de son fil — une déclaration n'a pas de dépôt.
+  declaration('DECLARATION'),
+
+  /// Le promoteur vise une déclaration — terminal.
+  visa('VISA'),
+
+  /// Le promoteur signale une déclaration, toujours avec motif. Un simple
+  /// signalement : la sortie de caisse reste.
+  flag('FLAG');
 
   const ExpenseAct(this.wireValue);
 
@@ -144,5 +155,59 @@ enum ExpenseAct {
       if (act.wireValue == value) return act;
     }
     return null;
+  }
+}
+
+/// Comment une dépense est née (v3) — **figé à la création**, jamais changé.
+enum ExpenseMode {
+  /// La demande d'avant : déposée, décidée, puis payée. Toute dépense
+  /// antérieure à la v3 est de ce mode.
+  authorization('AUTHORIZATION'),
+
+  /// Payée tout de suite, sortie de la caisse à l'heure du décaissement, et
+  /// visée **ensuite** par le promoteur. Photo du bon obligatoire.
+  declaration('DECLARATION');
+
+  const ExpenseMode(this.wireValue);
+
+  final String wireValue;
+
+  /// Absent ou inconnu se lit [authorization] : c'est ce que sont toutes les
+  /// dépenses existantes, et ce qu'envoient les postes d'avant la v3 (F36).
+  static ExpenseMode fromWire(String? raw) {
+    final value = raw?.trim().toUpperCase();
+    for (final mode in values) {
+      if (mode.wireValue == value) return mode;
+    }
+    return authorization;
+  }
+}
+
+/// Le contrôle **après coup** d'une déclaration — un second axe, jamais mêlé
+/// au statut : un visa ne déplace pas l'argent, et le statut ne dit pas si
+/// la dépense est visée.
+enum ExpenseVisaStatus {
+  /// Déclarée, pas encore contrôlée.
+  pending('PENDING'),
+
+  /// Visée par le promoteur — terminal : on ne revient pas sur un visa.
+  visaed('VISAED'),
+
+  /// Signalée avec motif ; reste visable, ce qui lève le signalement.
+  flagged('FLAGGED');
+
+  const ExpenseVisaStatus(this.wireValue);
+
+  final String wireValue;
+
+  /// `null` hors déclaration. Sur une déclaration, une valeur absente ou
+  /// inconnue se lit [pending] : le sens prudent, « pas visée » (F36).
+  static ExpenseVisaStatus? fromWire(String? raw, {required ExpenseMode mode}) {
+    if (mode != ExpenseMode.declaration) return null;
+    final value = raw?.trim().toUpperCase();
+    for (final status in values) {
+      if (status.wireValue == value) return status;
+    }
+    return pending;
   }
 }

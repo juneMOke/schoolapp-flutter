@@ -12125,6 +12125,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get expenseActEdit => 'Request edited';
 
   @override
+  String get expenseActDeclaration => 'Expense declared';
+
+  @override
+  String get expenseActVisa => 'Sign-off';
+
+  @override
+  String get expenseActFlag => 'Flag';
+
+  @override
   String get expenseFormCreateTitle => 'Record an operating expense';
 
   @override

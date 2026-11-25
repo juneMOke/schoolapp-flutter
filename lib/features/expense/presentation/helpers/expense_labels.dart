@@ -37,6 +37,9 @@ String expenseActLabel(AppLocalizations l10n, ExpenseAct act) => switch (act) {
   ExpenseAct.reopening => l10n.expenseActReopening,
   ExpenseAct.correction => l10n.expenseActCorrection,
   ExpenseAct.edit => l10n.expenseActEdit,
+  ExpenseAct.declaration => l10n.expenseActDeclaration,
+  ExpenseAct.visa => l10n.expenseActVisa,
+  ExpenseAct.flag => l10n.expenseActFlag,
 };
 
 /// Le motif d'un refus serveur, dit à l'économe (A4) — par son code machine
