@@ -142,4 +142,20 @@ class ExpenseDeclarationActions {
     if (!context.mounted) return;
     if (outcome is ExpenseFormDeclaration) await declare(outcome.draft);
   }
+
+  /// Rejuge l'annulation **au moment du geste** (F44) : une clôture a pu
+  /// descendre depuis l'ouverture de la fiche. `true` : le geste peut partir ;
+  /// sinon la raison est dite, et rien n'est écrit.
+  Future<bool> confirmCancellable(Expense expense) async {
+    final support = this.support;
+    if (support == null) return false;
+    final allowed = await support.canCancel(expense);
+    if (!allowed && context.mounted) {
+      AppSnackBar.showError(
+        context,
+        AppLocalizations.of(context)!.expenseCancelBlockedNote,
+      );
+    }
+    return allowed;
+  }
 }

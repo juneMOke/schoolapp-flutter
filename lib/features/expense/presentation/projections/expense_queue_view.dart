@@ -76,6 +76,7 @@ class ExpenseQueueView extends Equatable {
       if (expense.isDeclaration) {
         final visa = expense.visaStatus;
         if (!expense.isCancelledDeclaration &&
+            !expense.isDeclarationToRegularize &&
             (visa == ExpenseVisaStatus.pending ||
                 visa == ExpenseVisaStatus.flagged)) {
           toVisa.add(expense);

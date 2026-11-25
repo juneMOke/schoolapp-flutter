@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/helpers/school_time.dart';
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
@@ -43,6 +44,9 @@ class ExpenseVisaQueueList extends StatelessWidget {
           for (final (i, expense) in expenses.indexed) ...[
             if (i > 0) const Divider(height: 1, color: AppColors.border),
             _VisaRow(
+              // Sans clé, une ligne remontée garderait la vignette de celle
+              // qu'elle remplace — le mauvais bon sous les yeux de qui vise.
+              key: ValueKey(expense.id),
               expense: expense,
               type: typesById[expense.typeId],
               onOpen: () => onOpen(expense),
@@ -60,6 +64,7 @@ class _VisaRow extends StatelessWidget {
   final VoidCallback onOpen;
 
   const _VisaRow({
+    super.key,
     required this.expense,
     required this.type,
     required this.onOpen,
@@ -69,7 +74,10 @@ class _VisaRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final dates = MaterialLocalizations.of(context);
-    final out = expense.disbursedAt?.toLocal() ?? expense.expenseDate;
+    final disbursed = expense.disbursedAt;
+    final out = disbursed == null
+        ? expense.expenseDate
+        : SchoolTime.wallClock(disbursed);
     return InkWell(
       onTap: onOpen,
       child: Padding(

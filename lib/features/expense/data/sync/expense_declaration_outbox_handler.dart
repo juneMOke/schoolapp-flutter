@@ -9,7 +9,7 @@ import 'package:school_app_flutter/core/offline/outbox_permission_guard.dart';
 import 'package:school_app_flutter/core/offline/outbox_school_guard.dart';
 import 'package:school_app_flutter/core/offline/outbox_sync_handler.dart';
 import 'package:school_app_flutter/core/offline/sync_engine.dart'
-    show Clock, systemClock;
+    show Clock, SyncEngine, systemClock;
 import 'package:school_app_flutter/core/storage/encrypted_blob/blob_read.dart';
 import 'package:school_app_flutter/features/expense/data/local/expense_declaration_dao.dart';
 import 'package:school_app_flutter/features/expense/data/sync/expense_declaration_api.dart';
@@ -68,6 +68,14 @@ class ExpenseDeclarationOutboxHandler
         jsonDecode(entry.payload) as Map<String, dynamic>,
       );
     } catch (e) {
+      // Illisible ne se répare pas : la ligne passe « à régulariser » plutôt
+      // que de rester comptée en attente, son fil gelé derrière elle.
+      await _dao.markRefused(
+        entry.aggregateId,
+        code: 'PAYLOAD_UNREADABLE',
+        reason: 'PAYLOAD_UNREADABLE',
+        nowMs: _now(),
+      );
       return OutboxDispatchResult.failed('Payload illisible : $e');
     }
     final hold = outboxForeignSchoolHold(entry, _currentUser.schoolId);
@@ -119,16 +127,36 @@ class ExpenseDeclarationOutboxHandler
         return const OutboxDispatchResult.permissionDenied();
       }
       final failure = ExpensePushFailure.of(e);
-      if (failure.isTransient) {
-        return OutboxDispatchResult.retry(failure.reason);
+      // Une route absente (déploiement en cours) n'est pas un refus du fond.
+      final routeMissing =
+          failure.detailCode == null &&
+          (failure.status == 404 || failure.status == 405);
+      if (failure.isTransient || routeMissing) {
+        return _retry(entry, payload, failure.reason);
       }
       await _refuse(payload, code: failure.storedCode, reason: failure.reason);
       return OutboxDispatchResult.failed(failure.reason);
     } catch (e) {
       // Échec LOCAL après un POST peut-être accusé : le rejeu rend
       // `SUPERSEDED` et le même état.
-      return OutboxDispatchResult.retry(e.toString());
+      return _retry(entry, payload, e.toString());
     }
+  }
+
+  /// Rejoue — sauf à la dernière tentative avant que le moteur n'empoisonne
+  /// l'entrée : la ligne passe alors « à régulariser » (F45). Sans cela elle
+  /// resterait comptée en attente, et ses gestes bloqués derrière elle pour
+  /// toujours.
+  Future<OutboxDispatchResult> _retry(
+    OutboxEntry entry,
+    ExpenseDeclarationPayload payload,
+    String reason,
+  ) async {
+    if (entry.attempts + 1 >= SyncEngine.defaultMaxAttempts) {
+      await _refuse(payload, code: 'POISONED', reason: reason);
+      return OutboxDispatchResult.failed(reason);
+    }
+    return OutboxDispatchResult.retry(reason);
   }
 
   Future<void> _refuse(

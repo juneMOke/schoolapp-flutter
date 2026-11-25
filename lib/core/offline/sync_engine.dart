@@ -122,6 +122,10 @@ class SyncEngine {
   /// humain et, sur de l'argent, un doute.
   static const int _defaultMaxAttempts = 1000;
 
+  /// Le seuil par défaut, lisible des handlers qui doivent régler leur ligne
+  /// métier avant que l'entrée ne soit empoisonnée.
+  static const int defaultMaxAttempts = _defaultMaxAttempts;
+
   bool _flushing = false;
   final List<void Function()> _flushCompleteListeners = [];
 

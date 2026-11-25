@@ -36,6 +36,10 @@ abstract final class ExpenseGesturePolicy {
   static bool _declarationAllows(ExpenseGesture gesture, Expense expense) =>
       switch (gesture) {
         ExpenseGesture.comment => true,
+        // Refusée par le serveur, elle n'y existe pas : tout geste mourrait
+        // en 404 et effacerait le vrai motif du refus. Elle se régularise par
+        // une redéclaration (F45), rien d'autre.
+        _ when expense.isDeclarationToRegularize => false,
         ExpenseGesture.reopen => ExpenseTransitions.canCancelDeclaration(
           expense.status,
         ),

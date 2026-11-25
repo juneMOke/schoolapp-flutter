@@ -48,7 +48,7 @@ class _ExpenseQueueTabsState extends State<ExpenseQueueTabs> {
             SegmentedTabOption(
               label: count == 0
                   ? l10n.expenseQueueTabVisa
-                  : '${l10n.expenseQueueTabVisa} · $count',
+                  : l10n.expenseQueueTabVisaCount(count),
               value: ExpenseQueueTab.visa,
               icon: Icons.receipt_long_outlined,
             ),

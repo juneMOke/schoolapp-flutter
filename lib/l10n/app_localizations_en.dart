@@ -11917,6 +11917,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get expenseQueueTabVisa => 'To sign off';
 
   @override
+  String expenseQueueTabVisaCount(int count) {
+    return 'To sign off · $count';
+  }
+
+  @override
   String get expenseQueueVisaEmptyTitle => 'Nothing to sign off';
 
   @override

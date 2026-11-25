@@ -7917,6 +7917,8 @@
   "expenseActionRedeclare": "Declare again",
   "expenseQueueTabRequests": "Requests",
   "expenseQueueTabVisa": "To sign off",
+  "expenseQueueTabVisaCount": "To sign off · {count}",
+  "@expenseQueueTabVisaCount": {"placeholders": {"count": {"type": "int"}}},
   "expenseQueueVisaEmptyTitle": "Nothing to sign off",
   "expenseQueueVisaEmpty": "Every declaration is signed off.",
   "expenseGestureRefused": "That gesture is no longer possible on this request: its state has changed.",

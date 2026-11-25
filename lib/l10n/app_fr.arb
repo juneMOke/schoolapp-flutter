@@ -8128,6 +8128,8 @@
   "expenseActionRedeclare": "Redéclarer",
   "expenseQueueTabRequests": "Demandes",
   "expenseQueueTabVisa": "À viser",
+  "expenseQueueTabVisaCount": "À viser · {count}",
+  "@expenseQueueTabVisaCount": {"placeholders": {"count": {"type": "int"}}},
   "expenseQueueVisaEmptyTitle": "Rien à viser",
   "expenseQueueVisaEmpty": "Toutes les déclarations sont visées.",
   "expenseGestureRefused": "Ce geste n'est plus possible sur cette demande : son état a changé.",

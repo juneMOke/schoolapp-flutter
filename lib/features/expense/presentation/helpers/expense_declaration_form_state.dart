@@ -27,8 +27,9 @@ class ExpenseDeclarationFormState {
       time = _timeOf(SchoolTime.wallClock(now)),
       replacing = null;
 
-  /// Reprend une déclaration refusée : même heure, même photo, même note
-  /// — un nouvel identifiant à l'écriture.
+  /// Reprend une déclaration refusée : même heure, même photo — un nouvel
+  /// identifiant à l'écriture. La note n'est pas reprise : elle vit au fil,
+  /// et la ligne ne la porte pas.
   ExpenseDeclarationFormState.redeclaring(ExpenseRedeclaration from)
     : day = SchoolTime.today(from.disbursedAt),
       time = _timeOf(SchoolTime.wallClock(from.disbursedAt)),

@@ -116,7 +116,9 @@ class ExpenseDetailActions extends StatelessWidget {
           // fiche est déjà un pas délibéré. Le mot nomme le RETRAIT DU
           // REGISTRE ; la reprise par son demandeur s'appelle « Retirer »
           // (F25).
-          if (allowShortcuts)
+          // Une déclaration ne se supprime pas : l'argent est sorti. Elle
+          // s'annule (sous la garde de la clôture) ou se redéclare.
+          if (allowShortcuts && !declaration)
             PermissionGate.access(
               kExpenseWithdrawAccess,
               child: TextButton.icon(

@@ -101,7 +101,8 @@ class ExpenseDeclarationDao {
           ...ExpenseDeltaColumns.server(canonical),
           ...ExpenseDeltaColumns.content(canonical),
           ...ExpenseDeltaColumns.synced,
-          'deleted_at': canonical.deletedAt,
+          if (row.withdrawalPendingAt == null)
+            'deleted_at': canonical.deletedAt,
           'updated_at': nowMs,
         },
         where: 'id = ?',
@@ -168,10 +169,16 @@ class ExpenseDeclarationDao {
         ).toIso8601String(),
         'updated_at': nowMs,
       },
-      where: 'id = ? AND expense_number IS NULL AND sync_status = ?',
+      where:
+          'id = ? AND expense_number IS NULL AND sync_status = ? '
+          'AND deleted_at IS NULL',
       whereArgs: [expenseId, ExpenseSyncState.rejected.dbValue],
     );
-    if (updated == 0) return;
+    // La refusée n'est plus à régulariser — accusée entre-temps (relancée
+    // depuis la feuille des erreurs), ou déjà remplacée par un premier envoi
+    // du même formulaire. Écrire la nouvelle compterait deux fois le même
+    // argent : la transaction entière est défaite.
+    if (updated == 0) throw const ExpenseRedeclarationStale();
     await txn.update(
       OutboxDao.table,
       {'status': OutboxStatus.acked.dbValue},
@@ -186,4 +193,9 @@ class ExpenseDeclarationDao {
       ],
     );
   }
+}
+
+/// La déclaration à remplacer n'est plus à régulariser : rien n'est écrit.
+class ExpenseRedeclarationStale implements Exception {
+  const ExpenseRedeclarationStale();
 }

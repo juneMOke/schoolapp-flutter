@@ -8,6 +8,7 @@ import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/core/offline/current_user_context.dart';
 import 'package:school_app_flutter/core/offline/id_generator.dart';
 import 'package:school_app_flutter/core/offline/outbox_dao.dart';
+import 'package:school_app_flutter/core/offline/sync_engine.dart';
 import 'package:school_app_flutter/core/offline/outbox_sync_handler.dart';
 import 'package:school_app_flutter/core/storage/encrypted_blob/blob_cipher.dart';
 import 'package:school_app_flutter/core/storage/encrypted_blob/blob_key_service.dart';
@@ -538,4 +539,46 @@ void main() {
       expect(await probe.pendingFor(TreasuryCurrency.usd), 1);
     },
   );
+
+  test('redéclarer une refusée déjà régularisée : rien n’est écrit', () async {
+    final refused = await declare();
+    await dao.markRefused(refused.id, code: 'X', reason: 'X', nowMs: 0);
+    await declare(draft(replacing: refused.id));
+    final before = await db.query('expenses');
+
+    final second = await repository.declare(draft(replacing: refused.id));
+
+    expect(second.isLeft(), isTrue, reason: 'jamais deux fois le même argent');
+    expect(await db.query('expenses'), hasLength(before.length));
+  });
+
+  test(
+    'à la dernière tentative, la déclaration passe « à régulariser »',
+    () async {
+      final expense = await declare();
+      when(() => api.submit(any(), any(), any())).thenThrow(_http(503));
+      final entry = (await OutboxDao(
+        db,
+      ).byId(ExpenseDeclarationDao.entryId(expense.id)))!;
+
+      final result = await handler.dispatch(
+        entry.copyWith(attempts: SyncEngine.defaultMaxAttempts - 1),
+      );
+
+      expect(result.outcome, OutboxDispatchOutcome.failed);
+      expect((await reload(expense.id)).isDeclarationToRegularize, isTrue);
+    },
+  );
+
+  test('une route absente (404 sans code) se rejoue', () async {
+    final expense = await declare();
+    when(() => api.submit(any(), any(), any())).thenThrow(_http(404));
+
+    final result = await handler.dispatch(
+      (await OutboxDao(db).byId(ExpenseDeclarationDao.entryId(expense.id)))!,
+    );
+
+    expect(result.outcome, OutboxDispatchOutcome.retry);
+    expect((await reload(expense.id)).isRejected, isFalse);
+  });
 }

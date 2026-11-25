@@ -248,11 +248,9 @@ Future<void> migrateTenantDatabase(
 }
 
 /// v89 — la dépense **déclarée** et son visa (DEPENSES_PLAN partie III).
-/// Ajout pur, en fin de table : toute dépense existante est une demande
-/// d'autorisation, ce que dit le défaut de `mode`. Aucune reprise, aucun
-/// curseur touché — le delta redescendra les champs neufs à la prochaine
-/// modification côté serveur, et ils sont vides pour toutes les lignes
-/// existantes.
+/// Ajout en fin de table : toute dépense existante est une demande
+/// d'autorisation, ce que dit le défaut de `mode` — sauf celles qu'un poste
+/// d'avant la v3 aurait tirées sans comprendre, d'où le re-tirage.
 Future<void> _expenseDeclaration(DatabaseExecutor db) async {
   const columns = <String, String>{
     'mode': "TEXT NOT NULL DEFAULT 'AUTHORIZATION'",
@@ -271,6 +269,20 @@ Future<void> _expenseDeclaration(DatabaseExecutor db) async {
   };
   for (final entry in columns.entries) {
     await _addColumnIfTable(db, 'expenses', entry.key, type: entry.value);
+  }
+  // Un poste d'avant la v3 a pu tirer des déclarations faites ailleurs, et
+  // les ranger en demandes d'autorisation (il ignorait `mode`). Le flux des
+  // dépenses (`expenses@école`) repart donc de zéro : le re-tirage ne pose
+  // que la famille serveur sur une ligne en attente, et rend leur mode aux
+  // déclarations.
+  final hasMeta = await db.rawQuery(
+    "SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'sync_meta'",
+  );
+  if (hasMeta.isNotEmpty) {
+    await db.execute(
+      "DELETE FROM sync_meta WHERE resource = 'expenses' "
+      "OR resource LIKE 'expenses@%'",
+    );
   }
 }
 

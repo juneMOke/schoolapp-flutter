@@ -99,9 +99,11 @@ class _ExpenseRefusalPanelState extends State<ExpenseRefusalPanel> {
             children: [
               Icon(icon, size: AppDimensions.detailMiniIconSize, color: ink),
               const SizedBox(width: AppDimensions.spacingS),
-              Text(
-                flagging ? l10n.expenseFlagTitle : l10n.expenseRefusalTitle,
-                style: AppTextStyles.bodyStrong.copyWith(color: ink),
+              Flexible(
+                child: Text(
+                  flagging ? l10n.expenseFlagTitle : l10n.expenseRefusalTitle,
+                  style: AppTextStyles.bodyStrong.copyWith(color: ink),
+                ),
               ),
             ],
           ),

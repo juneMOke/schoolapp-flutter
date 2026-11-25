@@ -6,6 +6,7 @@ import 'package:school_app_flutter/core/components/dialogs/eteelo_dialog_body.da
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
+import 'package:school_app_flutter/core/helpers/school_time.dart';
 import 'package:school_app_flutter/core/money/exchange_rate.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_text_input.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_enums.dart';
@@ -215,7 +216,9 @@ class _ExpenseFormDialogState extends State<ExpenseFormDialog> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        if (_canDeclare) ...[
+        // Une redéclaration reste une déclaration : la refusée ne se
+        // régularise pas par une demande (F45).
+        if (_canDeclare && widget.redeclaration == null) ...[
           ExpenseModeSwitch(
             mode: _mode,
             onChanged: (mode) => setState(() => _mode = mode),
@@ -272,7 +275,9 @@ class _ExpenseFormDialogState extends State<ExpenseFormDialog> {
           gap,
           ExpenseDeclarationSection(
             state: _declaration,
-            today: widget.today,
+            // Le jour de l'école, pas celui de la tablette : c'est la borne
+            // du calendrier comme celle du jour choisi.
+            today: SchoolTime.today(DateTime.now()),
             touched: _touched,
             onCaptureVoucher: _captureVoucher,
             onChanged: () => setState(() {}),

@@ -117,4 +117,20 @@ void main() {
 
     expect(migrated, await columnsOf(fresh, 'expenses'));
   });
+
+  test('le flux des dépenses repart de zéro, les autres non', () async {
+    await db.execute(
+      'CREATE TABLE sync_meta (resource TEXT PRIMARY KEY, cursor TEXT)',
+    );
+    for (final resource in ['expenses@school-A', 'expense_types', 'payments']) {
+      await db.insert('sync_meta', {'resource': resource, 'cursor': 'c'});
+    }
+
+    await migrateTenantDatabase(db, 88);
+
+    final left = [
+      for (final row in await db.query('sync_meta')) row['resource'],
+    ];
+    expect(left, unorderedEquals(['expense_types', 'payments']));
+  });
 }

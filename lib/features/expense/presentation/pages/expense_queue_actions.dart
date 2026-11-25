@@ -78,6 +78,12 @@ class ExpenseQueueActions {
     String note = '',
   }) async {
     final l10n = AppLocalizations.of(context)!;
+    if (gesture == ExpenseGesture.reopen &&
+        expense.isDeclaration &&
+        !await ExpenseDeclarationActions(context).confirmCancellable(expense)) {
+      return;
+    }
+    if (!context.mounted) return;
     final advance = await ExpenseAdvancePayFlow.run(
       context,
       expense,

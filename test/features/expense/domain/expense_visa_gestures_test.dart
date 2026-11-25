@@ -88,6 +88,26 @@ void main() {
       });
     });
 
+    test(
+      'refusée par le serveur : seulement commenter (elle n’y existe pas)',
+      () {
+        final refused = Expense(
+          id: 'e-1',
+          typeId: 't-1',
+          title: 'Carburant',
+          amountInCents: 4500,
+          currency: 'USD',
+          status: ExpenseStatus.paid,
+          expenseDate: DateTime(2026, 11, 25),
+          clientUpdatedAt: DateTime.utc(2026, 11, 25),
+          mode: ExpenseMode.declaration,
+          visaStatus: ExpenseVisaStatus.pending,
+          syncState: ExpenseSyncState.rejected,
+        );
+        expect(offered(refused), {ExpenseGesture.comment});
+      },
+    );
+
     test('jamais sur une demande d’autorisation', () {
       for (final status in ExpenseStatus.values) {
         final gestures = offered(

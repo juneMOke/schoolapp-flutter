@@ -17,6 +17,9 @@ class ExpenseVoucherThumb extends StatefulWidget {
 
   const ExpenseVoucherThumb({super.key, required this.expense});
 
+  // L'état est attaché à une dépense : la ligne qui le porte a pour clé
+  // l'identifiant de la dépense (`ExpenseVisaQueueList`).
+
   @override
   State<ExpenseVoucherThumb> createState() => _ExpenseVoucherThumbState();
 }

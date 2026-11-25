@@ -255,6 +255,12 @@ void main() {
 
       expect(find.text('Redéclarer'), findsOneWidget);
       expect(find.text('Dupliquer'), findsNothing);
+      expect(
+        find.text('Supprimer'),
+        findsNothing,
+        reason: 'l’argent est sorti',
+      );
+      expect(find.text('Viser'), findsNothing, reason: 'inconnue du serveur');
       expect(find.textContaining('Redéclarez-la'), findsOneWidget);
     });
 

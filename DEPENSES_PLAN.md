@@ -708,6 +708,51 @@ back**. Grâce à F35, la branche peut néanmoins fusionner avant lui.
 peut partir dès DEP-18). Une PR par lot, ou une seule à la fin : au choix de
 l'utilisateur.
 
+### État d'exécution (2026-11-25, branche `feat/expense-declaration`)
+
+| Lot | État |
+|---|---|
+| DEP-16 | ✅ commité |
+| DEP-17 | ✅ commité (F40 révisé : une seule copie de la photo) |
+| DEP-18 | ✅ commité |
+| DEP-19 | ✅ commité ; `CashClosureReader` ajouté au socle (`lib/core/money`) |
+| DEP-20 | ✅ commité ; défaut du formulaire : « Pour autorisation » |
+| DEP-21 | ✅ commité ; l'onglet « À viser » de la file n'a pas d'adresse propre |
+| DEP-22 | ✅ revue adversariale jouée, 17 défauts corrigés (ci-dessous) |
+
+### Ce que la revue de DEP-22 a trouvé (trois relecteurs, sans mon avis)
+
+| Défaut | Correction |
+|---|---|
+| Redéclarer une refusée déjà accusée, ou deux fois, comptait deux fois l'argent | `_abandon` exige une refusée **vivante** ; sinon la transaction est défaite (`ConflictFailure`) |
+| « Supprimer » offert sur une déclaration : une refusée disparaissait sans régularisation | aucun « Supprimer » sur une déclaration |
+| Une déclaration empoisonnée (1 000 tentatives) restait comptée et gelait ses gestes et la clôture | à la dernière tentative, et sur un payload illisible, elle passe « à régulariser » |
+| Viser / signaler / annuler offerts sur une refusée, inconnue du serveur (404, motif d'origine écrasé) | plus aucun geste sauf commenter ; hors de la file « À viser » |
+| Un poste d'avant la v3 a pu ranger des déclarations en demandes | le palier 89 fait repartir le flux `expenses@…` de zéro |
+| Une clôture descendue après l'ouverture de la fiche n'empêchait pas l'annulation | règle rejugée au moment du geste ; pas d'« Annuler » sans la règle |
+| L'accusé ressuscitait une ligne retirée localement | `deleted_at` respecte `withdrawal_pending_at`, comme le contenu |
+| Une horloge reculée datait un geste avant la déclaration | un geste prend au moins la milliseconde après le dernier message du fil |
+| 404 / 405 sans code (déploiement en cours) rendait toutes les déclarations « à régulariser » | rejoués |
+| Redéclarer en basculant vers « Pour autorisation » ne faisait rien | la bascule est cachée en redéclaration |
+| Vignettes de la file « À viser » décalées après un visa | une clé par ligne |
+| Titre du panneau de signalement débordant à 360 dp, texte ×1,3 | `Flexible` |
+| Borne du calendrier au jour de la tablette, pas de l'école | jour de l'école |
+| « Viser » ouvert sur une photo illisible | refermé quand l'image ne se décode pas |
+| Note « journée close » affichée avant la réponse de la règle | attend la réponse |
+| Date de la file « À viser » à l'heure de la tablette | heure de l'école |
+| Séparateur du compteur d'onglet en dur | clé l10n |
+
+Non retenu : `visaBy*` posé aussi sur un signalement — c'est le contrat
+(« qui a visé ou signalé en dernier »).
+
+**Écarts assumés** (pas de maquette Claude Design pour la v3 : les écrans
+suivent les patrons du module) :
+- un bon en PDF s'affiche comme une marque « Bon en PDF », sans visionneuse ;
+- l'onglet de la file et le filtre de visa vivent dans l'état de l'écran, pas
+  dans l'adresse ;
+- `expense.declare` reste hors de `kGuardedWriteActions` tant que le back ne
+  l'a pas semée (même raison que les trois droits du circuit).
+
 ## 21. Questions encore ouvertes
 
 | # | Question | À qui | Bloque |

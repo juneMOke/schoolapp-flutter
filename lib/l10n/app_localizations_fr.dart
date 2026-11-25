@@ -12018,6 +12018,11 @@ class AppLocalizationsFr extends AppLocalizations {
   String get expenseQueueTabVisa => 'À viser';
 
   @override
+  String expenseQueueTabVisaCount(int count) {
+    return 'À viser · $count';
+  }
+
+  @override
   String get expenseQueueVisaEmptyTitle => 'Rien à viser';
 
   @override

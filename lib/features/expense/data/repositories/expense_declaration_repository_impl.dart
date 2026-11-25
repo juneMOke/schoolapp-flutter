@@ -85,6 +85,10 @@ class ExpenseDeclarationRepositoryImpl implements ExpenseDeclarationRepository {
       return Right(await _write(draft, schoolId: schoolId, authorId: authorId));
     } on _VoucherNotSealed {
       return const Left(StorageFailure('Photo du bon non scellée'));
+    } on ExpenseRedeclarationStale {
+      return const Left(
+        ConflictFailure('La déclaration refusée n’est plus à régulariser.'),
+      );
     } catch (e) {
       return Left(StorageFailure('Déclaration non enregistrée : $e'));
     }

@@ -18818,6 +18818,12 @@ abstract class AppLocalizations {
   /// **'To sign off'**
   String get expenseQueueTabVisa;
 
+  /// No description provided for @expenseQueueTabVisaCount.
+  ///
+  /// In en, this message translates to:
+  /// **'To sign off · {count}'**
+  String expenseQueueTabVisaCount(int count);
+
   /// No description provided for @expenseQueueVisaEmptyTitle.
   ///
   /// In en, this message translates to:

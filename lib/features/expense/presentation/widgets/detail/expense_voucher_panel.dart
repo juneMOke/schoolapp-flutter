@@ -48,12 +48,16 @@ class ExpenseVoucherPanel extends StatelessWidget {
   /// fiche dit pourquoi plutôt que de le taire.
   final bool cancelBlocked;
 
+  /// L'image ne se décode pas : la fiche referme « Viser ».
+  final VoidCallback? onImageError;
+
   const ExpenseVoucherPanel({
     super.key,
     required this.expense,
     required this.load,
     required this.onRetry,
     this.cancelBlocked = false,
+    this.onImageError,
   });
 
   @override
@@ -100,10 +104,13 @@ class ExpenseVoucherPanel extends StatelessWidget {
                   image.bytes,
                   fit: BoxFit.contain,
                   semanticLabel: l10n.expenseVoucherLabel,
-                  errorBuilder: (_, _, _) => _PdfMark(
-                    label: l10n.expenseVoucherLabel,
-                    icon: Icons.broken_image_outlined,
-                  ),
+                  errorBuilder: (_, _, _) {
+                    onImageError?.call();
+                    return _PdfMark(
+                      label: l10n.expenseVoucherLabel,
+                      icon: Icons.broken_image_outlined,
+                    );
+                  },
                 ),
               ),
       ),
