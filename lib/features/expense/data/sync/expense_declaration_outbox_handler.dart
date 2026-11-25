@@ -9,7 +9,7 @@ import 'package:school_app_flutter/core/offline/outbox_permission_guard.dart';
 import 'package:school_app_flutter/core/offline/outbox_school_guard.dart';
 import 'package:school_app_flutter/core/offline/outbox_sync_handler.dart';
 import 'package:school_app_flutter/core/offline/sync_engine.dart'
-    show Clock, SyncEngine, systemClock;
+    show Clock, systemClock;
 import 'package:school_app_flutter/core/storage/encrypted_blob/blob_read.dart';
 import 'package:school_app_flutter/features/expense/data/local/expense_declaration_dao.dart';
 import 'package:school_app_flutter/features/expense/data/sync/expense_declaration_api.dart';
@@ -143,21 +143,20 @@ class ExpenseDeclarationOutboxHandler
     }
   }
 
-  /// Rejoue — sauf à la dernière tentative avant que le moteur n'empoisonne
-  /// l'entrée : la ligne passe alors « à régulariser » (F45). Sans cela elle
-  /// resterait comptée en attente, et ses gestes bloqués derrière elle pour
-  /// toujours.
+  /// Rejoue, **même à la dernière tentative** : le moteur empoisonne alors
+  /// l'entrée, et la ligne reste payée, comptée, en attente d'envoi.
+  ///
+  /// Jamais « à régulariser » sur une simple absence d'accusé : le premier
+  /// envoi a pu aboutir et son accusé se perdre. Le serveur a alors la
+  /// dépense, et l'argent est sorti de SA caisse ; la redéclarer sous un
+  /// nouvel id la compterait deux fois. Seul un refus du fond (4xx avec
+  /// réponse) dit que le serveur n'a rien écrit. L'entrée empoisonnée se
+  /// relance depuis la feuille des erreurs, et le rejeu rend `SUPERSEDED`.
   Future<OutboxDispatchResult> _retry(
     OutboxEntry entry,
     ExpenseDeclarationPayload payload,
     String reason,
-  ) async {
-    if (entry.attempts + 1 >= SyncEngine.defaultMaxAttempts) {
-      await _refuse(payload, code: 'POISONED', reason: reason);
-      return OutboxDispatchResult.failed(reason);
-    }
-    return OutboxDispatchResult.retry(reason);
-  }
+  ) async => OutboxDispatchResult.retry(reason);
 
   Future<void> _refuse(
     ExpenseDeclarationPayload payload, {

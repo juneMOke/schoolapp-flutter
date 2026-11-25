@@ -726,7 +726,7 @@ l'utilisateur.
 |---|---|
 | Redéclarer une refusée déjà accusée, ou deux fois, comptait deux fois l'argent | `_abandon` exige une refusée **vivante** ; sinon la transaction est défaite (`ConflictFailure`) |
 | « Supprimer » offert sur une déclaration : une refusée disparaissait sans régularisation | aucun « Supprimer » sur une déclaration |
-| Une déclaration empoisonnée (1 000 tentatives) restait comptée et gelait ses gestes et la clôture | à la dernière tentative, et sur un payload illisible, elle passe « à régulariser » |
+| Une déclaration empoisonnée (1 000 tentatives) restait comptée et gelait ses gestes | **corrigé puis défait** (remarque du back) : une absence d'accusé n'est pas un refus — le serveur a peut-être la dépense, la redéclarer la compterait deux fois. Elle reste payée, comptée, relançable depuis la feuille des erreurs (le rejeu rend `SUPERSEDED`). Seul un payload illisible, jamais parti, passe « à régulariser » |
 | Viser / signaler / annuler offerts sur une refusée, inconnue du serveur (404, motif d'origine écrasé) | plus aucun geste sauf commenter ; hors de la file « À viser » |
 | Un poste d'avant la v3 a pu ranger des déclarations en demandes | le palier 89 fait repartir le flux `expenses@…` de zéro |
 | Une clôture descendue après l'ouverture de la fiche n'empêchait pas l'annulation | règle rejugée au moment du geste ; pas d'« Annuler » sans la règle |
@@ -741,6 +741,11 @@ l'utilisateur.
 | Note « journée close » affichée avant la réponse de la règle | attend la réponse |
 | Date de la file « À viser » à l'heure de la tablette | heure de l'école |
 | Séparateur du compteur d'onglet en dur | clé l10n |
+
+**Règle (accord back, 2026-11-25)** : « à régulariser » ne vise **que** les
+refus du fond (4xx avec réponse). Une ligne descendue au flux porte un numéro
+et n'est donc jamais redéclarable (`isDeclarationToRegularize` et `_abandon`
+exigent `number == null`) — la seconde parade du back, déjà tenue.
 
 Non retenu : `visaBy*` posé aussi sur un signalement — c'est le contrat
 (« qui a visé ou signalé en dernier »).

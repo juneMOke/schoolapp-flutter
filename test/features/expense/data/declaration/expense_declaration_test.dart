@@ -8,7 +8,6 @@ import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/core/offline/current_user_context.dart';
 import 'package:school_app_flutter/core/offline/id_generator.dart';
 import 'package:school_app_flutter/core/offline/outbox_dao.dart';
-import 'package:school_app_flutter/core/offline/sync_engine.dart';
 import 'package:school_app_flutter/core/offline/outbox_sync_handler.dart';
 import 'package:school_app_flutter/core/storage/encrypted_blob/blob_cipher.dart';
 import 'package:school_app_flutter/core/storage/encrypted_blob/blob_key_service.dart';
@@ -553,20 +552,22 @@ void main() {
   });
 
   test(
-    'à la dernière tentative, la déclaration passe « à régulariser »',
+    'tentatives épuisées : jamais « à régulariser » (accusé peut-être perdu)',
     () async {
       final expense = await declare();
-      when(() => api.submit(any(), any(), any())).thenThrow(_http(503));
+      when(() => api.submit(any(), any(), any())).thenThrow(_http(null));
       final entry = (await OutboxDao(
         db,
       ).byId(ExpenseDeclarationDao.entryId(expense.id)))!;
 
-      final result = await handler.dispatch(
-        entry.copyWith(attempts: SyncEngine.defaultMaxAttempts - 1),
-      );
+      final result = await handler.dispatch(entry.copyWith(attempts: 999));
 
-      expect(result.outcome, OutboxDispatchOutcome.failed);
-      expect((await reload(expense.id)).isDeclarationToRegularize, isTrue);
+      // Le moteur empoisonnera l'entrée ; la ligne reste comptée et jamais
+      // redéclarable : le serveur l'a peut-être déjà.
+      expect(result.outcome, OutboxDispatchOutcome.retry);
+      final after = await reload(expense.id);
+      expect(after.isDeclarationToRegularize, isFalse);
+      expect(after.isFirm, isTrue);
     },
   );
 
