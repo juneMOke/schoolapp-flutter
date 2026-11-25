@@ -1,5 +1,6 @@
 import 'package:school_app_flutter/core/offline/outbox_dao.dart';
 import 'package:school_app_flutter/core/offline/sync_state.dart';
+import 'package:school_app_flutter/features/expense/data/local/expense_declaration_dao.dart';
 import 'package:school_app_flutter/features/expense/data/local/expense_write_dao.dart';
 import 'package:school_app_flutter/features/finance/offline/data/local/payment_in_force_sql.dart';
 import 'package:school_app_flutter/features/payroll/data/local/payroll_outbox.dart';
@@ -44,6 +45,7 @@ class CashPendingProbeSql implements CashPendingProbe {
       _corrections,
       _shopSales,
       _cashExpenses,
+      _cashDeclarations,
       _cashPayroll,
       _cashPayrollCancellations,
       _cashAdvances,
@@ -117,6 +119,19 @@ class CashPendingProbeSql implements CashPendingProbe {
         AND e.funding_source = 'CASH'
         AND e.currency = ?
         AND ${_entryPending("'${ExpenseWriteDao.gestureAggregateType}:' || m.id")}
+      ''';
+
+  /// (d') Déclarations de dépenses en espèces encore à envoyer (v3, F46) :
+  /// l'argent est sorti à la saisie, le serveur ne l'a pas encore vu. Une
+  /// déclaration refusée (« à régulariser ») n'a plus d'entrée `PENDING` et
+  /// ne bloque donc pas la clôture.
+  static String get _cashDeclarations =>
+      '''
+      SELECT COUNT(*) AS c
+      FROM expenses e
+      WHERE e.mode = 'DECLARATION' AND e.funding_source = 'CASH'
+        AND e.currency = ?
+        AND ${_entryPending("'${ExpenseDeclarationDao.aggregateType}:' || e.id")}
       ''';
 
   /// (e) Versements de salaire en espèces encore à envoyer. Leur agrégat est

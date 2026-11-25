@@ -8,7 +8,7 @@ import 'package:school_app_flutter/core/offline/pull_completion_bus.dart';
 import 'package:school_app_flutter/core/offline/pull_coordinator.dart';
 import 'package:school_app_flutter/core/offline/sync_engine.dart';
 import 'package:school_app_flutter/core/offline/sync_meta_dao.dart';
-import 'package:school_app_flutter/core/di/offline_modules/expense_voucher_di.dart';
+import 'package:school_app_flutter/core/di/offline_modules/expense_declaration_di.dart';
 import 'package:school_app_flutter/features/academic_year/domain/repositories/academic_year_context_repository.dart';
 import 'package:school_app_flutter/features/auth/data/local/auth_local_dao.dart';
 import 'package:school_app_flutter/features/expense/data/local/expense_message_dao.dart';
@@ -65,7 +65,6 @@ void registerExpenseOffline(GetIt getIt) {
   getIt.registerLazySingleton<ExpenseSyncApi>(
     () => ExpenseSyncApi(getIt<Dio>()),
   );
-  registerExpenseVoucher(getIt);
 
   // ── Registre local ──────────────────────────────────────────────────────
   getIt.registerLazySingleton<ExpenseRepository>(
@@ -197,6 +196,7 @@ void registerExpenseOffline(GetIt getIt) {
       extras: getIt<Map<String, dynamic>>(),
     ),
   );
+  registerExpenseDeclaration(getIt);
   getIt<SyncEngine>().registerHandler(
     ExpenseGestureOutboxHandler(
       api: getIt<ExpenseSyncApi>(),

@@ -236,7 +236,14 @@ const ModuleAccess kExpensePayAccess = ModuleAccess([Perm.expensePay]);
 /// à qui dépose reviendrait à lui donner le dernier mot sur son propre refus.
 const ModuleAccess kExpenseReopenAccess = ModuleAccess([Perm.expenseReopen]);
 
-/// ⚠️ **Les trois accès du circuit sont délibérément ABSENTS de
+/// Déclarer une dépense déjà payée, photo du bon comprise
+/// (`POST /sync/expenses/declarations`, v3). C'est aussi l'interrupteur de la
+/// déclaration (F35) : sans ce droit, le bon de sortie ne propose que
+/// « pour autorisation ».
+const ModuleAccess kExpenseDeclareAccess = ModuleAccess([Perm.expenseDeclare]);
+
+/// ⚠️ **Les trois accès du circuit — et celui de la déclaration — sont
+/// délibérément ABSENTS de
 /// [kGuardedWriteActions]**, pour la raison exacte de [kRateOverrideAccess] :
 /// aucun rôle du template serveur ne détient encore `expense.decide`,
 /// `expense.pay` ni `expense.reopen`. Les y inscrire ferait rougir — à raison —

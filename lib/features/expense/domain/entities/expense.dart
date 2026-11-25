@@ -142,7 +142,11 @@ class Expense extends Equatable {
 
   /// L'argent est engagé pour de bon (approuvée ou payée). **Toute somme du
   /// module passe par là** — jamais par une égalité de statut.
-  bool get isFirm => status.isFirm;
+  ///
+  /// Une déclaration refusée par le serveur n'en est pas (F45) : le serveur
+  /// ne l'a jamais comptée, et la compter ici ferait lire deux totaux
+  /// différents. L'argent ne compte plus que par sa redéclaration.
+  bool get isFirm => status.isFirm && !isDeclarationToRegularize;
 
   /// Décaissée et soldée — ce qui autorise la ligne « Payée le … ».
   bool get isPaid => status == ExpenseStatus.paid;
@@ -168,6 +172,12 @@ class Expense extends Equatable {
   bool get isRejected => syncState == ExpenseSyncState.rejected;
 
   bool get isDeclaration => mode == ExpenseMode.declaration;
+
+  /// Une déclaration que le serveur a refusée pour de bon, sans jamais
+  /// l'enregistrer (pas de numéro) : l'argent est sorti, le serveur n'en sait
+  /// rien. « À régulariser » (F45), par une redéclaration.
+  bool get isDeclarationToRegularize =>
+      isDeclaration && isRejected && number == null;
 
   /// Une déclaration annulée (F43) : `RETRACTED` en mode déclaration. Elle
   /// se dit « Annulée », jamais « Retirée », et elle est terminale.
