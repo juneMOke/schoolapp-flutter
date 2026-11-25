@@ -1022,6 +1022,13 @@ class AppConstants {
   /// d'envoi.
   static const String staffDocumentsDirectoryName = 'staff_documents';
 
+  /// Clé du secure storage qui scelle les photos des bons de dépense.
+  static const String expenseVouchersKeyStorageKey = 'expense_vouchers_key';
+
+  /// Sous-répertoire où les photos des bons de dépense sont scellées. **Ne se
+  /// renomme pas** : une déclaration en attente d'envoi y relit sa photo.
+  static const String expenseVouchersDirectoryName = 'expense_vouchers';
+
   /// Clé du secure storage qui scelle les photos d'élèves.
   static const String studentPhotosKeyStorageKey = 'student_photos_key';
 
@@ -1220,6 +1227,16 @@ class AppConstants {
   /// **Les types ne passent pas par ici** : ils descendent à la racine de
   /// [syncReferentialEndpoint] (`expenseTypes`), servis à tout compte.
   static const String syncExpensesEndpoint = '/api/v1/sync/expenses';
+
+  /// Déclarer une dépense, photo du bon comprise (multipart `declaration` +
+  /// `voucher`, v3).
+  static const String syncExpenseDeclarationsEndpoint =
+      '/api/v1/sync/expenses/declarations';
+
+  /// Octets de la photo du bon d'une dépense (`ETag`, la photo ne change
+  /// jamais ; `404` sans photo).
+  static const String expenseVoucherEndpoint =
+      '/api/v1/expenses/{expenseId}/voucher';
 
   /// Retrait (`deleted: true`) ou restauration (`deleted: false`) d'une
   /// dépense — le « Annuler » du toast. Exige `expense.delete` : saisir ne

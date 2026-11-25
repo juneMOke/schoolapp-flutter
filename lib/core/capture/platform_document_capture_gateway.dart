@@ -48,13 +48,19 @@ class PlatformDocumentCaptureGateway implements DocumentCaptureGateway {
     DocumentCapturePolicy policy = DocumentCapturePolicy.staffDocument,
   }) {
     return switch (mode) {
-      DocumentCaptureMode.scan => _pickImage(ImageSource.camera),
-      DocumentCaptureMode.importImage => _pickImage(ImageSource.gallery),
+      DocumentCaptureMode.scan => _pickImage(ImageSource.camera, policy),
+      DocumentCaptureMode.importImage => _pickImage(
+        ImageSource.gallery,
+        policy,
+      ),
       DocumentCaptureMode.importPdf => _pickFile(policy),
     };
   }
 
-  Future<RawCapture?> _pickImage(ImageSource source) async {
+  Future<RawCapture?> _pickImage(
+    ImageSource source,
+    DocumentCapturePolicy policy,
+  ) async {
     // Plateforme sans prise de vue (bureau) : l'appel lèverait une erreur
     // générique, qui se lirait comme une lecture ratée.
     if (source == ImageSource.camera &&
@@ -65,9 +71,9 @@ class PlatformDocumentCaptureGateway implements DocumentCaptureGateway {
     try {
       file = await _imagePicker.pickImage(
         source: source,
-        maxWidth: DocumentCapturePolicy.maxImageDimension,
-        maxHeight: DocumentCapturePolicy.maxImageDimension,
-        imageQuality: DocumentCapturePolicy.jpegQuality,
+        maxWidth: policy.imageMaxDimension,
+        maxHeight: policy.imageMaxDimension,
+        imageQuality: policy.imageJpegQuality,
         // Respecté sur iOS seulement ; voir la note sur Android plus haut.
         requestFullMetadata: false,
       );
