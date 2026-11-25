@@ -23,6 +23,10 @@ class ExpenseTypeDateFields extends StatelessWidget {
   final ValueChanged<String?> onTypeChanged;
   final ValueChanged<DateTime?> onDateChanged;
 
+  /// Faux pour une déclaration : sa date est le jour du décaissement, saisi
+  /// à part (F47).
+  final bool showDate;
+
   const ExpenseTypeDateFields({
     super.key,
     required this.types,
@@ -31,6 +35,7 @@ class ExpenseTypeDateFields extends StatelessWidget {
     required this.today,
     required this.onTypeChanged,
     required this.onDateChanged,
+    this.showDate = true,
   });
 
   @override
@@ -60,20 +65,21 @@ class ExpenseTypeDateFields extends StatelessWidget {
             ],
           ),
         ),
-        ConstrainedBox(
-          constraints: const BoxConstraints(
-            minWidth: AppDimensions.expenseFormDateMinWidth,
-            maxWidth: AppDimensions.expenseFormDateMaxWidth,
+        if (showDate)
+          ConstrainedBox(
+            constraints: const BoxConstraints(
+              minWidth: AppDimensions.expenseFormDateMinWidth,
+              maxWidth: AppDimensions.expenseFormDateMaxWidth,
+            ),
+            child: EteeloDateInput(
+              label: l10n.expenseFormDate,
+              required: true,
+              value: date,
+              onChanged: onDateChanged,
+              firstDate: DateTime(today.year - 10),
+              lastDate: today,
+            ),
           ),
-          child: EteeloDateInput(
-            label: l10n.expenseFormDate,
-            required: true,
-            value: date,
-            onChanged: onDateChanged,
-            firstDate: DateTime(today.year - 10),
-            lastDate: today,
-          ),
-        ),
       ],
     );
   }

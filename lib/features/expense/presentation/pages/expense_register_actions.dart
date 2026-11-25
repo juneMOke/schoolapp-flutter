@@ -9,7 +9,9 @@ import 'package:school_app_flutter/features/expense/domain/entities/expense_staf
 import 'package:school_app_flutter/features/expense/domain/entities/expense_gesture.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_type.dart';
 import 'package:school_app_flutter/features/expense/presentation/bloc/expense_register_cubit.dart';
+import 'package:school_app_flutter/features/expense/presentation/helpers/expense_form_outcome.dart';
 import 'package:school_app_flutter/features/expense/presentation/helpers/expense_form_seed.dart';
+import 'package:school_app_flutter/features/expense/presentation/pages/expense_declaration_actions.dart';
 import 'package:school_app_flutter/features/expense/presentation/helpers/expense_advance_pay_flow.dart';
 import 'package:school_app_flutter/features/expense/presentation/helpers/expense_labels.dart';
 import 'package:school_app_flutter/features/expense/presentation/helpers/expense_money_text.dart';
@@ -77,7 +79,8 @@ class ExpenseRegisterActions {
         ? null
         : ExpenseStaffAdvanceBridge.typeOf(cubit.state.snapshot.activeTypes);
     var bridged = false;
-    final draft = await showExpenseFormDialog(
+    final declaration = ExpenseDeclarationActions(context);
+    final outcome = await showExpenseFormDialog(
       context,
       seed: seed,
       types: [..._formTypes(seed.typeId), ?advanceType],
@@ -86,6 +89,8 @@ class ExpenseRegisterActions {
       recordedByName: _agentName(),
       staffAdvanceTypeId: advanceType?.id,
       onStaffAdvance: () => bridged = true,
+      captureVoucher: seed.isEdit ? null : declaration.voucherCapture,
+      visaOnDeclare: declaration.visaOnDeclare,
     );
     if (!context.mounted) return null;
     if (bridged) {
@@ -96,7 +101,13 @@ class ExpenseRegisterActions {
       if (context.mounted) _notifyLocalWrite();
       return null;
     }
-    if (draft == null) return null;
+    final draft = switch (outcome) {
+      null => null,
+      ExpenseFormRequest(:final draft) => draft,
+      ExpenseFormDeclaration(:final draft) =>
+        await declaration.declare(draft).then((_) => null),
+    };
+    if (draft == null || !context.mounted) return null;
     final result = await cubit.save(draft);
     if (!context.mounted) return null;
     return result.fold(

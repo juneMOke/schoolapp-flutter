@@ -11862,6 +11862,79 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
+  String get expenseModeLabel => 'Cette dépense est';
+
+  @override
+  String get expenseModeSemantics => 'Mode de la dépense';
+
+  @override
+  String get expenseModeDeclaration => 'Déjà payée';
+
+  @override
+  String get expenseModeAuthorization => 'Pour autorisation';
+
+  @override
+  String get expenseModeDeclarationHint =>
+      'L\'argent est déjà sorti : vous la déclarez avec la photo du bon, et le promoteur la visera ensuite. Pour demander l\'accord avant de payer, choisissez « Pour autorisation ».';
+
+  @override
+  String get expenseModeAuthorizationHint =>
+      'Une demande, accordée avant d\'être payée. Si l\'argent est déjà sorti, choisissez « Déjà payée ».';
+
+  @override
+  String get expenseDisbursedOnLabel => 'Payée le';
+
+  @override
+  String get expenseDisbursedAtLabel => 'À';
+
+  @override
+  String get expenseVoucherLabel => 'Photo du bon';
+
+  @override
+  String get expenseVoucherAdd => 'Ajouter la photo du bon';
+
+  @override
+  String get expenseVoucherReplace => 'Remplacer la photo';
+
+  @override
+  String get expenseVoucherRequired =>
+      'La photo du bon est obligatoire pour déclarer.';
+
+  @override
+  String expenseVoucherSize(int size) {
+    return '$size Ko';
+  }
+
+  @override
+  String get expenseVoucherCaptureTitle => 'Bon de sortie';
+
+  @override
+  String get expenseDeclarationNoteLabel => 'Accord reçu';
+
+  @override
+  String get expenseDeclarationNotePlaceholder =>
+      'Accord du promoteur par WhatsApp, de vive voix…';
+
+  @override
+  String get expenseFormDeclareTitle => 'Déclarer une dépense';
+
+  @override
+  String get expenseFormDeclareSubtitle =>
+      'Une dépense déjà payée, que le promoteur visera.';
+
+  @override
+  String get expenseFormDeclareSubmit => 'Déclarer';
+
+  @override
+  String expenseToastDeclared(String amount) {
+    return 'Dépense déclarée : $amount.';
+  }
+
+  @override
+  String get expenseDeclareFailed =>
+      'La déclaration n\'a pas pu être enregistrée sur cet appareil.';
+
+  @override
   String get expenseGestureRefused =>
       'Ce geste n\'est plus possible sur cette demande : son état a changé.';
 

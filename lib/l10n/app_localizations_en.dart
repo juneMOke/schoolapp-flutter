@@ -11762,6 +11762,79 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get expenseModeLabel => 'This expense is';
+
+  @override
+  String get expenseModeSemantics => 'Expense mode';
+
+  @override
+  String get expenseModeDeclaration => 'Already paid';
+
+  @override
+  String get expenseModeAuthorization => 'For approval';
+
+  @override
+  String get expenseModeDeclarationHint =>
+      'The money is already out: declare it with the voucher photo, and the promoter signs it off afterwards. To ask for approval before paying, choose “For approval”.';
+
+  @override
+  String get expenseModeAuthorizationHint =>
+      'A request, approved before it is paid. If the money is already out, choose “Already paid”.';
+
+  @override
+  String get expenseDisbursedOnLabel => 'Paid on';
+
+  @override
+  String get expenseDisbursedAtLabel => 'At';
+
+  @override
+  String get expenseVoucherLabel => 'Voucher photo';
+
+  @override
+  String get expenseVoucherAdd => 'Add the voucher photo';
+
+  @override
+  String get expenseVoucherReplace => 'Replace the photo';
+
+  @override
+  String get expenseVoucherRequired =>
+      'The voucher photo is required to declare.';
+
+  @override
+  String expenseVoucherSize(int size) {
+    return '$size KB';
+  }
+
+  @override
+  String get expenseVoucherCaptureTitle => 'Payment voucher';
+
+  @override
+  String get expenseDeclarationNoteLabel => 'Approval received';
+
+  @override
+  String get expenseDeclarationNotePlaceholder =>
+      'Promoter\'s approval by WhatsApp, in person…';
+
+  @override
+  String get expenseFormDeclareTitle => 'Declare an expense';
+
+  @override
+  String get expenseFormDeclareSubtitle =>
+      'An expense already paid, for the promoter to sign off.';
+
+  @override
+  String get expenseFormDeclareSubmit => 'Declare';
+
+  @override
+  String expenseToastDeclared(String amount) {
+    return 'Expense declared: $amount.';
+  }
+
+  @override
+  String get expenseDeclareFailed =>
+      'The declaration could not be saved on this device.';
+
+  @override
   String get expenseGestureRefused =>
       'That gesture is no longer possible on this request: its state has changed.';
 

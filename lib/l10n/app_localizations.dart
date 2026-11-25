@@ -18542,6 +18542,132 @@ abstract class AppLocalizations {
   /// **'Declaration {name} cancelled.'**
   String expenseToastDeclarationCancelled(String name);
 
+  /// No description provided for @expenseModeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'This expense is'**
+  String get expenseModeLabel;
+
+  /// No description provided for @expenseModeSemantics.
+  ///
+  /// In en, this message translates to:
+  /// **'Expense mode'**
+  String get expenseModeSemantics;
+
+  /// No description provided for @expenseModeDeclaration.
+  ///
+  /// In en, this message translates to:
+  /// **'Already paid'**
+  String get expenseModeDeclaration;
+
+  /// No description provided for @expenseModeAuthorization.
+  ///
+  /// In en, this message translates to:
+  /// **'For approval'**
+  String get expenseModeAuthorization;
+
+  /// No description provided for @expenseModeDeclarationHint.
+  ///
+  /// In en, this message translates to:
+  /// **'The money is already out: declare it with the voucher photo, and the promoter signs it off afterwards. To ask for approval before paying, choose “For approval”.'**
+  String get expenseModeDeclarationHint;
+
+  /// No description provided for @expenseModeAuthorizationHint.
+  ///
+  /// In en, this message translates to:
+  /// **'A request, approved before it is paid. If the money is already out, choose “Already paid”.'**
+  String get expenseModeAuthorizationHint;
+
+  /// No description provided for @expenseDisbursedOnLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Paid on'**
+  String get expenseDisbursedOnLabel;
+
+  /// No description provided for @expenseDisbursedAtLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'At'**
+  String get expenseDisbursedAtLabel;
+
+  /// No description provided for @expenseVoucherLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Voucher photo'**
+  String get expenseVoucherLabel;
+
+  /// No description provided for @expenseVoucherAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Add the voucher photo'**
+  String get expenseVoucherAdd;
+
+  /// No description provided for @expenseVoucherReplace.
+  ///
+  /// In en, this message translates to:
+  /// **'Replace the photo'**
+  String get expenseVoucherReplace;
+
+  /// No description provided for @expenseVoucherRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'The voucher photo is required to declare.'**
+  String get expenseVoucherRequired;
+
+  /// No description provided for @expenseVoucherSize.
+  ///
+  /// In en, this message translates to:
+  /// **'{size} KB'**
+  String expenseVoucherSize(int size);
+
+  /// No description provided for @expenseVoucherCaptureTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment voucher'**
+  String get expenseVoucherCaptureTitle;
+
+  /// No description provided for @expenseDeclarationNoteLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Approval received'**
+  String get expenseDeclarationNoteLabel;
+
+  /// No description provided for @expenseDeclarationNotePlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Promoter\'s approval by WhatsApp, in person…'**
+  String get expenseDeclarationNotePlaceholder;
+
+  /// No description provided for @expenseFormDeclareTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Declare an expense'**
+  String get expenseFormDeclareTitle;
+
+  /// No description provided for @expenseFormDeclareSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'An expense already paid, for the promoter to sign off.'**
+  String get expenseFormDeclareSubtitle;
+
+  /// No description provided for @expenseFormDeclareSubmit.
+  ///
+  /// In en, this message translates to:
+  /// **'Declare'**
+  String get expenseFormDeclareSubmit;
+
+  /// No description provided for @expenseToastDeclared.
+  ///
+  /// In en, this message translates to:
+  /// **'Expense declared: {amount}.'**
+  String expenseToastDeclared(String amount);
+
+  /// No description provided for @expenseDeclareFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The declaration could not be saved on this device.'**
+  String get expenseDeclareFailed;
+
   /// No description provided for @expenseGestureRefused.
   ///
   /// In en, this message translates to:

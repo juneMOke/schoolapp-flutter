@@ -9,10 +9,14 @@ class ExpenseFormFooter extends StatelessWidget {
   final bool isEdit;
   final VoidCallback? onSubmit;
 
+  /// Le libellé d'envoi quand ce n'est ni créer ni modifier (« Déclarer »).
+  final String? submitLabel;
+
   const ExpenseFormFooter({
     super.key,
     required this.isEdit,
     required this.onSubmit,
+    this.submitLabel,
   });
 
   @override
@@ -31,9 +35,11 @@ class ExpenseFormFooter extends StatelessWidget {
             fullWidth: false,
           ),
           EteeloButton.primary(
-            label: isEdit
-                ? l10n.expenseFormSaveEdit
-                : l10n.expenseFormSaveCreate,
+            label:
+                submitLabel ??
+                (isEdit
+                    ? l10n.expenseFormSaveEdit
+                    : l10n.expenseFormSaveCreate),
             icon: Icons.check,
             onPressed: onSubmit,
             fullWidth: false,
