@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/components/grid/eteelo_grid_view.dart';
 import 'package:school_app_flutter/core/components/skeletons/eteelo_list_skeleton.dart';
-import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_button.dart';
@@ -120,7 +119,10 @@ class ClosingDayView extends StatelessWidget {
         EteeloGridView(
           itemCount: day.registers.length,
           padding: EdgeInsets.zero,
-          minItemWidth: AppDimensions.treasuryDayCardMinWidth,
+          // Deux cartes côte à côte seulement si chacune garde son registre
+          // en colonnes (reçu, élève, frais) : à 340, un portable de 1 366
+          // les affichait sur deux lignes, et le N° de reçu disparaissait.
+          minItemWidth: DayCard.ledgerColumnsMinWidth,
           spacing: AppSpacing.lg,
           itemBuilder: (context, index) {
             final summary = day.registers[index];

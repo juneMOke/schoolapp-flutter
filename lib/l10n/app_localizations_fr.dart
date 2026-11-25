@@ -22495,6 +22495,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get treasuryRetry => 'Réessayer';
 
   @override
+  String get treasuryRefreshTooltip => 'Relire l\'écran (F5)';
+
+  @override
   String treasuryErrorIncident(String code) {
     return 'Code incident : $code';
   }
@@ -23530,6 +23533,9 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get treasuryPeriodYear => 'Cette année';
+
+  @override
+  String get treasuryPeriodYearShort => 'Année';
 
   @override
   String get treasuryPeriodCustom => 'Période';

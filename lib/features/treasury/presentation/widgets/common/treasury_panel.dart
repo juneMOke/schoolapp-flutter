@@ -6,8 +6,8 @@ import 'package:school_app_flutter/core/theme/tokens/app_spacing.dart';
 import 'package:school_app_flutter/core/theme/tokens/app_typography.dart';
 import 'package:school_app_flutter/features/treasury/presentation/helpers/treasury_tones.dart';
 
-/// Un panneau blanc de la trésorerie (A3, A5) : rayon 16, pad 20, ombre
-/// douce.
+/// Un panneau blanc de la trésorerie (A3, A5) : rayon 16, pad 20 (16 sur un
+/// téléphone étroit, où chaque dp va à la courbe), ombre douce.
 class TreasuryPanel extends StatelessWidget {
   final Widget child;
 
@@ -15,7 +15,11 @@ class TreasuryPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-    padding: const EdgeInsets.all(AppDimensions.treasuryPanelPadding),
+    padding: EdgeInsets.all(
+      MediaQuery.sizeOf(context).width < AppBreakpoints.phoneNarrowMax
+          ? AppDimensions.treasuryPanelPaddingCompact
+          : AppDimensions.treasuryPanelPadding,
+    ),
     decoration: BoxDecoration(
       color: AppColors.surfaceRaised,
       borderRadius: BorderRadius.circular(AppDimensions.treasuryPanelRadius),

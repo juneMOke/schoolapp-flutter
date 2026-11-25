@@ -22339,6 +22339,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get treasuryRetry => 'Try again';
 
   @override
+  String get treasuryRefreshTooltip => 'Reload the screen (F5)';
+
+  @override
   String treasuryErrorIncident(String code) {
     return 'Incident code: $code';
   }
@@ -23370,6 +23373,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get treasuryPeriodYear => 'This year';
+
+  @override
+  String get treasuryPeriodYearShort => 'Year';
 
   @override
   String get treasuryPeriodCustom => 'Range';

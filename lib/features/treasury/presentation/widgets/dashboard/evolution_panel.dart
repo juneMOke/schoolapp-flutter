@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/constants/app_breakpoints.dart';
+import 'package:school_app_flutter/core/device/pointer_kind_scope.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/components/controls/segmented_tab_filter.dart';
 import 'package:school_app_flutter/core/components/grid/eteelo_grid_view.dart';
@@ -42,6 +44,11 @@ class EvolutionPanel extends StatelessWidget {
     return BlocBuilder<TreasuryEvolutionCubit, TreasuryEvolutionState>(
       builder: (context, state) {
         final cubit = context.read<TreasuryEvolutionCubit>();
+        // Libellés courts sur un écran étroit, comme le filtre de la
+        // Clôture : les cinq périodes tiennent alors sur deux rangées.
+        final short =
+            MediaQuery.sizeOf(context).width <
+            AppBreakpoints.periodFilterShortLabelsMax;
         return Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -58,22 +65,30 @@ class EvolutionPanel extends StatelessWidget {
               wrap: true,
               options: [
                 SegmentedTabOption(
-                  label: l10n.treasuryPeriodToday,
+                  label: short
+                      ? l10n.treasuryScopeDayShort
+                      : l10n.treasuryPeriodToday,
                   value: EvolutionPeriod.today,
                   icon: Icons.schedule,
                 ),
                 SegmentedTabOption(
-                  label: l10n.treasuryPeriodWeek,
+                  label: short
+                      ? l10n.treasuryScopeWeekShort
+                      : l10n.treasuryPeriodWeek,
                   value: EvolutionPeriod.week,
                   icon: Icons.calendar_today_outlined,
                 ),
                 SegmentedTabOption(
-                  label: l10n.treasuryPeriodMonth,
+                  label: short
+                      ? l10n.treasuryScopeMonthShort
+                      : l10n.treasuryPeriodMonth,
                   value: EvolutionPeriod.month,
                   icon: Icons.date_range,
                 ),
                 SegmentedTabOption(
-                  label: l10n.treasuryPeriodYear,
+                  label: short
+                      ? l10n.treasuryPeriodYearShort
+                      : l10n.treasuryPeriodYear,
                   value: EvolutionPeriod.year,
                   icon: Icons.event_available,
                 ),
@@ -123,7 +138,7 @@ class EvolutionPanel extends StatelessWidget {
             evolution: evolution,
             // Au doigt, un appui choisit le point ; à la souris, le clic
             // l'ouvre (SelectableBalanceLine).
-            onPointHint: treasuryTypesDates
+            onPointHint: PointerKindScope.usesMouseOf(context)
                 ? l10n.treasuryChartOpenHintMouse
                 : l10n.treasuryChartOpenHint,
           ),

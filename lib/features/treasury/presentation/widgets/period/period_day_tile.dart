@@ -13,11 +13,14 @@ import 'package:school_app_flutter/features/treasury/presentation/widgets/closin
 import 'package:school_app_flutter/features/treasury/presentation/helpers/treasury_tones.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
-/// Les colonnes du tableau « Jour par jour » (B7) : JOURNÉE (200) · une
-/// colonne par caisse (280 au moins) · CLÔTURE (130, à droite).
+/// Les colonnes du tableau « Jour par jour » (B7) : JOURNÉE (130) · une
+/// colonne par caisse (200 au moins) · CLÔTURE (150, à droite). Deux caisses
+/// tiennent en 696 : la période garde son tableau entier à côté du volet de
+/// la journée (`AppBreakpoints.treasuryPeriodSideBySideMin`). Une cellule de
+/// caisse passe sur deux lignes plutôt que de déborder.
 abstract final class PeriodDayColumns {
-  static const double day = 150;
-  static const double register = 240;
+  static const double day = 130;
+  static const double register = 200;
   static const double closure = 150;
 
   static List<double?> widths(int registers) => [
@@ -150,35 +153,43 @@ class _Cell extends StatelessWidget {
     final currency = register.currency;
     final gap = cell.gapInCents;
     final justification = cell.justification;
-    final line = Text.rich(
-      TextSpan(
-        style: AppTextStyles.moneyTabular,
-        children: [
-          TextSpan(
-            text: TreasuryFormat.signedMoney(cell.inflowsInCents, currency),
-            style: const TextStyle(color: AppColors.treasuryCdfInk),
-          ),
-          const TextSpan(text: '  '),
-          TextSpan(
-            text: TreasuryFormat.signedMoney(-cell.outflowsInCents, currency),
-            style: const TextStyle(color: AppColors.treasuryOutflowInk),
-          ),
-          TextSpan(
-            text:
-                '  = ${TreasuryFormat.money(cell.closingBalanceInCents, currency)}',
-            style: const TextStyle(fontWeight: FontWeight.w700),
-          ),
-          if (gap != 0)
-            TextSpan(
-              text:
-                  '  ${l10n.treasuryCellGap(TreasuryFormat.signedMoney(gap, currency))}',
-              style: AppTypography.labelSmall.copyWith(
-                color: AppColors.error,
-                fontWeight: FontWeight.w600,
-              ),
+    // Chaque montant reste entier : ses milliers sont séparés par une espace
+    // insécable (`MoneyFormat.nbsp`), et un `Text.rich` d'un seul tenant le
+    // couperait au milieu du chiffre dans une colonne étroite (×1,3). Les
+    // montants passent à la ligne entre eux ; un montant plus large que la
+    // colonne se réduit au lieu de se couper.
+    Widget amount(String text, TextStyle style) => FittedBox(
+      fit: BoxFit.scaleDown,
+      alignment: AlignmentDirectional.centerStart,
+      child: Text(text, softWrap: false, style: style),
+    );
+    final money = AppTextStyles.moneyTabular;
+    final line = Wrap(
+      spacing: AppSpacing.sm,
+      runSpacing: AppSpacing.xs / 2,
+      crossAxisAlignment: WrapCrossAlignment.center,
+      children: [
+        amount(
+          TreasuryFormat.signedMoney(cell.inflowsInCents, currency),
+          money.copyWith(color: AppColors.treasuryCdfInk),
+        ),
+        amount(
+          TreasuryFormat.signedMoney(-cell.outflowsInCents, currency),
+          money.copyWith(color: AppColors.treasuryOutflowInk),
+        ),
+        amount(
+          '= ${TreasuryFormat.money(cell.closingBalanceInCents, currency)}',
+          money.copyWith(fontWeight: FontWeight.w700),
+        ),
+        if (gap != 0)
+          amount(
+            l10n.treasuryCellGap(TreasuryFormat.signedMoney(gap, currency)),
+            AppTypography.labelSmall.copyWith(
+              color: AppColors.error,
+              fontWeight: FontWeight.w600,
             ),
-        ],
-      ),
+          ),
+      ],
     );
     if (gap == 0 || justification == null) return line;
     // La justification se lit sur la ligne : une infobulle ne s'ouvre pas au

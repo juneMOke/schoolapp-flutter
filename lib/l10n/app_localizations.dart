@@ -34368,6 +34368,12 @@ abstract class AppLocalizations {
   /// **'Try again'**
   String get treasuryRetry;
 
+  /// No description provided for @treasuryRefreshTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Reload the screen (F5)'**
+  String get treasuryRefreshTooltip;
+
   /// No description provided for @treasuryErrorIncident.
   ///
   /// In en, this message translates to:
@@ -35969,6 +35975,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'This year'**
   String get treasuryPeriodYear;
+
+  /// No description provided for @treasuryPeriodYearShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Year'**
+  String get treasuryPeriodYearShort;
 
   /// No description provided for @treasuryPeriodCustom.
   ///

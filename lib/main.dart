@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:school_app_flutter/core/device/pointer_kind_scope.dart';
 import 'package:school_app_flutter/features/desktop_update/desktop_update_di.dart';
 import 'package:school_app_flutter/features/desktop_update/presentation/widgets/desktop_update_scope.dart';
 import 'package:school_app_flutter/core/attachments/ephemeral_attachment_cache.dart';
@@ -407,26 +408,28 @@ class _MyAppState extends State<MyApp> {
             // voile compris.
             builder: (context, child) => MediaQuery.withClampedTextScaling(
               maxScaleFactor: AppTypography.maxTextScaleFactor,
-              child: EnvironmentBanner(
-                config: getIt<EnvConfig>(),
-                child: WebOnlineGate(
-                  connectivity: getIt<ConnectivityService>(),
-                  child: AppUpdateScope(
-                    child: DesktopUpdateScope(
-                      enabled: getIt.isRegistered<DesktopUpdateContext>(),
-                      router: _router,
-                      createCubit: () => createDesktopUpdateCubit(
-                        getIt,
-                        getIt<DesktopUpdateContext>(),
-                        syncNow: _syncStatusCubit.syncNow,
-                      ),
-                      onQuit: quitDesktopApp,
-                      child: TabSessionSync(
-                        child: PersonPhotoScope(
-                          source: getIt<StudentPhotoRegistry>(),
-                          child: PaymentAnomalyBanner(
-                            child: SessionDegradationBanner(
-                              child: child ?? const SizedBox.shrink(),
+              child: PointerKindScope(
+                child: EnvironmentBanner(
+                  config: getIt<EnvConfig>(),
+                  child: WebOnlineGate(
+                    connectivity: getIt<ConnectivityService>(),
+                    child: AppUpdateScope(
+                      child: DesktopUpdateScope(
+                        enabled: getIt.isRegistered<DesktopUpdateContext>(),
+                        router: _router,
+                        createCubit: () => createDesktopUpdateCubit(
+                          getIt,
+                          getIt<DesktopUpdateContext>(),
+                          syncNow: _syncStatusCubit.syncNow,
+                        ),
+                        onQuit: quitDesktopApp,
+                        child: TabSessionSync(
+                          child: PersonPhotoScope(
+                            source: getIt<StudentPhotoRegistry>(),
+                            child: PaymentAnomalyBanner(
+                              child: SessionDegradationBanner(
+                                child: child ?? const SizedBox.shrink(),
+                              ),
                             ),
                           ),
                         ),
