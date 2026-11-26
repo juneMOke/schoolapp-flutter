@@ -18578,17 +18578,17 @@ abstract class AppLocalizations {
   /// **'A request, approved before it is paid. If the money is already out, choose “Already paid”.'**
   String get expenseModeAuthorizationHint;
 
-  /// No description provided for @expenseDisbursedOnLabel.
+  /// No description provided for @expenseDisbursedNowNotice.
   ///
   /// In en, this message translates to:
-  /// **'Paid on'**
-  String get expenseDisbursedOnLabel;
+  /// **'Paid now: the disbursement time is the moment you save it. It cannot be changed.'**
+  String get expenseDisbursedNowNotice;
 
-  /// No description provided for @expenseDisbursedAtLabel.
+  /// No description provided for @expenseDisbursedRedeclaredNotice.
   ///
   /// In en, this message translates to:
-  /// **'At'**
-  String get expenseDisbursedAtLabel;
+  /// **'Paid on {date} at {time}: the original disbursement time is kept.'**
+  String expenseDisbursedRedeclaredNotice(String date, String time);
 
   /// No description provided for @expenseVoucherLabel.
   ///

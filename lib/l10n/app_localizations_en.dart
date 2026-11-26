@@ -11782,10 +11782,13 @@ class AppLocalizationsEn extends AppLocalizations {
       'A request, approved before it is paid. If the money is already out, choose “Already paid”.';
 
   @override
-  String get expenseDisbursedOnLabel => 'Paid on';
+  String get expenseDisbursedNowNotice =>
+      'Paid now: the disbursement time is the moment you save it. It cannot be changed.';
 
   @override
-  String get expenseDisbursedAtLabel => 'At';
+  String expenseDisbursedRedeclaredNotice(String date, String time) {
+    return 'Paid on $date at $time: the original disbursement time is kept.';
+  }
 
   @override
   String get expenseVoucherLabel => 'Voucher photo';

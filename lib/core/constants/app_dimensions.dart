@@ -709,11 +709,9 @@ class AppDimensions {
   static const expenseFormAmountMaxWidth = 240.0;
   static const expenseFormFundingMinWidth = 200.0;
   static const expenseFormFundingMaxWidth = 280.0;
-  // La déclaration (v3) : l'heure du décaissement à côté de son jour, et la
-  // vignette de la photo du bon — assez haute pour reconnaître le bon,
-  // assez basse pour laisser le formulaire lisible sur téléphone.
-  static const expenseFormTimeMinWidth = 140.0;
-  static const expenseFormTimeMaxWidth = 180.0;
+  // La déclaration (v3) : la vignette de la photo du bon — assez haute pour
+  // reconnaître le bon, assez basse pour laisser le formulaire lisible sur
+  // téléphone.
   static const expenseVoucherThumbHeight = 120.0;
   // La photo du bon dans la fiche : le bon se lit sans zoom sur tablette.
   static const expenseVoucherDetailHeight = 360.0;

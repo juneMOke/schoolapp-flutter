@@ -11882,10 +11882,13 @@ class AppLocalizationsFr extends AppLocalizations {
       'Une demande, accordée avant d\'être payée. Si l\'argent est déjà sorti, choisissez « Déjà payée ».';
 
   @override
-  String get expenseDisbursedOnLabel => 'Payée le';
+  String get expenseDisbursedNowNotice =>
+      'Payée maintenant : l\'heure du décaissement est celle de l\'enregistrement. Elle ne se modifie pas.';
 
   @override
-  String get expenseDisbursedAtLabel => 'À';
+  String expenseDisbursedRedeclaredNotice(String date, String time) {
+    return 'Payée le $date à $time : l\'heure du décaissement d\'origine est reprise.';
+  }
 
   @override
   String get expenseVoucherLabel => 'Photo du bon';
