@@ -8104,6 +8104,7 @@
   "@expenseToastDeclared": {"placeholders": {"amount": {"type": "String"}}},
   "expenseDeclareFailed": "La déclaration n'a pas pu être enregistrée sur cet appareil.",
   "expenseFlagTitle": "Signaler cette déclaration",
+  "expenseFlagDialogHint": "La dépense reste payée et comptée en caisse. Le motif s'affiche sur la fiche, pour la caissière.",
   "expenseFlagReasonLabel": "Motif du signalement",
   "expenseFlagReasonHint": "Ce qui ne va pas, pour la caissière",
   "expenseFlagReasonMissing": "Le motif est obligatoire pour signaler.",

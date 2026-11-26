@@ -11841,6 +11841,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get expenseFlagTitle => 'Flag this declaration';
 
   @override
+  String get expenseFlagDialogHint =>
+      'The expense stays paid and counted in the cash register. The reason shows on its record, for the cashier.';
+
+  @override
   String get expenseFlagReasonLabel => 'Reason for the flag';
 
   @override

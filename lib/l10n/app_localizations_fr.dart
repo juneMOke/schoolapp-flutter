@@ -11941,6 +11941,10 @@ class AppLocalizationsFr extends AppLocalizations {
   String get expenseFlagTitle => 'Signaler cette déclaration';
 
   @override
+  String get expenseFlagDialogHint =>
+      'La dépense reste payée et comptée en caisse. Le motif s\'affiche sur la fiche, pour la caissière.';
+
+  @override
   String get expenseFlagReasonLabel => 'Motif du signalement';
 
   @override

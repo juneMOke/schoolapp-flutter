@@ -18674,6 +18674,12 @@ abstract class AppLocalizations {
   /// **'Flag this declaration'**
   String get expenseFlagTitle;
 
+  /// No description provided for @expenseFlagDialogHint.
+  ///
+  /// In en, this message translates to:
+  /// **'The expense stays paid and counted in the cash register. The reason shows on its record, for the cashier.'**
+  String get expenseFlagDialogHint;
+
   /// No description provided for @expenseFlagReasonLabel.
   ///
   /// In en, this message translates to:

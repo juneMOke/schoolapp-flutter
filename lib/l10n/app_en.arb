@@ -7893,6 +7893,7 @@
   "@expenseToastDeclared": {"placeholders": {"amount": {"type": "String"}}},
   "expenseDeclareFailed": "The declaration could not be saved on this device.",
   "expenseFlagTitle": "Flag this declaration",
+  "expenseFlagDialogHint": "The expense stays paid and counted in the cash register. The reason shows on its record, for the cashier.",
   "expenseFlagReasonLabel": "Reason for the flag",
   "expenseFlagReasonHint": "What is wrong, for the cashier",
   "expenseFlagReasonMissing": "A reason is required to flag.",
