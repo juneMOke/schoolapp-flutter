@@ -15,6 +15,7 @@ import 'package:school_app_flutter/features/expense/presentation/helpers/expense
 import 'package:school_app_flutter/features/expense/presentation/projections/expense_queue_view.dart';
 import 'package:school_app_flutter/features/expense/presentation/widgets/common/expense_status_badge.dart';
 import 'package:school_app_flutter/features/expense/presentation/widgets/detail/expense_detail_dialog.dart';
+import 'package:school_app_flutter/features/expense/presentation/widgets/detail/expense_flag_dialog.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 final _png = base64Decode(
@@ -234,13 +235,79 @@ void main() {
       await tester.tap(find.text('Signaler'));
       await tester.pumpAndSettle();
       expect(find.text('Signaler cette déclaration'), findsOneWidget);
-      // Le bouton du panneau précède celui du pied dans l'arbre.
-      await tester.tap(find.text('Signaler').first);
+      expect(find.byType(ExpenseFlagDialog), findsOneWidget);
+      // La modale est au-dessus : son bouton est le dernier de l'arbre.
+      await tester.tap(find.text('Signaler').last);
       await tester.pumpAndSettle();
       expect(
         find.text('Le motif est obligatoire pour signaler.'),
         findsOneWidget,
       );
+    });
+
+    testWidgets('signaler : le motif saisi rend le geste, fiche fermée', (
+      tester,
+    ) async {
+      final outcomes = <ExpenseDetailOutcome?>[];
+      await open(
+        tester,
+        _declared(),
+        image: ExpenseVoucherImage(bytes: _png, contentType: 'image/png'),
+        outcomes: outcomes,
+      )();
+
+      await tester.tap(find.text('Signaler'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Bon illisible ou incomplet'));
+      await tester.pump();
+      await tester.tap(find.text('Signaler').last);
+      await tester.pumpAndSettle();
+
+      final outcome = outcomes.single! as ExpenseDetailGesture;
+      expect(outcome.gesture, ExpenseGesture.flag);
+      expect(outcome.note, 'Bon illisible ou incomplet');
+      expect(find.byType(ExpenseFlagDialog), findsNothing);
+    });
+
+    testWidgets('signaler puis renoncer : la fiche reste, rien ne part', (
+      tester,
+    ) async {
+      final outcomes = <ExpenseDetailOutcome?>[];
+      await open(
+        tester,
+        _declared(),
+        image: ExpenseVoucherImage(bytes: _png, contentType: 'image/png'),
+        outcomes: outcomes,
+      )();
+
+      await tester.tap(find.text('Signaler'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Annuler').last);
+      await tester.pumpAndSettle();
+
+      expect(find.byType(ExpenseFlagDialog), findsNothing);
+      expect(find.text('Viser'), findsOneWidget);
+      expect(outcomes, isEmpty);
+    });
+
+    testWidgets('signaler sur téléphone, texte ×1,3 : rien ne déborde', (
+      tester,
+    ) async {
+      await open(
+        tester,
+        _declared(),
+        image: ExpenseVoucherImage(bytes: _png, contentType: 'image/png'),
+      )();
+      await tester.binding.setSurfaceSize(const Size(360, 740));
+      tester.platformDispatcher.textScaleFactorTestValue = 1.3;
+      addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Signaler'));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(ExpenseFlagDialog), findsOneWidget);
+      expect(tester.takeException(), isNull);
     });
 
     testWidgets('refusée par le serveur : Redéclarer, pas Dupliquer', (

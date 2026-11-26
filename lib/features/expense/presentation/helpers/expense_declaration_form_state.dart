@@ -1,59 +1,39 @@
 import 'package:flutter/material.dart';
 import 'package:school_app_flutter/core/capture/captured_document.dart';
-import 'package:school_app_flutter/core/helpers/school_time.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_declaration_draft.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_draft.dart';
 
-/// Ce que le formulaire saisit **en plus** pour une déclaration : l'heure du
-/// décaissement, la photo du bon, la note sur l'accord reçu.
+/// Ce que le formulaire saisit **en plus** pour une déclaration : la photo
+/// du bon et la note sur l'accord reçu.
 ///
-/// L'heure se lit à l'heure de l'école : le jour choisi **est** la date de
-/// la dépense (F47), et c'est à Kinshasa que le serveur le vérifie.
+/// L'heure du décaissement ne se saisit pas (écart de recette E1, F49) :
+/// c'est l'instant où l'agent appuie sur « Déclarer ». Un décaissement
+/// antidaté fausserait une caisse déjà clôturée.
 class ExpenseDeclarationFormState {
-  /// Le jour du décaissement, à l'heure de l'école.
-  DateTime day;
-
-  /// L'heure du décaissement, à l'heure de l'école.
-  TimeOfDay time;
-
   CapturedDocument? voucher;
   final TextEditingController note = TextEditingController();
 
   /// La déclaration refusée que celle-ci régularise (F45), ou `null`.
   final String? replacing;
 
-  ExpenseDeclarationFormState({required DateTime now})
-    : day = SchoolTime.today(now),
-      time = _timeOf(SchoolTime.wallClock(now)),
-      replacing = null;
+  /// L'instant du décaissement d'origine, repris tel quel par une
+  /// redéclaration : l'argent est sorti à ce moment-là. `null` pour une
+  /// déclaration neuve.
+  final DateTime? redeclaredAt;
 
-  /// Reprend une déclaration refusée : même heure, même photo — un nouvel
+  ExpenseDeclarationFormState() : replacing = null, redeclaredAt = null;
+
+  /// Reprend une déclaration refusée : même instant, même photo — un nouvel
   /// identifiant à l'écriture. La note n'est pas reprise : elle vit au fil,
   /// et la ligne ne la porte pas.
   ExpenseDeclarationFormState.redeclaring(ExpenseRedeclaration from)
-    : day = SchoolTime.today(from.disbursedAt),
-      time = _timeOf(SchoolTime.wallClock(from.disbursedAt)),
-      voucher = from.voucher,
-      replacing = from.expenseId;
+    : voucher = from.voucher,
+      replacing = from.expenseId,
+      redeclaredAt = from.disbursedAt.toUtc();
 
-  static TimeOfDay _timeOf(DateTime wall) =>
-      TimeOfDay(hour: wall.hour, minute: wall.minute);
-
-  /// L'instant UTC du décaissement.
-  DateTime get disbursedAt =>
-      SchoolTime.instantAt(day: day, hour: time.hour, minute: time.minute);
-
-  /// Une heure dans le futur ne se déclare pas : l'écran la ramène à
-  /// maintenant plutôt que de la laisser partir.
-  bool isFuture(DateTime now) => disbursedAt.isAfter(now.toUtc());
-
-  /// Ramène l'heure à maintenant si le jour choisi est aujourd'hui et
-  /// l'heure, devant.
-  void clampTo(DateTime now) {
-    if (!isFuture(now)) return;
-    day = SchoolTime.today(now);
-    time = _timeOf(SchoolTime.wallClock(now));
-  }
+  /// L'instant UTC du décaissement : celui d'origine pour une redéclaration,
+  /// [now] sinon.
+  DateTime disbursedAt(DateTime now) => redeclaredAt ?? now.toUtc();
 
   bool get hasVoucher => voucher != null;
 
@@ -62,6 +42,7 @@ class ExpenseDeclarationFormState {
   ExpenseDeclarationDraft? draft(
     ExpenseDraft content, {
     required bool visaOnDeclare,
+    required DateTime now,
   }) {
     final voucher = this.voucher;
     if (voucher == null) return null;
@@ -73,7 +54,7 @@ class ExpenseDeclarationFormState {
       currency: content.currency,
       supplier: content.supplier,
       fundingSource: content.fundingSource,
-      disbursedAt: disbursedAt,
+      disbursedAt: disbursedAt(now),
       note: note.text,
       voucherBytes: voucher.bytes,
       voucherContentType: voucher.mimeType.value,

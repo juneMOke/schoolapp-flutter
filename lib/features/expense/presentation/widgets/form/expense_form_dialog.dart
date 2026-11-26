@@ -6,7 +6,6 @@ import 'package:school_app_flutter/core/components/dialogs/eteelo_dialog_body.da
 import 'package:school_app_flutter/core/constants/app_colors.dart';
 import 'package:school_app_flutter/core/constants/app_dimensions.dart';
 import 'package:school_app_flutter/core/constants/app_text_styles.dart';
-import 'package:school_app_flutter/core/helpers/school_time.dart';
 import 'package:school_app_flutter/core/money/exchange_rate.dart';
 import 'package:school_app_flutter/core/widgets/eteelo_text_input.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_enums.dart';
@@ -108,7 +107,7 @@ class ExpenseFormDialog extends StatefulWidget {
 class _ExpenseFormDialogState extends State<ExpenseFormDialog> {
   late final _form = ExpenseFormModel(widget.seed, types: widget.types);
   late final _declaration = widget.redeclaration == null
-      ? ExpenseDeclarationFormState(now: DateTime.now())
+      ? ExpenseDeclarationFormState()
       : ExpenseDeclarationFormState.redeclaring(widget.redeclaration!);
   bool _touched = false;
 
@@ -138,10 +137,10 @@ class _ExpenseFormDialogState extends State<ExpenseFormDialog> {
       Navigator.of(context).pop(ExpenseFormRequest(content));
       return;
     }
-    _declaration.clampTo(DateTime.now());
     final declaration = _declaration.draft(
       content,
       visaOnDeclare: widget.visaOnDeclare,
+      now: DateTime.now(),
     );
     if (declaration != null) {
       Navigator.of(context).pop(ExpenseFormDeclaration(declaration));
@@ -275,12 +274,8 @@ class _ExpenseFormDialogState extends State<ExpenseFormDialog> {
           gap,
           ExpenseDeclarationSection(
             state: _declaration,
-            // Le jour de l'école, pas celui de la tablette : c'est la borne
-            // du calendrier comme celle du jour choisi.
-            today: SchoolTime.today(DateTime.now()),
             touched: _touched,
             onCaptureVoucher: _captureVoucher,
-            onChanged: () => setState(() {}),
           ),
         ],
         gap,

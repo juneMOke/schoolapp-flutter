@@ -12,6 +12,7 @@ import 'package:school_app_flutter/features/expense/presentation/widgets/common/
 import 'package:school_app_flutter/features/expense/presentation/widgets/detail/expense_detail_actions.dart';
 import 'package:school_app_flutter/features/expense/presentation/widgets/detail/expense_detail_body.dart';
 import 'package:school_app_flutter/features/expense/presentation/widgets/detail/expense_detail_outcome.dart';
+import 'package:school_app_flutter/features/expense/presentation/widgets/detail/expense_flag_dialog.dart';
 import 'package:school_app_flutter/features/expense/presentation/widgets/detail/expense_refusal_panel.dart';
 import 'package:school_app_flutter/features/expense/presentation/widgets/detail/expense_thread_composer.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_enums.dart';
@@ -103,9 +104,6 @@ class _ExpenseDetailDialogState extends State<ExpenseDetailDialog> {
   /// Le panneau de motif est ouvert : le refus attend son mot.
   late bool _refusing = widget.startRefusing;
 
-  /// Le panneau de motif est ouvert pour **signaler** une déclaration.
-  bool _flagging = false;
-
   ExpenseVoucherLoad _voucher = const ExpenseVoucherLoading();
 
   /// Prudent tant que la règle n'a pas répondu : « Annuler » caché.
@@ -172,6 +170,14 @@ class _ExpenseDetailDialogState extends State<ExpenseDetailDialog> {
 
   void _close([ExpenseDetailOutcome? outcome]) =>
       Navigator.of(context).pop(outcome);
+
+  /// Le motif se demande dans une modale par-dessus la fiche : sous la
+  /// photo du bon, un panneau ouvert en bas restait hors de vue.
+  Future<void> _flag() async {
+    final reason = await showExpenseFlagDialog(context, expense: _expense);
+    if (!mounted || reason == null) return;
+    _close(ExpenseDetailGesture(ExpenseGesture.flag, note: reason));
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -242,14 +248,6 @@ class _ExpenseDetailDialogState extends State<ExpenseDetailDialog> {
                     ExpenseDetailGesture(ExpenseGesture.refuse, note: reason),
                   ),
                 ),
-              if (_flagging)
-                ExpenseRefusalPanel(
-                  flagging: true,
-                  onCancel: () => setState(() => _flagging = false),
-                  onConfirm: (reason) => _close(
-                    ExpenseDetailGesture(ExpenseGesture.flag, note: reason),
-                  ),
-                ),
             ],
           ),
         ),
@@ -263,7 +261,7 @@ class _ExpenseDetailDialogState extends State<ExpenseDetailDialog> {
             onShortcut: (choice) => _close(ExpenseDetailShortcut(choice)),
             onGesture: (gesture) => _close(ExpenseDetailGesture(gesture)),
             onRefuse: () => setState(() => _refusing = true),
-            onFlag: () => setState(() => _flagging = true),
+            onFlag: _flag,
             voucherSeen: _voucherSeen,
             // Une déclaration sans la règle de clôture ne s'annule pas d'ici :
             // le geste partirait sans savoir si la journée est figée.

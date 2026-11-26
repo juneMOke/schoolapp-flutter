@@ -176,18 +176,27 @@ void main() {
   });
 
   testWidgets(
-    'en déclaration, pas de seconde date ni d’encart « ne débite rien »',
+    'en déclaration, aucune date à choisir : payée à l’appui sur Déclarer (E1)',
     (tester) async {
       await open(tester);
       await chooseDeclaration(tester);
 
+      expect(find.byType(EteeloDateInput), findsNothing);
       expect(
-        find.byWidgetPredicate(
-          (w) => w is EteeloDateInput && w.label == 'Payée le',
-        ),
+        find.textContaining('heure du décaissement est celle de'),
         findsOneWidget,
       );
-      expect(find.byType(EteeloDateInput), findsOneWidget);
+
+      await fillContent(tester);
+      await tester.tap(find.text('Ajouter la photo du bon'));
+      await tester.pumpAndSettle();
+      final before = DateTime.now().toUtc();
+      await tester.tap(find.text('Déclarer').last);
+      await tester.pumpAndSettle();
+
+      final declared = (outcome! as ExpenseFormDeclaration).draft;
+      expect(declared.disbursedAt.isBefore(before), isFalse);
+      expect(declared.disbursedAt.isAfter(DateTime.now().toUtc()), isFalse);
     },
   );
 
