@@ -16,7 +16,7 @@ import 'package:school_app_flutter/features/expense/presentation/helpers/expense
 import 'package:school_app_flutter/features/expense/presentation/projections/expense_queue_view.dart';
 import 'package:school_app_flutter/features/expense/presentation/widgets/common/expense_status_badge.dart';
 import 'package:school_app_flutter/features/expense/presentation/widgets/detail/expense_detail_dialog.dart';
-import 'package:school_app_flutter/features/expense/presentation/widgets/detail/expense_flag_dialog.dart';
+import 'package:school_app_flutter/features/expense/presentation/widgets/detail/expense_reason_dialog.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 final _png = base64Decode(
@@ -245,7 +245,7 @@ void main() {
       await tester.tap(find.text('Signaler'));
       await tester.pumpAndSettle();
       expect(find.text('Signaler cette déclaration'), findsOneWidget);
-      expect(find.byType(ExpenseFlagDialog), findsOneWidget);
+      expect(find.byType(ExpenseReasonDialog), findsOneWidget);
       // La modale est au-dessus : son bouton est le dernier de l'arbre.
       await tester.tap(find.text('Signaler').last);
       await tester.pumpAndSettle();
@@ -276,7 +276,7 @@ void main() {
       final outcome = outcomes.single! as ExpenseDetailGesture;
       expect(outcome.gesture, ExpenseGesture.flag);
       expect(outcome.note, 'Bon illisible ou incomplet');
-      expect(find.byType(ExpenseFlagDialog), findsNothing);
+      expect(find.byType(ExpenseReasonDialog), findsNothing);
     });
 
     testWidgets('signaler puis renoncer : la fiche reste, rien ne part', (
@@ -295,7 +295,7 @@ void main() {
       await tester.tap(find.text('Annuler').last);
       await tester.pumpAndSettle();
 
-      expect(find.byType(ExpenseFlagDialog), findsNothing);
+      expect(find.byType(ExpenseReasonDialog), findsNothing);
       expect(find.text('Viser'), findsOneWidget);
       expect(outcomes, isEmpty);
     });
@@ -316,7 +316,7 @@ void main() {
       await tester.tap(find.text('Signaler'));
       await tester.pumpAndSettle();
 
-      expect(find.byType(ExpenseFlagDialog), findsOneWidget);
+      expect(find.byType(ExpenseReasonDialog), findsOneWidget);
       expect(tester.takeException(), isNull);
     });
 

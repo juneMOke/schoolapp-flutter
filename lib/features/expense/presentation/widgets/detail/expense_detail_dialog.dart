@@ -12,8 +12,7 @@ import 'package:school_app_flutter/features/expense/presentation/widgets/common/
 import 'package:school_app_flutter/features/expense/presentation/widgets/detail/expense_detail_actions.dart';
 import 'package:school_app_flutter/features/expense/presentation/widgets/detail/expense_detail_body.dart';
 import 'package:school_app_flutter/features/expense/presentation/widgets/detail/expense_detail_outcome.dart';
-import 'package:school_app_flutter/features/expense/presentation/widgets/detail/expense_flag_dialog.dart';
-import 'package:school_app_flutter/features/expense/presentation/widgets/detail/expense_refusal_panel.dart';
+import 'package:school_app_flutter/features/expense/presentation/widgets/detail/expense_reason_dialog.dart';
 import 'package:school_app_flutter/features/expense/presentation/widgets/detail/expense_thread_composer.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_enums.dart';
 import 'package:school_app_flutter/features/expense/presentation/helpers/expense_declaration_support.dart';
@@ -64,7 +63,7 @@ class ExpenseDetailDialog extends StatefulWidget {
   /// Écrit le commentaire et rend le fil relu. `null` : fil en lecture seule.
   final Future<ExpenseCommentResult> Function(String body)? onComment;
 
-  /// Ouvre la fiche avec le panneau de motif déjà déplié : c'est le
+  /// Ouvre la fiche avec la modale de motif déjà par-dessus : c'est le
   /// « Refuser » d'une ligne de file, qui amène le décideur devant ce qu'il
   /// refuse plutôt que de lui demander un mot dans le vide.
   final bool startRefusing;
@@ -101,9 +100,6 @@ class _ExpenseDetailDialogState extends State<ExpenseDetailDialog> {
   /// la fiche rouvre sur un registre relu.
   late List<ExpenseMessage>? _thread = widget.thread;
 
-  /// Le panneau de motif est ouvert : le refus attend son mot.
-  late bool _refusing = widget.startRefusing;
-
   ExpenseVoucherLoad _voucher = const ExpenseVoucherLoading();
 
   /// Prudent tant que la règle n'a pas répondu : « Annuler » caché.
@@ -120,6 +116,12 @@ class _ExpenseDetailDialogState extends State<ExpenseDetailDialog> {
     if (_expense.isDeclaration && widget.declaration != null) {
       _loadVoucher();
       _resolveCancel();
+    }
+    // Après le premier cadre : la fiche doit être posée pour rester derrière.
+    if (widget.startRefusing) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _refuse();
+      });
     }
   }
 
@@ -171,8 +173,14 @@ class _ExpenseDetailDialogState extends State<ExpenseDetailDialog> {
   void _close([ExpenseDetailOutcome? outcome]) =>
       Navigator.of(context).pop(outcome);
 
-  /// Le motif se demande dans une modale par-dessus la fiche : sous la
-  /// photo du bon, un panneau ouvert en bas restait hors de vue.
+  /// Les motifs se demandent dans une modale par-dessus la fiche : sous la
+  /// photo du bon ou le fil, un panneau ouvert en bas restait hors de vue.
+  Future<void> _refuse() async {
+    final reason = await showExpenseRefusalDialog(context, expense: _expense);
+    if (!mounted || reason == null) return;
+    _close(ExpenseDetailGesture(ExpenseGesture.refuse, note: reason));
+  }
+
   Future<void> _flag() async {
     final reason = await showExpenseFlagDialog(context, expense: _expense);
     if (!mounted || reason == null) return;
@@ -238,16 +246,6 @@ class _ExpenseDetailDialogState extends State<ExpenseDetailDialog> {
                             !_cancelAllowed,
                       ),
               ),
-              // Le panneau s'ouvre DANS la fiche, sous le fil : le décideur
-              // garde sous les yeux le montant, la chaîne et l'historique —
-              // c'est ce qu'il refuse.
-              if (_refusing)
-                ExpenseRefusalPanel(
-                  onCancel: () => setState(() => _refusing = false),
-                  onConfirm: (reason) => _close(
-                    ExpenseDetailGesture(ExpenseGesture.refuse, note: reason),
-                  ),
-                ),
             ],
           ),
         ),
@@ -260,7 +258,7 @@ class _ExpenseDetailDialogState extends State<ExpenseDetailDialog> {
             accountId: widget.accountId,
             onShortcut: (choice) => _close(ExpenseDetailShortcut(choice)),
             onGesture: (gesture) => _close(ExpenseDetailGesture(gesture)),
-            onRefuse: () => setState(() => _refusing = true),
+            onRefuse: _refuse,
             onFlag: _flag,
             voucherSeen: _voucherSeen,
             // Une déclaration sans la règle de clôture ne s'annule pas d'ici :

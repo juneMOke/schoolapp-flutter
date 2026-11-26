@@ -29,7 +29,7 @@ class ExpenseQueueActions {
 
   ExpenseQueueCubit get _cubit => context.read<ExpenseQueueCubit>();
 
-  /// Ouvre la fiche. [refusing] déplie d'emblée le panneau de motif — c'est
+  /// Ouvre la fiche. [refusing] ouvre d’emblée la modale de motif — c'est
   /// le « Refuser » de la ligne, qui ne part jamais sans son mot.
   Future<void> open(Expense expense, {bool refusing = false}) async {
     final cubit = _cubit;

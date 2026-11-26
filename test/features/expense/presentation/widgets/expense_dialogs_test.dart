@@ -13,6 +13,7 @@ import 'package:school_app_flutter/features/expense/domain/services/expense_mone
 import 'package:school_app_flutter/features/expense/presentation/helpers/expense_form_outcome.dart';
 import 'package:school_app_flutter/features/expense/presentation/helpers/expense_form_seed.dart';
 import 'package:school_app_flutter/features/expense/presentation/widgets/detail/expense_detail_dialog.dart';
+import 'package:school_app_flutter/features/expense/presentation/widgets/detail/expense_reason_dialog.dart';
 import 'package:school_app_flutter/features/expense/presentation/widgets/detail/expense_thread_composer.dart';
 import 'package:school_app_flutter/features/expense/presentation/widgets/detail/expense_chain.dart';
 import 'package:school_app_flutter/features/expense/presentation/widgets/detail/expense_thread_panel.dart';
@@ -455,7 +456,7 @@ void main() {
     });
   });
 
-  group('panneau de refus', () {
+  group('modale de refus', () {
     const motifDevis =
         'Devis manquant : joindre au moins deux offres avant de réengager la '
         'dépense.';
@@ -490,14 +491,15 @@ void main() {
       await tester.pumpAndSettle();
     }
 
-    testWidgets('Refuser ouvre le panneau sans fermer la fiche', (
-      tester,
-    ) async {
+    testWidgets('Refuser ouvre la modale par-dessus la fiche, sans la '
+        'fermer', (tester) async {
       await ouvrirEtRefuser(tester);
 
+      expect(find.byType(ExpenseReasonDialog), findsOneWidget);
       expect(find.text('Refuser la demande'), findsOneWidget);
-      // Le décideur garde sous les yeux ce qu'il refuse.
-      expect(find.text('Facture SNEL'), findsOneWidget);
+      // La fiche reste derrière : ce qu'il refuse, et la modale le rappelle.
+      expect(find.byType(ExpenseDetailDialog), findsOneWidget);
+      expect(find.text('Facture SNEL'), findsNWidgets(2));
     });
 
     testWidgets('confirmer SANS motif : le geste ne part pas, et la fiche le '
@@ -511,7 +513,7 @@ void main() {
         findsOneWidget,
       );
       expect(outcome(), isNull);
-      expect(find.text('Facture SNEL'), findsOneWidget);
+      expect(find.byType(ExpenseReasonDialog), findsOneWidget);
 
       // Ligne de contrôle : le même lecteur DOIT voir passer un refus motivé,
       // sinon le `isNull` ci-dessus ne prouverait rien.
@@ -539,7 +541,26 @@ void main() {
       );
     });
 
-    testWidgets('annuler referme le panneau et laisse la demande intacte', (
+    testWidgets('le « Refuser » de la file ouvre la fiche avec la modale '
+        'déjà par-dessus', (tester) async {
+      await tester.binding.setSurfaceSize(const Size(1280, 1600));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+      await _pumpHost(tester, (context) async {
+        await showExpenseDetailDialog(
+          context,
+          expense: _snel(),
+          type: _types.first,
+          reader: ExpenseUsdReader.withoutRate,
+          thread: const [],
+          startRefusing: true,
+        );
+      });
+
+      expect(find.byType(ExpenseDetailDialog), findsOneWidget);
+      expect(find.byType(ExpenseReasonDialog), findsOneWidget);
+    });
+
+    testWidgets('annuler referme la modale et laisse la demande intacte', (
       tester,
     ) async {
       final outcome = await ouvrirEtRefuser(tester);
@@ -548,7 +569,7 @@ void main() {
       await tester.tap(find.text('Annuler'));
       await tester.pumpAndSettle();
 
-      expect(find.text('Refuser la demande'), findsNothing);
+      expect(find.byType(ExpenseReasonDialog), findsNothing);
       expect(outcome(), isNull);
       expect(find.text('Refuser'), findsOneWidget);
     });
