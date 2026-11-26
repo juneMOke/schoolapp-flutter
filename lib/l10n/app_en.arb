@@ -7892,6 +7892,8 @@
   "expenseToastDeclared": "Expense declared: {amount}.",
   "@expenseToastDeclared": {"placeholders": {"amount": {"type": "String"}}},
   "expenseDeclareFailed": "The declaration could not be saved on this device.",
+  "expenseDeclaredAfterDays": "{days, plural, =1{Declared 1 day after the disbursement} other{Declared {days} days after the disbursement}}",
+  "@expenseDeclaredAfterDays": {"placeholders": {"days": {"type": "int"}}},
   "expenseFlagTitle": "Flag this declaration",
   "expenseFlagDialogHint": "The expense stays paid and counted in the cash register. The reason shows on its record, for the cashier.",
   "expenseFlagReasonLabel": "Reason for the flag",

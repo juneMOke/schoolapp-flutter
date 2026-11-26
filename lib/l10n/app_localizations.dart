@@ -18668,6 +18668,12 @@ abstract class AppLocalizations {
   /// **'The declaration could not be saved on this device.'**
   String get expenseDeclareFailed;
 
+  /// No description provided for @expenseDeclaredAfterDays.
+  ///
+  /// In en, this message translates to:
+  /// **'{days, plural, =1{Declared 1 day after the disbursement} other{Declared {days} days after the disbursement}}'**
+  String expenseDeclaredAfterDays(int days);
+
   /// No description provided for @expenseFlagTitle.
   ///
   /// In en, this message translates to:

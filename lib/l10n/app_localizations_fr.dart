@@ -11938,6 +11938,17 @@ class AppLocalizationsFr extends AppLocalizations {
       'La déclaration n\'a pas pu être enregistrée sur cet appareil.';
 
   @override
+  String expenseDeclaredAfterDays(int days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: 'Déclarée $days jours après le décaissement',
+      one: 'Déclarée 1 jour après le décaissement',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get expenseFlagTitle => 'Signaler cette déclaration';
 
   @override
