@@ -9,6 +9,7 @@ import 'package:school_app_flutter/features/expense/domain/entities/expense_enum
 import 'package:school_app_flutter/features/expense/domain/entities/expense_voucher_image.dart';
 import 'package:school_app_flutter/features/expense/presentation/widgets/common/expense_section_note.dart';
 import 'package:school_app_flutter/features/expense/presentation/widgets/states/expense_results_error_state.dart';
+import 'package:school_app_flutter/features/expense/domain/services/expense_declaration_delay.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// Où en est la lecture de la photo d'un bon.
@@ -64,10 +65,15 @@ class ExpenseVoucherPanel extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final reason = expense.flagReason;
+    final lateDays = ExpenseDeclarationDelay.days(expense) ?? 0;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         _photo(l10n),
+        // Le promoteur voit qu'un décaissement est arrivé tard : un envoi
+        // hors ligne tardif, ou une horloge de poste faussée (E1).
+        if (lateDays >= 1)
+          ExpenseSectionNote(text: l10n.expenseDeclaredAfterDays(lateDays)),
         if (expense.isDeclarationToRegularize)
           ExpenseSectionNote(text: l10n.expenseToRegularizeNote),
         if (expense.visaStatus == ExpenseVisaStatus.flagged && reason != null)

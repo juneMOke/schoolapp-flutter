@@ -10,6 +10,7 @@ import 'package:school_app_flutter/features/expense/presentation/helpers/expense
 import 'package:school_app_flutter/features/expense/presentation/widgets/common/expense_card.dart';
 import 'package:school_app_flutter/features/expense/presentation/widgets/common/expense_status_badge.dart';
 import 'package:school_app_flutter/features/expense/presentation/widgets/queue/expense_voucher_thumb.dart';
+import 'package:school_app_flutter/features/expense/domain/services/expense_declaration_delay.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 /// La file « À viser » (v3) : les déclarations que le promoteur n'a pas
@@ -75,6 +76,7 @@ class _VisaRow extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final dates = MaterialLocalizations.of(context);
     final disbursed = expense.disbursedAt;
+    final lateDays = ExpenseDeclarationDelay.days(expense) ?? 0;
     final out = disbursed == null
         ? expense.expenseDate
         : SchoolTime.wallClock(disbursed);
@@ -106,6 +108,19 @@ class _VisaRow extends StatelessWidget {
                       color: AppColors.textSecondary,
                     ),
                   ),
+                  if (lateDays >= 1) ...[
+                    const SizedBox(height: AppDimensions.spacingXS),
+                    Text(
+                      l10n.expenseDeclaredAfterDays(lateDays),
+                      style: AppTextStyles.caption.copyWith(
+                        // Au-delà de 72 h, l'ambre d'une alerte : le serveur
+                        // n'a pas posé le visa d'office.
+                        color: ExpenseDeclarationDelay.isLate(expense)
+                            ? AppColors.feeStatusPartialInk
+                            : AppColors.textSecondary,
+                      ),
+                    ),
+                  ],
                   const SizedBox(height: AppDimensions.spacingXS),
                   Wrap(
                     spacing: AppDimensions.spacingS,

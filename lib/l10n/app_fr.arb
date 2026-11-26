@@ -8103,6 +8103,8 @@
   "expenseToastDeclared": "Dépense déclarée : {amount}.",
   "@expenseToastDeclared": {"placeholders": {"amount": {"type": "String"}}},
   "expenseDeclareFailed": "La déclaration n'a pas pu être enregistrée sur cet appareil.",
+  "expenseDeclaredAfterDays": "{days, plural, =1{Déclarée 1 jour après le décaissement} other{Déclarée {days} jours après le décaissement}}",
+  "@expenseDeclaredAfterDays": {"placeholders": {"days": {"type": "int"}}},
   "expenseFlagTitle": "Signaler cette déclaration",
   "expenseFlagDialogHint": "La dépense reste payée et comptée en caisse. Le motif s'affiche sur la fiche, pour la caissière.",
   "expenseFlagReasonLabel": "Motif du signalement",

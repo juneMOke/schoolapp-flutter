@@ -7,6 +7,7 @@ import 'package:school_app_flutter/features/expense/domain/entities/expense.dart
 import 'package:school_app_flutter/features/expense/domain/entities/expense_enums.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_gesture.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_register_snapshot.dart';
+import 'package:school_app_flutter/features/expense/domain/entities/expense_voucher.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_voucher_image.dart';
 import 'package:school_app_flutter/features/expense/domain/services/expense_money.dart';
 import 'package:school_app_flutter/features/expense/domain/services/expense_queue_sort.dart';
@@ -31,6 +32,7 @@ Expense _declared({
   String? number = 'DEP-0142',
   String? flagReason,
   DateTime? disbursedAt,
+  DateTime? receivedAt,
 }) => Expense(
   id: id,
   number: number,
@@ -47,6 +49,14 @@ Expense _declared({
   flagReason: flagReason,
   syncState: sync,
   disbursedAt: disbursedAt ?? DateTime.utc(2026, 11, 25, 9, 12),
+  voucher: receivedAt == null
+      ? null
+      : ExpenseVoucher(
+          id: 'v-$id',
+          contentType: 'image/png',
+          sizeBytes: 70,
+          uploadedAt: receivedAt,
+        ),
 );
 
 Widget _app(Widget child) => MaterialApp(
@@ -329,6 +339,32 @@ void main() {
       );
       expect(find.text('Viser'), findsNothing, reason: 'inconnue du serveur');
       expect(find.textContaining('Redéclarez-la'), findsOneWidget);
+    });
+
+    testWidgets('déclarée tard : la fiche le dit au promoteur', (tester) async {
+      await open(
+        tester,
+        _declared(
+          disbursedAt: DateTime.utc(2026, 11, 20, 9),
+          receivedAt: DateTime.utc(2026, 11, 24, 10),
+        ),
+        image: ExpenseVoucherImage(bytes: _png, contentType: 'image/png'),
+      )();
+
+      expect(
+        find.text('Déclarée 4 jours après le décaissement'),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('déclarée le jour même : aucune mention', (tester) async {
+      await open(
+        tester,
+        _declared(receivedAt: DateTime.utc(2026, 11, 25, 9, 13)),
+        image: ExpenseVoucherImage(bytes: _png, contentType: 'image/png'),
+      )();
+
+      expect(find.textContaining('après le décaissement'), findsNothing);
     });
 
     testWidgets('signalée : le motif se lit dans la fiche', (tester) async {

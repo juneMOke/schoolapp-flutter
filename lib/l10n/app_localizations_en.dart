@@ -11838,6 +11838,17 @@ class AppLocalizationsEn extends AppLocalizations {
       'The declaration could not be saved on this device.';
 
   @override
+  String expenseDeclaredAfterDays(int days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: 'Declared $days days after the disbursement',
+      one: 'Declared 1 day after the disbursement',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get expenseFlagTitle => 'Flag this declaration';
 
   @override
