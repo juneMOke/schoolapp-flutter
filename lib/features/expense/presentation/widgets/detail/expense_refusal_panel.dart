@@ -18,10 +18,16 @@ class ExpenseRefusalPanel extends StatefulWidget {
   final void Function(String reason) onConfirm;
   final VoidCallback onCancel;
 
+  /// Le même panneau pour **signaler** une déclaration (v3) : un motif
+  /// obligatoire aussi, mais l'ambre d'une alerte et non le rouge d'un
+  /// refus — un signalement ne défait rien.
+  final bool flagging;
+
   const ExpenseRefusalPanel({
     super.key,
     required this.onConfirm,
     required this.onCancel,
+    this.flagging = false,
   });
 
   @override
@@ -57,17 +63,33 @@ class _ExpenseRefusalPanelState extends State<ExpenseRefusalPanel> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final suggestions = [
-      l10n.expenseRefusalSuggestionQuote,
-      l10n.expenseRefusalSuggestionAmount,
-      l10n.expenseRefusalSuggestionDuplicate,
-    ];
+    final flagging = widget.flagging;
+    final suggestions = flagging
+        ? [
+            l10n.expenseFlagSuggestionQuote,
+            l10n.expenseFlagSuggestionVoucher,
+            l10n.expenseFlagSuggestionApproval,
+          ]
+        : [
+            l10n.expenseRefusalSuggestionQuote,
+            l10n.expenseRefusalSuggestionAmount,
+            l10n.expenseRefusalSuggestionDuplicate,
+          ];
+    final ink = flagging
+        ? AppColors.feeStatusPartialInk
+        : AppColors.feeStatusDue;
+    final border = flagging
+        ? AppColors.feeStatusPartialBorder
+        : AppColors.feeStatusDueBorder;
+    final icon = flagging ? Icons.flag_outlined : Icons.cancel_outlined;
     return Container(
       margin: const EdgeInsets.only(top: AppDimensions.spacingM),
       padding: const EdgeInsets.all(AppDimensions.spacingM),
       decoration: BoxDecoration(
-        color: AppColors.feeStatusDueSoft,
-        border: Border.all(color: AppColors.feeStatusDueBorder),
+        color: flagging
+            ? AppColors.feeStatusPartialSoft
+            : AppColors.feeStatusDueSoft,
+        border: Border.all(color: border),
         borderRadius: BorderRadius.circular(AppDimensions.expenseInsetRadius),
       ),
       child: Column(
@@ -75,16 +97,12 @@ class _ExpenseRefusalPanelState extends State<ExpenseRefusalPanel> {
         children: [
           Row(
             children: [
-              const Icon(
-                Icons.cancel_outlined,
-                size: AppDimensions.detailMiniIconSize,
-                color: AppColors.feeStatusDue,
-              ),
+              Icon(icon, size: AppDimensions.detailMiniIconSize, color: ink),
               const SizedBox(width: AppDimensions.spacingS),
-              Text(
-                l10n.expenseRefusalTitle,
-                style: AppTextStyles.bodyStrong.copyWith(
-                  color: AppColors.feeStatusDue,
+              Flexible(
+                child: Text(
+                  flagging ? l10n.expenseFlagTitle : l10n.expenseRefusalTitle,
+                  style: AppTextStyles.bodyStrong.copyWith(color: ink),
                 ),
               ),
             ],
@@ -96,10 +114,18 @@ class _ExpenseRefusalPanelState extends State<ExpenseRefusalPanel> {
             onSubmit: _confirm,
             child: EteeloTextInput(
               controller: _reason,
-              label: l10n.expenseRefusalReasonLabel,
-              placeholder: l10n.expenseRefusalReasonHint,
+              label: flagging
+                  ? l10n.expenseFlagReasonLabel
+                  : l10n.expenseRefusalReasonLabel,
+              placeholder: flagging
+                  ? l10n.expenseFlagReasonHint
+                  : l10n.expenseRefusalReasonHint,
               maxLines: 2,
-              errorText: _missing ? l10n.expenseRefusalReasonMissing : null,
+              errorText: _missing
+                  ? (flagging
+                        ? l10n.expenseFlagReasonMissing
+                        : l10n.expenseRefusalReasonMissing)
+                  : null,
               onChanged: (_) {
                 if (_missing) setState(() => _missing = false);
               },
@@ -113,6 +139,8 @@ class _ExpenseRefusalPanelState extends State<ExpenseRefusalPanel> {
               for (final suggestion in suggestions)
                 _SuggestionChip(
                   label: suggestion,
+                  ink: ink,
+                  border: border,
                   onTap: () => _use(suggestion),
                 ),
             ],
@@ -128,12 +156,20 @@ class _ExpenseRefusalPanelState extends State<ExpenseRefusalPanel> {
                 onPressed: widget.onCancel,
                 fullWidth: false,
               ),
-              EteeloButton.danger(
-                label: l10n.expenseRefusalConfirm,
-                icon: Icons.cancel_outlined,
-                onPressed: _confirm,
-                fullWidth: false,
-              ),
+              if (flagging)
+                EteeloButton.primary(
+                  label: l10n.expenseFlagConfirm,
+                  icon: icon,
+                  onPressed: _confirm,
+                  fullWidth: false,
+                )
+              else
+                EteeloButton.danger(
+                  label: l10n.expenseRefusalConfirm,
+                  icon: icon,
+                  onPressed: _confirm,
+                  fullWidth: false,
+                ),
             ],
           ),
         ],
@@ -146,9 +182,16 @@ class _ExpenseRefusalPanelState extends State<ExpenseRefusalPanel> {
 /// reconnu, et le champ le montre en entier une fois choisi.
 class _SuggestionChip extends StatelessWidget {
   final String label;
+  final Color ink;
+  final Color border;
   final VoidCallback onTap;
 
-  const _SuggestionChip({required this.label, required this.onTap});
+  const _SuggestionChip({
+    required this.label,
+    required this.ink,
+    required this.border,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) => ConstrainedBox(
@@ -158,9 +201,9 @@ class _SuggestionChip extends StatelessWidget {
     child: OutlinedButton(
       onPressed: onTap,
       style: OutlinedButton.styleFrom(
-        foregroundColor: AppColors.feeStatusDue,
+        foregroundColor: ink,
         backgroundColor: AppColors.surfaceRaised,
-        side: const BorderSide(color: AppColors.feeStatusDueBorder),
+        side: BorderSide(color: border),
         padding: const EdgeInsets.symmetric(
           horizontal: AppDimensions.spacingS + AppDimensions.spacingXS,
           vertical: AppDimensions.spacingXS,

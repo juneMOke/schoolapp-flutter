@@ -965,7 +965,10 @@ class AppConstants {
   // (motifs de chaque grille) et `ref_sous_periode.rang` (rang dans l'année).
   // Sans reprise : le tirage du bundle n'envoie pas d'ETag tant qu'une ligne
   // de barème n'a pas sa grille. Palier d'école.
-  static const int offlineDbSchemaVersion = 88;
+  // v89 (2026-11-25) : la dépense déclarée et son visa — treize colonnes en
+  // fin de `expenses` (mode, visa, journée de caisse, fiche de la photo du
+  // bon). Ajout pur, sans reprise. Palier d'école.
+  static const int offlineDbSchemaVersion = 89;
 
   /// Dernière version de la base unique HÉRITÉE : là où l'escalier
   /// `migrateOfflineDatabase` s'arrête pour toujours.
@@ -1018,6 +1021,13 @@ class AppConstants {
   /// renomme pas** : un autre nom rendrait orphelines les pièces en attente
   /// d'envoi.
   static const String staffDocumentsDirectoryName = 'staff_documents';
+
+  /// Clé du secure storage qui scelle les photos des bons de dépense.
+  static const String expenseVouchersKeyStorageKey = 'expense_vouchers_key';
+
+  /// Sous-répertoire où les photos des bons de dépense sont scellées. **Ne se
+  /// renomme pas** : une déclaration en attente d'envoi y relit sa photo.
+  static const String expenseVouchersDirectoryName = 'expense_vouchers';
 
   /// Clé du secure storage qui scelle les photos d'élèves.
   static const String studentPhotosKeyStorageKey = 'student_photos_key';
@@ -1218,6 +1228,16 @@ class AppConstants {
   /// [syncReferentialEndpoint] (`expenseTypes`), servis à tout compte.
   static const String syncExpensesEndpoint = '/api/v1/sync/expenses';
 
+  /// Déclarer une dépense, photo du bon comprise (multipart `declaration` +
+  /// `voucher`, v3).
+  static const String syncExpenseDeclarationsEndpoint =
+      '/api/v1/sync/expenses/declarations';
+
+  /// Octets de la photo du bon d'une dépense (`ETag`, la photo ne change
+  /// jamais ; `404` sans photo).
+  static const String expenseVoucherEndpoint =
+      '/api/v1/expenses/{expenseId}/voucher';
+
   /// Retrait (`deleted: true`) ou restauration (`deleted: false`) d'une
   /// dépense — le « Annuler » du toast. Exige `expense.delete` : saisir ne
   /// donne pas le droit de retirer.
@@ -1239,6 +1259,14 @@ class AppConstants {
       '/api/v1/sync/expenses/{expenseId}/payment';
   static const String syncExpenseReopenEndpoint =
       '/api/v1/sync/expenses/{expenseId}/reopen';
+
+  /// Viser une déclaration — `expense.decide` (v3).
+  static const String syncExpenseVisaEndpoint =
+      '/api/v1/sync/expenses/{expenseId}/visa';
+
+  /// Signaler une déclaration, motif obligatoire — `expense.decide` (v3).
+  static const String syncExpenseFlagEndpoint =
+      '/api/v1/sync/expenses/{expenseId}/flag';
   static const String syncExpenseRetractionEndpoint =
       '/api/v1/sync/expenses/{expenseId}/retraction';
   static const String syncExpenseResubmitEndpoint =

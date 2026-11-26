@@ -43,6 +43,7 @@ void main() {
     Perm.expenseDecide: 'expense.decide',
     Perm.expensePay: 'expense.pay',
     Perm.expenseReopen: 'expense.reopen',
+    Perm.expenseDeclare: 'expense.declare',
     Perm.treasuryRead: 'treasury.read',
     Perm.treasuryClose: 'treasury.close',
     Perm.treasuryRegisterWrite: 'treasury.register.write',
@@ -193,7 +194,10 @@ void main() {
       // `calendar.life.write`, `calendar.holiday.write`,
       // `calendar.publish` — le calendrier scolaire (doc unifié K10).
       // ⚠️ Déclarées avant que le serveur ne les sème (lot back CAL-2).
-      expect(Perm.values, hasLength(91));
+      // 91 → 92 : `expense.declare`, déclarer une dépense déjà payée
+      // (ACCOUNTANT, DIRECTOR, SUPER_ADMIN — contrat déclaration et visa).
+      // ⚠️ Déclarée avant que le serveur ne la sème (F35).
+      expect(Perm.values, hasLength(92));
     },
   );
 

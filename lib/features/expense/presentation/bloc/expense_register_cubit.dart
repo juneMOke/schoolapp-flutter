@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:school_app_flutter/core/error/failures.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_advance_payment.dart';
+import 'package:school_app_flutter/features/expense/domain/entities/expense_declaration_draft.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_draft.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_enums.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_gesture.dart';
@@ -12,6 +13,7 @@ import 'package:school_app_flutter/features/expense/domain/entities/expense_mess
 import 'package:school_app_flutter/features/expense/domain/entities/expense_period.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_register_snapshot.dart';
 import 'package:school_app_flutter/features/expense/domain/services/expense_register_query.dart';
+import 'package:school_app_flutter/features/expense/domain/usecases/declare_expense_use_case.dart';
 import 'package:school_app_flutter/features/expense/domain/usecases/expense_write_use_cases.dart';
 import 'package:school_app_flutter/features/expense/domain/usecases/load_expense_thread_use_case.dart';
 import 'package:school_app_flutter/features/expense/presentation/bloc/expense_period_memory.dart';
@@ -32,6 +34,10 @@ class ExpenseRegisterCubit extends Cubit<ExpenseRegisterState> {
   final RestoreExpenseUseCase _restore;
   final ApplyExpenseGestureUseCase _gesture;
   final LoadExpenseThreadUseCase _thread;
+
+  /// `null` hors déclaration (tests, module sans v3) : déclarer échoue alors
+  /// proprement, l'écran ne le propose de toute façon pas.
+  final DeclareExpenseUseCase? _declare;
   final DateTime Function() _now;
   void Function()? _unwatch;
 
@@ -43,6 +49,7 @@ class ExpenseRegisterCubit extends Cubit<ExpenseRegisterState> {
     required RestoreExpenseUseCase restore,
     required ApplyExpenseGestureUseCase gesture,
     required LoadExpenseThreadUseCase thread,
+    DeclareExpenseUseCase? declare,
     DateTime Function() now = DateTime.now,
   }) : _source = source,
        _memory = memory,
@@ -51,6 +58,7 @@ class ExpenseRegisterCubit extends Cubit<ExpenseRegisterState> {
        _restore = restore,
        _gesture = gesture,
        _thread = thread,
+       _declare = declare,
        _now = now,
        super(
          ExpenseRegisterState.initial(
@@ -126,6 +134,9 @@ class ExpenseRegisterCubit extends Cubit<ExpenseRegisterState> {
     state.copyWith(query: state.query.withStatus(status), resetLimit: true),
   );
 
+  void setVisaFilter(ExpenseVisaStatus? visa) =>
+      emit(state.copyWith(query: state.query.withVisa(visa), resetLimit: true));
+
   void setText(String text) {
     if (text == state.query.text) return;
     emit(state.copyWith(query: state.query.withText(text), resetLimit: true));
@@ -142,6 +153,18 @@ class ExpenseRegisterCubit extends Cubit<ExpenseRegisterState> {
 
   Future<Either<Failure, Expense>> save(ExpenseDraft draft) =>
       _thenRefresh(_save(draft));
+
+  /// Déclarer une dépense déjà payée (v3) : la base d'abord, la relecture
+  /// ensuite, comme toute écriture.
+  Future<Either<Failure, Expense>> declare(ExpenseDeclarationDraft draft) {
+    final declare = _declare;
+    if (declare == null) {
+      return Future.value(
+        const Left(StorageFailure('Déclaration indisponible')),
+      );
+    }
+    return _thenRefresh(declare(draft));
+  }
 
   /// Un geste du circuit — le statut ne change plus que par là (D8), jamais
   /// par un clic de liste ni par le formulaire.

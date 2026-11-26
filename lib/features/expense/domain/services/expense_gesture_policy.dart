@@ -25,8 +25,36 @@ abstract final class ExpenseGesturePolicy {
     // pas. La restaurer la remet dans le circuit telle qu'elle était.
     if (expense.isWithdrawn) return false;
     if (!_ownershipAllows(gesture, expense, accountId)) return false;
+    if (expense.isDeclaration) return _declarationAllows(gesture, expense);
     return _statusAllows(gesture, expense.status);
   }
+
+  /// Une déclaration ne suit pas le circuit : elle est déjà payée. On peut
+  /// la commenter, et la direction peut l'annuler tant qu'elle ne l'est pas
+  /// (F43). Le reste — décider, payer, relancer, retirer, renvoyer — n'a
+  /// pas d'objet, et le serveur le refuserait.
+  static bool _declarationAllows(ExpenseGesture gesture, Expense expense) =>
+      switch (gesture) {
+        ExpenseGesture.comment => true,
+        // Refusée par le serveur, elle n'y existe pas : tout geste mourrait
+        // en 404 et effacerait le vrai motif du refus. Elle se régularise par
+        // une redéclaration (F45), rien d'autre.
+        _ when expense.isDeclarationToRegularize => false,
+        ExpenseGesture.reopen => ExpenseTransitions.canCancelDeclaration(
+          expense.status,
+        ),
+        // Le visa ne se donne que sur une déclaration en vigueur. Visée,
+        // elle est terminale ; signalée, elle reste visable — c'est ce qui
+        // lève le signalement.
+        ExpenseGesture.visa =>
+          expense.status == ExpenseStatus.paid &&
+              (expense.visaStatus == ExpenseVisaStatus.pending ||
+                  expense.visaStatus == ExpenseVisaStatus.flagged),
+        ExpenseGesture.flag =>
+          expense.status == ExpenseStatus.paid &&
+              expense.visaStatus == ExpenseVisaStatus.pending,
+        _ => false,
+      };
 
   static bool _ownershipAllows(
     ExpenseGesture gesture,
@@ -54,6 +82,8 @@ abstract final class ExpenseGesturePolicy {
           ExpenseStatus.retracted,
         ),
         ExpenseGesture.remind => from == ExpenseStatus.pending,
+        // Le visa n'existe pas hors déclaration.
+        ExpenseGesture.visa || ExpenseGesture.flag => false,
         // Commenter n'est pas une transition : le fil reste ouvert à tous les
         // états, y compris une demande refusée que l'on veut comprendre.
         ExpenseGesture.comment => true,

@@ -242,6 +242,48 @@ Future<void> migrateTenantDatabase(
     await _createTables(db, [refGrilleTable]);
     await _addColumnIfTable(db, 'ref_sous_periode', 'rang', type: 'INTEGER');
   }
+  if (upTo(89)) {
+    await _expenseDeclaration(db);
+  }
+}
+
+/// v89 — la dépense **déclarée** et son visa (DEPENSES_PLAN partie III).
+/// Ajout en fin de table : toute dépense existante est une demande
+/// d'autorisation, ce que dit le défaut de `mode` — sauf celles qu'un poste
+/// d'avant la v3 aurait tirées sans comprendre, d'où le re-tirage.
+Future<void> _expenseDeclaration(DatabaseExecutor db) async {
+  const columns = <String, String>{
+    'mode': "TEXT NOT NULL DEFAULT 'AUTHORIZATION'",
+    'visa_status': 'TEXT',
+    'visa_by_id': 'TEXT',
+    'visa_by_name': 'TEXT',
+    'visa_at': 'TEXT',
+    'flag_reason': 'TEXT',
+    'disbursed_at': 'TEXT',
+    'cash_day': 'TEXT',
+    'after_closure': 'INTEGER NOT NULL DEFAULT 0',
+    'voucher_id': 'TEXT',
+    'voucher_content_type': 'TEXT',
+    'voucher_size_bytes': 'INTEGER',
+    'voucher_uploaded_at': 'TEXT',
+  };
+  for (final entry in columns.entries) {
+    await _addColumnIfTable(db, 'expenses', entry.key, type: entry.value);
+  }
+  // Un poste d'avant la v3 a pu tirer des déclarations faites ailleurs, et
+  // les ranger en demandes d'autorisation (il ignorait `mode`). Le flux des
+  // dépenses (`expenses@école`) repart donc de zéro : le re-tirage ne pose
+  // que la famille serveur sur une ligne en attente, et rend leur mode aux
+  // déclarations.
+  final hasMeta = await db.rawQuery(
+    "SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'sync_meta'",
+  );
+  if (hasMeta.isNotEmpty) {
+    await db.execute(
+      "DELETE FROM sync_meta WHERE resource = 'expenses' "
+      "OR resource LIKE 'expenses@%'",
+    );
+  }
 }
 
 /// v86 — les cadres déjà connus n'ont ni `replaceable` ni document, et un

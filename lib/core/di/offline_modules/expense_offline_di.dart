@@ -8,6 +8,7 @@ import 'package:school_app_flutter/core/offline/pull_completion_bus.dart';
 import 'package:school_app_flutter/core/offline/pull_coordinator.dart';
 import 'package:school_app_flutter/core/offline/sync_engine.dart';
 import 'package:school_app_flutter/core/offline/sync_meta_dao.dart';
+import 'package:school_app_flutter/core/di/offline_modules/expense_declaration_di.dart';
 import 'package:school_app_flutter/features/academic_year/domain/repositories/academic_year_context_repository.dart';
 import 'package:school_app_flutter/features/auth/data/local/auth_local_dao.dart';
 import 'package:school_app_flutter/features/expense/data/local/expense_message_dao.dart';
@@ -26,6 +27,7 @@ import 'package:school_app_flutter/features/expense/data/sync/expense_withdrawal
 import 'package:school_app_flutter/features/expense/domain/repositories/expense_pull_repository.dart';
 import 'package:school_app_flutter/features/expense/domain/repositories/expense_advance_guard.dart';
 import 'package:school_app_flutter/features/expense/domain/repositories/expense_repository.dart';
+import 'package:school_app_flutter/features/expense/domain/usecases/declare_expense_use_case.dart';
 import 'package:school_app_flutter/features/expense/domain/usecases/expense_write_use_cases.dart';
 import 'package:school_app_flutter/features/expense/domain/usecases/find_expense_use_case.dart';
 import 'package:school_app_flutter/features/expense/domain/usecases/load_expense_register_use_case.dart';
@@ -137,6 +139,7 @@ void registerExpenseOffline(GetIt getIt) {
       restore: getIt<RestoreExpenseUseCase>(),
       gesture: getIt<ApplyExpenseGestureUseCase>(),
       thread: getIt<LoadExpenseThreadUseCase>(),
+      declare: getIt<DeclareExpenseUseCase>(),
     ),
   );
   getIt.registerFactory<ExpenseQueueCubit>(
@@ -195,6 +198,7 @@ void registerExpenseOffline(GetIt getIt) {
       extras: getIt<Map<String, dynamic>>(),
     ),
   );
+  registerExpenseDeclaration(getIt);
   getIt<SyncEngine>().registerHandler(
     ExpenseGestureOutboxHandler(
       api: getIt<ExpenseSyncApi>(),

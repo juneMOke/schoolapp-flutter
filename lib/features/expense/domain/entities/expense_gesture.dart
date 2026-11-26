@@ -21,7 +21,8 @@ enum ExpenseGestureOwnership {
   anyone,
 }
 
-/// Les huit gestes du circuit de validation, tels qu'ils s'offrent à l'écran.
+/// Les gestes du circuit de validation, tels qu'ils s'offrent à l'écran —
+/// huit pour la demande, deux de plus pour le visa d'une déclaration (v3).
 ///
 /// Sept routes serveur les portent — `decision` en sert deux, accorder et
 /// refuser. Chacun écrit **un** message de fil, et c'est l'uuid de ce message
@@ -64,12 +65,21 @@ enum ExpenseGesture {
 
   /// Le commentaire libre — le seul message du fil qui ne constate aucun
   /// geste, d'où son acte `null`.
-  comment();
+  comment(),
+
+  /// Viser une déclaration (v3) : le contrôle après coup du promoteur.
+  /// Terminal. Ne déplace pas l'argent, seulement le visa.
+  visa(act: ExpenseAct.visa, visaTarget: ExpenseVisaStatus.visaed),
+
+  /// Signaler une déclaration, toujours avec motif. Un simple signalement :
+  /// la sortie de caisse reste, et la déclaration reste visable.
+  flag(act: ExpenseAct.flag, visaTarget: ExpenseVisaStatus.flagged);
 
   const ExpenseGesture({
     this.act,
     this.target,
     this.ownership = ExpenseGestureOwnership.anyone,
+    this.visaTarget,
   });
 
   /// L'acte écrit au fil ; `null` pour le commentaire libre.
@@ -81,12 +91,22 @@ enum ExpenseGesture {
 
   final ExpenseGestureOwnership ownership;
 
+  /// Où le geste mène le **visa** d'une déclaration, ou `null` — le second
+  /// axe, jamais mêlé à [target].
+  final ExpenseVisaStatus? visaTarget;
+
   /// Un geste sans cible ne passe pas par la table des transitions.
   bool get movesStatus => target != null;
 
+  /// Le geste change-t-il l'état de la dépense, sur l'un ou l'autre axe ?
+  /// C'est ce qui rend la ligne « à corriger » quand il est refusé ; un
+  /// commentaire, lui, ne la touche pas.
+  bool get changesState => target != null || visaTarget != null;
+
   /// Un refus sans motif laisse le demandeur sans issue : l'écran l'interdit,
   /// et le serveur aussi (`422 REASON_REQUIRED`).
-  bool get requiresNote => this == ExpenseGesture.refuse;
+  bool get requiresNote =>
+      this == ExpenseGesture.refuse || this == ExpenseGesture.flag;
 
   /// Le retour en attente efface la décision, la date de règlement et le
   /// compteur de relances — mais jamais le fil.

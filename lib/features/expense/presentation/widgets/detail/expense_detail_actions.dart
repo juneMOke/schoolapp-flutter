@@ -34,6 +34,19 @@ class ExpenseDetailActions extends StatelessWidget {
   /// Refuser ne part pas d'ici : le panneau de motif s'ouvre d'abord.
   final VoidCallback onRefuse;
 
+  /// Signaler non plus : le motif est obligatoire (v3).
+  final VoidCallback? onFlag;
+
+  /// La photo du bon est sur ce poste : « Viser » s'ouvre (F40). On ne vise
+  /// pas un bon qu'on n'a pas vu.
+  final bool voucherSeen;
+
+  /// « Annuler » reste offert sur cette déclaration (F44).
+  final bool cancelAllowed;
+
+  /// La session peut redéclarer une déclaration refusée (F45).
+  final bool canRedeclare;
+
   /// Supprimer, dupliquer et modifier rouvrent une modale de saisie, et cette
   /// saisie appartient au **registre**. La file ne les offre donc pas : un
   /// bouton qui renverrait vers un autre écran sans rien faire serait pire
@@ -53,6 +66,10 @@ class ExpenseDetailActions extends StatelessWidget {
     required this.onGesture,
     required this.onRefuse,
     this.allowShortcuts = true,
+    this.onFlag,
+    this.voucherSeen = false,
+    this.cancelAllowed = true,
+    this.canRedeclare = false,
   });
 
   /// L'ordre du pied, de la reprise à la décision : ce que le demandeur peut
@@ -66,6 +83,8 @@ class ExpenseDetailActions extends StatelessWidget {
     ExpenseGesture.refuse,
     ExpenseGesture.approve,
     ExpenseGesture.pay,
+    ExpenseGesture.flag,
+    ExpenseGesture.visa,
   ];
 
   /// Les gestes qui closent une étape portent l'accent ; les autres
@@ -74,6 +93,7 @@ class ExpenseDetailActions extends StatelessWidget {
     ExpenseGesture.resubmit,
     ExpenseGesture.approve,
     ExpenseGesture.pay,
+    ExpenseGesture.visa,
   };
 
   @override
@@ -83,6 +103,7 @@ class ExpenseDetailActions extends StatelessWidget {
       expense,
       accountId: accountId,
     );
+    final declaration = expense.isDeclaration;
     return Padding(
       padding: const EdgeInsets.all(AppDimensions.spacingM),
       child: Wrap(
@@ -95,7 +116,9 @@ class ExpenseDetailActions extends StatelessWidget {
           // fiche est déjà un pas délibéré. Le mot nomme le RETRAIT DU
           // REGISTRE ; la reprise par son demandeur s'appelle « Retirer »
           // (F25).
-          if (allowShortcuts)
+          // Une déclaration ne se supprime pas : l'argent est sorti. Elle
+          // s'annule (sous la garde de la clôture) ou se redéclare.
+          if (allowShortcuts && !declaration)
             PermissionGate.access(
               kExpenseWithdrawAccess,
               child: TextButton.icon(
@@ -105,7 +128,21 @@ class ExpenseDetailActions extends StatelessWidget {
                 label: Text(l10n.expenseActionDelete),
               ),
             ),
-          if (allowShortcuts)
+          if (allowShortcuts &&
+              canRedeclare &&
+              expense.isDeclarationToRegularize)
+            PermissionGate.access(
+              kExpenseDeclareAccess,
+              child: EteeloButton.primary(
+                label: l10n.expenseActionRedeclare,
+                icon: Icons.receipt_long_outlined,
+                onPressed: () => onShortcut(ExpenseDetailChoice.redeclare),
+                fullWidth: false,
+              ),
+            ),
+          // Une déclaration est payée : ni dupliquée ni modifiée ici — on la
+          // redéclare si elle a été refusée.
+          if (allowShortcuts && !declaration)
             PermissionGate.access(
               kExpenseWriteAccess,
               child: Wrap(
@@ -138,15 +175,26 @@ class ExpenseDetailActions extends StatelessWidget {
               ),
             ),
           for (final gesture in _order)
-            if (offered.contains(gesture))
+            if (offered.contains(gesture) &&
+                !(declaration &&
+                    gesture == ExpenseGesture.reopen &&
+                    !cancelAllowed))
               PermissionGate.access(
                 expenseGestureAccess(gesture),
                 child: _GestureButton(
                   gesture: gesture,
+                  declaration: declaration,
                   leading: _leading.contains(gesture),
-                  onPressed: () => gesture == ExpenseGesture.refuse
-                      ? onRefuse()
-                      : onGesture(gesture),
+                  // « Viser » attend la photo : désactivé, avec son pourquoi.
+                  tooltip: gesture == ExpenseGesture.visa && !voucherSeen
+                      ? l10n.expenseVisaNeedsVoucher
+                      : null,
+                  onPressed: switch (gesture) {
+                    ExpenseGesture.refuse => onRefuse,
+                    ExpenseGesture.flag => onFlag,
+                    ExpenseGesture.visa when !voucherSeen => null,
+                    _ => () => onGesture(gesture),
+                  },
                 ),
               ),
         ],
@@ -158,18 +206,22 @@ class ExpenseDetailActions extends StatelessWidget {
 class _GestureButton extends StatelessWidget {
   final ExpenseGesture gesture;
   final bool leading;
-  final VoidCallback onPressed;
+  final bool declaration;
+  final String? tooltip;
+  final VoidCallback? onPressed;
 
   const _GestureButton({
     required this.gesture,
     required this.leading,
     required this.onPressed,
+    this.declaration = false,
+    this.tooltip,
   });
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final label = expenseGestureLabel(l10n, gesture);
+    final label = expenseGestureLabel(l10n, gesture, declaration: declaration);
     // L'icône du geste est celle de l'acte qu'il écrira au fil : le bouton et
     // la ligne qu'il produit se reconnaissent l'un l'autre.
     final icon = expenseActVisuals(gesture.act).icon;
@@ -177,7 +229,7 @@ class _GestureButton extends StatelessWidget {
     // variante rouge sortante, et deux boutons pleins côte à côte — Refuser
     // et Approuver — se disputeraient l'accent. Le rouge arrive au panneau de
     // motif, là où le refus se confirme.
-    return leading
+    final button = leading
         ? EteeloButton.primary(
             label: label,
             icon: icon,
@@ -190,5 +242,7 @@ class _GestureButton extends StatelessWidget {
             onPressed: onPressed,
             fullWidth: false,
           );
+    final tooltip = this.tooltip;
+    return tooltip == null ? button : Tooltip(message: tooltip, child: button);
   }
 }

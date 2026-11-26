@@ -67,6 +67,8 @@ class ExpenseGesturePayload {
     ExpenseGesture.resubmit => AppConstants.syncExpenseResubmitEndpoint,
     ExpenseGesture.remind => AppConstants.syncExpenseReminderEndpoint,
     ExpenseGesture.comment => AppConstants.syncExpenseMessagesEndpoint,
+    ExpenseGesture.visa => AppConstants.syncExpenseVisaEndpoint,
+    ExpenseGesture.flag => AppConstants.syncExpenseFlagEndpoint,
   };
 
   /// Le corps de la requête.

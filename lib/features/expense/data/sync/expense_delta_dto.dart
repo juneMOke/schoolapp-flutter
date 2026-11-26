@@ -1,4 +1,6 @@
 import 'package:school_app_flutter/core/offline/keyset_page.dart';
+import 'package:school_app_flutter/features/expense/data/local/expense_declaration_row.dart';
+import 'package:school_app_flutter/features/expense/data/sync/expense_declaration_wire.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_day.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_staff_advance.dart';
 
@@ -62,6 +64,10 @@ class ExpenseDeltaDto {
   /// jamais sur les messages (Q9) — donc jamais de fil tronqué en silence.
   final List<ExpenseMessageDeltaDto> messages;
 
+  /// La déclaration et son visa (v3) ; [ExpenseDeclarationRow.none] pour une
+  /// demande d'autorisation.
+  final ExpenseDeclarationRow declaration;
+
   const ExpenseDeltaDto({
     required this.id,
     this.expenseNumber,
@@ -90,6 +96,7 @@ class ExpenseDeltaDto {
     this.reminderCount = 0,
     this.lastMessageAt,
     this.messages = const [],
+    this.declaration = ExpenseDeclarationRow.none,
   });
 
   static ExpenseDeltaDto? tryParse(Object? raw) {
@@ -162,6 +169,7 @@ class ExpenseDeltaDto {
       reminderCount: reminders is num ? reminders.toInt() : 0,
       lastMessageAt: instant('lastMessageAt'),
       messages: messages,
+      declaration: ExpenseDeclarationWire.parse(raw),
     );
   }
 }

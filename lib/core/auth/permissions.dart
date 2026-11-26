@@ -115,6 +115,16 @@ enum Perm {
   expenseDecide('expense.decide'),
   expensePay('expense.pay'),
   expenseReopen('expense.reopen'),
+  // La déclaration (v3) : payer d'abord, faire viser ensuite. Une autorité à
+  // part, donnée à la caissière et à la direction seulement — déclarer fait
+  // sortir l'argent de la caisse sans accord préalable dans l'application.
+  // Viser et signaler reprennent `expense.decide`.
+  //
+  // ⚠️ Déclarée avant que le back ne la sème, comme les trois précédentes :
+  // sans elle, l'écran ne propose que « pour autorisation », et c'est ce qui
+  // rend le front livrable avant le back (F35). Hors de `kGuardedWriteActions`
+  // pour la même raison.
+  expenseDeclare('expense.declare'),
 
   // ── Trésorerie ────────────────────────────────────────────────────────────
   // Les caisses en espèces (une par devise), leur clôture du soir et leur

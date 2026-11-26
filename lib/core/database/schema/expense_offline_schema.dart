@@ -65,6 +65,15 @@ const TableSchema refExpenseTypesTable = TableSchema(
 /// - `last_message_at` : fraîcheur du fil, **distincte** de
 ///   `client_updated_at` — un message ne doit jamais faire perdre une
 ///   décision à l'arbitrage (le défaut du module Discipline).
+/// - `mode` : `AUTHORIZATION` ou `DECLARATION` (v89), figé à la création.
+/// - `visa_*`, `flag_reason` : le contrôle après coup d'une déclaration ;
+///   `NULL` en mode autorisation. Un second axe, jamais mêlé à `status`.
+/// - `disbursed_at` : l'heure du décaissement envoyée (ISO-8601 UTC), celle
+///   qu'une redéclaration reprend.
+/// - `cash_day` / `after_closure` : la journée de caisse de la sortie, que
+///   lit la garde de l'annulation (F44).
+/// - `voucher_*` : la fiche de la photo du bon, **jamais ses octets** (ils
+///   vivent dans le magasin chiffré).
 const TableSchema expensesTable = TableSchema(
   name: 'expenses',
   createTableSql: '''
@@ -104,7 +113,22 @@ const TableSchema expensesTable = TableSchema(
       decision_reason TEXT,
       reminder_count INTEGER NOT NULL DEFAULT 0,
       last_message_at TEXT,
-      staff_advance TEXT
+      staff_advance TEXT,
+      -- La déclaration et son visa (v89), en fin de table pour la même
+      -- raison que le circuit.
+      mode TEXT NOT NULL DEFAULT 'AUTHORIZATION',
+      visa_status TEXT,
+      visa_by_id TEXT,
+      visa_by_name TEXT,
+      visa_at TEXT,
+      flag_reason TEXT,
+      disbursed_at TEXT,
+      cash_day TEXT,
+      after_closure INTEGER NOT NULL DEFAULT 0,
+      voucher_id TEXT,
+      voucher_content_type TEXT,
+      voucher_size_bytes INTEGER,
+      voucher_uploaded_at TEXT
     )
   ''',
   createIndexSql: [

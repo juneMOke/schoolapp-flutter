@@ -83,7 +83,10 @@ class ExpenseGestureOutboxHandler
       return null;
     }
     return switch (gesture) {
-      ExpenseGesture.approve || ExpenseGesture.refuse => kExpenseDecideAccess,
+      ExpenseGesture.approve ||
+      ExpenseGesture.refuse ||
+      ExpenseGesture.visa ||
+      ExpenseGesture.flag => kExpenseDecideAccess,
       ExpenseGesture.pay => kExpensePayAccess,
       ExpenseGesture.reopen => kExpenseReopenAccess,
       ExpenseGesture.retract ||
@@ -165,6 +168,8 @@ class ExpenseGestureOutboxHandler
       ExpenseGesture.resubmit => _api.resubmitExpense(_extras, id, body),
       ExpenseGesture.remind => _api.remindExpense(_extras, id, body),
       ExpenseGesture.comment => _api.commentExpense(_extras, id, body),
+      ExpenseGesture.visa => _api.visaExpense(_extras, id, body),
+      ExpenseGesture.flag => _api.flagExpense(_extras, id, body),
     };
   }
 
@@ -213,7 +218,7 @@ class ExpenseGestureOutboxHandler
     );
     // Un COMMENTAIRE refusé ne rend pas la dépense « à corriger » : il n'y a
     // rien à corriger dans une demande parce qu'un mot n'a pas pu s'écrire.
-    if (payload.gesture.movesStatus) {
+    if (payload.gesture.changesState) {
       await _dao.markGestureRejected(
         payload.expenseId,
         code: failure.storedCode,

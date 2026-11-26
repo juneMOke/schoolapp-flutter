@@ -11738,6 +11738,196 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get expenseGestureVisa => 'Sign off';
+
+  @override
+  String get expenseGestureFlag => 'Flag';
+
+  @override
+  String get expenseGestureCancelDeclaration => 'Cancel the declaration';
+
+  @override
+  String expenseToastVisaed(String name) {
+    return '$name signed off.';
+  }
+
+  @override
+  String expenseToastFlagged(String name) {
+    return '$name flagged.';
+  }
+
+  @override
+  String expenseToastDeclarationCancelled(String name) {
+    return 'Declaration $name cancelled.';
+  }
+
+  @override
+  String get expenseModeLabel => 'This expense is';
+
+  @override
+  String get expenseModeSemantics => 'Expense mode';
+
+  @override
+  String get expenseModeDeclaration => 'Already paid';
+
+  @override
+  String get expenseModeAuthorization => 'For approval';
+
+  @override
+  String get expenseModeDeclarationHint =>
+      'The money is already out: declare it with the voucher photo, and the promoter signs it off afterwards. To ask for approval before paying, choose “For approval”.';
+
+  @override
+  String get expenseModeAuthorizationHint =>
+      'A request, approved before it is paid. If the money is already out, choose “Already paid”.';
+
+  @override
+  String get expenseDisbursedOnLabel => 'Paid on';
+
+  @override
+  String get expenseDisbursedAtLabel => 'At';
+
+  @override
+  String get expenseVoucherLabel => 'Voucher photo';
+
+  @override
+  String get expenseVoucherAdd => 'Add the voucher photo';
+
+  @override
+  String get expenseVoucherReplace => 'Replace the photo';
+
+  @override
+  String get expenseVoucherRequired =>
+      'The voucher photo is required to declare.';
+
+  @override
+  String expenseVoucherSize(int size) {
+    return '$size KB';
+  }
+
+  @override
+  String get expenseVoucherCaptureTitle => 'Payment voucher';
+
+  @override
+  String get expenseDeclarationNoteLabel => 'Approval received';
+
+  @override
+  String get expenseDeclarationNotePlaceholder =>
+      'Promoter\'s approval by WhatsApp, in person…';
+
+  @override
+  String get expenseFormDeclareTitle => 'Declare an expense';
+
+  @override
+  String get expenseFormDeclareSubtitle =>
+      'An expense already paid, for the promoter to sign off.';
+
+  @override
+  String get expenseFormDeclareSubmit => 'Declare';
+
+  @override
+  String expenseToastDeclared(String amount) {
+    return 'Expense declared: $amount.';
+  }
+
+  @override
+  String get expenseDeclareFailed =>
+      'The declaration could not be saved on this device.';
+
+  @override
+  String get expenseFlagTitle => 'Flag this declaration';
+
+  @override
+  String get expenseFlagReasonLabel => 'Reason for the flag';
+
+  @override
+  String get expenseFlagReasonHint => 'What is wrong, for the cashier';
+
+  @override
+  String get expenseFlagReasonMissing => 'A reason is required to flag.';
+
+  @override
+  String get expenseFlagConfirm => 'Flag';
+
+  @override
+  String get expenseFlagSuggestionQuote => 'Amount above the quote';
+
+  @override
+  String get expenseFlagSuggestionVoucher => 'Voucher unreadable or incomplete';
+
+  @override
+  String get expenseFlagSuggestionApproval =>
+      'No approval given for this expense';
+
+  @override
+  String get expenseVisaPending => 'To sign off';
+
+  @override
+  String get expenseVisaVisaed => 'Signed off';
+
+  @override
+  String get expenseVisaFlagged => 'Flagged';
+
+  @override
+  String get expenseVisaFilterTitle => 'Sign-off';
+
+  @override
+  String get expenseVisaFilterAll => 'All';
+
+  @override
+  String get expenseStatusCancelled => 'Cancelled';
+
+  @override
+  String get expenseSyncToRegularize => 'To regularise';
+
+  @override
+  String get expenseVoucherMissingTitle => 'No voucher photo';
+
+  @override
+  String get expenseVoucherMissing =>
+      'The server has no photo for this declaration.';
+
+  @override
+  String get expenseVoucherPdf => 'Voucher as PDF';
+
+  @override
+  String get expenseVisaNeedsVoucher =>
+      'The voucher photo must have been loaded on this tablet before signing off.';
+
+  @override
+  String expenseFlaggedNote(String reason) {
+    return 'Flagged: $reason';
+  }
+
+  @override
+  String get expenseToRegularizeNote =>
+      'The server refused this declaration: the money is out, but it is not recorded. Declare it again.';
+
+  @override
+  String get expenseCancelBlockedNote =>
+      'The cash day is closed: this outflow can no longer be cancelled here, it is corrected by a cash adjustment.';
+
+  @override
+  String get expenseActionRedeclare => 'Declare again';
+
+  @override
+  String get expenseQueueTabRequests => 'Requests';
+
+  @override
+  String get expenseQueueTabVisa => 'To sign off';
+
+  @override
+  String expenseQueueTabVisaCount(int count) {
+    return 'To sign off · $count';
+  }
+
+  @override
+  String get expenseQueueVisaEmptyTitle => 'Nothing to sign off';
+
+  @override
+  String get expenseQueueVisaEmpty => 'Every declaration is signed off.';
+
+  @override
   String get expenseGestureRefused =>
       'That gesture is no longer possible on this request: its state has changed.';
 
@@ -12123,6 +12313,15 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get expenseActEdit => 'Request edited';
+
+  @override
+  String get expenseActDeclaration => 'Expense declared';
+
+  @override
+  String get expenseActVisa => 'Sign-off';
+
+  @override
+  String get expenseActFlag => 'Flag';
 
   @override
   String get expenseFormCreateTitle => 'Record an operating expense';

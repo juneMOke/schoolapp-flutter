@@ -168,7 +168,8 @@ class _Badges extends StatelessWidget {
     spacing: AppDimensions.spacingXS,
     runSpacing: AppDimensions.spacingXS,
     children: [
-      ExpenseStatusBadge(status: expense.status, small: true),
+      ExpenseStatusBadge.of(expense, small: true),
+      ExpenseVisaBadge(expense: expense),
       ExpenseSyncBadge(expense: expense),
     ],
   );

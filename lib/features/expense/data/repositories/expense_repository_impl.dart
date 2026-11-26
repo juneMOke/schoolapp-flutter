@@ -218,7 +218,15 @@ class ExpenseRepositoryImpl implements ExpenseRepository {
           return const Left(ExpenseAdvanceRules.monthLocked);
         }
       }
-      final now = _now();
+      // Le fil ordonne les gestes sur son horloge (F31) : un geste daté avant
+      // le dernier message — une horloge de tablette corrigée vers l'arrière
+      // — doublerait ce qui le précède, déclaration comprise. Il prend donc
+      // au moins la milliseconde qui suit.
+      final last = current.lastMessageAt?.toUtc();
+      final clock = _now();
+      final now = last != null && !clock.toUtc().isAfter(last)
+          ? last.add(const Duration(milliseconds: 1))
+          : clock;
       final messageId = _ids.newId();
       await _messages.appendGesture(
         ExpenseMessageLocalModel.at(
@@ -238,6 +246,7 @@ class ExpenseRepositoryImpl implements ExpenseRepository {
             actorName: actorName,
             at: now,
             reason: body,
+            mode: current.mode,
           ),
           // La première retenue est connue de la tablette dès le paiement :
           // la Paie projette l'avance sans attendre l'accusé.

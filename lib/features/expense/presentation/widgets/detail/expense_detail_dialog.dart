@@ -14,6 +14,9 @@ import 'package:school_app_flutter/features/expense/presentation/widgets/detail/
 import 'package:school_app_flutter/features/expense/presentation/widgets/detail/expense_detail_outcome.dart';
 import 'package:school_app_flutter/features/expense/presentation/widgets/detail/expense_refusal_panel.dart';
 import 'package:school_app_flutter/features/expense/presentation/widgets/detail/expense_thread_composer.dart';
+import 'package:school_app_flutter/features/expense/domain/entities/expense_enums.dart';
+import 'package:school_app_flutter/features/expense/presentation/helpers/expense_declaration_support.dart';
+import 'package:school_app_flutter/features/expense/presentation/widgets/detail/expense_voucher_panel.dart';
 import 'package:school_app_flutter/l10n/app_localizations.dart';
 
 export 'package:school_app_flutter/features/expense/presentation/widgets/detail/expense_detail_outcome.dart';
@@ -34,6 +37,7 @@ Future<ExpenseDetailOutcome?> showExpenseDetailDialog(
   Future<ExpenseCommentResult> Function(String body)? onComment,
   bool startRefusing = false,
   bool allowShortcuts = true,
+  ExpenseDeclarationSupport? declaration,
 }) => showEteeloAdaptiveDialog<ExpenseDetailOutcome>(
   context: context,
   builder: (_) => ExpenseDetailDialog(
@@ -45,6 +49,7 @@ Future<ExpenseDetailOutcome?> showExpenseDetailDialog(
     onComment: onComment,
     startRefusing: startRefusing,
     allowShortcuts: allowShortcuts,
+    declaration: declaration,
   ),
 );
 
@@ -67,6 +72,9 @@ class ExpenseDetailDialog extends StatefulWidget {
   /// saisie, et la saisie appartient au registre.
   final bool allowShortcuts;
 
+  /// Pour une déclaration (v3) : la photo du bon et la règle d'annulation.
+  final ExpenseDeclarationSupport? declaration;
+
   const ExpenseDetailDialog({
     super.key,
     required this.expense,
@@ -77,6 +85,7 @@ class ExpenseDetailDialog extends StatefulWidget {
     this.onComment,
     this.startRefusing = false,
     this.allowShortcuts = true,
+    this.declaration,
   });
 
   @override
@@ -93,6 +102,63 @@ class _ExpenseDetailDialogState extends State<ExpenseDetailDialog> {
 
   /// Le panneau de motif est ouvert : le refus attend son mot.
   late bool _refusing = widget.startRefusing;
+
+  /// Le panneau de motif est ouvert pour **signaler** une déclaration.
+  bool _flagging = false;
+
+  ExpenseVoucherLoad _voucher = const ExpenseVoucherLoading();
+
+  /// Prudent tant que la règle n'a pas répondu : « Annuler » caché.
+  bool _cancelAllowed = false;
+  bool _cancelResolved = false;
+
+  /// La photo est arrivée mais ne se décode pas : on ne vise pas ce qu'on
+  /// n'a pas vu.
+  bool _voucherBroken = false;
+
+  @override
+  void initState() {
+    super.initState();
+    if (_expense.isDeclaration && widget.declaration != null) {
+      _loadVoucher();
+      _resolveCancel();
+    }
+  }
+
+  Future<void> _loadVoucher() async {
+    setState(() => _voucher = const ExpenseVoucherLoading());
+    final result = await widget.declaration!.loadVoucher(_expense);
+    if (!mounted) return;
+    setState(
+      () => _voucher = result.fold(
+        ExpenseVoucherFailed.new,
+        ExpenseVoucherLoaded.new,
+      ),
+    );
+  }
+
+  Future<void> _resolveCancel() async {
+    final allowed = await widget.declaration!.canCancel(_expense);
+    if (!mounted) return;
+    setState(() {
+      _cancelAllowed = allowed;
+      _cancelResolved = true;
+    });
+  }
+
+  /// La photo s'est montrée : elle est sur ce poste, « Viser » s'ouvre.
+  bool get _voucherSeen => switch (_voucher) {
+    ExpenseVoucherLoaded(:final image) => image != null && !_voucherBroken,
+    _ => false,
+  };
+
+  void _onVoucherBroken() {
+    if (_voucherBroken) return;
+    // Signalé pendant la construction de l'image : on attend la fin du cadre.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) setState(() => _voucherBroken = true);
+    });
+  }
 
   Future<ExpenseCommentResult> _send(String body) async {
     final result = await widget.onComment!(body);
@@ -153,6 +219,18 @@ class _ExpenseDetailDialogState extends State<ExpenseDetailDialog> {
                 thread: _thread,
                 accountId: widget.accountId,
                 onSend: widget.onComment == null ? null : _send,
+                declarationSection: widget.declaration == null
+                    ? null
+                    : ExpenseVoucherPanel(
+                        expense: _expense,
+                        load: _voucher,
+                        onRetry: _loadVoucher,
+                        onImageError: _onVoucherBroken,
+                        cancelBlocked:
+                            _expense.status == ExpenseStatus.paid &&
+                            _cancelResolved &&
+                            !_cancelAllowed,
+                      ),
               ),
               // Le panneau s'ouvre DANS la fiche, sous le fil : le décideur
               // garde sous les yeux le montant, la chaîne et l'historique —
@@ -162,6 +240,14 @@ class _ExpenseDetailDialogState extends State<ExpenseDetailDialog> {
                   onCancel: () => setState(() => _refusing = false),
                   onConfirm: (reason) => _close(
                     ExpenseDetailGesture(ExpenseGesture.refuse, note: reason),
+                  ),
+                ),
+              if (_flagging)
+                ExpenseRefusalPanel(
+                  flagging: true,
+                  onCancel: () => setState(() => _flagging = false),
+                  onConfirm: (reason) => _close(
+                    ExpenseDetailGesture(ExpenseGesture.flag, note: reason),
                   ),
                 ),
             ],
@@ -177,6 +263,12 @@ class _ExpenseDetailDialogState extends State<ExpenseDetailDialog> {
             onShortcut: (choice) => _close(ExpenseDetailShortcut(choice)),
             onGesture: (gesture) => _close(ExpenseDetailGesture(gesture)),
             onRefuse: () => setState(() => _refusing = true),
+            onFlag: () => setState(() => _flagging = true),
+            voucherSeen: _voucherSeen,
+            // Une déclaration sans la règle de clôture ne s'annule pas d'ici :
+            // le geste partirait sans savoir si la journée est figée.
+            cancelAllowed: !_expense.isDeclaration || _cancelAllowed,
+            canRedeclare: widget.declaration?.canRedeclare ?? false,
             allowShortcuts: widget.allowShortcuts,
           ),
         ],

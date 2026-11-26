@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
 import 'package:school_app_flutter/core/helpers/school_time.dart';
+import 'package:school_app_flutter/core/money/cash_closure_reader.dart';
 import 'package:school_app_flutter/core/money/cash_register_lock.dart';
 import 'package:school_app_flutter/core/offline/current_user_context.dart';
 import 'package:school_app_flutter/core/offline/keyset_pull_runner.dart';
@@ -51,7 +52,9 @@ void registerTreasury(GetIt getIt) {
     ..registerLazySingleton<TreasuryClosureDao>(
       () => TreasuryClosureDao(getIt<Database>(), getIt<CurrentUserContext>()),
     )
-    ..registerLazySingleton<CashRegisterLock>(
+    ..registerLazySingleton<CashRegisterLock>(() => getIt<TreasuryClosureDao>())
+    // Lu par les Dépenses : l'annulation d'une déclaration (F44).
+    ..registerLazySingleton<CashClosureReader>(
       () => getIt<TreasuryClosureDao>(),
     );
   getIt<PullCoordinator>().registerHandler(

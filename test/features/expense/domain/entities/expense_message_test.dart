@@ -5,12 +5,15 @@ import 'package:school_app_flutter/features/expense/domain/entities/expense_mess
 
 void main() {
   group('ExpenseAct.fromWire', () {
-    test('les neuf actes se relisent', () {
-      for (final act in ExpenseAct.values) {
-        expect(ExpenseAct.fromWire(act.wireValue), act);
-      }
-      expect(ExpenseAct.values, hasLength(9));
-    });
+    test(
+      'les douze actes se relisent (neuf du circuit, trois de la déclaration)',
+      () {
+        for (final act in ExpenseAct.values) {
+          expect(ExpenseAct.fromWire(act.wireValue), act);
+        }
+        expect(ExpenseAct.values, hasLength(12));
+      },
+    );
 
     test('un acte INCONNU se lit comme un commentaire libre : un serveur plus '
         'récent ne doit pas faire mentir la vignette', () {

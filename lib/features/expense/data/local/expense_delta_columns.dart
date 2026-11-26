@@ -67,6 +67,11 @@ abstract final class ExpenseDeltaColumns {
     'decided_at': d.decidedAt,
     'decision_reason': d.decisionReason,
     'reminder_count': d.reminderCount,
+    // La déclaration et son visa (v3) suivent la décision : le mode est figé
+    // par le serveur, et le visa se donne AILLEURS. Un visa local encore en
+    // attente est donc écrasé par l'état serveur jusqu'à son accusé — la même
+    // décision optimiste et restaurable que F22.
+    ...d.declaration.toMap(),
   };
 
   /// ⚠️ `last_message_at` n'est **PAS** dans [server], et ce n'est pas un

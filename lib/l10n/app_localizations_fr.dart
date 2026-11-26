@@ -11838,6 +11838,197 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
+  String get expenseGestureVisa => 'Viser';
+
+  @override
+  String get expenseGestureFlag => 'Signaler';
+
+  @override
+  String get expenseGestureCancelDeclaration => 'Annuler la déclaration';
+
+  @override
+  String expenseToastVisaed(String name) {
+    return '$name est visée.';
+  }
+
+  @override
+  String expenseToastFlagged(String name) {
+    return '$name est signalée.';
+  }
+
+  @override
+  String expenseToastDeclarationCancelled(String name) {
+    return 'La déclaration $name est annulée.';
+  }
+
+  @override
+  String get expenseModeLabel => 'Cette dépense est';
+
+  @override
+  String get expenseModeSemantics => 'Mode de la dépense';
+
+  @override
+  String get expenseModeDeclaration => 'Déjà payée';
+
+  @override
+  String get expenseModeAuthorization => 'Pour autorisation';
+
+  @override
+  String get expenseModeDeclarationHint =>
+      'L\'argent est déjà sorti : vous la déclarez avec la photo du bon, et le promoteur la visera ensuite. Pour demander l\'accord avant de payer, choisissez « Pour autorisation ».';
+
+  @override
+  String get expenseModeAuthorizationHint =>
+      'Une demande, accordée avant d\'être payée. Si l\'argent est déjà sorti, choisissez « Déjà payée ».';
+
+  @override
+  String get expenseDisbursedOnLabel => 'Payée le';
+
+  @override
+  String get expenseDisbursedAtLabel => 'À';
+
+  @override
+  String get expenseVoucherLabel => 'Photo du bon';
+
+  @override
+  String get expenseVoucherAdd => 'Ajouter la photo du bon';
+
+  @override
+  String get expenseVoucherReplace => 'Remplacer la photo';
+
+  @override
+  String get expenseVoucherRequired =>
+      'La photo du bon est obligatoire pour déclarer.';
+
+  @override
+  String expenseVoucherSize(int size) {
+    return '$size Ko';
+  }
+
+  @override
+  String get expenseVoucherCaptureTitle => 'Bon de sortie';
+
+  @override
+  String get expenseDeclarationNoteLabel => 'Accord reçu';
+
+  @override
+  String get expenseDeclarationNotePlaceholder =>
+      'Accord du promoteur par WhatsApp, de vive voix…';
+
+  @override
+  String get expenseFormDeclareTitle => 'Déclarer une dépense';
+
+  @override
+  String get expenseFormDeclareSubtitle =>
+      'Une dépense déjà payée, que le promoteur visera.';
+
+  @override
+  String get expenseFormDeclareSubmit => 'Déclarer';
+
+  @override
+  String expenseToastDeclared(String amount) {
+    return 'Dépense déclarée : $amount.';
+  }
+
+  @override
+  String get expenseDeclareFailed =>
+      'La déclaration n\'a pas pu être enregistrée sur cet appareil.';
+
+  @override
+  String get expenseFlagTitle => 'Signaler cette déclaration';
+
+  @override
+  String get expenseFlagReasonLabel => 'Motif du signalement';
+
+  @override
+  String get expenseFlagReasonHint => 'Ce qui ne va pas, pour la caissière';
+
+  @override
+  String get expenseFlagReasonMissing =>
+      'Le motif est obligatoire pour signaler.';
+
+  @override
+  String get expenseFlagConfirm => 'Signaler';
+
+  @override
+  String get expenseFlagSuggestionQuote => 'Montant supérieur au devis';
+
+  @override
+  String get expenseFlagSuggestionVoucher => 'Bon illisible ou incomplet';
+
+  @override
+  String get expenseFlagSuggestionApproval =>
+      'Aucun accord donné pour cette dépense';
+
+  @override
+  String get expenseVisaPending => 'À viser';
+
+  @override
+  String get expenseVisaVisaed => 'Visée';
+
+  @override
+  String get expenseVisaFlagged => 'Signalée';
+
+  @override
+  String get expenseVisaFilterTitle => 'Visa';
+
+  @override
+  String get expenseVisaFilterAll => 'Toutes';
+
+  @override
+  String get expenseStatusCancelled => 'Annulée';
+
+  @override
+  String get expenseSyncToRegularize => 'À régulariser';
+
+  @override
+  String get expenseVoucherMissingTitle => 'Pas de photo du bon';
+
+  @override
+  String get expenseVoucherMissing =>
+      'Le serveur n\'a pas de photo pour cette déclaration.';
+
+  @override
+  String get expenseVoucherPdf => 'Bon en PDF';
+
+  @override
+  String get expenseVisaNeedsVoucher =>
+      'La photo du bon doit avoir été chargée sur cette tablette avant de viser.';
+
+  @override
+  String expenseFlaggedNote(String reason) {
+    return 'Signalée : $reason';
+  }
+
+  @override
+  String get expenseToRegularizeNote =>
+      'Le serveur a refusé cette déclaration : l\'argent est sorti, mais il n\'est pas enregistré. Redéclarez-la.';
+
+  @override
+  String get expenseCancelBlockedNote =>
+      'La journée de caisse est close : cette sortie ne s\'annule plus ici, elle se corrige par un ajustement de caisse.';
+
+  @override
+  String get expenseActionRedeclare => 'Redéclarer';
+
+  @override
+  String get expenseQueueTabRequests => 'Demandes';
+
+  @override
+  String get expenseQueueTabVisa => 'À viser';
+
+  @override
+  String expenseQueueTabVisaCount(int count) {
+    return 'À viser · $count';
+  }
+
+  @override
+  String get expenseQueueVisaEmptyTitle => 'Rien à viser';
+
+  @override
+  String get expenseQueueVisaEmpty => 'Toutes les déclarations sont visées.';
+
+  @override
   String get expenseGestureRefused =>
       'Ce geste n\'est plus possible sur cette demande : son état a changé.';
 
@@ -12220,6 +12411,15 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get expenseActEdit => 'Demande modifiée';
+
+  @override
+  String get expenseActDeclaration => 'Dépense déclarée';
+
+  @override
+  String get expenseActVisa => 'Visa';
+
+  @override
+  String get expenseActFlag => 'Signalement';
 
   @override
   String get expenseFormCreateTitle =>

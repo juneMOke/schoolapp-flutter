@@ -1,11 +1,8 @@
-# Module Dépenses — plan front (V1 + v2)
+# Module Dépenses — plan front (V1, v2, v3)
 
-> **Où on en est, en une ligne** : la V1 est livrée dans `main` ; la **v2 —
-> circuit de validation** est à mi-chemin sur la branche
-> **`feat/expense-validation-circuit`** (lots DEP-9 à DEP-11 faits, DEP-12 à
-> DEP-15 à faire) et **`main` n'en porte rien**. Tout est en **partie II**, à
-> partir du §8 — c'est là qu'il faut reprendre. ⚠️ Lire d'abord l'encadré du §12 :
-> le chantier est à moitié construit, et cela a deux conséquences vérifiées.
+> **Où on en est, en une ligne** : la V1 et la v2 (circuit de validation) sont
+> en prod, front et back. La **v3 — déclarer, puis viser** est planifiée en
+> **partie III** (§16 à §22), rien n'est codé : c'est là qu'il faut reprendre.
 
 > Rédigé le 2026-09-13 sur `feat/expense-register` (base `origin/main` 6252762e).
 > Sources : spec design `ui_kits/app/Depenses-Frais-Fonctionnement-Spec.html`
@@ -608,3 +605,201 @@ propre lot et profiterait aussi aux paiements et aux ventes.
   de décision — et gardera le bouton Supprimer que la comptabilité vient de
   perdre, pour un 403 terminal. À faire au moment où le back sème
   `expense.decide` / `expense.pay` / `expense.reopen`, pas avant.
+
+---
+
+# Partie III — v3 : déclarer, puis viser
+
+> Rédigé le 2026-11-25 sur `main` (`80b10f5d`, palier local 88). Contrat :
+> doc « Dépenses : déclaration et visa — contrat front »
+> (https://claude.ai/artifact/8oKtzW4JJynUbo17eSchK5, rev 17 : arbitrages du
+> 25/11 et réponses du back à Q1, Q2, C1-C4 comprises). **Le contrat fait foi** ; ce qui suit dit comment le poste
+> le tient.
+
+## 16. Ce que la v3 change
+
+Une dépense peut naître **déclarée** : payée tout de suite, sortie de la caisse
+à l'heure du décaissement, photo du bon jointe, et visée ensuite par le
+promoteur. Le mode est choisi sur chaque bon, à sa création, et ne change plus.
+Le circuit d'autorisation de la partie II reste tel quel.
+
+Le statut et le visa sont **deux axes séparés** : `status` dit où en est
+l'argent (`PAID`, ou `RETRACTED` une fois annulée), `visaStatus` dit si le
+promoteur a contrôlé (`PENDING` · `VISAED` · `FLAGGED`). Un visa ne déplace
+jamais le statut, et un statut ne se lit jamais pour savoir si une dépense est
+visée.
+
+## 17. Ce qu'on reprend, et d'où
+
+Presque tout existe déjà ; le lot qui recode l'un de ces socles fait fausse
+route.
+
+| Besoin | Patron existant | Où |
+|---|---|---|
+| Prendre ou importer la photo | `DocumentCaptureService` + une politique par usage | `lib/core/capture/` |
+| Garder les octets chiffrés hors ligne | `EncryptedBlobStore` (attente puis promotion) | `lib/core/storage/encrypted_blob/`, cf. `StudentPhotoBlobs` |
+| Envoyer JSON + fichier depuis l'outbox | Dio à la main, partie JSON en `application/json` | `StaffDocumentTransferApi.upload`, `StaffDocumentOutboxHandler` (octets relus au dispatch, `LOCAL_BYTES_LOST`) |
+| Relire la photo | `download` en octets, cache chiffré | `StaffDocumentTransferApi.download` |
+| Ordonner les gestes d'une dépense | le fil, garde F31 + `rejectFrom` | `ExpenseGestureOutboxHandler._orderGuard` |
+| Bloquer la clôture tant qu'un fait d'argent n'est pas parti | une requête de plus dans la sonde | `CashPendingProbeSql` |
+| Savoir qu'une journée est close | `treasury_closures` | `TreasuryClosureDao` (n'a que `closedToday()` aujourd'hui) |
+| « Jamais effacé, à régulariser » | la paie | `PayrollLedger.toRegularize` |
+
+## 18. Décisions front v3 (F35 → F48)
+
+| # | Décision |
+|---|---|
+| F35 | **La permission est l'interrupteur.** Le choix « Déclaration » n'apparaît qu'avec `expense.declare`, que seule la migration du back sème. Un front livré avant le back n'offre donc rien qui mourrait en 404 : **pas de release conjointe obligatoire**, contrairement à la v2. |
+| F36 | `ExpenseMode` (`AUTHORIZATION` · `DECLARATION`) et `ExpenseVisaStatus` sont deux énumérations à part, lues avec tolérance : un `mode` absent ou inconnu se lit `AUTHORIZATION` (c'est ce que sont toutes les dépenses existantes), un `visaStatus` inconnu sur une déclaration se lit `PENDING` (le sens prudent : pas visée). `isFirm` ne change pas : une déclaration `PAID` compte, une déclaration annulée ne compte plus. |
+| F37 | **Une déclaration = une seule entrée d'outbox**, d'un agrégat neuf `EXPENSE_DECLARATION:{expenseId}`, poussée en multipart. Elle **remplace** l'entrée de contenu `EXPENSE:{id}`, et n'y est jamais ajoutée : l'ancienne route refuse `mode = DECLARATION` (`EXPENSE_MODE_LOCKED`). Les octets sont relus dans le magasin chiffré au moment de l'envoi, comme pour une pièce du personnel. |
+| F38 | **Le message `DECLARATION` est écrit sur le poste**, `PENDING`, dans la même transaction que la ligne, la photo en attente et l'entrée d'outbox. C'est lui qui ordonne : la garde F31 retient visa, signalement et annulation derrière la déclaration **sans une ligne de code de plus**. Accusée, la déclaration marque son message `SYNCED` ; refusée pour de bon, elle appelle `rejectFrom` et la suite meurt avec elle. **Confirmé par le back (Q2)** : l'accusé `APPLIED` porte la dépense entière, fil imbriqué, et `messages[]` rend ce message sous notre id. Un rejeu `SUPERSEDED` rend l'état du premier envoi : si celui-ci portait un autre message pour le même `expense.id`, c'est le sien qui fait foi, et le poste s'aligne dessus. |
+| F39 | **Photo :** une politique `DocumentCapturePolicy.expenseVoucher` (5 Mo ; JPEG, PNG, PDF). Le contrat demande 1 600 px et une qualité de 80 : la politique gagne `maxImageDimension` et `jpegQuality` **par instance**, avec les valeurs actuelles (2 000 / 82) par défaut. Les pièces du personnel et des chapitres ne bougent pas (règle du socle partagé). Le WebP du contrat n'est pas produit par le poste : le reconnaisseur de type ne le connaît pas, et une image importée est de toute façon réencodée en JPEG. |
+| F40 | **Les octets de la photo : une seule copie par dépense**, `v_{expenseId}`, dans un magasin chiffré à part (`expense_vouchers`, sa clé à lui). La photo ne change jamais : les octets scellés à la déclaration sont à la fois ceux que l'envoi relit et ceux que le détail affiche ; sur un autre poste, ce sont ceux que `GET …/voucher` a rangés. **« Viser » se règle sur la présence de cette copie**, pas sur une colonne : un magasin vidé (clé perdue) referme le bouton de lui-même. (Révisé à DEP-17 : la paire attente / affichage prévue d'abord n'apportait rien pour une photo immuable.) |
+| F41 | **Visa d'office** : si le déclarant a `expense.decide`, la ligne naît `VISAED` et signée par lui, dès la saisie. C'est de l'optimisme, l'accusé réaligne. La règle lit la permission, jamais le rôle (confirmé, C3). Le serveur écrit alors au fil un message `VISA` d'id **uuid5 dérivé de `expense.id` et de `"VISA"`**, comme le dépôt (`NameBasedIds.of(expenseId, "DEPOSIT")`) : le poste fabrique le même id d'avance (`uuid` v5, déjà employé par `payroll_ids.dart`), et l'accusé ne double jamais le message. Ce message n'a pas d'entrée d'outbox : il voyage dans la déclaration. |
+| F42 | **Viser et signaler sont deux gestes de plus** dans `ExpenseGesture` (actes `VISA`, `FLAG`) : ils ne déplacent pas `status` (`target = null`), ils portent une **cible de visa**. Ils passent par `EXPENSE_GESTURE`, l'uuid du message reste la clé d'idempotence, `/flag` exige un motif (`requiresNote`). Ils ne sont offerts que sur une déclaration ; visé est terminal. |
+| F43 | **Annuler une déclaration = le geste `reopen` existant**, même route et même droit, mais la cible dépend du mode : `PENDING` en autorisation, `RETRACTED` en déclaration (visa effacé, sortie de caisse défaite par le serveur). `ExpenseTransitions` prend le mode en entrée ; une seconde table, pas des `if` dans la première. Une déclaration annulée est terminale : ni renvoi, ni visa, ni signalement. Elle s'affiche **« Annulée »**, jamais « Retirée ». |
+| F44 | **Journée close ⇒ pas d'« Annuler ».** La journée lue est celle **de la sortie de caisse**, jamais celle de `paidOn` : le delta descend `cashDay` (date, `null` sans caisse dans la devise) et `afterClosure` (booléen). « Annuler » est caché si une clôture vivante de la devise existe **à `cashDay` ou après** (`TreasuryClosureDao.hasLiveClosureFrom(day, currency)`, à côté de `closedToday()`), ou dès que `afterClosure` est vrai, réponse de la caissière ou pas (Q6, option b : la dépense ne redescend pas quand la caissière répond, un champ `awaitsAnswer` serait vite périmé ; l'erreur va dans le sens prudent, « Annuler » caché à tort, jamais montré à tort). `cashDay` et `afterClosure` sont remplis pour toute dépense en espèces qui a une ligne au registre de caisse, mode autorisation compris ; sinon `null` et `false`. Le bouton est remplacé par un renvoi vers l'ajustement de caisse. Le serveur (`CashLedgerService.noLongerCounts`) refuse aussi quand une compensation « déjà en caisse » a annulé la sortie, ce que le poste ne voit pas : le refus `CASH_DAY_ALREADY_CLOSED` reste le filet. |
+| F45 | **Un refus terminal de déclaration ne se corrige pas, il se régularise.** La ligne n'est jamais effacée : elle reste visible, marquée « Refusée par le serveur — à régulariser » avec le motif, mais **sort des totaux dès le refus** (le serveur ne l'a jamais comptée ; la compter ferait partir la clôture sur un attendu faux, `EXPECTED_CHANGED`). L'argent ne compte plus que par sa redéclaration. « Redéclarer » ouvre le formulaire prérempli, photo comprise, sous un **nouvel** identifiant, et abandonne la ligne refusée sur le poste dans la même transaction : jamais les deux à la fois. Rien ne remonte pour l'ancienne (C1, accordé). |
+| F46 | **La sonde de clôture compte deux familles de plus** : les déclarations en espèces dont l'entrée `EXPENSE_DECLARATION` est `PENDING`, et les annulations de déclarations en espèces encore à envoyer. Une déclaration refusée (« à régulariser ») ne bloque pas la clôture, comme partout ailleurs dans la sonde. |
+| F47 | **L'écran évite d'avance les refus** : type `STAFF_ADVANCE` absent du choix, photo et poids vérifiés à la capture, `expenseDate` dérivée de l'heure du décaissement (jamais saisie à part), heure bornée à maintenant. Il ne reste pour la file que ce que le poste ne peut pas savoir : un droit retiré, un type supprimé. |
+| F48 | **Les codes du contrat entrent dans `ExpenseErrorCodes`** et se lisent dans `detailCode` (F34 tient). Tous les nouveaux 422 sont terminaux ; `409 DECISION_ALREADY_TAKEN` réaligne et ne rejoue pas, comme aujourd'hui. |
+
+## 19. Données locales v3 — palier **89**
+
+⚠️ Prendre le palier libre au moment du lot : 88 est le dernier dans `main`
+(`intitulés des colonnes de notes`), et la saisie des notes a réservé des
+paliers à elle. Toujours dans `tenant_migrations.dart` (`if (upTo(89))`).
+
+Sur `expenses`, en fin de table :
+
+| Colonne | Type | Rôle |
+|---|---|---|
+| `mode` | TEXT NOT NULL DEFAULT `'AUTHORIZATION'` | figé à la création |
+| `visa_status` | TEXT | `NULL` en autorisation |
+| `visa_by_id`, `visa_by_name` | TEXT | dernier qui a visé ou signalé |
+| `visa_at` | TEXT (ISO UTC) | instant du dernier visa ou signalement |
+| `flag_reason` | TEXT | non nul si et seulement si `FLAGGED` |
+| `disbursed_at` | TEXT (ISO UTC) | l'heure envoyée, et celle que « Redéclarer » reprend ; le delta la remplit par `paidAt` (porté depuis V210, = `disbursedAt` borné à maintenant) |
+| `cash_day` | TEXT (`YYYY-MM-DD`) | journée de caisse de la sortie (F44), `NULL` sans caisse |
+| `after_closure` | INTEGER (0/1) | sortie arrivée après une clôture |
+| `voucher_id`, `voucher_content_type`, `voucher_size_bytes`, `voucher_uploaded_at` | TEXT / INTEGER | la fiche de la photo, sans ses octets |
+
+Les octets ne sont jamais en base (F40). Le delta pull et l'accusé passent par
+la même lecture (`expense_delta_columns.dart`) : un champ absent du delta ne
+doit pas effacer un visa local en attente (même règle que les gestes v2).
+
+## 20. Lots v3
+
+Les lots DEP-16, DEP-17 et DEP-20 s'écrivent sans serveur. DEP-18, DEP-19 et
+DEP-21 se codent sur le contrat, mais **ne se recettent qu'en staging avec le
+back**. Grâce à F35, la branche peut néanmoins fusionner avant lui.
+
+| Lot | Contenu | Tests attendus |
+|---|---|---|
+| **DEP-16 — Le modèle** | `ExpenseMode`, `ExpenseVisaStatus`, `ExpenseVoucher` ; les 3 actes (`DECLARATION`, `VISA`, `FLAG`) dans `ExpenseAct` ; champs de l'entité, getters `isDeclaration` / `isCancelledDeclaration` ; palier 89 ; delta et mappers ; `ExpenseTransitions` par mode (F43). Aucune UI. | lecture tolérante (F36), palier rejouable, delta sans visa n'efface rien, table des transitions des deux modes |
+| **DEP-17 — La photo du bon** | `DocumentCapturePolicy.expenseVoucher` + dimensions par instance (F39) ; `ExpenseVoucherBlobs` (attente, promotion, cache) ; `ExpenseVoucherApi.download` + `voucherFor(expense)` dans le dépôt, `404` = pas de photo. | défauts des autres politiques inchangés, promotion atomique, magasin vidé ⇒ « pas vue » |
+| **DEP-18 — Déclarer** | permission `expense.declare` (`Perm`, `kExpenseDeclareAccess`, `kGuardedWriteActions`, copie du template de `role_journeys_test.dart`) ; `DeclareExpenseUseCase` (F41, F47) ; transaction ligne + message + photo + entrée (F37, F38) ; `ExpenseDeclarationOutboxHandler` multipart, classement des codes (F48), accusé ⇒ photo promue, refus ⇒ « à régulariser » + `rejectFrom` (F45) ; sonde de clôture, famille (i) (F46) ; DI. | rejeu `SUPERSEDED` inerte, octets perdus ⇒ `LOCAL_BYTES_LOST`, aucun refus terminal n'efface la ligne, visa retenu derrière la déclaration, sonde |
+| **DEP-19 — Viser, signaler, annuler** | gestes `visa` / `flag` (F42) : payload, routes Retrofit (`build_runner`), `writeAccessFor`, politique par mode ; `reopen` ⇒ `RETRACTED` en déclaration (F43) ; `isClosed(day, currency)` (F44) ; sonde, famille (j) (F46). | `DECISION_ALREADY_TAKEN` réaligne, `DECLARATION_CANCELLED` terminal, visé terminal, « Annuler » absent sur journée close |
+| **DEP-20 — Le bon de sortie** | bascule « Déclaration / Pour autorisation » en tête du formulaire (avec le droit, sans `STAFF_ADVANCE`) ; bloc photo (caméra, photothèque, PDF) avec aperçu ; heure du décaissement (maintenant, vers le passé seulement) ; note sur l'accord reçu. `expense_form_dialog` (212 l.) et `expense_form_fields` (214 l.) sont déjà près de la cible : le bloc déclaration va dans ses propres fichiers. | formats de référence et texte ×1,3 (règle 13), cibles ≥ 48 dp, `EteeloDialogBody` pour le clavier |
+| **DEP-21 — Registre, file, détail** | badge de visa (« À viser » · « Visée » · « Signalée »), « Annulée », « à régulariser » ; filtre sur les trois états de visa ; onglet **« À viser »** dans la file existante, sous `expense.decide`, plus anciennes d'abord, vignette ; détail : photo en grand, Viser / Signaler (motif), « Viser » fermé tant que la photo n'est pas sur le poste (F40), Redéclarer (F45). | `switch` exhaustifs sur les deux axes, onglet absent sans le droit, états partagés (règle 10) pour le chargement de la photo |
+| **DEP-22 — Revue et clôture** | revue adversariale (liste money-grade), suite complète sans pipe, `flutter analyze` **après** le commit, mise à jour de `CLAUDE.md` (ligne `expense`). | — |
+
+**Ordre :** DEP-16 → DEP-17 → DEP-18 → DEP-19, puis DEP-20 et DEP-21 (DEP-20
+peut partir dès DEP-18). Une PR par lot, ou une seule à la fin : au choix de
+l'utilisateur.
+
+### État d'exécution (2026-11-25, branche `feat/expense-declaration`)
+
+| Lot | État |
+|---|---|
+| DEP-16 | ✅ commité |
+| DEP-17 | ✅ commité (F40 révisé : une seule copie de la photo) |
+| DEP-18 | ✅ commité |
+| DEP-19 | ✅ commité ; `CashClosureReader` ajouté au socle (`lib/core/money`) |
+| DEP-20 | ✅ commité ; défaut du formulaire : « Pour autorisation » |
+| DEP-21 | ✅ commité ; l'onglet « À viser » de la file n'a pas d'adresse propre |
+| DEP-22 | ✅ revue adversariale jouée, 17 défauts corrigés (ci-dessous) |
+
+### Ce que la revue de DEP-22 a trouvé (trois relecteurs, sans mon avis)
+
+| Défaut | Correction |
+|---|---|
+| Redéclarer une refusée déjà accusée, ou deux fois, comptait deux fois l'argent | `_abandon` exige une refusée **vivante** ; sinon la transaction est défaite (`ConflictFailure`) |
+| « Supprimer » offert sur une déclaration : une refusée disparaissait sans régularisation | aucun « Supprimer » sur une déclaration |
+| Une déclaration empoisonnée (1 000 tentatives) restait comptée et gelait ses gestes | **corrigé puis défait** (remarque du back) : une absence d'accusé n'est pas un refus — le serveur a peut-être la dépense, la redéclarer la compterait deux fois. Elle reste payée, comptée, relançable depuis la feuille des erreurs (le rejeu rend `SUPERSEDED`). Seul un payload illisible, jamais parti, passe « à régulariser » |
+| Viser / signaler / annuler offerts sur une refusée, inconnue du serveur (404, motif d'origine écrasé) | plus aucun geste sauf commenter ; hors de la file « À viser » |
+| Un poste d'avant la v3 a pu ranger des déclarations en demandes | le palier 89 fait repartir le flux `expenses@…` de zéro |
+| Une clôture descendue après l'ouverture de la fiche n'empêchait pas l'annulation | règle rejugée au moment du geste ; pas d'« Annuler » sans la règle |
+| L'accusé ressuscitait une ligne retirée localement | `deleted_at` respecte `withdrawal_pending_at`, comme le contenu |
+| Une horloge reculée datait un geste avant la déclaration | un geste prend au moins la milliseconde après le dernier message du fil |
+| 404 / 405 sans code (déploiement en cours) rendait toutes les déclarations « à régulariser » | rejoués |
+| Redéclarer en basculant vers « Pour autorisation » ne faisait rien | la bascule est cachée en redéclaration |
+| Vignettes de la file « À viser » décalées après un visa | une clé par ligne |
+| Titre du panneau de signalement débordant à 360 dp, texte ×1,3 | `Flexible` |
+| Borne du calendrier au jour de la tablette, pas de l'école | jour de l'école |
+| « Viser » ouvert sur une photo illisible | refermé quand l'image ne se décode pas |
+| Note « journée close » affichée avant la réponse de la règle | attend la réponse |
+| Date de la file « À viser » à l'heure de la tablette | heure de l'école |
+| Séparateur du compteur d'onglet en dur | clé l10n |
+
+**Règle (accord back, 2026-11-25)** : « à régulariser » ne vise **que** les
+refus du fond (4xx avec réponse). Une ligne descendue au flux porte un numéro
+et n'est donc jamais redéclarable (`isDeclarationToRegularize` et `_abandon`
+exigent `number == null`) — la seconde parade du back, déjà tenue.
+
+Non retenu : `visaBy*` posé aussi sur un signalement — c'est le contrat
+(« qui a visé ou signalé en dernier »).
+
+**Écarts assumés** (pas de maquette Claude Design pour la v3 : les écrans
+suivent les patrons du module) :
+- un bon en PDF s'affiche comme une marque « Bon en PDF », sans visionneuse ;
+- l'onglet de la file et le filtre de visa vivent dans l'état de l'écran, pas
+  dans l'adresse ;
+- `expense.declare` reste hors de `kGuardedWriteActions` tant que le back ne
+  l'a pas semée (même raison que les trois droits du circuit).
+
+## 21. Questions encore ouvertes
+
+| # | Question | À qui | Bloque |
+|---|---|---|---|
+| Q1 | ✅ Tranché (back, 2026-11-25) : journée de la sortie, `cashDay` + `afterClosure` dans le delta (F44) | — | — |
+| Q2 | ✅ Tranché (back, 2026-11-25) : le message revient sous notre id ; visa d'office = message `VISA` d'id uuid5 (F38, F41) | — | — |
+| Q7 | ✅ Vérifié par le back (`ExpenseDeclarationService.declare`, test `replay`) : un rejeu d'un id déjà déclaré rend **toujours** 200 `SUPERSEDED` avant toute validation métier — annulée entre-temps comprise (`RETRACTED`, le poste s'aligne). Seuls passent avant : 403 (permission ou auteur, retenu), 400 / `DOCUMENT_TOO_LARGE` (impossibles sur un envoi identique accepté), `EXPENSE_MODE_LOCKED` (l'id porte une demande : rien d'écrit, terminal) | — | — |
+| Q6 | ✅ Tranché (back, 2026-11-25) : option (b), pas de `awaitsAnswer` ; noms des champs confirmés, `voucher.id` = id de la dépense | — | — |
+| Q5 | ✅ Tranché (back, 2026-11-25) : uuid5 RFC 4122 standard, **espace de noms = l'`expenseId` lui-même**, nom = `"VISA"` seul en UTF-8 (vecteur au §22) | — | — |
+| Q3 | Le rapport de caisse journalier mentionne-t-il les déclarations non visées du jour ? | produit | rien côté poste (rapport serveur) |
+| Q4 | Notifier le promoteur quand des déclarations attendent son visa | produit | hors v3 |
+
+## 22. Pièges à surveiller
+
+- **Le moteur d'outbox n'ordonne rien par agrégat** (§15) : sans le message
+  `DECLARATION` local (F38), un visa donné sur le poste déclarant partirait
+  avant la déclaration et mourrait en 404.
+- **Un 422 sur une déclaration n'est pas un 422 ordinaire** : l'argent est
+  déjà sorti. Le chemin « à corriger » de la v2 (`markGestureRejected`) est
+  le mauvais pour elle (F45).
+- **La permission n'arrive qu'au prochain login ou rafraîchissement de
+  session.** `user_version` est un champ **serveur** (ADR-010), et le back ne
+  l'incrémente pas pour un ajout de droit : un bump effacerait la session de
+  tout le parc (même choix qu'en V85, V86, V90, V140). Ne pas compter dessus ;
+  le §15 se lit désormais ainsi.
+- **Les octets de la photo ne doivent jamais apparaître dans un journal**, ni
+  le motif d'un signalement (`stringify = false`, comme pour le fil).
+- **L'id du message `VISA` d'office** (F41) se fabrique comme
+  `NameBasedIds.of` du serveur : `Uuid().v5(expenseId, 'VISA')`, l'`expenseId`
+  servant d'**espace de noms**, pas d'espace fixe comme dans
+  `payroll_ids.dart`. Vecteurs à figer dans un test de DEP-18 (vérifiés par
+  `uuid.uuid5` de Python le 2026-11-25 ; le back les met dans
+  `ServerMessageIdsTest`) :
+  - `expenseId = 7d0c5a8e-1b2f-4c3d-9e8f-0a1b2c3d4e5f` :
+    `VISA` → `97d3f5b8-da8d-5cf2-9fd1-a2a80dff56c2`,
+    `DEPOSIT` → `77d45430-dd26-5dbd-83c4-b8a0ba3a52fb` ;
+  - contrôle RFC : espace DNS, `www.example.com` →
+    `2ed6657d-e927-568b-95e1-2665a8aea6a2`.
+- **Une déclaration n'a pas de message `DEPOSIT`** : son premier message est
+  le `DECLARATION` du poste, sous son id.
+- **Le magasin des bons n'a ni garde de session ni ménage des orphelins**
+  (DEP-17). Les pièces du personnel effacent leurs octets quand le compte
+  change ; une photo de bon reste. À trancher en revue (DEP-22) : une photo
+  de bon n'est pas une donnée personnelle, mais un bon abandonné laisse un
+  fichier derrière lui.

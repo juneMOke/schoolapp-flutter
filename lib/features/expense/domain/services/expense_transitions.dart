@@ -25,6 +25,41 @@ abstract final class ExpenseTransitions {
     ExpenseStatus.retracted: {ExpenseStatus.pending},
   };
 
+  /// La table d'une dépense **déclarée** (v3, F43) — une seconde table, pas
+  /// des exceptions dans la première. Une déclaration naît payée ; la seule
+  /// issue est l'annulation, et elle est terminale : ni renvoi, ni retour en
+  /// attente.
+  static const Map<ExpenseStatus, Set<ExpenseStatus>> declarationAllowed = {
+    ExpenseStatus.paid: {ExpenseStatus.retracted},
+    ExpenseStatus.retracted: {},
+  };
+
+  /// La table du mode.
+  static Map<ExpenseStatus, Set<ExpenseStatus>> tableFor(ExpenseMode mode) =>
+      switch (mode) {
+        ExpenseMode.authorization => allowed,
+        ExpenseMode.declaration => declarationAllowed,
+      };
+
+  /// Comme [isAllowed], dans la table du mode.
+  static bool isAllowedIn(
+    ExpenseMode mode,
+    ExpenseStatus from,
+    ExpenseStatus to,
+  ) => from == to || (tableFor(mode)[from]?.contains(to) ?? false);
+
+  /// Où mène « annuler la décision » : le retour en attente d'une demande,
+  /// l'annulation d'une déclaration.
+  static ExpenseStatus reopenTarget(ExpenseMode mode) => switch (mode) {
+    ExpenseMode.authorization => ExpenseStatus.pending,
+    ExpenseMode.declaration => ExpenseStatus.retracted,
+  };
+
+  /// Annuler une déclaration : seulement tant qu'elle est payée. Annulée,
+  /// elle est terminale (F43).
+  static bool canCancelDeclaration(ExpenseStatus from) =>
+      declarationAllowed[from]?.contains(ExpenseStatus.retracted) ?? false;
+
   /// Un geste qui ne change rien n'est pas une transition : il est **inerte**,
   /// jamais une erreur. C'est le rejeu d'une décision déjà appliquée, et le
   /// serveur lui répond 200 sans rien réécrire.

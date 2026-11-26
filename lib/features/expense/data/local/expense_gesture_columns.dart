@@ -1,5 +1,7 @@
 import 'package:school_app_flutter/features/expense/domain/entities/expense_day.dart';
+import 'package:school_app_flutter/features/expense/domain/entities/expense_enums.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_gesture.dart';
+import 'package:school_app_flutter/features/expense/domain/services/expense_transitions.dart';
 
 /// Ce qu'un geste réécrit sur la ligne de `expenses` — **et rien d'autre**.
 ///
@@ -29,7 +31,31 @@ abstract final class ExpenseGestureColumns {
     required String? actorName,
     required DateTime at,
     String? reason,
+    ExpenseMode mode = ExpenseMode.authorization,
   }) {
+    final visaTarget = gesture.visaTarget;
+    if (visaTarget != null) {
+      return <String, Object?>{
+        'visa_status': visaTarget.wireValue,
+        'visa_by_id': actorId,
+        'visa_by_name': actorName,
+        'visa_at': at.toUtc().toIso8601String(),
+        // Le motif ne vit que sous un signalement : viser le lève.
+        'flag_reason': gesture.requiresNote ? reason : null,
+      };
+    }
+    // Annuler une déclaration n'est pas la ramener en attente : elle est
+    // terminale, et son visa disparaît avec elle (F43).
+    if (gesture == ExpenseGesture.reopen && mode == ExpenseMode.declaration) {
+      return <String, Object?>{
+        'status': ExpenseTransitions.reopenTarget(mode).wireValue,
+        'visa_status': null,
+        'visa_by_id': null,
+        'visa_by_name': null,
+        'visa_at': null,
+        'flag_reason': null,
+      };
+    }
     final target = gesture.target;
     if (target == null) return const {};
     return <String, Object?>{

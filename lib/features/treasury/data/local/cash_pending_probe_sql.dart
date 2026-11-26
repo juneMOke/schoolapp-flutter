@@ -1,5 +1,6 @@
 import 'package:school_app_flutter/core/offline/outbox_dao.dart';
 import 'package:school_app_flutter/core/offline/sync_state.dart';
+import 'package:school_app_flutter/features/expense/data/local/expense_declaration_dao.dart';
 import 'package:school_app_flutter/features/expense/data/local/expense_write_dao.dart';
 import 'package:school_app_flutter/features/finance/offline/data/local/payment_in_force_sql.dart';
 import 'package:school_app_flutter/features/payroll/data/local/payroll_outbox.dart';
@@ -44,6 +45,8 @@ class CashPendingProbeSql implements CashPendingProbe {
       _corrections,
       _shopSales,
       _cashExpenses,
+      _cashDeclarations,
+      _cashDeclarationCancellations,
       _cashPayroll,
       _cashPayrollCancellations,
       _cashAdvances,
@@ -115,6 +118,32 @@ class CashPendingProbeSql implements CashPendingProbe {
       JOIN expenses e ON e.id = m.expense_id
       WHERE m.act = 'PAYMENT' AND m.sync_status = '$_pendingSync'
         AND e.funding_source = 'CASH'
+        AND e.currency = ?
+        AND ${_entryPending("'${ExpenseWriteDao.gestureAggregateType}:' || m.id")}
+      ''';
+
+  /// (d') Déclarations de dépenses en espèces encore à envoyer (v3, F46) :
+  /// l'argent est sorti à la saisie, le serveur ne l'a pas encore vu. Une
+  /// déclaration refusée (« à régulariser ») n'a plus d'entrée `PENDING` et
+  /// ne bloque donc pas la clôture.
+  static String get _cashDeclarations =>
+      '''
+      SELECT COUNT(*) AS c
+      FROM expenses e
+      WHERE e.mode = 'DECLARATION' AND e.funding_source = 'CASH'
+        AND e.currency = ?
+        AND ${_entryPending("'${ExpenseDeclarationDao.aggregateType}:' || e.id")}
+      ''';
+
+  /// (d'') Annulations de déclarations en espèces encore à envoyer : l'argent
+  /// revient au tiroir. Un geste a son entrée à lui (`EXPENSE_GESTURE:{message}`).
+  static String get _cashDeclarationCancellations =>
+      '''
+      SELECT COUNT(*) AS c
+      FROM expense_messages m
+      JOIN expenses e ON e.id = m.expense_id
+      WHERE m.act = 'REOPENING' AND m.sync_status = '$_pendingSync'
+        AND e.mode = 'DECLARATION' AND e.funding_source = 'CASH'
         AND e.currency = ?
         AND ${_entryPending("'${ExpenseWriteDao.gestureAggregateType}:' || m.id")}
       ''';

@@ -10,6 +10,7 @@ import 'package:school_app_flutter/features/expense/domain/entities/expense_gest
 import 'package:school_app_flutter/features/expense/domain/entities/expense_message.dart';
 import 'package:school_app_flutter/features/expense/domain/entities/expense_type.dart';
 import 'package:school_app_flutter/features/expense/domain/services/expense_money.dart';
+import 'package:school_app_flutter/features/expense/presentation/helpers/expense_form_outcome.dart';
 import 'package:school_app_flutter/features/expense/presentation/helpers/expense_form_seed.dart';
 import 'package:school_app_flutter/features/expense/presentation/widgets/detail/expense_detail_dialog.dart';
 import 'package:school_app_flutter/features/expense/presentation/widgets/detail/expense_thread_composer.dart';
@@ -105,6 +106,11 @@ Finder _field(String label) => find.descendant(
   matching: find.byType(TextField),
 );
 
+ExpenseDraft? _requestOf(ExpenseFormOutcome? outcome) => switch (outcome) {
+  ExpenseFormRequest(:final draft) => draft,
+  _ => null,
+};
+
 void main() {
   group('formulaire', () {
     testWidgets('soumettre vide : les deux motifs, et la modale reste', (
@@ -114,12 +120,14 @@ void main() {
       addTearDown(() => tester.binding.setSurfaceSize(null));
       ExpenseDraft? draft;
       await _pumpHost(tester, (context) async {
-        draft = await showExpenseFormDialog(
-          context,
-          seed: ExpenseFormSeed.blank(types: _types, today: _today),
-          types: _types,
-          rate: _rate,
-          today: _today,
+        draft = _requestOf(
+          await showExpenseFormDialog(
+            context,
+            seed: ExpenseFormSeed.blank(types: _types, today: _today),
+            types: _types,
+            rate: _rate,
+            today: _today,
+          ),
         );
       });
 
@@ -143,13 +151,15 @@ void main() {
       addTearDown(() => tester.binding.setSurfaceSize(null));
       ExpenseDraft? draft;
       await _pumpHost(tester, (context) async {
-        draft = await showExpenseFormDialog(
-          context,
-          seed: ExpenseFormSeed.blank(types: _types, today: _today),
-          types: _types,
-          rate: _rate,
-          today: _today,
-          recordedByName: 'Moke Junior',
+        draft = _requestOf(
+          await showExpenseFormDialog(
+            context,
+            seed: ExpenseFormSeed.blank(types: _types, today: _today),
+            types: _types,
+            rate: _rate,
+            today: _today,
+            recordedByName: 'Moke Junior',
+          ),
         );
       });
 
@@ -186,14 +196,16 @@ void main() {
       var bridged = false;
       ExpenseDraft? draft;
       await _pumpHost(tester, (context) async {
-        draft = await showExpenseFormDialog(
-          context,
-          seed: ExpenseFormSeed.blank(types: _types, today: _today),
-          types: [..._types, advance],
-          rate: _rate,
-          today: _today,
-          staffAdvanceTypeId: advance.id,
-          onStaffAdvance: () => bridged = true,
+        draft = _requestOf(
+          await showExpenseFormDialog(
+            context,
+            seed: ExpenseFormSeed.blank(types: _types, today: _today),
+            types: [..._types, advance],
+            rate: _rate,
+            today: _today,
+            staffAdvanceTypeId: advance.id,
+            onStaffAdvance: () => bridged = true,
+          ),
         );
       });
 

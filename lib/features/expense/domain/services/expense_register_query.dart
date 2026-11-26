@@ -14,29 +14,45 @@ class ExpenseQuery extends Equatable {
   final ExpenseStatus? status;
   final String text;
 
-  const ExpenseQuery({this.typeIds = const {}, this.status, this.text = ''});
+  /// Le visa d'une déclaration (v3) ; `null` = tous. Un visa choisi ne garde
+  /// que des déclarations.
+  final ExpenseVisaStatus? visa;
+
+  const ExpenseQuery({
+    this.typeIds = const {},
+    this.status,
+    this.text = '',
+    this.visa,
+  });
 
   static const none = ExpenseQuery();
 
   bool get isActive =>
-      typeIds.isNotEmpty || status != null || text.trim().isNotEmpty;
+      typeIds.isNotEmpty ||
+      status != null ||
+      visa != null ||
+      text.trim().isNotEmpty;
 
   ExpenseQuery toggleType(String typeId) {
     final next = {...typeIds};
     if (!next.remove(typeId)) next.add(typeId);
-    return ExpenseQuery(typeIds: next, status: status, text: text);
+    return ExpenseQuery(typeIds: next, status: status, text: text, visa: visa);
   }
 
   ExpenseQuery withStatus(ExpenseStatus? value) =>
-      ExpenseQuery(typeIds: typeIds, status: value, text: text);
+      ExpenseQuery(typeIds: typeIds, status: value, text: text, visa: visa);
+
+  ExpenseQuery withVisa(ExpenseVisaStatus? value) =>
+      ExpenseQuery(typeIds: typeIds, status: status, text: text, visa: value);
 
   ExpenseQuery withText(String value) =>
-      ExpenseQuery(typeIds: typeIds, status: status, text: value);
+      ExpenseQuery(typeIds: typeIds, status: status, text: value, visa: visa);
 
-  ExpenseQuery withoutTypes() => ExpenseQuery(status: status, text: text);
+  ExpenseQuery withoutTypes() =>
+      ExpenseQuery(status: status, text: text, visa: visa);
 
   @override
-  List<Object?> get props => [typeIds, status, text];
+  List<Object?> get props => [typeIds, status, text, visa];
 }
 
 /// Les lignes d'un même jour, dans l'ordre du registre.
@@ -77,6 +93,9 @@ abstract final class ExpenseRegisterQuery {
       for (final expense in rows)
         if ((query.typeIds.isEmpty || query.typeIds.contains(expense.typeId)) &&
             (query.status == null || expense.status == query.status) &&
+            (query.visa == null ||
+                (expense.visaStatus == query.visa &&
+                    !expense.isCancelledDeclaration)) &&
             (text.isEmpty ||
                 SearchNormalizationHelper.contains(
                   _haystack(expense, typesById[expense.typeId]),
